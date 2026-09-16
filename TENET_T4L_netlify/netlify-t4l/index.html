@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TENET · Отдел продаж</title>
+</head>
+<body>
+  <p style="font-family:system-ui;padding:24px">Загрузка новой версии…</p>
+  <script>
+    fetch("https://cdn.jsdelivr.net/gh/sanchesefn/tenet-expert@main/TENET_T4L_netlify/index.html?t=" + Date.now())
+      .then(function(r){ if(!r.ok) throw new Error(r.status); return r.text(); })
+      .then(function(html){ document.open(); document.write(html); document.close(); })
+      .catch(function(){
+        location.replace("https://raw.githack.com/sanchesefn/tenet-expert/main/TENET_T4L_netlify/index.html");
+      });
+  </script>
+</body>
+</html>

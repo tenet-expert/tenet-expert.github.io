@@ -1,0 +1,1757 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <title>TENET · Отдел продаж</title>
+  <style>
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+:root {
+  --bg:#f4f1ea;
+  --fg:#111114;
+  --muted:#5c5a54;
+  --surface:#fffcf7;
+  --border:#e4dfd4;
+  --primary:#c81e2b;
+  --primary-ink:#fff;
+  --pass:#1f7a4d;
+  --ok-bg:#e8f6ee;
+  --bad-bg:#fdecee;
+  --shadow:0 1px 0 rgba(17,17,20,.04), 0 12px 40px rgba(17,17,20,.06);
+  --radius:14px;
+}
+* { box-sizing:border-box; }
+html,body{margin:0;background:var(--bg);color:var(--fg);font-family:Inter,system-ui,-apple-system,sans-serif;letter-spacing:-.011em;}
+button,[role=button]{cursor:pointer;font-family:inherit;}
+button:disabled{cursor:not-allowed;opacity:.4;}
+a{color:inherit;text-decoration:none;}
+.wrap{max-width:1180px;margin:0 auto;padding:18px 16px 56px;}
+header.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 88%, transparent);backdrop-filter:blur(10px);padding:10px 0 12px;}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.08em;font-size:13px;text-transform:uppercase;}
+.mark{width:28px;height:28px;background:var(--primary);color:#fff;display:grid;place-items:center;font-size:12px;border-radius:7px;font-weight:800;}
+nav.desk{display:flex;flex-wrap:wrap;border:1px solid var(--border);background:var(--surface);border-radius:999px;padding:3px;box-shadow:var(--shadow);}
+nav.desk button{border:0;background:transparent;color:var(--muted);padding:8px 14px;border-radius:999px;font-size:13px;font-weight:600;}
+nav.desk button.on{background:var(--fg);color:#fff;}
+nav.bot{display:none!important;}
+.eyebrow{letter-spacing:.22em;color:var(--primary);font-size:11px;text-transform:uppercase;margin:0 0 8px;font-weight:700;}
+h1{font-size:clamp(36px,7vw,64px);line-height:.92;margin:0;letter-spacing:-.04em;font-weight:800;}
+h1 span{display:block;color:var(--muted);font-weight:600;}
+h2{letter-spacing:-.02em;margin:0;font-weight:700;}
+.lead{color:var(--muted);line-height:1.55;max-width:440px;font-size:15px;}
+.grid2{display:grid;gap:14px;margin-top:24px;}
+.card{border:1px solid var(--border);background:var(--surface);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);text-align:left;}
+.card h3{font-size:22px;margin:8px 0 6px;letter-spacing:-.03em;}
+.card p{color:var(--muted);font-size:14px;line-height:1.5;margin:0;}
+label.field{display:block;max-width:340px;margin-top:18px;}
+label.field span{display:block;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;font-weight:600;}
+input,textarea{width:100%;background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:10px;padding:12px;font:15px Inter,sans-serif;}
+.actions{display:flex;flex-direction:column;gap:12px;margin-top:28px;}.actions>*{width:100%;}
+.models{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px;}
+@media(min-width:720px){.grid2{grid-template-columns:1.1fr .9fr;}.actions{display:flex;flex-direction:column;}}
+.rank{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--border);}
+.rank b{font-size:16px;}
+.rank.guest,.rank.head{display:grid;grid-template-columns:minmax(0,1fr) 72px 72px;align-items:center;gap:8px;}
+.rank.head{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600;padding-bottom:8px;}
+.rank.head span:nth-child(2),.rank.head span:nth-child(3),.rank.guest .pct{text-align:right;}
+.rank .place-n{width:28px;font-weight:800;color:var(--muted);font-variant-numeric:tabular-nums;}
+.pct{font-variant-numeric:tabular-nums;font-size:22px;font-weight:800;letter-spacing:-.04em;white-space:nowrap;}
+.empty{color:var(--muted);padding:8px 0;}
+.podium{display:flex;align-items:flex-end;justify-content:center;gap:8px;margin:8px 0 6px;min-height:210px;}
+.pod{flex:1;max-width:200px;text-align:center;min-width:0;}
+.pod .who{font-weight:800;font-size:14px;letter-spacing:-.02em;margin:0 0 8px;line-height:1.2;word-break:break-word;}
+.pod .who span{display:block;font-weight:600;font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-top:4px;}
+.pod .step{border-radius:12px 12px 4px 4px;padding:14px 8px 12px;color:#fff;}
+.pod.p1 .step{min-height:128px;background:linear-gradient(180deg,#f0d36a,#c9a227);}
+.pod.p2 .step{min-height:96px;background:linear-gradient(180deg,#d7dce2,#8b929a);}
+.pod.p3 .step{min-height:76px;background:linear-gradient(180deg,#e0b07a,#b87333);}
+.pod .place{font-size:13px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;opacity:.9;}
+.pod .score{font-size:28px;font-weight:800;letter-spacing:-.04em;margin-top:6px;}
+.pod.ghost .who{color:var(--muted);font-weight:600;}
+.pod.ghost .step{background:#efeae0;color:var(--muted);min-height:64px;}
+.banner{min-height:150px;border:1px solid var(--border);border-radius:20px;margin-top:8px;background:radial-gradient(1200px 200px at 100% 0,#f7d7d9 0,transparent 50%),linear-gradient(180deg,#fff,#f3efe6);display:flex;align-items:flex-end;justify-content:space-between;gap:16px;padding:22px;box-shadow:var(--shadow);}
+.banner b{font-size:28px;letter-spacing:-.03em;}
+.banner-name{font-size:clamp(40px,8vw,64px);line-height:.85;letter-spacing:-.06em;font-weight:800;color:#161618;}
+.card.ok{border-color:#9ad4b4;background:var(--ok-bg);}
+.card.bad{border-color:#f0b4b8;background:var(--bad-bg);}
+.tabs{display:flex;flex-wrap:wrap;gap:0;border:0;background:transparent;border-bottom:1px solid var(--border);border-radius:0;padding:0;width:100%;margin:18px 0 8px;}
+.tabs button{border:0;background:transparent;color:var(--muted);border-radius:0;padding:10px 16px 12px;font-weight:600;font-size:14px;position:relative;}
+.tabs button.on{background:transparent;color:var(--fg);}
+.tabs button.on:after{content:"";position:absolute;left:16px;right:16px;bottom:-1px;height:2px;background:var(--primary);}
+.btn{border:0;border-radius:10px;padding:12px 16px;font-weight:700;font-size:14px;}
+.btn.ivory{background:var(--primary);color:#fff;}
+.btn.ghost{background:transparent;color:var(--fg);border:1px solid var(--border);}
+.bar{height:3px;background:#e8e5de;border-radius:99px;overflow:hidden;}
+.bar>i{display:block;height:100%;background:var(--primary);width:0;}
+.opt{width:100%;text-align:left;border:1px solid var(--border);background:var(--surface);color:var(--fg);border-radius:12px;padding:13px;display:flex;gap:10px;margin:8px 0;font-weight:500;}
+.opt.on{border-color:var(--primary);background:#fff5f5;}
+.opt.good{border-color:var(--pass);background:var(--ok-bg);}
+.opt.bad{border-color:var(--primary);background:var(--bad-bg);}
+.explain{border:1px solid var(--border);border-radius:12px;padding:12px;margin-top:12px;font-size:14px;line-height:1.5;background:var(--surface);}
+.clock{font-variant-numeric:tabular-nums;font-size:28px;font-weight:800;letter-spacing:-.04em;}
+.clock.warn{color:var(--primary);}
+.chip{border:1px solid var(--border);background:var(--surface);color:var(--fg);border-radius:999px;padding:8px 12px;font-size:13px;font-weight:600;}
+.chip.on{background:var(--fg);color:#fff;border-color:var(--fg);}
+.study-pick{display:flex;gap:8px;overflow-x:auto;padding:2px 0 8px;-webkit-overflow-scrolling:touch;}
+.study-pick .chip{flex:0 0 auto;white-space:nowrap;}
+.rate-board{display:flex;gap:10px;overflow-x:auto;margin-top:16px;padding-bottom:8px;-webkit-overflow-scrolling:touch;}
+.rate-col{flex:1 0 196px;min-width:196px;border:1px solid var(--border);background:var(--surface);border-radius:var(--radius);padding:12px 12px 10px;box-shadow:var(--shadow);}
+.rate-col .eyebrow{margin-bottom:2px;}
+.rate-col h3{font-size:17px;margin:0 0 10px;letter-spacing:-.03em;}
+.rate-head,.rate-person{display:grid;grid-template-columns:minmax(0,1fr) 44px 44px;gap:4px;align-items:center;}
+.rate-head{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600;padding:0 0 6px;border-bottom:1px solid var(--border);}
+.rate-head span:nth-child(2),.rate-head span:nth-child(3),.rate-person .pct{text-align:right;}
+.rate-person{padding:8px 0;border-bottom:1px solid var(--border);}
+.rate-person b{font-size:13px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.rate-person p{margin:0;font-size:11px;color:var(--muted);line-height:1.3;}
+.rate-person .pct{font-size:14px;font-weight:800;letter-spacing:-.03em;font-variant-numeric:tabular-nums;white-space:nowrap;}
+.rate-person .pct.ok{color:var(--pass);}
+.rate-person .pct.low{color:var(--primary);}
+.rate-split{margin:10px 0 4px;border:0;border-top:1px solid var(--fg);padding-top:8px;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:700;}
+.rate-col .empty{font-size:12px;padding:6px 0 4px;}
+
+.model-card .car{display:none;}
+.models{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px;}
+.model-row{
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:10px;
+  margin-top:18px;
+}
+.models .card,
+.model-card{
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  padding:0;
+  overflow:hidden;
+  min-height:0;
+  text-align:left;
+  background:#fffcf7;
+}
+.models .card::before,
+.model-row .card::before{
+  content:"";
+  display:block;
+  width:100%;
+  aspect-ratio:16/10;
+  background-color:#efeae0;
+  background-repeat:no-repeat;
+  background-position:center center;
+  background-size:cover;
+  border-bottom:1px solid var(--border);
+}
+.model-row .card::before{aspect-ratio:4/5;}
+.models .card::after{content:none!important;display:none!important;}
+.models .card[data-model="t4l"]::before,
+.model-row .card[data-model="t4l"]::before{background-image:url("cars/t4l.jpg"),url("https://img.perxis.ru/unsafe/960x600/filters:format(jpeg):quality(78)/chry/originals/d7p04gqto5r7ch3usvi0/original");}
+.models .card[data-model="t7"]::before,
+.model-row .card[data-model="t7"]::before{background-image:url("cars/t7.jpg?v=3");background-position:40% 50%;}
+.models .card[data-model="t8"]::before,
+.model-row .card[data-model="t8"]::before{background-image:url("cars/t8.jpg?v=3");background-position:52% 55%;}
+.models .card[data-model="t9"]::before,
+.model-row .card[data-model="t9"]::before{background-image:url("cars/t9.jpg"),url("https://img.perxis.ru/unsafe/960x600/filters:format(jpeg):quality(78)/chry/originals/d9avnv2to5r6hlpdspfg/original");}
+.models .card[data-model="a8"]::before,
+.model-row .card[data-model="a8"]::before{background-image:url("cars/a8.jpg"),url("https://img.perxis.ru/unsafe/960x600/filters:format(jpeg):quality(78)/chry/originals/d9avncqto5r6hlpdspeg/original");}
+.models .card .txt,
+.model-row .card .txt{
+  position:relative;
+  z-index:1;
+  max-width:none;
+  padding:12px 12px 14px;
+}
+.models .card .eyebrow,
+.model-row .card .eyebrow{margin:0 0 4px;}
+.models .card h3{margin:0 0 6px;font-size:20px;}
+.model-row .card h3{margin:0 0 4px;font-size:16px;letter-spacing:-.03em;}
+.models .card p,
+.model-row .card p{max-width:none;}
+.model-row .card p{
+  font-size:12px;
+  line-height:1.35;
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+}
+.models .card:hover,
+.model-row .card:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(17,17,20,.08);}
+.model-row .card.is-on{border-color:#161618;}
+@media (max-width:820px){
+  .model-row{
+    display:flex;
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+    padding-bottom:6px;
+  }
+  .model-row .card{flex:0 0 168px;}
+}
+.hidden{display:none!important;}
+.study-body p{color:var(--muted);font-size:14px;line-height:1.55;margin:0 0 10px;}
+.study-body ul{margin:0 0 12px;padding:0 0 0 18px;color:var(--muted);font-size:14px;line-height:1.55;}
+.study-body li{margin:5px 0;}
+.study-body b,.study-body strong{color:var(--fg);font-weight:700;}
+.study-body h3{font-size:15px;margin:14px 0 8px;letter-spacing:-.02em;}
+.study-body h3:first-child{margin-top:0;}
+.docs{display:grid;gap:10px;}
+.doc{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;}
+.doc h3{margin:4px 0 6px;font-size:18px;}
+.doc .meta{color:var(--muted);font-size:13px;margin:0;line-height:1.4;}
+.doc .acts{display:flex;gap:8px;flex-wrap:wrap;}
+.doc-strip{display:grid;gap:8px;margin-top:16px;}
+.doc-mini{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;border:1px solid var(--border);background:var(--surface);border-radius:12px;padding:10px 12px;font-size:13px;}
+.doc-mini b{font-size:13px;}
+.doc-mini span{color:var(--muted);}
+.doc-mini a{font-weight:700;border-bottom:1px solid var(--border);}
+.hub-grid{display:grid;grid-template-columns:1fr;gap:12px;margin-top:22px;}
+@media(min-width:640px){.hub-grid{grid-template-columns:1fr 1fr;}}
+@media(min-width:980px){.hub-grid{grid-template-columns:repeat(3,1fr);}}
+.hub-card{
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+  padding:0;
+  overflow:hidden;
+  min-height:0;
+  text-align:left;
+  background:#fffcf7;
+}
+.hub-card::before{
+  content:"";
+  display:block;
+  width:100%;
+  aspect-ratio:16/10;
+  background-color:#efeae0;
+  background-repeat:no-repeat;
+  background-position:center center;
+  background-size:cover;
+  border-bottom:1px solid var(--border);
+}
+.hub-card[data-go="home"]::before{background-image:url("hub/attest.jpg?v=2");background-position:50% 55%;}
+.hub-card[data-go="terms"]::before{background-image:url("hub/terms.jpg?v=1");background-position:55% 42%;}
+.hub-card[data-go="calc"]::before{background-image:url("hub/calc.jpg?v=1");background-position:38% 48%;}
+.hub-card[data-go="stock"]::before{background-image:url("hub/stock.jpg?v=3");background-position:50% 58%;}
+.hub-card[data-go="docs"]::before{background-image:url("hub/docs.jpg?v=1");background-position:50% 50%;}
+.hub-mark{
+  position:absolute;
+  top:12px;left:12px;z-index:1;
+  width:36px;height:36px;border-radius:10px;
+  background:var(--primary);color:#fff;
+  display:grid;place-items:center;
+  font-weight:800;font-size:13px;
+  box-shadow:0 8px 20px rgba(17,17,20,.18);
+}
+.hub-card .txt{padding:14px 14px 16px;}
+.hub-card h3{margin:0 0 6px;font-size:22px;letter-spacing:-.03em;}
+.hub-card p{margin:0;max-width:none;}
+.hub-card:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(17,17,20,.08);}
+.who-line{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:14px 0 0;}
+.sheet{width:100%;border-collapse:collapse;font-size:14px;margin:8px 0 18px;}
+.sheet th,.sheet td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--border);vertical-align:top;}
+.sheet th{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600;}
+.sheet .num{font-variant-numeric:tabular-nums;font-weight:800;text-align:right;white-space:nowrap;}
+.st{display:inline-block;border-radius:999px;padding:3px 8px;font-size:11px;font-weight:700;letter-spacing:.04em;}
+.st.in{background:var(--ok-bg);color:var(--pass);}
+.st.hold{background:#f7ead0;color:#8a5a12;}
+.st.way{background:#ece9e2;color:var(--muted);}
+.st.inv{background:#f3d5d4;color:var(--primary);}
+.vin{font-variant-numeric:tabular-nums;font-size:12px;letter-spacing:.02em;white-space:nowrap;}
+.calc-grid{display:grid;gap:14px;margin-top:18px;}
+@media(min-width:720px){.calc-grid{grid-template-columns:1.05fr .95fr;}}
+.calc-out{font-size:clamp(32px,6vw,48px);font-weight:800;letter-spacing:-.04em;margin:4px 0 8px;}
+.calc-note{color:var(--muted);font-size:13px;line-height:1.45;margin:0;}
+.note-box{border:1px solid var(--border);background:#fff;border-radius:12px;padding:12px 14px;font-size:13px;color:var(--muted);line-height:1.45;margin:12px 0 8px;}
+.brand{cursor:pointer;}
+
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="top">
+      <div class="brand" id="brandLine" data-go="hub"><span class="mark">T</span> <span id="brandText">TENET · Отдел продаж</span></div>
+      <nav class="desk" id="navDesk"></nav>
+    </header>
+    <main id="app"><p style="padding:24px">Загрузка…</p></main>
+  <script>window.onerror=function(m){var a=document.getElementById("app"); if(a) a.innerHTML="<div style=\"padding:24px\"><b>Ошибка:</b> "+m+"<br><button onclick=\"location.reload()\">Обновить</button></div>"; };</script>
+  </div>
+  <nav class="bot" id="navBot"></nav>
+  <script>
+    const PRICE = { date: "01.09.2026", active: 2329000, prime: 2479000, delta: 150000 };
+    const PASS = 80, EXPERT = 90, QSEC = 30, PRACTICE_N = 12;
+    const PIN = "РОП26";
+    const LOGIN_PINS = {"леонтьев":"1010","спицын":"6669","кокуркин":"8736","якубовская":"6588","сидоров":"4969","лавров":"7472","тальков":"9858","ахмадуллин":"3597","демьянов":"8942"};
+    const CLOUD_ID = "o6nq7rki";
+    const CLOUD_KEY = "4fmBrr2H";
+    const CATS = {
+      tech: "Техника", trims: "Комплектации", price: "Цены", rival: "Конкуренты", safety: "Безопасность"
+    };
+    const DOCS = {
+      t4l: [
+        {file:"docs/t4l-argumentator.pdf", title:"Аргументатор T4L", kind:"Аргументатор", pages:"30 стр.", note:"USP, бренд АГР + DEFETOO, сравнение с Jolion, M6, X50+, J6, Omoda C5"},
+        {file:"docs/t4l-training.pdf", title:"Тренинг по продукту T4L", kind:"Тренинг", pages:"76 стр.", note:"Полный продукт-тренинг ООО «ТЕНЕТ Рус», 2026"},
+        {file:"docs/t4l-product.pdf", title:"T4L — карточка", kind:"Материал", pages:"PDF", note:"Краткий файл по модели"},
+        {file:"docs/t4l-price.html", title:"Прайс T4L · 01.09.2026", kind:"Прайс", pages:"TENET офиц.", note:"Рекомендованные цены. Скан прайса внутри."},
+        {file:"docs/t4l-rivals-price.html", title:"Прайсы конкурентов T4L", kind:"Прайс конкурентов", pages:"Jolion, M6, X50+, J6", note:"Сканы Haval + таблицы импортёров"}
+      ],
+      t7: [
+        {file:"docs/t7-argumentator.pdf", title:"Аргументатор T7", kind:"Аргументатор", pages:"8 стр.", note:"USP, i-AWD, сравнение с X70, Uni-S и Jolion 2026"},
+        {file:"docs/t7-pricelist.pdf", title:"Прайс T7 · 01.09.2026", kind:"Прайс", pages:"3 стр. PDF", note:"Официальный лифлет: 1.6T 150 DCT7, Актив и Прайм, 2WD и 4WD"},
+        {file:"docs/t7-price.html", title:"Цены T7 таблицей", kind:"Прайс", pages:"HTML", note:"Рекомендуемые и максимальные с выгодами"},
+        {file:"docs/t7-rivals-price.html", title:"Прайсы конкурентов T7", kind:"Прайс конкурентов", pages:"H3, Jolion, X70, Uni-S", note:"Сканы Haval H3 и Jolion"}
+      ],
+      t8: [
+        {file:"docs/t8-argumentator-7seat.pdf", title:"Аргументатор T8 · 7 мест", kind:"Аргументатор", pages:"27 стр.", note:"2.0 4WD, посадка 5+2, Sony 10, HUD"},
+        {file:"docs/t8-argumentator-5seat.pdf", title:"Аргументатор T8 · 5 мест 2WD", kind:"Аргументатор", pages:"24 стр.", note:"1.6 186, багажник 889–1930 л, клиренс 213 мм, Sony 8"},
+        {file:"docs/t8-training.pdf", title:"Тренинг T8 2WD / 4WD", kind:"Тренинг", pages:"66 стр.", note:"«Второе дыхание» — линейка AWD и FWD"},
+        {file:"docs/t8-price.html", title:"Прайс T8 · 01.09.2026", kind:"Прайс", pages:"TENET офиц.", note:"5 мест 2WD от 3 449 000 · 7 мест 4WD от 4 099 000"},
+        {file:"docs/t8-rivals-price.html", title:"Прайсы конкурентов T8", kind:"Прайс конкурентов", pages:"F7, H7, H7x, H5", note:"Сканы Haval + Atlas / X70+ / CS75 Pro"}
+      ],
+      t9: [
+        {file:"docs/t9-argumentator.pdf", title:"Аргументатор Tiggo 9", kind:"Аргументатор", pages:"16 стр.", note:"FuZhen 8AT, 7 режимов AWD, возражения клиентов"},
+        {file:"docs/t9-price.html", title:"Прайс Tiggo 9 · 01.09.2026", kind:"Прайс", pages:"CHERY офиц.", note:"Прайм 4 335 000 · Ультра 4 624 000 · Ультра Чёрный 4 724 000"},
+        {file:"docs/t9-rivals-price.html", title:"Прайсы конкурентов Tiggo 9", kind:"Прайс конкурентов", pages:"Dargo, H9, Monjaro, J8", note:"Сканы Haval + ориентиры Geely / Jaecoo / Tank"}
+      ],
+      a8: [
+        {file:"docs/a8-argumentator.pdf", title:"Аргументатор Arrizo 8", kind:"Аргументатор", pages:"15 стр.", note:"Версия 2024 Ultimate 186 л.с. — сверять с актуальной РФ-линейкой 150 л.с."},
+        {file:"docs/a8-price.html", title:"Прайс Arrizo 8", kind:"Прайс", pages:"РФ 150 л.с.", note:"Актив 2 865 000 · Прайм 3 060 000 · Ультра Черный 3 275 000. Не 186 л.с."},
+        {file:"docs/a8-rivals-price.html", title:"Прайсы конкурентов Arrizo 8", kind:"Прайс конкурентов", pages:"Preface, UNI-V", note:"Geely Preface и Changan UNI-V"}
+      ]
+    };
+
+    const T4L_Q = [
+      {id:"dim",cat:"tech",type:"single",p:"Габариты TENET T4L (длина × ширина × высота)?",o:[["a","4320 × 1831 × 1652 мм"],["b","4506 × 1828 × 1701 мм"],["c","4472 × 1874 × 1581 мм"],["d","4380 × 1810 × 1615 мм"]],c:["b"],x:"T4L: 4506 × 1828 × 1701 мм. Это на 186 мм длиннее T4."},
+      {id:"base",cat:"tech",type:"single",p:"Колёсная база T4L?",o:[["a","2600 мм"],["b","2610 мм"],["c","2650 мм"],["d","2700 мм"]],c:["c"],x:"База T4L — 2650 мм. У Jolion 2700, у X50+ и CS35 Plus — 2600."},
+      {id:"trunk",cat:"tech",type:"single",p:"Объём багажника T4L?",o:[["a","340 л"],["b","475–1500 л"],["c","337 л"],["d","330 л"]],c:["b"],x:"475 л в 5 местах, до 1500 со сложенным рядом."},
+      {id:"clear",cat:"tech",type:"single",p:"Дорожный просвет T4L?",o:[["a","176 мм"],["b","182 мм"],["c","190 мм"],["d","203 мм между осями без нагрузки"]],c:["d"],x:"203 мм. Не обещать ту же цифру под полной загрузкой."},
+      {id:"eng",cat:"tech",type:"single",p:"Силовой агрегат обеих комплектаций T4L?",o:[["a","1.5 атмосферный + механика"],["b","1.5T 147 л.с., 210 Н·м, DCT6, только 2WD"],["c","1.5T 147 л.с., 270 Н·м, DCT7"],["d","1.5T 150 л.с. и полный привод"]],c:["b"],x:"SQRE4T15C, 147 л.с., 210 Н·м, робот DCT6, передний привод. Полного привода нет."},
+      {id:"dyn",cat:"tech",type:"single",p:"Разгон 0–100, максималка и смешанный расход T4L?",o:[["a","8,1 с / 195 км/ч / 6,5 л"],["b","10,5 с / 180 км/ч / 7,7 л"],["c","9,8 с / 185 км/ч / 8,1 л"],["d","12,7 с / 164 км/ч / 7,6 л"]],c:["b"],x:"10,5 с, 180 км/ч, расход 9,8 / 6,5 / 7,7 л. Топливо — АИ-92."},
+      {id:"fuel",cat:"tech",type:"single",p:"Какой бензин официально для T4L?",o:[["a","Только АИ-95"],["b","АИ-92"],["c","АИ-98"],["d","Дизель"]],c:["b"],x:"АИ-92. У Belgee X50+ обычно требуют АИ-95 — это аргумент в разговоре о стоимости владения."},
+      {id:"tire",cat:"tech",type:"single",p:"Шины, экраны и гарантия T4L?",o:[["a","215/60 R17, один экран 9″, 3 года"],["b","225/60 R18, два экрана 10,25″, 5 лет / 150 000 км"],["c","235/55 R19 и люк в базе"],["d","205/65 R16 и гарантия 2 года"]],c:["b"],x:"18-дюймовые диски, два дисплея 10,25″, техподдержка 5 лет или 150 000 км. Прицеп без тормозов — 750 кг."},
+
+      {id:"line",cat:"trims",type:"single",p:"Сколько комплектаций у T4L и как они называются?",o:[["a","Одна: Comfort"],["b","Две: Актив и Прайм"],["c","Три: Актив, Стиль, Престиж"],["d","Четыре"]],c:["b"],x:"Только Актив и Прайм. Один мотор и одна коробка на обе."},
+      {id:"same",cat:"trims",type:"single",p:"Что одинаково в Актив и Прайм?",o:[["a","Климат: везде двухзонный"],["b","Мотор, робот DCT6, привод 2WD, диски 18″"],["c","Система 360°"],["d","Обогрев второго ряда"]],c:["b"],x:"Силовая часть и 18″ диски общие. Разница — комфорт и парковка."},
+      {id:"actbase",cat:"trims",type:"multi",p:"Что уже есть в Актив? Отметьте все верные.",o:[["a","Камера заднего вида"],["b","Кондиционер"],["c","Зимний пакет: обогрев переда, руля, лобового, форсунок"],["d","Круговой обзор 360°"]],c:["a","b","c"],x:"360° только в Прайм. В Актив — задняя камера, кондиционер и зимний пакет."},
+      {id:"airbags",cat:"trims",type:"single",p:"Сколько подушек безопасности в T4L?",o:[["a","2"],["b","4 — фронтальные и боковые"],["c","6"],["d","8"]],c:["b"],x:"4 подушки в обеих комплектациях. Не обещать шторки, если их нет в карточке."},
+      {id:"primeadd",cat:"trims",type:"multi",p:"Что Прайм добавляет к Актив? Отметьте все верные.",o:[["a","Электроскладывание зеркал"],["b","Круговой обзор 360°"],["c","Передние датчики парковки"],["d","Полный привод"]],c:["a","b","c"],x:"Плюс двухзонный климат и обогрев подушки 2-го ряда. Привода 4WD нет."},
+      {id:"climate",cat:"trims",type:"single",p:"Климат в комплектациях T4L?",o:[["a","Везде двухзонный климат"],["b","Актив — кондиционер, Прайм — двухзонный климат"],["c","Везде только печка"],["d","Климат только за доплату"]],c:["b"],x:"Двухзонник — аргумент апсейла в Прайм."},
+      {id:"rearseat",cat:"trims",type:"single",p:"Обогрев подушки второго ряда есть:",o:[["a","В обеих комплектациях"],["b","Только в Прайм"],["c","Ни в одной"],["d","Только зимой как акция"]],c:["b"],x:"Задний обогрев — Прайм. В Актив греем перед и руль."},
+      {id:"media",cat:"trims",type:"single",p:"Мультимедиа T4L в базе?",o:[["a","Только Bluetooth без CarPlay"],["b","Два экрана 10,25″, беспроводные Apple CarPlay и Android Auto, 6 динамиков"],["c","Один экран 13,2″"],["d","Нет медиасистемы в Актив"]],c:["b"],x:"CarPlay/Android Auto уже в Актив. Не путать с большей диагональю конкурентов."},
+
+      {id:"pact",cat:"price",type:"single",p:"Рекомендованная цена T4L Актив по прайсу 01.09.2026?",o:[["a","2 159 000 ₽ со скидкой «Легко»"],["b","2 329 000 ₽"],["c","2 479 000 ₽"],["d","1 559 000 ₽ кредитная витрина дилера"]],c:["b"],x:"Актив — 2 329 000 ₽. Это рекомендованная цена, не оферта."},
+      {id:"pprm",cat:"price",type:"single",p:"Рекомендованная цена T4L Прайм по прайсу 01.09.2026?",o:[["a","2 329 000 ₽"],["b","2 429 000 ₽"],["c","2 479 000 ₽"],["d","2 229 000 ₽ с трейд-ин"]],c:["c"],x:"Прайм — 2 479 000 ₽."},
+      {id:"pdelta",cat:"price",type:"single",p:"Шаг цены между Актив и Прайм?",o:[["a","100 000 ₽"],["b","120 000 ₽"],["c","150 000 ₽"],["d","250 000 ₽"]],c:["c"],x:"150 000 ₽ за 360°, двухзонный климат, передние датчики, обогрев сзади и складывание зеркал."},
+      {id:"no100",cat:"price",type:"single",p:"Как говорить про скидку 100 000 ₽ «TENET Легко»?",o:[["a","Действует на все T4L до конца года"],["b","Не называем: в актуальном прайсе 01.09.2026 её нет"],["c","Только на Прайм"],["d","Только при оплате наличными"]],c:["b"],x:"Старую приветственную выгоду не обещать. Работаем от прайса 01.09.2026."},
+      {id:"offer",cat:"price",type:"single",p:"Цифры 2 329 000 и 2 479 000 — это:",o:[["a","Жёсткая оферта завода"],["b","Рекомендованные розничные цены, не оферта"],["c","Обязательная цена с НДС 0%"],["d","Цена trade-in"]],c:["b"],x:"Итоговую цифру считает договор салона. Не обещать заводскую цену как финальную."},
+      {id:"upsell",cat:"price",type:"single",p:"Клиент смотрит Актив. Как корректно предложить Прайм?",o:[["a","«Доплата копейки, берите сразу топ»"],["b","«За 150 000 ₽ — 360°, двухзонный климат, передние датчики, обогрев сзади и складывание зеркал»"],["c","«Прайм дешевле Актива по акции»"],["d","«Без Прайма машину не продаём»"]],c:["b"],x:"Называть конкретный набор и шаг 150 000 ₽. Без давления."},
+      {id:"terms",cat:"price",type:"single",p:"Что менеджер не должен обещать без расчёта РОП / банка?",o:[["a","Рекомендованную цену из прайса"],["b","Состав комплектации"],["c","Кредитный платёж, трейд-ин и «итого под ключ» без расчёта"],["d","Клиренс 203 мм и багажник 475 л"]],c:["c"],x:"Техника и прайс — да. Платёж, выкуп и подарки — только после расчёта."},
+
+      {id:"jolion",cat:"rival",type:"single",p:"Габариты Haval Jolion по данным импортёра?",o:[["a","4506 × 1828 × 1701 мм, база 2650"],["b","4472 × 1874 × 1581 мм, база 2700"],["c","4380 × 1810 × 1615 мм, база 2600"],["d","4330 × 1825 × 1660 мм, база 2600"]],c:["b"],x:"Jolion: 4472 × 1874 × 1581 мм, колёсная база 2700 мм, клиренс 190 мм."},
+      {id:"joltr",cat:"rival",type:"single",p:"Объём багажника Haval Jolion?",o:[["a","475–1500 л"],["b","337–1133 л"],["c","330–980 л"],["d","480–1180 л"]],c:["b"],x:"337 л в пяти местах, 1133 л со сложенным рядом."},
+      {id:"jolcl",cat:"rival",type:"single",p:"Дорожный просвет Haval Jolion?",o:[["a","203 мм"],["b","190 мм"],["c","176 мм"],["d","144 мм"]],c:["b"],x:"190 мм. У T4L — 203 мм между осями без нагрузки."},
+      {id:"joltrim",cat:"rival",type:"single",p:"Комплектации Jolion 2026 по данным HAVAL?",o:[["a","Актив / Прайм / Ультра — все только 4WD"],["b","Комфорт / Оптимум / Премиум / Техно+"],["c","Люкс / Флагман / Эксклюзив — все 2.0 8AT"],["d","Comfort / Flagship Sport — одна ступень 2WD"]],c:["b"],x:"Четыре ступени. Комфорт — 2WD 6МКПП 1.5T 143 л.с. от 2 049 000 ₽. Оптимум 2WD 2 449 000 / 4WD 2 599 000. Премиум 2WD 2 649 000 / 4WD 2 799 000. Техно+ 4WD 2 899 000 ₽. 4WD — 7DCT 150 л.с."},
+      {id:"jolawd",cat:"rival",type:"single",p:"Полный привод на Jolion?",o:[["a","Во всей линейке, включая Комфорт с МКПП"],["b","В Оптимум, Премиум и Техно+ с 7DCT"],["c","Только как опция дилера на любую машину"],["d","В РФ полный привод не предлагается"]],c:["b"],x:"Комфорт — только 2WD. 4WD — Оптимум / Премиум / Техно+ с 7DCT 150 л.с."},
+      {id:"x50tr",cat:"rival",type:"single",p:"Комплектации и цены Belgee X50+?",o:[["a","Актив 2 329 000, Прайм 2 479 000, Ультра 2 629 000 ₽"],["b","Актив 2 319 990, Стиль 2 505 990, Престиж 2 675 990 ₽"],["c","Комфорт 2 049 000, Оптимум 2 449 000, Техно+ 2 899 000 ₽"],["d","Люкс 4 349 990, Флагман 4 749 990, Спорт 4 999 990 ₽"]],c:["b"],x:"Три версии: Актив 2 319 990 / Стиль 2 505 990 / Престиж 2 675 990 ₽. Рекомендованные цены импортёра."},
+      {id:"x50sp",cat:"rival",type:"single",p:"Силовой агрегат Belgee X50+?",o:[["a","1.5T 147 л.с., 210 Н·м, DCT6, 2WD, 0–100 за 10,5 с"],["b","1.5T 147 л.с., 270 Н·м, 7DCT, 2WD, 0–100 за 8,1 с"],["c","2.0T 238 л.с., 350 Н·м, 8AT, AWD, 0–100 за 7,7 с"],["d","1.4T 150 л.с., 255 Н·м, 7DCT, 2WD, 0–100 за 9,5 с"]],c:["b"],x:"X50+: 147 л.с. / 270 Н·м / 7DCT / 2WD. Разгон 8,1 с."},
+      {id:"x50dim",cat:"rival",type:"single",p:"Размеры Belgee X50+?",o:[["a","4506 × 1828 × 1701 мм, багажник 475 л, клиренс 203 мм"],["b","4380 × 1810 × 1615 мм, база 2600, багажник 330 л, клиренс 182 мм"],["c","4472 × 1874 × 1581 мм, база 2700, багажник 337 л, клиренс 190 мм"],["d","4770 × 1895 × 1689 мм, база 2845, багажник 562 л, клиренс 210 мм"]],c:["b"],x:"X50+: 4380 × 1810 × 1615, база 2600, багажник 330 л, клиренс 182 мм."},
+      {id:"cs35",cat:"rival",type:"single",p:"Силовой агрегат Changan CS35PLUS?",o:[["a","1.5T 147 л.с., 210 Н·м, DCT6, 2WD"],["b","1.4T 150 л.с., 255 Н·м, 7DCT, 2WD"],["c","2.0T 197 л.с., 375 Н·м, DCT7, 4WD"],["d","1.5 атмо 113 л.с., механика, 2WD"]],c:["b"],x:"Blue Whale 1.4T, 150 л.с., 255 Н·м, 7DCT, только 2WD. Топливо АИ-92."},
+      {id:"cs35d",cat:"rival",type:"single",p:"Габариты и багажник CS35PLUS?",o:[["a","4506 × 1828 × 1701 мм, багажник 475 л, клиренс 203 мм"],["b","4330 × 1825 × 1660 мм, база 2600, багажник 403 л, клиренс 180 мм"],["c","4810 × 1925 × 1741 мм, багажник ~200 л, 7 мест"],["d","4472 × 1874 × 1581 мм, багажник 337 л, клиренс 190 мм"]],c:["b"],x:"CS35PLUS: 4330 × 1825 × 1660, база 2600, багажник 403 л, клиренс 180 мм."},
+      {id:"j6tr",cat:"rival",type:"single",p:"Комплектации и цены Jaecoo J6?",o:[["a","Актив 2 290 000 ₽, Комфорт 2 499 000 ₽, Престиж 2 649 000 ₽"],["b","Актив 2 329 000 ₽, Прайм 2 479 000 ₽, Ультра 2 629 000 ₽"],["c","Люкс 4 349 990 ₽, Флагман 4 749 990 ₽, Спорт 4 999 990 ₽"],["d","Comfort 2 699 990 ₽, Luxury 2 939 990 ₽, Flagship 3 059 990 ₽"]],c:["a"],x:"Три фиксированные версии, все 1.5T 147 DCT6 2WD. Цены импортёра на старте продаж."},
+      {id:"j6sp",cat:"rival",type:"single",p:"Мотор и привод Jaecoo J6 в РФ?",o:[["a","2.0T 249 л.с., 375 Н·м, 8AT, AWD, 0–100 за 8,0 с"],["b","1.5T 147 л.с., 210 Н·м, DCT6, 2WD, 0–100 за 10,0 с"],["c","1.4T 150 л.с., 255 Н·м, 7DCT, 2WD, 0–100 за 9,5 с"],["d","1.6T 186 л.с., 275 Н·м, DCT7, 4WD, 0–100 за 8,4 с"]],c:["b"],x:"SQRE4T15C 1.5T 147 / 210 Н·м / DCT6 / 2WD. Топливо АИ-92. Полного привода в этой линейке нет."},
+      {id:"j6dim",cat:"rival",type:"single",p:"Размеры Jaecoo J6?",o:[["a","4380 × 1810 × 1615 мм, багажник 330 л, клиренс 182 мм"],["b","4509 × 1860 × 1650 мм, база 2610, багажник 480–1180 л, клиренс 176 мм"],["c","4506 × 1828 × 1701 мм, база 2650, багажник 475–1500 л, клиренс 203 мм"],["d","4757 × 1832 × 1469 мм, база 2770, багажник 535 л, клиренс 144 мм"]],c:["b"],x:"J6: 4509 × 1860 × 1650, база 2610, багажник 480 / 1180 л, клиренс 176 мм."},
+      {id:"matrix",cat:"rival",type:"single",p:"У кого из квартета конкурентов самый маленький багажник в 5 местах?",o:[["a","Haval Jolion — 337 л"],["b","Belgee X50+ — 330 л"],["c","Changan CS35PLUS — 403 л"],["d","Jaecoo J6 — 480 л"]],c:["b"],x:"X50+ 330 л, Jolion 337 л, CS35PLUS 403 л, T4L 475 л, J6 480 л. Со сложенным рядом у T4L 1500 л."},
+      {id:"bags",cat:"safety",type:"single",p:"Сколько подушек безопасности у T4L и какие?",o:[["a","2 — только фронтальные"],["b","4 — фронтальные и боковые"],["c","6 — плюс шторки"],["d","8 — как в премиуме"]],c:["b"],x:"4 подушки в Актив и Прайм. Шторки и коленные не обещать."},
+      {id:"assist",cat:"safety",type:"multi",p:"Какие системы помощи есть на T4L в обеих комплектациях? Отметьте все верные.",o:[["a","ABS и система курсовой устойчивости"],["b","Помощь при старте в гору и спуске"],["c","Автопилот уровня 3"],["d","ЭРА-ГЛОНАСС"]],c:["a","b","d"],x:"Базовый набор: ABS/ESP, помощь в гору и на спуске, ЭРА-ГЛОНАСС. Автопилота нет."},
+      {id:"parkcam",cat:"safety",type:"single",p:"Камеры и парковка по комплектациям?",o:[["a","Везде только парктроник без камеры"],["b","Актив — камера заднего вида; Прайм — круговой обзор 360° и передние датчики"],["c","360° уже в Актив"],["d","Камеры только как опция дилера"]],c:["b"],x:"Задняя камера — аргумент Актива. 360° и передние датчики — апсейл Прайма."},
+      {id:"child",cat:"safety",type:"single",p:"Крепление детских кресел?",o:[["a","Только штатный ремень"],["b","ISOFIX на втором ряду"],["c","ISOFIX только за доплату"],["d","Третий ряд с ISOFIX"]],c:["b"],x:"ISOFIX на втором ряду. Третьего ряда у T4L нет."},
+      {id:"lock",cat:"safety",type:"single",p:"Что из пассивной безопасности можно называть в разговоре с клиентом?",o:[["a","Автоматическое запирание дверей на скорости и ЭРА-ГЛОНАСС"],["b","Бронированные стёкла в базе"],["c","Выезд без ключа из любой лужи за счёт 4WD"],["d","Ночное видение"]],c:["a"],x:"Запирание на скорости и ЭРА-ГЛОНАСС — факты. Броню, ПНВ и 4WD не выдумывать."},
+      {id:"honest",cat:"safety",type:"single",p:"Подушки T4L и Haval Jolion?",o:[["a","У T4L всегда 6 шторок, как в топе Jolion"],["b","T4L — 4 подушки; шторки Jolion — в старших версиях"],["c","Одинаково по 2 фронтальные в любой версии"],["d","У T4L нет подушек, у Jolion всегда восемь"]],c:["b"],x:"T4L: 4 подушки (фронтальные и боковые) в Актив и Прайм. Состав Jolion зависит от версии."},
+      {id:"drive3",cat:"tech",type:"single",p:"Сколько режимов движения и усилителя руля у T4L?",o:[["a","Один режим, руль без выбора"],["b","3 режима движения и 2 режима усилителя руля"],["c","6 режимов i-AWD и 3 режима руля"],["d","Только Sport"]],c:["b"],x:"По аргументатору: 3 режима движения и 2 режима электроусилителя. Полного привода нет."},
+      {id:"store80",cat:"tech",type:"single",p:"Объём мест для хранения в салоне T4L?",o:[["a","20 л"],["b","около 80 л"],["c","200 л в дверях"],["d","Нет дополнительных ниш"]],c:["b"],x:"Аргументатор: ширина/высота салона и ниши суммарно около 80 л — аргумент практичности."},
+      {id:"rails",cat:"tech",type:"single",p:"Рейлинги и прицеп T4L?",o:[["a","Рейлингов нет, прицеп запрещён"],["b","Рейлинги до 50 кг, прицеп без тормозов до 750 кг"],["c","Рейлинги 150 кг и прицеп 2000 кг"],["d","Только фаркоп 1500 кг, без рейлингов"]],c:["b"],x:"Крыша до 50 кг (лыжи, бокс). Прицеп без тормозов — 750 кг."},
+      {id:"fast5",cat:"safety",type:"single",p:"Что такое FAST в разговоре про T4L?",o:[["a","Название комплектации вместо Прайм"],["b","5 мировых стандартов безопасности, по которым собран кузов"],["c","Система автопилота 3 уровня"],["d","Только шильдик на решётке"]],c:["b"],x:"Аргументатор: безопасность по 5 мировым стандартам (FAST). Не путать с названием комплектации."},
+      {id:"galva",cat:"safety",type:"single",p:"Кузов T4L с точки зрения коррозии?",o:[["a","Только краска, без оцинковки"],["b","Оцинкованный кузов и антикор с завода, платформа T1X"],["c","Алюминиевый кузов как у авиации"],["d","Рама с понижайкой"]],c:["b"],x:"Оцинковка, антикор и силовой каркас T1X из высокопрочных сталей. Рамы нет."},
+      {id:"slogan",cat:"trims",type:"single",p:"Как корректно говорить про бренд TENET?",o:[["a","Это переименованный Haval, сборка в Китае без партнёра"],["b","Российский бренд: АГР Холдинг (Калуга) + DEFETOO, слоган «TENET. Живи движением»"],["c","Это суббренд Chery без завода в РФ"],["d","Только импорт из Уханя, без локализации"]],c:["b"],x:"Завод АГР в индустриальном парке Грабцево, Калужская область. Партнёр — DEFETOO. TAKE EVERY NEW EXPERIENCE TOGETHER."},
+      {id:"m6c5",cat:"rival",type:"multi",p:"Каких конкурентов аргументатор T4L ставит рядом с Jolion и X50+? Отметьте все верные.",o:[["a","Haval M6"],["b","Omoda C5"],["c","Geely Monjaro"],["d","Tank 300"]],c:["a","b"],x:"В аргументаторе T4L: Jolion, M6, X50+, J6, Omoda C5, X50. Monjaro и Tank — класс Tiggo 9, не T4L."},
+
+    ];
+
+
+
+    const STAFF = ["ахмадуллин","демьянов","коропец","лавров","сидоров","спицын","тальков"];
+    const STAFF_SHOW = ["Ахмадуллин","Демьянов","Коропец","Лавров","Сидоров","Спицын","Тальков"];
+    const T7_Q = [
+      {id:"t7dim",cat:"tech",type:"single",p:"Длина T7 и колёсная база?",o:[["a","4506 / 2650"],["b","4553 / 2670"],["c","4725 / 2710"],["d","4810 / 2800"]],c:["b"],x:"По аргументатору T7: 4553 × 1862 × 1696 мм, база 2670. Не путать с 4513 — это устаревшая цифра."},
+      {id:"t7wh",cat:"tech",type:"single",p:"Ширина и высота T7?",o:[["a","1828 × 1701"],["b","1862 × 1696"],["c","1925 × 1741"],["d","1832 × 1469"]],c:["b"],x:"Около 1862 × 1696 мм."},
+      {id:"t7tr",cat:"tech",type:"single",p:"Багажник T7?",o:[["a","330 л"],["b","475–1500 л"],["c","193–1930 л"],["d","535 л"]],c:["b"],x:"475 л, до 1500 со сложенным рядом."},
+      {id:"t7eng",cat:"tech",type:"single",p:"Мотор T7?",o:[["a","1.5T 147 / 210 Н·м, как T4L"],["b","1.6T 150 / 275 Н·м, DCT7"],["c","2.0T 197 / 375 Н·м"],["d","1.6T 186, как пятиместная T8"]],c:["b"],x:"SQRF4J16, 1598 см³, 110 кВт (150 л.с.), 275 Н·м. 1.5 на T7 нет — это мотор T4L."},
+      {id:"t7box",cat:"tech",type:"single",p:"Коробка T7?",o:[["a","DCT6"],["b","DCT7"],["c","8AT"],["d","вариатор"]],c:["b"],x:"Робот DCT7."},
+      {id:"t7awd",cat:"tech",type:"single",p:"Привод T7?",o:[["a","Только 2WD"],["b","Есть 2WD и 4WD"],["c","Только 4WD"],["d","Только задний"]],c:["b"],x:"Актив и Прайм бывают 2WD и 4WD. Мотор один — 1.6T 150 DCT7."},
+      {id:"t7dyn",cat:"tech",type:"single",p:"Разгон T7 2WD 0–100?",o:[["a","8,4 с"],["b","9,7 с"],["c","10,5 с"],["d","12,0 с"]],c:["b"],x:"2WD около 9,7 с, 4WD около 9,8 с."},
+      {id:"t7fuel",cat:"tech",type:"single",p:"Топливо T7?",o:[["a","Только АИ-98"],["b","АИ-92"],["c","Дизель"],["d","Только 100-й"]],c:["b"],x:"АИ-92."},
+      {id:"t7mix",cat:"tech",type:"single",p:"Смешанный расход T7 2WD?",o:[["a","5,5 л"],["b","7,7 л"],["c","9,8 л"],["d","12,6 л"]],c:["b"],x:"Около 7,7 л."},
+      {id:"t7vmax",cat:"tech",type:"single",p:"Максималка T7 2WD?",o:[["a","180 км/ч"],["b","190 км/ч"],["c","210 км/ч"],["d","220 км/ч"]],c:["b"],x:"Около 190 км/ч."},
+      {id:"t7line",cat:"trims",type:"single",p:"Комплектации T7?",o:[["a","Comfort / Актив / Прайм / Ультра, мотор 1.5"],["b","Актив и Прайм, каждая 2WD и 4WD"],["c","Только Прайм 4WD"],["d","Одна версия Comfort 1.5"]],c:["b"],x:"Линейка: Актив и Прайм. Комфорта и Ультры у T7 нет. Мотор везде 1.6T 150."},
+      {id:"t7base",cat:"trims",type:"multi",p:"Что типично для T7 Актив?",o:[["a","Зимний пакет"],["b","Двухзонный климат"],["c","Рама и понижайка"],["d","Светодиодная оптика"]],c:["a","b","d"],x:"Рамы нет."},
+      {id:"t7prime",cat:"trims",type:"multi",p:"Что добавляет T7 Прайм?",o:[["a","Обзор 540°"],["b","Панорамная крыша"],["c","Рамный кузов"],["d","Расширенные ассистенты"]],c:["a","b","d"],x:"540°, панорама, электроника."},
+      {id:"t7scr",cat:"trims",type:"single",p:"Экраны T7?",o:[["a","Один 8″"],["b","Два экрана, в Прайм крупнее"],["c","Нет медиа"],["d","Только проекция"]],c:["b"],x:"Два дисплея."},
+      {id:"t7cp",cat:"trims",type:"single",p:"CarPlay / Android Auto на T7?",o:[["a","Только Прайм 4WD"],["b","Есть в линейке уже на входе"],["c","Нет"],["d","Только у дилера кабелем"]],c:["b"],x:"Беспроводные интерфейсы — аргумент базы."},
+      {id:"t7aw2",cat:"trims",type:"single",p:"Где доступен 4WD T7?",o:[["a","Только Ультра"],["b","В Актив и в Прайм"],["c","Недоступен"],["d","Только летом"]],c:["b"],x:"Обе комплектации могут быть 4WD. Мотор тот же — 1.6T 150."},
+      {id:"t7p1",cat:"price",type:"single",p:"Рекомендуемая цена T7 Актив 2WD (прайс 01.09.2026)?",o:[["a","2 605 000 ₽"],["b","2 785 000 ₽"],["c","2 735 000 ₽"],["d","2 429 000 ₽"]],c:["b"],x:"Рекомендуемая 2 785 000 ₽. 2 605 000 — максимальная с учётом выгод. 1.5 / 2 429 000 — это не T7."},
+      {id:"t7p2",cat:"price",type:"single",p:"Рекомендуемая цена T7 Актив 4WD (прайс 01.09.2026)?",o:[["a","2 860 000 ₽"],["b","2 990 000 ₽"],["c","2 785 000 ₽"],["d","3 099 000 ₽"]],c:["b"],x:"Рекомендуемая 2 990 000 ₽. 2 860 000 — максимальная с учётом выгод."},
+      {id:"t7p3",cat:"price",type:"single",p:"Рекомендуемая цена T7 Прайм 2WD (прайс 01.09.2026)?",o:[["a","2 735 000 ₽"],["b","2 985 000 ₽"],["c","2 785 000 ₽"],["d","3 140 000 ₽"]],c:["b"],x:"Рекомендуемая 2 985 000 ₽. 2 735 000 — максимальная с учётом выгод (трейд-ин + кредит)."},
+      {id:"t7p4",cat:"price",type:"single",p:"Рекомендуемая цена T7 Прайм 4WD (прайс 01.09.2026)?",o:[["a","3 040 000 ₽"],["b","3 190 000 ₽"],["c","2 990 000 ₽"],["d","3 449 000 ₽"]],c:["b"],x:"Рекомендуемая 3 190 000 ₽. 3 040 000 — максимальная с учётом выгод."},
+      {id:"t7p5",cat:"price",type:"single",p:"Сколько доплата за 4WD на T7 (рекомендуемые цены)?",o:[["a","50 000 ₽"],["b","205 000 ₽"],["c","150 000 ₽"],["d","Привод не влияет на цену"]],c:["b"],x:"2 990 000 − 2 785 000 = 205 000 ₽. На Прайме столько же: 3 190 000 − 2 985 000."},
+      {id:"t7city",cat:"rival",type:"single",p:"Силовой агрегат Geely Cityray?",o:[["a","1.6T 150 л.с., DCT7, есть версии 4WD"],["b","1.5T 147 л.с., 270 Н·м, 7DCT, только 2WD"],["c","2.0T 238 л.с., 350 Н·м, 8AT, полный привод"],["d","1.5T 147 л.с., DCT6, только механика 2WD"]],c:["b"],x:"Cityray: 1.5T 147 / 270 Н·м / 7DCT / 2WD. 0–100 за 8,9 с, топливо АИ-92."},
+      {id:"t7cityd",cat:"rival",type:"single",p:"Габариты и багажник Geely Cityray?",o:[["a","4725 × 1860 × 1705 мм, база 2710, багажник от 193 л"],["b","4510 × 1865 × 1650 мм, база 2701, багажник 571–1271 л"],["c","4472 × 1874 × 1581 мм, база 2700, багажник 337–1133 л"],["d","4810 × 1925 × 1741 мм, база 2800, багажник около 200 л"]],c:["b"],x:"Cityray: 4510 × 1865 × 1650, база 2701, клиренс 185 мм, багажник 571 / 1271 л."},
+      {id:"t7cityt",cat:"rival",type:"single",p:"Комплектации Geely Cityray в РФ?",o:[["a","Две ступени Актив и Прайм, есть 2WD и 4WD"],["b","Четыре ступени Comfort — Flagship Sport, все 2WD"],["c","Комфорт МКПП на входе и Техно+ 4WD наверху"],["d","Одна версия Exclusive с мотором 2.0 AWD"]],c:["b"],x:"Comfort 2 699 990 / Luxury 2 939 990 / Flagship 3 059 990 / Flagship Sport 3 099 990 ₽. Все 1.5T 7DCT, только 2WD."},
+      {id:"t7jol",cat:"rival",type:"single",p:"Багажник Jolion и T7?",o:[["a","Одинаково 337–1133 л у обеих моделей"],["b","T7 475–1500 л, Jolion 337–1133 л"],["c","Jolion 1500 л в пяти местах, T7 337 л"],["d","У T7 багажника нет, у Jolion 650–1610 л"]],c:["b"],x:"В пяти местах: T7 475 л, Jolion 337 л."},
+      {id:"t7h3",cat:"rival",type:"single",p:"Силовые агрегаты Haval H3 в РФ?",o:[["a","Только 1.5T 147 DCT6 2WD во всей линейке"],["b","2WD 143 л.с. 7DCT или 4WD 177 л.с. 7DCT"],["c","Только 2.0T 238 л.с. 8AT AWD без выбора 2WD"],["d","1.6 атмо и механика, клиренс 144 мм"]],c:["b"],x:"H3: 4520 × 1875 × 1745, база 2710, клиренс 196 мм, багажник 493–1298 л. 2WD 143 л.с. / 210 Н·м, 4WD 177 л.с. / 270 Н·м. Рамы нет."},
+      {id:"t7x70",cat:"rival",type:"single",p:"Комплектации Haval H3 и старт прайса?",o:[["a","Только Comfort с механикой, от 2 049 000 ₽"],["b","Elite / Premium / Tech+, 2WD от 2 699 000 ₽"],["c","Люкс и Флагман с 2.0 8AT, от 4 349 990 ₽"],["d","Одна версия без выбора привода, от 3 099 000 ₽"]],c:["b"],x:"Три ступени. 2WD — 143 л.с. от 2 699 000 ₽. 4WD Elite от 3 049 000, Premium 4WD 3 199 000, Tech+ 4WD 3 499 000 ₽. 4WD — 177 л.с. 7DCT."},
+      {id:"t7uni",cat:"rival",type:"single",p:"Belgee X70 относительно X50+?",o:[["a","Тот же автомобиль, те же 4380 мм и 330 л"],["b","X70 — другой класс, среднеразмерник; X50+ — компакт"],["c","X70 всегда седан 2.0 249 сил, X50+ — рамник"],["d","X70 — 7-местный рамник, X50+ — лифтбек 4740 мм"]],c:["b"],x:"X70 и X50+ — разные модели Belgee. X50+ — компакт 4380 мм, багажник 330 л. Не путать со среднеразмерником."},
+      {id:"t7dash",cat:"rival",type:"single",p:"Jetour Dashing: старт прайса на официальном сайте?",o:[["a","От 4 349 990 ₽"],["b","От 2 239 900 ₽"],["c","От 3 885 000 ₽"],["d","От 2 049 000 ₽"]],c:["b"],x:"Официальный сайт JETOUR: Dashing от 2 239 900 ₽. Кроссовер сегмента T7, не рамник."},
+      {id:"t7awdvs",cat:"rival",type:"single",p:"У кого из соседей T7 полный привод в линейке?",o:[["a","Только у Cityray, во всех версиях линейки"],["b","У T7, Jolion и H3 — в части версий; у Cityray — нет"],["c","Ни у одной модели этого сегмента в РФ"],["d","Только у Dashing и только в базовой версии"]],c:["b"],x:"Cityray в РФ — строго 2WD. T7, Jolion и H3 имеют полноприводные исполнения."},
+      {id:"t7s1",cat:"safety",type:"single",p:"Что не обещать на T7 без карточки?",o:[["a","Зимний пакет"],["b","Автопилот 3 уровня и раму"],["c","Климат"],["d","ESP"]],c:["b"],x:"Только комплектация машины."},
+      {id:"t7s2",cat:"safety",type:"single",p:"Обзор 540° на T7?",o:[["a","В каждой Актив 2WD"],["b","Аргумент Прайм"],["c","Нет в линейке"],["d","Только на седане"]],c:["b"],x:"Апсейл Прайма."},
+      {id:"t7s3",cat:"safety",type:"single",p:"4WD T7 зимой?",o:[["a","Стоит на любой T7 в салоне"],["b","Есть версии 4WD в Актив и в Прайм — смотреть карточку"],["c","4WD нельзя заказать"],["d","Только летом"]],c:["b"],x:"Не обещать муфту на 2WD. 4WD есть и в Актив, и в Прайм."},
+      {id:"t7s4",cat:"safety",type:"single",p:"ISOFIX на T7?",o:[["a","Нет"],["b","На втором ряду"],["c","Только третий ряд"],["d","Только за доплату"]],c:["b"],x:"Второй ряд."},
+      {id:"t7cl",cat:"tech",type:"single",p:"Дорожный просвет T7 по аргументатору?",o:[["a","171 мм, как у X70"],["b","197 мм"],["c","203 мм, как у T4L"],["d","144 мм"]],c:["b"],x:"197 мм. На 26 мм выше X70 (171) и Uni-S (171), на 7 мм выше Jolion (190)."},
+      {id:"t7air",cat:"safety",type:"single",p:"Сколько подушек у T7?",o:[["a","4, как у T4L"],["b","6, с сохранением 50% давления 6 секунд"],["c","2 фронтальные"],["d","10, как в седане Ultimate 2024"]],c:["b"],x:"Аргументатор: 6 подушек, давление держится 50% в течение 6 секунд при вторичном ударе."},
+      {id:"t7i4",cat:"tech",type:"single",p:"Полный привод T7?",o:[["a","Раздатка с понижайкой, как у Tank"],["b","Интеллектуальный i-AWD / i-4WD с 6 режимами"],["c","Только 2WD во всей линейке"],["d","4 режима, как у Belgee X70"]],c:["b"],x:"i-AWD с 6 режимами против 4 у X70. Не обещать понижайку."},
+      {id:"t7scr2",cat:"trims",type:"single",p:"Экраны и процессор T7?",o:[["a","Один 8″ без CarPlay"],["b","Два экрана 12,3″ и Snapdragon 8155"],["c","Только проекция HUD 15,6″"],["d","10,25″ как у T4L"]],c:["b"],x:"Аргументатор: 2×12,3″ и Qualcomm Snapdragon 8155. CarPlay/Android Auto беспроводные."},
+      {id:"t7ncap",cat:"safety",type:"single",p:"Рейтинг C-NCAP у T7?",o:[["a","Не заявлен"],["b","5 звёзд C-NCAP"],["c","3 звезды"],["d","Только Euro NCAP 2 звезды"]],c:["b"],x:"5★ C-NCAP. Плюс каркас T1X, ESC, 540°, TPMS."},
+      {id:"t7uni2",cat:"rival",type:"single",p:"Главный аргумент T7 против Changan Uni-S?",o:[["a","У Uni-S всегда 4WD, у T7 его нет"],["b","У T7 есть 4WD, клиренс 197 против 171, двухзонный климат и классический руль"],["c","Uni-S длиннее 4,8 м и семиместный"],["d","Цены одинаковые, разницы нет"]],c:["b"],x:"Uni-S: нет 4WD, клиренс 171, однозонный климат, овальный руль. T7 — комфортная подвеска и командирская посадка."},
+      {id:"t7n95",cat:"trims",type:"multi",p:"Что из «фишек» T7 можно называть в разговоре? Отметьте все верные.",o:[["a","Фильтр салона N95 и обогрев всей площади лобового"],["b","Бесконтактное открывание багажника"],["c","Понижайка и блокировки мостов"],["d","Рейлинги: доп. груз до 50 кг"]],c:["a","b","d"],x:"N95, полный обогрев стекла, сервокрышка, рейлинги 50 кг. Рамы и понижайки нет."},
+      {id:"t7x70b",cat:"rival",type:"single",p:"Багажник и клиренс T7 vs Belgee X70?",o:[["a","Одинаково 378 л и 171 мм"],["b","T7: 475 л и 197 мм; X70: 378 л и 171 мм"],["c","X70 1500 л в пяти местах, T7 337 л"],["d","Разницы нет, это одна платформа"]],c:["b"],x:"+97 л и +26 мм у T7. Ещё 4 цилиндра против 3-цилиндрового + 48V у X70, АИ-92 против АИ-95."},
+
+    ];
+    const T8_Q = [
+      {id:"t8dim",cat:"tech",type:"single",p:"Габариты T8?",o:[["a","4506 × 1828 × 1701"],["b","4513 × 1862 × 1696"],["c","4725 × 1860 × 1705"],["d","4810 × 1925 × 1741"]],c:["c"],x:"4725 × 1860 × 1705 мм."},
+      {id:"t8base",cat:"tech",type:"single",p:"База T8?",o:[["a","2650"],["b","2670"],["c","2710"],["d","2800"]],c:["c"],x:"2710 мм."},
+      {id:"t8cl",cat:"tech",type:"single",p:"Клиренс T8?",o:[["a","144 мм"],["b","176 мм"],["c","196 мм"],["d","220 мм"]],c:["c"],x:"Около 196 мм."},
+      {id:"t8seat",cat:"tech",type:"single",p:"Какие посадки есть у T8?",o:[["a","Только 5 мест во всей линейке"],["b","5 мест на 1.6 2WD и 5+2 на 2.0 4WD"],["c","Только 2 места"],["d","9 мест, как минивэн"]],c:["b"],x:"Актив 1.6 — пятиместный, багажник от 889 л. Прайм и Ультра 2.0 — формат 5+2, в семи местах около 193 л."},
+      {id:"t8tr",cat:"tech",type:"single",p:"Багажник T8?",o:[["a","475–1500 л"],["b","От ~193 л в 7 местах до 1930 л"],["c","535 л"],["d","330 л"]],c:["b"],x:"В семи местах багажник маленький."},
+      {id:"t8eng",cat:"tech",type:"single",p:"Моторы T8?",o:[["a","Только 1.5T 147"],["b","1.6T 186 2WD и 2.0T 197 4WD"],["c","Дизель 3.0"],["d","Только электро"]],c:["b"],x:"1.6 — Актив, 2.0 — Прайм и Ультра."},
+      {id:"t8nm",cat:"tech",type:"single",p:"Момент 2.0 T8?",o:[["a","210"],["b","275"],["c","375"],["d","500"]],c:["c"],x:"375 Н·м."},
+      {id:"t8box",cat:"tech",type:"single",p:"Коробка 2.0 T8?",o:[["a","DCT6"],["b","DCT7"],["c","Механика 5"],["d","CVT"]],c:["b"],x:"DCT7."},
+      {id:"t8dyn",cat:"tech",type:"single",p:"Разгон 2.0 4WD T8?",o:[["a","10,5 с"],["b","9,7 с"],["c","8,4 с"],["d","6,9 с"]],c:["c"],x:"8,4 с, до 210 км/ч."},
+      {id:"t8fuel",cat:"tech",type:"single",p:"Топливо T8?",o:[["a","Дизель"],["b","АИ-92"],["c","Только 100-й"],["d","Газ"]],c:["b"],x:"АИ-92."},
+      {id:"t8line",cat:"trims",type:"single",p:"Линейка T8?",o:[["a","Только Актив"],["b","Актив 1.6, Прайм и Ультра 2.0 4WD"],["c","Только Comfort"],["d","Пять одинаковых"]],c:["b"],x:"Три ступени и два мотора."},
+      {id:"t8pr",cat:"trims",type:"multi",p:"Что типично для Прайм 2.0?",o:[["a","Полный привод"],["b","Обзор 540°"],["c","Панорама"],["d","Рама"]],c:["a","b","c"],x:"Несущий кузов."},
+      {id:"t8ul",cat:"trims",type:"single",p:"Чем Ультра сильнее Прайм?",o:[["a","Мотором 1.5"],["b","Расширенный ADAS, вентиляция, диски 19″"],["c","Нет 4WD"],["d","Механика"]],c:["b"],x:"Обе 2.0 4WD."},
+      {id:"t8act",cat:"trims",type:"single",p:"Актив T8 — это?",o:[["a","2.0 4WD топ"],["b","1.6 186 и передний привод"],["c","Дизель"],["d","7 мест без складывания"]],c:["b"],x:"Вход линейки."},
+      {id:"t87",cat:"trims",type:"single",p:"Как говорить про третий ряд T8?",o:[["a","Полноценный бизнес-минивэн"],["b","5+2: дети и короткие поездки, в 7 местах багажник маленький"],["c","Ряда нет"],["d","Только против хода"]],c:["b"],x:"Честно про 193 л."},
+      {id:"t8p1",cat:"price",type:"single",p:"Цена T8 Актив 1.6?",o:[["a","2 735 000 ₽"],["b","3 099 000 ₽"],["c","3 885 000 ₽"],["d","4 335 000 ₽"]],c:["b"],x:"Около 3 099 000 ₽."},
+      {id:"t8p2",cat:"price",type:"single",p:"Цена T8 Прайм 2.0 4WD?",o:[["a","2 935 000 ₽"],["b","3 630 000 ₽"],["c","3 099 000 ₽"],["d","2 479 000 ₽"]],c:["b"],x:"Около 3 630 000 ₽."},
+      {id:"t8p3",cat:"price",type:"single",p:"Цена T8 Ультра?",o:[["a","3 140 000 ₽"],["b","3 630 000 ₽"],["c","3 885 000 ₽"],["d","2 865 000 ₽"]],c:["c"],x:"Около 3 885 000 ₽."},
+      {id:"t8p4",cat:"price",type:"single",p:"Шаг Прайм → Ультра T8?",o:[["a","50 000 ₽"],["b","около 255 000 ₽"],["c","1 000 000 ₽"],["d","0 ₽"]],c:["b"],x:"3 885 000 − 3 630 000."},
+      {id:"t8p5",cat:"price",type:"single",p:"Самая доступная T8 в линейке?",o:[["a","Ультра 2.0 4WD"],["b","Актив 1.6 2WD, около 3 099 000 ₽"],["c","Прайм 2.0 4WD"],["d","Актив 2.0 4WD"]],c:["b"],x:"Вход — Актив 1.6. 2.0 4WD заметно дороже."},
+      {id:"t8at",cat:"rival",type:"single",p:"Габариты и багажник Geely Atlas?",o:[["a","4725 × 1860 × 1705 мм, 7 мест, багажник от 193 л"],["b","4670 × 1900 × 1705 мм, база 2777, 5 мест, багажник 650–1610 л"],["c","4825 × 1880 × 1469 мм, седан, багажник 500 л, клиренс 135 мм"],["d","4330 × 1825 × 1660 мм, багажник 403 л, клиренс 180 мм"]],c:["b"],x:"Atlas: 4670 × 1900 × 1705, база 2777, клиренс 215 мм, багажник 650 / 1610 л, 5 мест."},
+      {id:"t8f7",cat:"rival",type:"single",p:"Комплектации обновлённого Haval F7?",o:[["a","Актив 1.6 2WD и Ультра 2.0 2WD, без 4WD"],["b","Оптимум / Премиум / Техно+; 1.5T 2WD или 2.0T 4WD"],["c","Только Comfort с механикой 1.5, без робота"],["d","Люкс и Флагман, обе 2.0T 8AT AWD без 2WD"]],c:["b"],x:"Три ступени: Оптимум / Премиум / Техно+. Оптимум 1.5T 2WD 2 999 000 / Премиум 1.5T 2WD 3 199 000 / Оптимум 2.0T 4WD 3 399 000 / Премиум 4WD 3 599 000 / Техно+ 4WD 3 799 000 ₽, 7DCT."},
+      {id:"t8f7d",cat:"rival",type:"single",p:"Габариты и багажник Haval F7?",o:[["a","4506 × 1828 × 1701 мм, багажник 475 л, клиренс 203 мм"],["b","4780 × 1890 мм, база 2800, багажник 376–1328 л"],["c","4810 × 1925 × 1741 мм, 7 мест, клиренс 200 мм"],["d","4330 × 1825 × 1660 мм, багажник 403 л, клиренс 180 мм"]],c:["b"],x:"F7: 4780 × 1890 × 1675–1707, база 2800, багажник 376 / 1328 л, клиренс 183–191 мм."},
+      {id:"t8h7",cat:"rival",type:"single",p:"Силовой агрегат и старт прайса Haval H7?",o:[["a","1.5T 147 л.с. DCT6 2WD, Elite от 2 699 000 ₽"],["b","2.0T 231 л.с. 7DCT 4WD, Премиум от 3 799 000 ₽"],["c","1.6T 150 л.с. механика 2WD, Comfort от 2 049 000 ₽"],["d","Дизель 3.0 на раме, старт от 4 349 990 ₽"]],c:["b"],x:"H7: 4705 × 1908 × 1780 мм, база 2810, клиренс 200 мм, багажник 483 / 1362 л, 5 мест, только 4WD. 2.0T 231 / 380 Н·м / 7DCT. Премиум от 3 799 000, Техно+ от 3 999 000 ₽."},
+      {id:"t8cs",cat:"rival",type:"single",p:"Моторы в линейке Geely Atlas?",o:[["a","Только Comfort 1.5 МКПП 2WD во всех версиях"],["b","Люкс 2WD — 1.5T 147 7DCT; 4WD — 2.0T 200 8AT"],["c","Прайм и Ультра 2.0 DCT7 с третьим рядом"],["d","Одна версия Exclusive 2.0 238 8AT AWD"]],c:["b"],x:"Люкс 2WD: 1.5T 147 / 270 Н·м / 7DCT от 3 259 990 ₽. 4WD-версии Люкс / Флагман / Спорт: 2.0T 200 / 325 Н·м / 8AT. Топливо АИ-95."},
+      {id:"t8xp",cat:"rival",type:"single",p:"Jetour X70+: мотор и старт прайса?",o:[["a","1.5T 120 л.с. DCT6, без третьего ряда, от 2 049 000 ₽"],["b","1.6T 190 л.с. 7DCT, Комфорт и Престиж, от 2 839 000 ₽"],["c","2.0T 200 л.с. 7DCT 2WD, как Preface, от 3 079 990 ₽"],["d","2.0T 238 л.с. 8AT AWD, одна версия, от 4 349 990 ₽"]],c:["b"],x:"Официальный сайт JETOUR: X70+ от 2 839 000 ₽. 1.6T 190 / 275 Н·м / 7DCT. Комфорт и Престиж."},
+      {id:"t8frame",cat:"rival",type:"single",p:"Кузов T8 и Tank 300 — это одно и то же?",o:[["a","Да, оба рамные с понижайкой и блокировками"],["b","Нет: T8 — несущий кроссовер 5+2, Tank 300 — рамный"],["c","Понижайка есть в T8 Актив, у Tank её нет"],["d","T8 — пикап на раме, Tank 300 — несущий седан"]],c:["b"],x:"Разный тип конструкции: несущий кроссовер против рамной лестницы."},
+      {id:"t8mot",cat:"rival",type:"single",p:"Какие моторы у T8 в линейке?",o:[["a","Только 1.5T 147 DCT6 и механика, без 4WD"],["b","Актив — 1.6T 186 2WD; Прайм и Ультра — 2.0T 197 4WD"],["c","Только 2.0T 231 7DCT 4WD, как у Haval H7"],["d","Дизель 3.0 и электро, оба с понижайкой"]],c:["b"],x:"Два силовых агрегата: 1.6 2WD на входе, 2.0T 197 / 375 Н·м / DCT7 / 4WD в Прайм и Ультра."},
+      {id:"t8s1",cat:"safety",type:"single",p:"Обзор 540° на T8?",o:[["a","Нигде нет"],["b","В богатых версиях, включая Прайм"],["c","Только самая бедная комплектация"],["d","Только за наличные"]],c:["b"],x:"Аргумент Прайма и Ультры."},
+      {id:"t8s2",cat:"safety",type:"single",p:"ADAS на T8?",o:[["a","Автопилот 4 уровня в Актив"],["b","Расширенный набор — в Ультра, читать карточку"],["c","Нет систем"],["d","Только механический круиз"]],c:["b"],x:"Не обещать автопилот."},
+      {id:"t8s3",cat:"safety",type:"single",p:"Подушки T8?",o:[["a","Всегда 2"],["b","Больше, чем у T4L; точное число — карточка"],["c","Нет подушек"],["d","Только коленная в Актив"]],c:["b"],x:"Не выдумывать 10 штук."},
+      {id:"t8s4",cat:"safety",type:"single",p:"Дети и T8?",o:[["a","ISOFIX только спереди"],["b","ISOFIX на втором ряду, третий — короткие поездки"],["c","Третий ряд запрещён"],["d","Кресла нельзя"]],c:["b"],x:"Честно про удобство."},
+      {id:"t85vs7",cat:"tech",type:"single",p:"Багажник T8 5 мест (2WD) vs 7 мест?",o:[["a","Одинаково 193 л в любом режиме"],["b","5 мест: 889–1930 л; 7 мест: от ~193 л до 1930 л"],["c","Только 475–1500 л, как у T7"],["d","В пяти местах 337 л, как у Jolion"]],c:["b"],x:"Аргументатор 5 мест: 889 л — сильный аргумент против Atlas 650 и F7 376. В семи местах багажник маленький."},
+      {id:"t85cl",cat:"tech",type:"single",p:"Клиренс T8 5 мест 2WD по аргументатору?",o:[["a","144 мм"],["b","213 мм"],["c","176 мм"],["d","203 мм, как у T4L"]],c:["b"],x:"5-местная 2WD — 213 мм. 7-местная 4WD — около 196 мм. Не путать версии."},
+      {id:"t8sony",cat:"trims",type:"single",p:"Аудиосистема T8?",o:[["a","Всегда 6 динамиков без бренда"],["b","Sony: 8 динамиков на 5-местной 2WD, 10 — на 7-местной 4WD"],["c","Только 2 пищалки в Актив"],["d","Bang & Olufsen 16 динамиков в базе"]],c:["b"],x:"Аргументаторы: 5 мест — Sony 8, 7 мест — Sony 10. Не обещать 10 колонок на Актив 1.6."},
+      {id:"t8scr",cat:"trims",type:"single",p:"Экраны T8?",o:[["a","Один 8″"],["b","15,6″ медиа + 10,3″ щиток, на 4WD ещё HUD"],["c","Только проекция без медиа"],["d","2×10,25″ как у T4L"]],c:["b"],x:"Цифровая зона 15,6 + 10,3. Проекция — аргумент богатых 4WD-версий."},
+      {id:"t8fast",cat:"safety",type:"single",p:"Подушки T8 5 мест 2WD?",o:[["a","Всегда 2"],["b","6 подушек, отключаемая пассажирская, FAST 5 стандартов"],["c","10 шторок в Актив"],["d","Нет подушек"]],c:["b"],x:"Аргументатор 5 мест: 6 подушек, 50% давления 6 секунд при вторичном ударе, FAST."},
+      {id:"t8cs75",cat:"rival",type:"single",p:"Changan CS75 Pro рядом с T8 5 мест 2WD?",o:[["a","CS75 Pro всегда 7 мест и 4WD, T8 — нет"],["b","CS75 Pro 1.5 181 2WD, багажник 780–1481, клиренс 180; у T8 5 мест — 889–1930 и 213 мм"],["c","Это один автомобиль с разными шильдиками"],["d","CS75 Pro — седан 144 мм"]],c:["b"],x:"Аргументатор 2WD: CS75 Pro Техно 7DCT. У T8 больше багажник и клиренс, мотор 186 против 181."},
+      {id:"t8modes",cat:"tech",type:"single",p:"Режимы движения T8?",o:[["a","Только Eco, без выбора"],["b","2WD: 3 режима; 4WD: интеллектуальный i4WD с 6 режимами"],["c","Понижайка и 9 режимов, как у Tank"],["d","Режимов нет ни на одной версии"]],c:["b"],x:"Не обещать 6 внедорожных режимов на переднеприводном Активе 1.6."},
+      {id:"t8hud",cat:"trims",type:"single",p:"Что из комфорта T8 5 мест не стоит обещать на Актив?",o:[["a","Зимний пакет и двухзонный климат"],["b","Открытие багажника без рук — в аргументаторе «кроме Актив»"],["c","Экокожа и 18″ диски"],["d","АИ-92"]],c:["b"],x:"Сервокрышка — не база Актива. Смотреть карточку конкретной машины."},
+
+    ];
+    const T9_Q = [
+      {id:"t9dim",cat:"tech",type:"single",p:"Габариты Tiggo 9?",o:[["a","4725 × 1860 × 1705"],["b","4810 × 1925 × 1741"],["c","4506 × 1828 × 1701"],["d","4757 × 1832 × 1469"]],c:["b"],x:"4810 × 1925 × 1741 мм."},
+      {id:"t9base",cat:"tech",type:"single",p:"База Tiggo 9?",o:[["a","2670"],["b","2710"],["c","2800"],["d","2600"]],c:["c"],x:"2800 мм."},
+      {id:"t9cl",cat:"tech",type:"single",p:"Клиренс Tiggo 9?",o:[["a","144 мм"],["b","176 мм"],["c","200 мм"],["d","220 мм рамный"]],c:["c"],x:"200 мм, несущий кузов."},
+      {id:"t9tr",cat:"tech",type:"single",p:"Багажник Tiggo 9?",o:[["a","475–1500"],["b","~200 л в 7 местах и до 2150 л"],["c","535 л"],["d","330 л"]],c:["b"],x:"Семь мест = маленький багажник."},
+      {id:"t9seat",cat:"tech",type:"single",p:"Мест у Tiggo 9?",o:[["a","5"],["b","7"],["c","2"],["d","9"]],c:["b"],x:"Семиместная компоновка."},
+      {id:"t9eng",cat:"tech",type:"single",p:"Мотор Tiggo 9 в РФ?",o:[["a","1.6T 150 DCT7 2WD"],["b","2.0T ~249 л.с., 375 Н·м, 8AT, AWD"],["c","Дизель 3.0"],["d","Только 1.5 гибрид"]],c:["b"],x:"2.0 + 8AT + полный привод."},
+      {id:"t9dyn",cat:"tech",type:"single",p:"Разгон и максимум Tiggo 9?",o:[["a","10,5 с / 180"],["b","8,0 с / 220 км/ч"],["c","12 с / 160"],["d","6,0 с / 250"]],c:["b"],x:"Около 8 с и 220 км/ч."},
+      {id:"t9fuel",cat:"tech",type:"single",p:"Топливо и смешанный расход Tiggo 9?",o:[["a","АИ-98 / 5,0 л"],["b","АИ-92 / около 8,3 л"],["c","Дизель / 11 л"],["d","Электро"]],c:["b"],x:"АИ-92, порядка 8,3 л."},
+      {id:"t9box",cat:"tech",type:"single",p:"Коробка Tiggo 9?",o:[["a","DCT6"],["b","DCT7"],["c","8AT"],["d","Механика"]],c:["c"],x:"Автомат 8AT."},
+      {id:"t9awd",cat:"tech",type:"single",p:"Привод Tiggo 9 в РФ?",o:[["a","Только 2WD"],["b","Полный"],["c","Только задний"],["d","Раздатка с понижайкой"]],c:["b"],x:"Полный привод, не Tank."},
+      {id:"t9line",cat:"trims",type:"single",p:"Комплектации Tiggo 9?",o:[["a","Актив и Комфорт"],["b","Прайм и Ультра"],["c","Одна Comfort"],["d","Четыре версии"]],c:["b"],x:"Две богатые версии."},
+      {id:"t9emp",cat:"trims",type:"single",p:"Есть ли пустая база Tiggo 9?",o:[["a","Да, без климата"],["b","Нет, обе версии богатые"],["c","Только кассетная магнитола"],["d","База без подушек"]],c:["b"],x:"Прайм и Ультра — обе богатые. Пустой базы нет."},
+      {id:"t9ul",cat:"trims",type:"single",p:"Ультра Tiggo 9?",o:[["a","Мотор 1.5"],["b","Топ по ассистентам и комфорту"],["c","Рама"],["d","Передний привод"]],c:["b"],x:"Тот же 2.0 AWD 8AT."},
+      {id:"t9pan",cat:"trims",type:"single",p:"Панорамная крыша на Tiggo 9?",o:[["a","Нет ни в Прайм, ни в Ультра"],["b","Обычно уже в Прайм, не только в Ультра"],["c","Только за отдельную тонировку дилера"],["d","Только на седанах"]],c:["b"],x:"Обе версии богатые. Панорама — норма Прайма."},
+      {id:"t9p1",cat:"price",type:"single",p:"Ориентир цены Прайм Tiggo 9?",o:[["a","2 735 000 ₽"],["b","около 4 335 000 ₽"],["c","3 060 000 ₽"],["d","2 329 000 ₽"]],c:["b"],x:"Порядок 4,3 млн."},
+      {id:"t9p2",cat:"price",type:"single",p:"Ультра относительно Прайм?",o:[["a","Дешевле"],["b","Дороже, ориентир около 4,6 млн"],["c","Та же цена"],["d","Бесплатно"]],c:["b"],x:"Топ заметно дороже."},
+      {id:"t9p4",cat:"price",type:"single",p:"Шаг Прайм → Ультра у Tiggo 9?",o:[["a","Около 50 000 ₽"],["b","Порядок 300 000 ₽ (4,3 → ~4,6 млн)"],["c","1,2 млн"],["d","Цены одинаковые"]],c:["b"],x:"Ультра дороже Прайма примерно на 300 тысяч."},
+      {id:"t9p5",cat:"price",type:"single",p:"Можно ли называть клиенту цену Tiggo 9 «от 3,1 млн»?",o:[["a","Да, это Прайм"],["b","Нет: ориентир Прайм около 4 335 000 ₽, Ультра выше. 3,1 млн — не прайс Tiggo 9"],["c","Да, это Ультра"],["d","Да, если написать от руки"]],c:["b"],x:"Рекомендованная цена модели — около 4,3 млн за Прайм. Кредитную витрину с этой цифрой не путать."},
+      {id:"t9mon",cat:"rival",type:"single",p:"Силовой агрегат Geely Monjaro в РФ?",o:[["a","1.6T 150 л.с., DCT7, только 2WD, АИ-92"],["b","2.0T 238 л.с., 350 Н·м, 8AT, AWD, АИ-95"],["c","1.5T 147 л.с., 210 Н·м, DCT6, только 2WD"],["d","2.0T 197 л.с., 375 Н·м, DCT7, полный привод"]],c:["b"],x:"2.0 турбо, 238 л.с., 350 Н·м, автомат 8AT, AWD во всей линейке. 0–100 за 7,7 с."},
+      {id:"t9mond",cat:"rival",type:"single",p:"Габариты Geely Monjaro?",o:[["a","4810 × 1925 × 1741 мм, база 2800, 7 мест"],["b","4770 × 1895 × 1689 мм, база 2845, клиренс 210 мм, 5 мест"],["c","4725 × 1860 × 1705 мм, база 2710, формат 5+2"],["d","4506 × 1828 × 1701 мм, база 2650, клиренс 203 мм"]],c:["b"],x:"Monjaro: 4770 × 1895 × 1689, база 2845, клиренс 210 мм, 5 мест."},
+      {id:"t9mont",cat:"rival",type:"single",p:"Комплектации и цены Monjaro?",o:[["a","Актив 3 099 000 ₽ и Прайм 3 630 000 ₽"],["b","Люкс 4 349 990 ₽ и Флагман 4 749 990 ₽"],["c","Комфорт МКПП 2 049 000 ₽ и Техно+ 2 899 000 ₽"],["d","Одна версия Comfort 2.0 8AT, 3 259 990 ₽"]],c:["b"],x:"Рекомендованные цены дилерского прайса Geely. Обе версии 5 мест, 2.0T 238 8AT AWD."},
+      {id:"t9monb",cat:"rival",type:"single",p:"Багажник и посадка Monjaro и Tiggo 9?",o:[["a","Оба 7 мест, багажник в пяти местах одинаковый"],["b","Monjaro — 5 мест и 562 л; Tiggo 9 — 7 мест и ~200 л"],["c","У Monjaro третий ряд, у Tiggo 9 только два ряда"],["d","Оба седаны с багажником около 500–535 л"]],c:["b"],x:"Компоновка: 5 мест у Monjaro (562 / 704 / 1532 л), 7 мест у Tiggo 9 (~200 л в семиместном режиме, до ~2150 л)."},
+      {id:"t9mondyn",cat:"rival",type:"single",p:"Разгон 0–100: Monjaro и Tiggo 9?",o:[["a","Tiggo 9 всегда 6,5 с, Monjaro 12,0 с"],["b","Monjaro 7,7 с (238 л.с.), Tiggo 9 около 8,0 с"],["c","Оба ровно 10,5 с при 147 лошадиных силах"],["d","Паспортных цифр разгона нет ни у одной"]],c:["b"],x:"Паспорт: Monjaro 7,7 с / 215 км/ч, Tiggo 9 около 8,0 с / 220 км/ч (~249 л.с.)."},
+      {id:"t9tank",cat:"rival",type:"single",p:"Tank 300 относительно Tiggo 9?",o:[["a","Одинаковая несущая конструкция, оба 7 мест"],["b","Tank 300 — рамный внедорожник, Tiggo 9 — несущий 7 мест"],["c","Оба с понижайкой, блокировками и лебёдкой"],["d","Tank 300 — седан 2.0 8AT, Tiggo 9 — рамник"]],c:["b"],x:"Разный тип кузова: рама у Tank 300, несущий кузов у Tiggo 9 (2.0 8AT AWD)."},
+      {id:"t9gs8",cat:"rival",type:"single",p:"GAC GS8 относительно Tiggo 9?",o:[["a","GS8 короче 4,5 м, 5 мест, без полного привода"],["b","GS8 длиннее (~4980 мм), тоже 7 мест, 2.0 ~231 8AT AWD"],["c","GS8 — седан с клиренсом 144 мм и мотором 1.6T"],["d","У Tiggo 9 нет полного привода, у GS8 только механика"]],c:["b"],x:"Оба 7-местные 2.0 AWD. GS8 больше по длине и базе (~2920 мм)."},
+      {id:"t9t2",cat:"rival",type:"single",p:"Jetour T2 относительно Tiggo 9?",o:[["a","T2 — седан, клиренс 144 мм, старт от 2 865 000 ₽"],["b","5-местный кроссовер, старт от 3 699 000 ₽"],["c","T2 всегда длиннее 5,1 м и строго 7 мест"],["d","Оба рамные с понижайкой, старт от 4 349 990 ₽"]],c:["b"],x:"Официальный сайт JETOUR: T2 от 3 699 000 ₽. 5 мест против 7 у Tiggo 9."},
+      {id:"t9j8",cat:"rival",type:"single",p:"Комплектации и привод Jaecoo J8?",o:[["a","Актив / Прайм / Ультра, все 1.5T 2WD"],["b","Комфорт / Престиж / Престиж+, все 2.0T AWD"],["c","Комфорт МКПП и Техно+ 4WD, без средней ступени"],["d","Одна версия Comfort без выбора привода"]],c:["b"],x:"4820 × 1930 × 1710 мм, база 2820, клиренс 210 мм, багажник 717–2021 л; 2.0T 249 л.с. 7DCT AWD, 5 мест. Прайс: Комфорт с учётом выгод от 3 894 000 ₽ (2024 г.п.) / от 4 130 000 ₽ (2026 г.п.)."},
+      {id:"t9k50",cat:"rival",type:"single",p:"Volga K50 относительно Tiggo 9?",o:[["a","K50 длиннее 5 м и строго с тремя рядами"],["b","K50: 4770 мм, 5 мест, 2.0 238 л.с. 8AT AWD"],["c","K50 — седан, клиренс 144 мм, 1.6T 150 DCT7"],["d","K50 всегда 1.5 DCT6 2WD, без полного привода"]],c:["b"],x:"K50: 4770 × 1895 × 1689 мм, база 2845, обычно 5 мест, 2.0 238, 8AT, полный привод."},
+      {id:"t9s1",cat:"safety",type:"single",p:"Что из этого верно про безопасность Tiggo 9?",o:[["a","Рама, понижайка и блокировки мостов"],["b","Полный привод, 7 мест, богатый ADAS в Ультра"],["c","Только 2 подушки и без ESP"],["d","Нет помощи при спуске и стабилизации"]],c:["b"],x:"Это кроссовер, не Tank. Полный ADAS не зачитывать на каждую машину — смотреть Ультра."},
+      {id:"t9s2",cat:"safety",type:"single",p:"Понижайка Tiggo 9?",o:[["a","Да, как у Tank"],["b","Нет, кроссовер с муфтой"],["c","Да, в Прайм"],["d","Да, если дописать в договор"]],c:["b"],x:"Не путать классы."},
+      {id:"t9s3",cat:"safety",type:"single",p:"Третий ряд и дети?",o:[["a","Ряда нет"],["b","Есть, для детей и коротких поездок; ISOFIX по карточке"],["c","Только взрослые надолго"],["d","Кресла запрещены"]],c:["b"],x:"Не обещать минивэн."},
+      {id:"t9s4",cat:"safety",type:"single",p:"Расширенный ADAS (ACC, удержание полосы, AEB) на Tiggo 9?",o:[["a","Есть даже без подушек"],["b","Полный набор — в Ультра, в Прайм состав короче"],["c","Запрещён в РФ"],["d","Только в версии с механикой"]],c:["b"],x:"Состав ассистентов зависит от комплектации."},
+      {id:"t9fuz",cat:"tech",type:"single",p:"Коробка Tiggo 9 FuZhen 8AT — как отвечать, что она «сырая»?",o:[["a","Согласиться и предложить робота DCT"],["b","Своя разработка Chery, уже стоит на Exeed RX; мотор и автомат настроены парой. Предложить тест-драйв"],["c","Это лицензия ZF, без доработок Chery"],["d","Коробки нет, только вариатор"]],c:["b"],x:"Аргументатор: FuZhen не «велосипед», стоит на Exeed RX 24MY. Не обещать ZF/Aisin на шильдике."},
+      {id:"t9snap",cat:"trims",type:"single",p:"Процессор мультимедиа Tiggo 9?",o:[["a","Устаревший 4-ядерный без запаса"],["b","8-ядерный Qualcomm Snapdragon 8155"],["c","Только Яндекс.Станция в бардачке"],["d","Нет процессора, всё через телефон"]],c:["b"],x:"8155 — ответ на «заглючит в мороз». Холодный старт и свайпы меню быстрого доступа."},
+      {id:"t97m",cat:"tech",type:"single",p:"Сколько режимов полного привода у Tiggo 9?",o:[["a","Только 2WD"],["b","7 режимов, и полный привод во всех комплектациях"],["c","4 режима и только в Ультра"],["d","Понижайка 2H/4H/4L"]],c:["b"],x:"Интеллектуальный AWD с 7 режимами — во всей линейке. Не Tank."},
+      {id:"t9spk",cat:"trims",type:"single",p:"Аудиосистема Tiggo 9 vs Monjaro?",o:[["a","Одинаково 8 динамиков"],["b","Tiggo 9 — 14 динамиков, Monjaro — 10"],["c","У Tiggo 9 нет акустики"],["d","Только 2 пищалки в Прайм"]],c:["b"],x:"14 vs 10. Плюс натуральная кожа и шпон против экокожи/алькантары Monjaro."},
+      {id:"t9hud",cat:"trims",type:"single",p:"Экраны Tiggo 9?",o:[["a","Один 8″"],["b","10,3″ щиток + 15,6″ медиа и проекционный HUD"],["c","Только 24,6″ как у Monjaro"],["d","Нет экранов, только стрелки"]],c:["b"],x:"Два экрана высокой чёткости и HUD. У Monjaro щиток 12,3 и медиа 24,6 — не путать, не обещать 24,6."},
+      {id:"t9tbox",cat:"trims",type:"single",p:"Телематика Tiggo 9: что ставить в ДЦ?",o:[["a","Отдельный блок за доплату, без него не работает"],["b","Уже в T-Box, бесплатное приложение, первые 3 года бесплатно"],["c","Только Wi-Fi с телефона клиента"],["d","Нужна SIM клиента на своё имя"]],c:["b"],x:"T-Box с SIM-чипом МТС (контракт на АО Чери Автомобили Рус), лимит 5 Гб/мес в первый год. Яндекс и VK уже в машине."},
+      {id:"t9unik",cat:"rival",type:"single",p:"Tiggo 9 против Changan Uni-K?",o:[["a","Uni-K семиместный, Tiggo 9 — только 5"],["b","Tiggo 9: 7 мест, 249 сил vs 226, клиренс 200 vs 190, 14 динамиков vs 12"],["c","Габариты один в один, разницы нет"],["d","Uni-K всегда дешевле и с 8AT FuZhen"]],c:["b"],x:"Uni-K длиннее и с большим щитком 22,95″. У Tiggo 9 — третий ряд, мощность и клиренс."},
+      {id:"t9obj",cat:"safety",type:"single",p:"ISOFIX на переднем кресле Tiggo 9?",o:[["a","Есть в любой версии"],["b","Нет: дети — второй ряд; спереди люлька спиной вперёд на ремне при отключённой подушке"],["c","Только в Ультра за доплату"],["d","Запрещено возить детей вообще"]],c:["b"],x:"Аргументатор: ISOFIX спереди нет. Передняя пассажирская подушка отключается."},
+
+    ];
+    const A8_Q = [
+      {id:"a8what",cat:"tech",type:"single",p:"Arrizo 8 — это?",o:[["a","7-местный кроссовер"],["b","Бизнес-седан"],["c","Пикап"],["d","Купе-кроссовер"]],c:["b"],x:"Седан D-класса."},
+      {id:"a8dim",cat:"tech",type:"single",p:"Габариты Arrizo 8?",o:[["a","4506 × 1828 × 1701"],["b","4757 × 1832 × 1469"],["c","4810 × 1925 × 1741"],["d","4725 × 1860 × 1705"]],c:["b"],x:"4757 × 1832 × 1469 мм."},
+      {id:"a8base",cat:"tech",type:"single",p:"База Arrizo 8?",o:[["a","2650"],["b","2670"],["c","2770"],["d","2800"]],c:["c"],x:"2770 мм."},
+      {id:"a8cl",cat:"tech",type:"single",p:"Клиренс Arrizo 8?",o:[["a","203 мм"],["b","196 мм"],["c","144 мм"],["d","200 мм"]],c:["c"],x:"Около 144 мм."},
+      {id:"a8tr",cat:"tech",type:"single",p:"Багажник Arrizo 8?",o:[["a","193 л"],["b","~535 л"],["c","1500 л"],["d","200 л"]],c:["b"],x:"Около 535 л."},
+      {id:"a8eng",cat:"tech",type:"single",p:"Мотор РФ-линейки Arrizo 8?",o:[["a","2.0 249 4WD"],["b","1.6T 150 / 275 Н·м / DCT7 / 2WD"],["c","3.0 атмо"],["d","Электро"]],c:["b"],x:"150 сил, робот, передний привод."},
+      {id:"a8dyn",cat:"tech",type:"single",p:"Разгон Arrizo 8?",o:[["a","8,0 с"],["b","8,4 с"],["c","9,8 с"],["d","12,5 с"]],c:["c"],x:"9,8 с, до 190 км/ч."},
+      {id:"a8fuel",cat:"tech",type:"single",p:"Топливо и смешанный расход?",o:[["a","АИ-98 / 11 л"],["b","АИ-92 / около 7,5 л"],["c","Дизель"],["d","Газ"]],c:["b"],x:"АИ-92, порядка 7,5 л."},
+      {id:"a8awd",cat:"tech",type:"single",p:"Привод Arrizo 8?",o:[["a","Полный"],["b","Только передний"],["c","Задний"],["d","Раздатка"]],c:["b"],x:"Только 2WD."},
+      {id:"a8tank",cat:"tech",type:"single",p:"Бак Arrizo 8?",o:[["a","45 л"],["b","55 л"],["c","80 л"],["d","30 л"]],c:["b"],x:"Около 55 л."},
+      {id:"a8line",cat:"trims",type:"single",p:"Комплектации Arrizo 8?",o:[["a","Только Comfort"],["b","Актив, Прайм, Ультра Черный"],["c","Только Prime и Ultra"],["d","Одна версия"]],c:["b"],x:"Три ступени."},
+      {id:"a8act",cat:"trims",type:"multi",p:"Что типично для Актив?",o:[["a","Зимний пакет"],["b","Два экрана 10,25″"],["c","Рама"],["d","Двухзонный климат"]],c:["a","b","d"],x:"Это седан, не рама."},
+      {id:"a8prm",cat:"trims",type:"single",p:"Прайм добавляет?",o:[["a","Полный привод"],["b","Круговой обзор и богатые регулировки"],["c","Третий ряд"],["d","Клиренс 203 мм"]],c:["b"],x:"Комфорт, не геометрия кроссовера."},
+      {id:"a8ul",cat:"trims",type:"single",p:"Ультра Черный?",o:[["a","Кузов универсал"],["b","Топ с ADAS"],["c","Дизель"],["d","Только такси"]],c:["b"],x:"Ассистенты — апсейл."},
+      {id:"a8scr",cat:"trims",type:"single",p:"Экраны Arrizo 8?",o:[["a","Нет экранов"],["b","Сдвоенные, в богатых версиях крупнее"],["c","Только проекция"],["d","Один 5″"]],c:["b"],x:"Два экрана — лицо модели."},
+      {id:"a8p1",cat:"price",type:"single",p:"Цена Актив?",o:[["a","2 329 000 ₽"],["b","2 865 000 ₽"],["c","4 335 000 ₽"],["d","3 630 000 ₽"]],c:["b"],x:"2 865 000 ₽."},
+      {id:"a8p2",cat:"price",type:"single",p:"Цена Прайм?",o:[["a","2 865 000 ₽"],["b","3 060 000 ₽"],["c","3 275 000 ₽"],["d","2 479 000 ₽"]],c:["b"],x:"3 060 000 ₽."},
+      {id:"a8p3",cat:"price",type:"single",p:"Цена Ультра Черный?",o:[["a","3 060 000 ₽"],["b","3 275 000 ₽"],["c","3 885 000 ₽"],["d","2 735 000 ₽"]],c:["b"],x:"3 275 000 ₽."},
+      {id:"a8p4",cat:"price",type:"single",p:"Шаг Актив → Прайм?",o:[["a","50 000 ₽"],["b","195 000 ₽"],["c","800 000 ₽"],["d","0 ₽"]],c:["b"],x:"3 060 000 − 2 865 000."},
+      {id:"a8p5",cat:"price",type:"single",p:"Самая дорогая Arrizo 8 в линейке?",o:[["a","Актив 2 865 000 ₽"],["b","Ультра Черный 3 275 000 ₽"],["c","Прайм 3 060 000 ₽"],["d","Актив с 2.0 AWD"]],c:["b"],x:"Ультра Черный — топ седана."},
+      {id:"a8pre",cat:"rival",type:"single",p:"Габариты Geely Preface?",o:[["a","4757 × 1832 × 1469 мм, база 2770, багажник ~535 л"],["b","4825 × 1880 × 1469 мм, база 2800, клиренс 135 мм, багажник 500 л"],["c","4810 × 1925 × 1741 мм, база 2800, 7 мест, клиренс 200 мм"],["d","4506 × 1828 × 1701 мм, база 2650, клиренс 203 мм"]],c:["b"],x:"Preface: 4825 × 1880 × 1469, база 2800, клиренс 135 мм, багажник 500 л."},
+      {id:"a8pret",cat:"rival",type:"single",p:"Комплектации и цены Preface?",o:[["a","Актив и Прайм, обе 1.6T, от 2 865 000 ₽"],["b","Люкс 3 079 990 ₽ и Флагман 3 264 990 ₽"],["c","Комфорт и Техно+, старт от 2 049 000 ₽"],["d","Одна версия Comfort, 3 259 990 ₽"]],c:["b"],x:"Две версии. Рекомендованные цены дилерского прайса Geely. Обе 2.0T 7DCT 2WD."},
+      {id:"a8preeng",cat:"rival",type:"single",p:"Силовой агрегат Preface в РФ?",o:[["a","1.5T 113 л.с., механика, 2WD, АИ-92"],["b","2.0T 200 л.с., 325 Н·м, 7DCT, 2WD, АИ-95"],["c","2.0T 238 л.с., 350 Н·м, 8AT, AWD, АИ-95"],["d","1.6T 150 л.с., 275 Н·м, DCT7, 2WD, АИ-92"]],c:["b"],x:"Preface: 2.0T 200 / 325 Н·м / 7DCT / 2WD, 0–100 за 7,1 с, топливо АИ-95."},
+      {id:"a8uni",cat:"rival",type:"single",p:"Кузов и мотор Changan UNI-V?",o:[["a","Классический седан 4757 мм, 1.6T 150 DCT7"],["b","Лифтбек 4740 мм, Спорт 2.0T 235 л.с., от 3 499 900 ₽"],["c","7-местный кроссовер 4810 мм, 2.0 8AT AWD"],["d","Рамный внедорожник с понижайкой, дизель 3.0"]],c:["b"],x:"UNI-V — лифтбек 4740 × 1838 × 1430, база 2750, клиренс 152 мм, багажник 465–1110 л. Спорт 2.0T 235 / 390 Н·м от 3 499 900 ₽."},
+      {id:"a8clvs",cat:"rival",type:"single",p:"Клиренс Arrizo 8 и Preface?",o:[["a","Оба 203 мм, как у кроссоверов сегмента"],["b","Arrizo 8 ~144 мм, Preface 135 мм — оба седаны"],["c","Arrizo 8 200 мм, Preface 190 мм — оба 4WD"],["d","У Preface клиренс 220 мм, у Arrizo 8 — 176 мм"]],c:["b"],x:"Легковые седаны. UNI-V — 152 мм."},
+      {id:"a8trvs",cat:"rival",type:"single",p:"Багажник Arrizo 8 и Preface?",o:[["a","193 л у обоих в пяти местах"],["b","Arrizo 8 ~535 л, Preface 500 л"],["c","2150 л у обоих со сложенным рядом"],["d","У Preface 1110 л, как у лифтбека UNI-V"]],c:["b"],x:"Седаны: Arrizo 8 ~535 л, Preface 500 л. У UNI-V лифтбек 465 / 1110 л."},
+      {id:"a8fuelvs",cat:"rival",type:"single",p:"Топливо Arrizo 8 и Preface?",o:[["a","Оба только АИ-98, без официального АИ-92"],["b","Arrizo 8 — АИ-92, Preface — АИ-95"],["c","Оба дизель, без бензиновых версий в РФ"],["d","Разницы нет: оба электро, зарядка от 220 В"]],c:["b"],x:"Arrizo 8 официально АИ-92. Preface по карточке Geely — не ниже АИ-95."},
+      {id:"a8linevs",cat:"rival",type:"single",p:"Линейка Arrizo 8?",o:[["a","Одна Comfort, 2 049 000 ₽, механика 1.5"],["b","Актив / Прайм / Ультра Черный, все 1.6T 2WD"],["c","Прайм и Ультра с 2.0 AWD, без версии Актив"],["d","Две версии с механикой 1.5, без робота"]],c:["b"],x:"Три ступени, один силовой агрегат 1.6T 150 DCT7 2WD. Актив 2 865 000 ₽, Прайм 3 060 000 ₽, Ультра Черный 3 275 000 ₽."},
+      {id:"a8s1",cat:"safety",type:"single",p:"Клиренс в разговоре?",o:[["a","203 мм"],["b","~144 мм, это седан"],["c","220 мм"],["d","Как у Tank"]],c:["b"],x:"Не обещать кроссовер."},
+      {id:"a8s2",cat:"safety",type:"single",p:"Подушки Arrizo 8?",o:[["a","Всегда ровно 2"],["b","База — фронтальные и боковые; шторки типичны для топа"],["c","Нет подушек"],["d","8 шторок в Актив"]],c:["b"],x:"Точное число — карточка."},
+      {id:"a8s3",cat:"safety",type:"single",p:"ADAS?",o:[["a","Автопилот в каждом Актив"],["b","Полный набор — аргумент Ультра Черный"],["c","Запрещён в РФ"],["d","Только на механике"]],c:["b"],x:"Полный набор ассистентов — в Ультра Черный."},
+      {id:"a8s4",cat:"safety",type:"single",p:"ISOFIX?",o:[["a","Нет"],["b","На втором ряду"],["c","Третий ряд"],["d","В багажнике"]],c:["b"],x:"Два ряда."},
+      {id:"a8hp",cat:"tech",type:"single",p:"Мощность Arrizo 8 в актуальной РФ-линейке?",o:[["a","186 л.с., как в аргументаторе Ultimate 2024"],["b","1.6T 150 л.с., 275 Н·м, DCT7, 2WD"],["c","2.0 249 AWD"],["d","113 л.с. атмо + механика"]],c:["b"],x:"Прайс и карточка РФ: 150 сил. 186 л.с. — цифра старого Ultimate, клиенту не обещать."},
+      {id:"a8arg",cat:"trims",type:"single",p:"Клиент видел аргументатор 2024 с 10 подушками и 2×12,3″. Что говорить?",o:[["a","Да, в любом Актив ровно так"],["b","Это описание топа 2024. Состав смотрим по карточке актуальной машины: экраны, подушки и ADAS зависят от версии"],["c","В РФ подушек нет вообще"],["d","Всегда 10 подушек и 205 км/ч, даже в Актив"]],c:["b"],x:"Аргументатор 2024 — Ultimate. РФ-линейка: Актив / Прайм / Ультра Черный, 150 сил. Не зачитывать 10 подушек и 12 динамиков на каждую машину."},
+      {id:"a8dclass",cat:"rival",type:"single",p:"Как ставить Arrizo 8 против UNI-V?",o:[["a","Оба рамные кроссоверы 200 мм"],["b","Arrizo 8 — классический седан D-класса; UNI-V — лифтбек. У нас 2-зонный климат, полный зимний пакет, CarPlay"],["c","UNI-V всегда 7 мест, Arrizo 8 — пикап"],["d","Разницы нет, это одна модель"]],c:["b"],x:"Седан vs лифтбек. UNI-V быстрее и с огромным щитком, но климат однозонный и зимний пакет короче."},
+      {id:"a8ncap",cat:"safety",type:"single",p:"Брендовый аргумент безопасности Chery?",o:[["a","Автопилот 4 уровня в каждой Arrizo 8"],["b","Конструкция по нормам 5★ C-NCAP, ADAS в топе, лаборатории краш-тестов"],["c","Рама и понижайка"],["d","Подушек нет, только ремни"]],c:["b"],x:"5★ C-NCAP — аргумент марки. Конкретный набор подушек и ассистентов — только из карточки."},
+      {id:"a8aqs",cat:"trims",type:"multi",p:"Какие «фишки» комфорта аргументатор даёт для топа Arrizo 8? Отметьте все верные.",o:[["a","Ионизатор / контроль воздуха AQS и ароматизатор"],["b","Авиационные подголовники, вентиляция и память сиденья"],["c","Понижайка и блокировка заднего моста"],["d","Двойное остекление и улучшенная шумоизоляция"]],c:["a","b","d"],x:"Комфорт седана. Состав — по комплектации. Рамы нет."},
+      {id:"a8shine",cat:"rival",type:"single",p:"Arrizo 8 и DFM Shine Max — один класс?",o:[["a","Shine Max — 7-местный кроссовер, Arrizo 8 — рамник"],["b","Оба седаны D-класса; у Arrizo 8 сильнее зимний пакет, CarPlay и 2-зонный климат"],["c","Shine Max всегда 1.5 механика 2WD без робота"],["d","Это одна платформа Chery"]],c:["b"],x:"Аргументатор 2024: Shine Max длиннее и с большим моментом, но зимний пакет слабее. Для РФ сверять актуальные карточки."},
+      {id:"a8winter",cat:"trims",type:"single",p:"Зимний пакет Arrizo 8 как аргумент?",o:[["a","Только зеркала, как у Shine Max"],["b","Обогрев сидений, руля, стёкол, форсунок и зеркал — полный пакет, смотреть версию"],["c","Зимнего пакета нет ни в одной версии"],["d","Только в кредит как опция банка"]],c:["b"],x:"Полный зимний пакет — сильный ответ UNI-V и Shine Max. Точный состав — карточка."},
+
+    ];
+
+    const MODELS = {
+      t4l: {id:"t4l", brand:"TENET", name:"T4L", rivals:"Jolion, X50+, CS35 Plus, J6, M6, Omoda C5", examN:50, img:"cars/t4l.jpg"},
+      t7:  {id:"t7", brand:"TENET", name:"T7", rivals:"X70, Uni-S, Jolion, Cityray, H3, Dashing", examN:42, img:"cars/t7.jpg"},
+      t8:  {id:"t8", brand:"TENET", name:"T8", rivals:"Atlas, F7, H7, X70+, CS75 Pro", examN:40, img:"cars/t8.jpg"},
+      t9:  {id:"t9", brand:"CHERY", name:"Tiggo 9", rivals:"Monjaro, J8, Uni-K, GS8, Tank 300, T2, K50", examN:40, img:"cars/t9.jpg"},
+      a8:  {id:"a8", brand:"CHERY", name:"Arrizo 8", rivals:"Preface, UNI-V", examN:39, img:"cars/a8.jpg"}
+    };
+    const PRICE_ROWS = [
+      {model:"t4l", brand:"TENET", name:"T4L Актив 2WD", motor:"1.5 147 DCT6", price:2329000},
+      {model:"t4l", brand:"TENET", name:"T4L Прайм 2WD", motor:"1.5 147 DCT6", price:2479000},
+      {model:"t7", brand:"TENET", name:"T7 Актив 2WD", motor:"1.6 150 DCT7", price:2785000},
+      {model:"t7", brand:"TENET", name:"T7 Прайм 2WD", motor:"1.6 150 DCT7", price:2985000},
+      {model:"t7", brand:"TENET", name:"T7 Актив 4WD", motor:"1.6 150 DCT7", price:2990000},
+      {model:"t7", brand:"TENET", name:"T7 Прайм 4WD", motor:"1.6 150 DCT7", price:3190000},
+      {model:"t8", brand:"TENET", name:"T8 Актив 5 мест 2WD", motor:"1.6 186 DCT", price:3449000},
+      {model:"t8", brand:"TENET", name:"T8 Прайм 5 мест 2WD", motor:"1.6 186 DCT", price:3629000},
+      {model:"t8", brand:"TENET", name:"T8 Ультра 5 мест 2WD", motor:"1.6 186 DCT", price:3799000},
+      {model:"t8", brand:"TENET", name:"T8 Прайм 7 мест 4WD", motor:"2.0 197 DCT", price:4099000},
+      {model:"t8", brand:"TENET", name:"T8 Ультра 7 мест 4WD", motor:"2.0 197 DCT", price:4299000},
+      {model:"t9", brand:"CHERY", name:"Tiggo 9 Прайм", motor:"2.0 197 4WD", price:4335000},
+      {model:"t9", brand:"CHERY", name:"Tiggo 9 Ультра", motor:"2.0 197 4WD", price:4624000},
+      {model:"t9", brand:"CHERY", name:"Tiggo 9 Ультра Чёрный", motor:"2.0 197 4WD", price:4724000},
+      {model:"a8", brand:"CHERY", name:"Arrizo 8 Актив", motor:"1.6 150 DCT7", price:2865000},
+      {model:"a8", brand:"CHERY", name:"Arrizo 8 Прайм", motor:"1.6 150 DCT7", price:3060000},
+      {model:"a8", brand:"CHERY", name:"Arrizo 8 Ультра Черный", motor:"1.6 150 DCT7", price:3275000}
+    ];
+    const T7_DEAL = [
+      {name:"T7 Актив 2WD", rec:2785000, max:2605000, trade:180000, credit:0},
+      {name:"T7 Прайм 2WD", rec:2985000, max:2735000, trade:200000, credit:50000},
+      {name:"T7 Актив 4WD", rec:2990000, max:2860000, trade:130000, credit:0},
+      {name:"T7 Прайм 4WD", rec:3190000, max:3040000, trade:150000, credit:0}
+    ];
+    const STOCK_META = {updated:"09.09.2026", dealer:"ООО «ЭКСПЕРТ АВТО САМАРА»"};
+    const STOCK = [{"vin": "EDELB31B1TE103208", "model": "t4l", "name": "T4L", "trim": "Актив", "color": "Белый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDELB31B2TE104643", "model": "t4l", "name": "T4L", "trim": "Актив", "color": "Белый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": true, "salon": "", "prod": "", "rrc": null}, {"vin": "EDELB31B2TE106361", "model": "t4l", "name": "T4L", "trim": "Актив", "color": "Белый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": true, "salon": "", "prod": "", "rrc": null}, {"vin": "EDELB31B4TE104739", "model": "t4l", "name": "T4L", "trim": "Актив", "color": "Белый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": true, "salon": "", "prod": "", "rrc": null}, {"vin": "EDELB31B9TE073827", "model": "t4l", "name": "T4L", "trim": "Актив", "color": "Белый", "status": "in", "note": "В салоне · с 25.06.2026", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDELB31B0TE106553", "model": "t4l", "name": "T4L", "trim": "Актив", "color": "Светло-серый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": true, "salon": "", "prod": "", "rrc": null}, {"vin": "EDELB31B1TE106724", "model": "t4l", "name": "T4L", "trim": "Актив", "color": "Светло-серый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDELB31B3TE099534", "model": "t4l", "name": "T4L", "trim": "Актив", "color": "Светло-серый", "status": "in", "note": "В салоне · с 22.08.2026", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDELB31B3TE106711", "model": "t4l", "name": "T4L", "trim": "Актив", "color": "Светло-серый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": true, "salon": "", "prod": "", "rrc": null}, {"vin": "EDELB31B5TE106502", "model": "t4l", "name": "T4L", "trim": "Актив", "color": "Светло-серый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": true, "salon": "", "prod": "", "rrc": null}, {"vin": "EDELB31B6TE106766", "model": "t4l", "name": "T4L", "trim": "Актив", "color": "Светло-серый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": true, "salon": "", "prod": "", "rrc": null}, {"vin": "EDELB31B7TE099729", "model": "t4l", "name": "T4L", "trim": "Актив", "color": "Светло-серый", "status": "in", "note": "В салоне · с 22.08.2026", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDELB31B5TE106449", "model": "t4l", "name": "T4L", "trim": "Актив", "color": "Чёрный", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": true, "salon": "", "prod": "", "rrc": null}, {"vin": "EDELB31B9TE103098", "model": "t4l", "name": "T4L", "trim": "Актив", "color": "Чёрный", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDELB31BXTE106401", "model": "t4l", "name": "T4L", "trim": "Актив", "color": "Чёрный", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": true, "salon": "", "prod": "", "rrc": null}, {"vin": "EDELB31B3TE093989", "model": "t4l", "name": "T4L", "trim": "Прайм", "color": "Белый", "status": "in", "note": "В салоне · с 06.08.2026", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDELB31B4TE106023", "model": "t4l", "name": "T4L", "trim": "Прайм", "color": "Белый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": true, "salon": "", "prod": "", "rrc": null}, {"vin": "EDELB31B6TE095588", "model": "t4l", "name": "T4L", "trim": "Прайм", "color": "Белый", "status": "in", "note": "В салоне · с 10.08.2026", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDELB31B7TE106047", "model": "t4l", "name": "T4L", "trim": "Прайм", "color": "Белый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": true, "salon": "", "prod": "", "rrc": null}, {"vin": "EDELB31B9TE105899", "model": "t4l", "name": "T4L", "trim": "Прайм", "color": "Белый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": true, "salon": "", "prod": "", "rrc": null}, {"vin": "EDELB31B9TE105966", "model": "t4l", "name": "T4L", "trim": "Прайм", "color": "Белый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": true, "salon": "", "prod": "", "rrc": null}, {"vin": "EDELB31BXTE095545", "model": "t4l", "name": "T4L", "trim": "Прайм", "color": "Белый", "status": "in", "note": "В салоне · с 06.08.2026", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDELB31BXTE104549", "model": "t4l", "name": "T4L", "trim": "Прайм", "color": "Белый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": true, "salon": "", "prod": "", "rrc": null}, {"vin": "EDEEB31B8TE003261", "model": "t4l", "name": "T4L", "trim": "Прайм", "color": "Светло-серый", "status": "in", "note": "В салоне · с 06.08.2026", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDELB31B0TE096879", "model": "t4l", "name": "T4L", "trim": "Прайм", "color": "Чёрный", "status": "in", "note": "В салоне · с 15.08.2026", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDELB31B4TE096853", "model": "t4l", "name": "T4L", "trim": "Прайм", "color": "Чёрный", "status": "in", "note": "В салоне · с 15.08.2026", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDELB31B7TE105710", "model": "t4l", "name": "T4L", "trim": "Прайм", "color": "Чёрный", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": true, "salon": "", "prod": "", "rrc": null}, {"vin": "EDELB31B9TE105739", "model": "t4l", "name": "T4L", "trim": "Прайм", "color": "Чёрный", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": true, "salon": "", "prod": "", "rrc": null}, {"vin": "EDEFB32B2TE105383", "model": "t7", "name": "T7", "trim": "Актив", "color": "Белый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": false, "salon": "", "prod": "26.08.2026", "rrc": null}, {"vin": "EDEFB32B4TE105370", "model": "t7", "name": "T7", "trim": "Актив", "color": "Белый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": false, "salon": "", "prod": "25.08.2026", "rrc": null}, {"vin": "EDEFB32B8TE105355", "model": "t7", "name": "T7", "trim": "Актив", "color": "Белый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": false, "salon": "", "prod": "25.08.2026", "rrc": null}, {"vin": "EDEFB32BXTE100707", "model": "t7", "name": "T7", "trim": "Актив", "color": "Белый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": false, "salon": "", "prod": "25.08.2026", "rrc": null}, {"vin": "EDEFB32B2TE105500", "model": "t7", "name": "T7", "trim": "Актив", "color": "Чёрный", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": false, "salon": "", "prod": "25.08.2026", "rrc": null}, {"vin": "EDXFB32B2TE041658", "model": "t7", "name": "T7", "trim": "Актив", "color": "Чёрный", "status": "in", "note": "В салоне · с 08.05.2026", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDXFB32B4TE041659", "model": "t7", "name": "T7", "trim": "Актив", "color": "Чёрный", "status": "in", "note": "В салоне · с 08.05.2026", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDXFB32B7TE062327", "model": "t7", "name": "T7", "trim": "Актив", "color": "Чёрный", "status": "in", "note": "В салоне · с 04.06.2026", "invoice": false, "salon": "", "prod": "26.05.2026", "rrc": null}, {"vin": "EDXFD32B0TE033634", "model": "t7", "name": "T7", "trim": "Актив 4WD", "color": "Белый", "status": "in", "note": "В салоне · с 13.07.2026", "invoice": false, "salon": "", "prod": "30.03.2026", "rrc": null}, {"vin": "EDXFD32B2TE042710", "model": "t7", "name": "T7", "trim": "Актив 4WD", "color": "Белый", "status": "in", "note": "В салоне · с 10.08.2026", "invoice": false, "salon": "", "prod": "16.04.2026", "rrc": null}, {"vin": "EDXFD32B3TE070113", "model": "t7", "name": "T7", "trim": "Актив 4WD", "color": "Чёрный", "status": "in", "note": "В салоне · с 10.08.2026", "invoice": false, "salon": "", "prod": "11.06.2026", "rrc": null}, {"vin": "EDXFD32B4TE070279", "model": "t7", "name": "T7", "trim": "Актив 4WD", "color": "Чёрный", "status": "in", "note": "В салоне · с 13.08.2026", "invoice": false, "salon": "", "prod": "10.06.2026", "rrc": null}, {"vin": "EDXFD32B7TE039754", "model": "t7", "name": "T7", "trim": "Актив 4WD", "color": "Чёрный", "status": "in", "note": "В салоне · с 13.05.2026", "invoice": false, "salon": "", "prod": "10.04.2026", "rrc": null}, {"vin": "EDEFB32B0TE106984", "model": "t7", "name": "T7", "trim": "Прайм", "color": "Белый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": true, "salon": "", "prod": "27.08.2026", "rrc": null}, {"vin": "EDEFB32B1TE106895", "model": "t7", "name": "T7", "trim": "Прайм", "color": "Белый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": true, "salon": "", "prod": "27.08.2026", "rrc": null}, {"vin": "EDEFB32B1TE106959", "model": "t7", "name": "T7", "trim": "Прайм", "color": "Белый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": true, "salon": "", "prod": "27.08.2026", "rrc": null}, {"vin": "EDEFB32B2TE106842", "model": "t7", "name": "T7", "trim": "Прайм", "color": "Белый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": true, "salon": "", "prod": "27.08.2026", "rrc": null}, {"vin": "EDEFB32B2TE106999", "model": "t7", "name": "T7", "trim": "Прайм", "color": "Белый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": true, "salon": "", "prod": "27.08.2026", "rrc": null}, {"vin": "EDEFB32B3TE099318", "model": "t7", "name": "T7", "trim": "Прайм", "color": "Белый", "status": "in", "note": "В салоне · с 25.08.2026", "invoice": false, "salon": "Чёрный/коричневый", "prod": "15.08.2026", "rrc": null}, {"vin": "EDEFB32B8TE099203", "model": "t7", "name": "T7", "trim": "Прайм", "color": "Белый", "status": "in", "note": "В салоне · с 22.08.2026", "invoice": false, "salon": "Чёрный/коричневый", "prod": "15.08.2026", "rrc": null}, {"vin": "EDXFB32B1TE087336", "model": "t7", "name": "T7", "trim": "Прайм", "color": "Светло-серый", "status": "in", "note": "В салоне · с 07.09.2026", "invoice": false, "salon": "Чёрный/коричневый", "prod": "", "rrc": null}, {"vin": "EDXFB32B3TE091114", "model": "t7", "name": "T7", "trim": "Прайм", "color": "Чёрный", "status": "in", "note": "В салоне · с 07.09.2026", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDEFD32B1TE101190", "model": "t7", "name": "T7", "trim": "Прайм 4WD", "color": "Белый", "status": "in", "note": "В салоне · с 23.08.2026", "invoice": false, "salon": "Чёрный/коричневый", "prod": "18.08.2026", "rrc": null}, {"vin": "EDEFD32B5TE102522", "model": "t7", "name": "T7", "trim": "Прайм 4WD", "color": "Белый", "status": "in", "note": "В салоне · с 23.08.2026", "invoice": false, "salon": "", "prod": "20.08.2026", "rrc": null}, {"vin": "EDEFD32B5TE102570", "model": "t7", "name": "T7", "trim": "Прайм 4WD", "color": "Белый", "status": "in", "note": "В салоне · с 23.08.2026", "invoice": false, "salon": "", "prod": "20.08.2026", "rrc": null}, {"vin": "EDEFD32B5TE102360", "model": "t7", "name": "T7", "trim": "Прайм 4WD", "color": "Светло-серый", "status": "in", "note": "В салоне · с 23.08.2026", "invoice": false, "salon": "", "prod": "20.08.2026", "rrc": null}, {"vin": "EDEFD32B5TE102228", "model": "t7", "name": "T7", "trim": "Прайм 4WD", "color": "Чёрный", "status": "in", "note": "В салоне · с 23.08.2026", "invoice": false, "salon": "", "prod": "20.08.2026", "rrc": null}, {"vin": "EDXFD32B3TE092581", "model": "t7", "name": "T7", "trim": "Прайм 4WD", "color": "Чёрный", "status": "in", "note": "В салоне · с 25.08.2026", "invoice": false, "salon": "", "prod": "17.08.2026", "rrc": null}, {"vin": "EDXFD32B4TE092587", "model": "t7", "name": "T7", "trim": "Прайм 4WD", "color": "Чёрный", "status": "in", "note": "В салоне · с 25.08.2026", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDXFD32B4TE092590", "model": "t7", "name": "T7", "trim": "Прайм 4WD", "color": "Чёрный", "status": "in", "note": "В салоне · с 25.08.2026", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDEFB32B2TE105108", "model": "t7", "name": "T7", "trim": "Актив", "color": "Белый", "status": "way", "note": "Калуга · склад дистрибьютора", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDEFB32B3TE112410", "model": "t7", "name": "T7", "trim": "Актив", "color": "Белый", "status": "way", "note": "Калуга · склад дистрибьютора", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDEFB32B5TE109881", "model": "t7", "name": "T7", "trim": "Актив", "color": "Белый", "status": "way", "note": "Едет к дилеру · Отгружен", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDEFB32B5TE110013", "model": "t7", "name": "T7", "trim": "Актив", "color": "Голубой", "status": "way", "note": "Калуга · Подтвержден к отгрузке", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDEFB32B2TE107327", "model": "t7", "name": "T7", "trim": "Актив", "color": "Чёрный", "status": "way", "note": "Калуга · склад дистрибьютора", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDEFB32BXTE107432", "model": "t7", "name": "T7", "trim": "Актив", "color": "Чёрный", "status": "way", "note": "Калуга · склад дистрибьютора", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDXGB32B3TE076049", "model": "t8", "name": "T8", "trim": "Актив 5 мест 2WD", "color": "Белый", "status": "in", "note": "В салоне · с 13.07.2026", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDXGD34B8TE095347", "model": "t8", "name": "T8", "trim": "Прайм 7 мест 4WD", "color": "Белый", "status": "in", "note": "В салоне · с 15.08.2026", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDXGD34B1TE022143", "model": "t8", "name": "T8", "trim": "Прайм 7 мест 4WD", "color": "Светло-серый", "status": "in", "note": "В салоне · с 29.06.2026", "invoice": true, "salon": "", "prod": "", "rrc": null}, {"vin": "EDXGD34B5TE082040", "model": "t8", "name": "T8", "trim": "Прайм 7 мест 4WD", "color": "Светло-серый", "status": "in", "note": "В салоне · с 29.07.2026", "invoice": true, "salon": "", "prod": "", "rrc": null}, {"vin": "EDXGD34BXTE081949", "model": "t8", "name": "T8", "trim": "Прайм 7 мест 4WD", "color": "Светло-серый", "status": "in", "note": "В салоне · с 29.07.2026", "invoice": true, "salon": "", "prod": "", "rrc": null}, {"vin": "EDXGD34B0TE082608", "model": "t8", "name": "T8", "trim": "Прайм 7 мест 4WD", "color": "Тёмно-зелёный", "status": "in", "note": "В салоне · с 29.07.2026", "invoice": true, "salon": "", "prod": "", "rrc": null}, {"vin": "EDXGD34B8TE082601", "model": "t8", "name": "T8", "trim": "Прайм 7 мест 4WD", "color": "Тёмно-зелёный", "status": "in", "note": "В салоне · с 29.07.2026", "invoice": true, "salon": "", "prod": "", "rrc": null}, {"vin": "EDXGD34B9TE082641", "model": "t8", "name": "T8", "trim": "Прайм 7 мест 4WD", "color": "Тёмно-зелёный", "status": "in", "note": "В салоне · с 27.07.2026", "invoice": true, "salon": "", "prod": "", "rrc": null}, {"vin": "EDXGD34B5TE095631", "model": "t8", "name": "T8", "trim": "Прайм 7 мест 4WD", "color": "Чёрный", "status": "in", "note": "В салоне · с 25.08.2026", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDXGD34B6TE031162", "model": "t8", "name": "T8", "trim": "Прайм 7 мест 4WD", "color": "Чёрный", "status": "in", "note": "В салоне · с 27.06.2026", "invoice": true, "salon": "", "prod": "", "rrc": null}, {"vin": "EDXGD34B8TE095641", "model": "t8", "name": "T8", "trim": "Прайм 7 мест 4WD", "color": "Чёрный", "status": "in", "note": "В салоне · с 06.09.2026", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDXGD34B3TE031815", "model": "t8", "name": "T8", "trim": "Ультра 7 мест 4WD", "color": "Белый", "status": "in", "note": "В салоне · с 12.06.2026", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDXGD34B2TE057953", "model": "t8", "name": "T8", "trim": "Ультра 7 мест 4WD", "color": "Тёмно-зелёный", "status": "in", "note": "В салоне · с 25.07.2026", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDXGB32B0TE110108", "model": "t8", "name": "T8", "trim": "Прайм 5 мест 2WD", "color": "Белый", "status": "way", "note": "Калуга · Подтвержден к отгрузке", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDXGD34B2TE109064", "model": "t8", "name": "T8", "trim": "Прайм 7 мест 4WD", "color": "Тёмно-зелёный", "status": "way", "note": "Калуга · Подтвержден к отгрузке", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDXGD34B4TE050793", "model": "t8", "name": "T8", "trim": "Ультра 7 мест 4WD", "color": "Светло-серый", "status": "way", "note": "Домодедово · Готов к отгрузке", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDXGD34B7TE034443", "model": "t8", "name": "T8", "trim": "Ультра 7 мест 4WD", "color": "Чёрный", "status": "way", "note": "Домодедово · Готов к отгрузке", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDEDD24BXSG010341", "model": "t9", "name": "Tiggo 9", "trim": "Ультра 4WD", "color": "Белый", "status": "in", "note": "В салоне · с 15.08.2026", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDEDD24B2SG003755", "model": "t9", "name": "Tiggo 9", "trim": "Ультра 4WD", "color": "Светло-серый", "status": "in", "note": "В салоне · с 25.04.2026", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDEDD24B3SG003926", "model": "t9", "name": "Tiggo 9", "trim": "Ультра 4WD", "color": "Серый матовый", "status": "in", "note": "В салоне · с 25.04.2026", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "LVVDC21B0SD594112", "model": "a8", "name": "Arrizo 8", "trim": "Прайм", "color": "Белый", "status": "in", "note": "В салоне · с 04.05.2026", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "LVVDC21B7SD594110", "model": "a8", "name": "Arrizo 8", "trim": "Прайм", "color": "Белый", "status": "in", "note": "В салоне · с 26.06.2026", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "LVVDC21B2SDJ34062", "model": "a8", "name": "Arrizo 8", "trim": "Прайм", "color": "Чёрный", "status": "in", "note": "В салоне · с 23.06.2026", "invoice": false, "salon": "", "prod": "", "rrc": null}];
+    const ST_LABEL = {in:"В наличии", hold:"Бронь", way:"В пути"};
+    const QBY = {t4l:null, t7:T7_Q, t8:T8_Q, t9:T9_Q, a8:A8_Q};
+
+    QBY.t4l = T4L_Q;
+    const KEY = "tenet-academy-v3";
+    const state = load();
+    state.seenStudy = state.seenStudy || {};
+    state.seenTrain = state.seenTrain || {};
+    state.runs = state.runs || {};
+    let view = (state.surname && state.authed) ? (state.section || "hub") : "login";
+    let rateModel = state.model || "t4l";
+    let model = state.model || "t4l";
+    let paper = [], idx = 0, selected = [], locked = false, done = false, closing = false;
+    let correct = 0, missed = [], byCat = {}, answers = [];
+    let elapsed = 0, left = QSEC, mode = "exam", examSession = 1, tick = null, studyTab = "tech", pinErr = "";
+    let remoteLocks = [];
+    let syncOk = false;
+    let qDeadline = 0;
+    let stockFilter = "all";
+    let stockStatus = "all";
+
+    function load(){
+      try { return Object.assign({surname:"",display:"",model:"t4l",history:[],locks:{},unlock:{},seenStudy:{},seenTrain:{},runs:{}}, JSON.parse(localStorage.getItem(KEY)||"{}")); }
+      catch { return {surname:"",display:"",model:"t4l",history:[],locks:{},unlock:{},seenStudy:{},seenTrain:{},runs:{}}; }
+    }
+    function save(){ localStorage.setItem(KEY, JSON.stringify(state)); }
+    function norm(s){ return (s||"").trim().replace(/\s+/g," ").replace(/ё/g,"е").replace(/Ё/g,"е").toLowerCase(); }
+    function pinDigits(s){ return String(s||"").replace(/\D/g,""); }
+    function pinEq(a,b){
+      if(!a || !b) return false;
+      const x=pinDigits(a), y=pinDigits(b);
+      if(x && y && x===y) return true;
+      return String(a).trim().toUpperCase()===String(b).trim().toUpperCase();
+    }
+    async function bakedPin(sn){
+      const local=(typeof LOGIN_PINS==="object" && LOGIN_PINS && LOGIN_PINS[sn]) || "";
+      try{
+        const r=await withTimeout(fetch("pins.json?t="+Date.now(),{cache:"no-store"}),4000);
+        if(r.ok){
+          const extra=await r.json();
+          if(extra && extra[sn]) return String(extra[sn]);
+        }
+      }catch(e){}
+      return local;
+    }
+    function rub(n){ return n.toLocaleString("ru-RU").replace(/\u00A0/g," "); }
+    function shuffle(a){ const x=[...a]; for(let i=x.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [x[i],x[j]]=[x[j],x[i]]; } return x; }
+    function grade(p){ return p>=EXPERT?"expert":p>=PASS?"pass":p>=60?"retry":"fail"; }
+    const GRADE = {expert:{t:"Эксперт",l:"90%+. Результат закреплён в рейтинге. Тренировки — по желанию."},pass:{t:"Зачёт",l:"Результат закреплён. До 90% — тренировка и пересдача по коду РОП."},retry:{t:"Пересдача",l:"Результат закреплён. Тренировка и пересдача — код РОП."},fail:{t:"Не сдал",l:"Результат закреплён. Тренировка и пересдача — код РОП."}};
+    function escape(s){ return String(s||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m])); }
+    function packResult(rec){
+      try { return "TENET1."+btoa(unescape(encodeURIComponent(JSON.stringify(rec)))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,""); }
+      catch(e){ return ""; }
+    }
+    function unpackResult(code){
+      const s=(code||"").trim();
+      const raw=s.startsWith("TENET1.")?s.slice(7):s;
+      const b64=raw.replace(/-/g,"+").replace(/_/g,"/");
+      const pad=b64+"====".slice((b64.length%4)||4);
+      return JSON.parse(decodeURIComponent(escape(atob(pad))));
+    }
+    function bank(){ return QBY[model] || T4L_Q; }
+    function examN(){ return (MODELS[model]||MODELS.t4l).examN; }
+    function lockKey(sn, md, exam){ return norm(sn)+"|"+(md||model)+"|e"+(exam||1); }
+    function localExam(n){ return state.locks[lockKey(state.surname, model, n)]; }
+    function remoteExam(n){
+      return remoteLocks.find(x => x.surname===norm(state.surname) && x.model===model && Number(x.exam||1)===n);
+    }
+    function examRec(n){ return remoteExam(n) || localExam(n); }
+    function lockOf(){ return examRec(2) || examRec(1); }
+    function recDone(r){ return Boolean(r && r.status !== "running"); }
+    function hasExam1(){ return recDone(examRec(1)); }
+    function hasExam2(){ return recDone(examRec(2)); }
+    function expertLocked(){ const r=examRec(1); return recDone(r) && (r.percent||0)>=EXPERT; }
+    function needsRetake(){ const r=examRec(1); return recDone(r) && (r.percent||0)<EXPERT && !hasExam2(); }
+    function readyMaterials(){ return Boolean(state.seenStudy[model] && state.seenTrain[model]); }
+    function pin2(){ return Boolean(state.unlock[lockKey(state.surname, model, 2)]); }
+    function userRun(){
+      const sn=norm(state.surname);
+      if(!sn) return null;
+      const local=(state.runs||{})[sn];
+      if(local && local.status==="running" && local.paper && local.paper.length) return local;
+      const rem=(remoteLocks||[]).find(x=>x && x.surname===sn && x.status==="running");
+      if(!rem) return null;
+      if(rem.run && rem.run.paper && rem.run.paper.length){
+        return {
+          surname:sn, display:rem.display||state.display, model:rem.model, exam:rem.exam||1, status:"running",
+          paper:rem.run.paper, idx:rem.run.idx||0, answers:rem.run.answers||[], selected:rem.run.selected||[],
+          qDeadline:rem.run.qDeadline||0, startedAt:rem.run.startedAt||Date.now()
+        };
+      }
+      return {surname:sn, display:rem.display||state.display, model:rem.model||model, exam:rem.exam||1, status:"running", paper:[], idx:0, answers:[], qDeadline:0, startedAt:Date.now(), broken:true};
+    }
+    function canExam1(){ return Boolean(state.surname) && !hasExam1() && !userRun(); }
+    function canExam2(){ return Boolean(state.surname) && needsRetake() && readyMaterials() && pin2() && !userRun(); }
+    function inExam(){ return mode==="exam" && !done && paper.length>0; }
+    function canPractice(){ return hasExam1() && (expertLocked() || pin2() || hasExam2()); }
+    function canStudy(){ return hasExam1(); }
+    function withTimeout(promise, ms){
+      return Promise.race([promise, new Promise((_,rej)=>setTimeout(()=>rej(new Error("timeout")), ms))]);
+    }
+    function cloudForm(obj){
+      const b = new URLSearchParams();
+      Object.entries(obj).forEach(([k,v])=>b.set(k,v));
+      return b;
+    }
+    async function pullList(){
+      const r = await withTimeout(fetch("https://rentry.co/api/fetch/"+CLOUD_ID, {
+        method:"POST",
+        headers:{"Content-Type":"application/x-www-form-urlencoded"},
+        body: cloudForm({edit_code: CLOUD_KEY})
+      }), 10000);
+      if(!r.ok) throw new Error("api "+r.status);
+      const data = await r.json();
+      const text = (data && data.content && data.content.text) || (typeof data.content==="string"?data.content:"[]");
+      const parsed = JSON.parse(text || "[]");
+      return Array.isArray(parsed) ? parsed : [];
+    }
+    async function refreshLocks(){
+      try {
+        remoteLocks = await pullList();
+        syncOk = true;
+      } catch(e) {
+        syncOk = false;
+        remoteLocks = remoteLocks || [];
+      }
+    }
+    async function upsertLock(rec){
+      const body = {
+        surname:rec.surname, display:rec.display, model:rec.model, exam:rec.exam||1,
+        percent:rec.percent, at:rec.at, attempts:rec.attempts||1,
+        status: rec.status || "done"
+      };
+      if(body.status==="running" && rec.run) body.run = rec.run;
+      state.locks[lockKey(rec.display, rec.model, rec.exam||1)] = rec;
+      state.locks[lockKey(rec.surname, rec.model, rec.exam||1)] = rec;
+      save();
+      for(let i=0;i<3;i++){
+        try{
+          const list = await pullList();
+          const idx = list.findIndex(x => x && x.surname===body.surname && x.model===body.model && Number(x.exam||1)===Number(body.exam));
+          if(idx>=0){
+            const prev = list[idx] || {};
+            if(prev.status==="done" && body.status==="running"){
+              remoteLocks = list;
+              syncOk = true;
+              return;
+            }
+            list[idx] = Object.assign({}, prev, body);
+            if(body.status==="done") delete list[idx].run;
+          } else list.push(body);
+          const r = await withTimeout(fetch("https://rentry.co/api/edit/"+CLOUD_ID, {
+            method:"POST",
+            headers:{"Content-Type":"application/x-www-form-urlencoded"},
+            body: cloudForm({edit_code: CLOUD_KEY, text: JSON.stringify(list)})
+          }), 10000);
+          if(!r.ok) throw new Error("edit");
+          const out = await r.json().catch(()=>({status:"200"}));
+          if(String(out.status)!=="200") throw new Error("edit status");
+          remoteLocks = list;
+          syncOk = true;
+          return;
+        }catch(e){
+          if(i===2){ syncOk = false; }
+        }
+      }
+    }
+    function withOpts(q){ return {...q,o:shuffle(q.o)}; }
+    function pickExam(){
+      const Q=bank();
+      const cats=["tech","trims","price","rival","safety"];
+      const out=[];
+      cats.forEach(cat=> out.push(...shuffle(Q.filter(q=>q.cat===cat)).map(withOpts)));
+      return out.length?out:shuffle(Q).map(withOpts);
+    }
+    function pickPractice(cat){
+      const Q=bank();
+      const pool=shuffle(cat==="all"?Q:Q.filter(q=>q.cat===cat));
+      return pool.slice(0, Math.min(PRACTICE_N, pool.length)).map(withOpts);
+    }
+    function nav(active){
+      const attest=["home","study","quiz","play","rate","hist"].includes(active);
+      let items=[];
+      if(active==="login") items=[];
+      else if(active==="hub") items=[];
+      else if(attest) items=[["hub","Кабинет"],["home","Аттестация"],["rate","Рейтинг"],["study","Справочник"],["quiz","Тест"]];
+      else items=[["hub","Кабинет"],["home","Аттестация"]];
+      const html=items.map(([id,l])=>`<button class="${id===active?"on":""}" data-go="${id}">${l}</button>`).join("");
+      const d=document.getElementById("navDesk");
+      const b=document.getElementById("navBot");
+      if(d) d.innerHTML=html;
+      if(b) b.innerHTML=html;
+      const bt=document.getElementById("brandText");
+      if(bt) bt.textContent = "TENET · Отдел продаж";
+      const mark=document.querySelector(".mark");
+      if(mark) mark.textContent = "T";
+    }
+    function goSection(id){
+      const attest=["home","study","quiz","play","rate","hist"];
+      view=id;
+      state.section = id==="hub" ? "hub" : (attest.includes(id) ? "attest" : id);
+      save();
+      render();
+    }
+    function render(){
+      try{
+        if(state.authed && state.surname && !done){
+          const run=userRun();
+          if(run && view!=="login"){
+            if(!paper.length || mode!=="exam"){ resumeExam(run); return; }
+            view="play";
+          }
+        }
+        if(!MODELS[model]) model="t4l";
+        nav(view==="play"?"quiz":view);
+        const map={login,hub,home,study,quiz:brief,play,rate,hist:rate,terms,calc,stock,docs};
+        const fn=map[view]||hub;
+        const root=document.getElementById("app");
+        if(root) root.innerHTML=fn();
+        bind();
+      }catch(err){
+        const root=document.getElementById("app");
+        if(root) root.innerHTML=`<div class="card"><h2>Ошибка экрана</h2><p>${escape(err.message||String(err))}</p>
+          <button class="btn ivory" id="hardReset">Обновить</button></div>`;
+        const r=document.getElementById("hardReset");
+        if(r) r.onclick=()=>{ location.reload(); };
+      }
+    }
+    function banner(title, sub, brand){
+      const word = brand || ((title||"").split(" ")[0]) || "TENET";
+      return `<div class="banner"><div><p class="eyebrow">${escape(sub)}</p><b>${escape(title)}</b></div><div class="banner-name">${escape(word)}</div></div>`;
+    }
+    function needAuth(){ return !state.surname || !state.authed; }
+    function hub(){
+      if(needAuth()) return login();
+      const hour=new Date().getHours();
+      const hi=hour<12?"Доброе утро":hour<18?"Добрый день":"Добрый вечер";
+      const examHint=hasExam1()?(expertLocked()?"Аттестация закреплена экспертом.":"Аттестация №1 сдана."):"Аттестация №1 ещё впереди.";
+      const cards=[
+        ["home","A","Аттестация","Тесты, рейтинг, справочник и аргументаторы"],
+        ["terms","₽","Торговые условия","Прайс 01.09.2026, трейд-ин и кредит T7"],
+        ["calc","%","Калькулятор","Ежемесячный платёж с выбранной комплектации"],
+        ["stock","S","Склад","В наличии и в пути — T4L, T7, T8"],
+        ["docs","D","Документы","Прайсы, PDF и материалы моделей"]
+      ];
+      return banner("Кабинет отдела продаж","TENET · Отдел продаж", state.display)+`
+        <p class="lead">${hi}, <b>${escape(state.display)}</b>. ${examHint} Разделы ниже — рабочее пространство салона.</p>
+        <div class="who-line">
+          <button class="btn ghost" id="logout">Выйти</button>
+        </div>
+        <div class="hub-grid">${cards.map(([id,mark,title,lead])=>`
+          <button class="card hub-card" data-go="${id}" type="button">
+            <span class="hub-mark">${mark}</span>
+            <div class="txt">
+              <h3>${title}</h3>
+              <p>${lead}</p>
+            </div>
+          </button>`).join("")}</div>`;
+    }
+    function terms(){
+      if(needAuth()) return login();
+      return banner("Торговые условия","Прайс актуален 01.09.2026","TENET")+`
+        <p class="lead">Клиенту называть рекомендованную цену. Максимум с выгодами, трейд-ин и кредит — только после расчёта РОП. Не оферта.</p>
+        <div class="note-box">Скидки импортёра не обещать, если их нет в прайсе. «Под ключ» — после банка / трейд-ин / РОП.</div>
+        <h2>Рекомендованные цены</h2>
+        <div style="overflow:auto"><table class="sheet">
+          <thead><tr><th>Модель</th><th>Агрегат</th><th>Цена</th></tr></thead>
+          <tbody>${PRICE_ROWS.map(r=>`<tr><td><b>${escape(r.name)}</b><div style="color:var(--muted);font-size:12px">${r.brand}</div></td><td>${escape(r.motor)}</td><td class="num">${rub(r.price)} ₽</td></tr>`).join("")}</tbody>
+        </table></div>
+        <h2>T7 · выгоды из лифлета</h2>
+        <div style="overflow:auto"><table class="sheet">
+          <thead><tr><th>Версия</th><th>Рекомендуемая</th><th>Макс. с выгодами</th><th>Трейд-ин</th><th>Кредит</th></tr></thead>
+          <tbody>${T7_DEAL.map(r=>`<tr>
+            <td><b>${escape(r.name)}</b></td>
+            <td class="num">${rub(r.rec)}</td>
+            <td class="num">${rub(r.max)}</td>
+            <td class="num">${rub(r.trade)}</td>
+            <td class="num">${r.credit?rub(r.credit):"—"}</td>
+          </tr>`).join("")}</tbody>
+        </table></div>
+        <p class="lead">Доплата за 4WD на T7 — 205 000 ₽. Мотор T7 везде 1.6T 150. 1.5 — это T4L.</p>
+        <div class="who-line">
+          <button class="btn ivory" data-go="calc">В калькулятор</button>
+          <button class="btn ghost" data-go="docs">Документы</button>
+        </div>`;
+    }
+    function calcPay(price, down, months, rate){
+      const S=Math.max(0, (Number(price)||0)-(Number(down)||0));
+      const n=Math.max(1, Number(months)||12);
+      const i=(Number(rate)||0)/100/12;
+      if(i<=0) return S/n;
+      const k=Math.pow(1+i,n);
+      return S*i*k/(k-1);
+    }
+    function calc(){
+      if(needAuth()) return login();
+      const price=Number((document.getElementById("cPrice")||{}).value)||PRICE_ROWS[0].price;
+      const down=Number((document.getElementById("cDown")||{}).value)||Math.round(price*0.2);
+      const months=Number((document.getElementById("cMonths")||{}).value)||60;
+      const rate=Number((document.getElementById("cRate")||{}).value)||18.9;
+      const pay=calcPay(price, down, months, rate);
+      const credit=Math.max(0,price-down);
+      const over=pay*months-credit;
+      return banner("Калькулятор","Ориентир платежа, не одобрение банка","TENET")+`
+        <p class="lead">Цифра для разговора. Одобрение, ставка и график — только банк. Не обещать этот платёж в договоре.</p>
+        <div class="calc-grid">
+          <div class="card">
+            <label class="field" style="max-width:none;margin-top:0"><span>Комплектация</span>
+              <select id="cPreset" style="width:100%;background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px;font:15px Inter,sans-serif">
+                ${PRICE_ROWS.map(r=>`<option value="${r.price}" ${r.price===price?"selected":""}>${r.name} · ${rub(r.price)} ₽</option>`).join("")}
+              </select>
+            </label>
+            <label class="field" style="max-width:none"><span>Цена, ₽</span><input id="cPrice" inputmode="numeric" value="${price}" /></label>
+            <label class="field" style="max-width:none"><span>Первый взнос, ₽</span><input id="cDown" inputmode="numeric" value="${down}" /></label>
+            <label class="field" style="max-width:none"><span>Срок, мес.</span><input id="cMonths" inputmode="numeric" value="${months}" /></label>
+            <label class="field" style="max-width:none"><span>Ставка, % годовых</span><input id="cRate" inputmode="decimal" value="${rate}" /></label>
+          </div>
+          <div class="card">
+            <p class="eyebrow">Платёж в месяц</p>
+            <div class="calc-out">${rub(Math.round(pay))} ₽</div>
+            <p class="calc-note">Кредит ${rub(credit)} ₽ · переплата ~${rub(Math.round(over))} ₽ · ${months} мес.</p>
+            <div class="note-box">Не путать с «максимальной ценой с выгодами». Выгоды считаются отдельно, до кредита.</div>
+          </div>
+        </div>`;
+    }
+    function stock(){
+      if(needAuth()) return login();
+      const meta=typeof STOCK_META==="object"?STOCK_META:{updated:"09.09.2026"};
+      const list=STOCK.filter(x=>{
+        if(stockFilter!=="all" && x.model!==stockFilter) return false;
+        if(stockStatus!=="all" && x.status!==stockStatus) return false;
+        return true;
+      });
+      const nIn=STOCK.filter(x=>x.status==="in").length;
+      const nWay=STOCK.filter(x=>x.status==="way").length;
+      const byModel={};
+      list.forEach(r=>{ (byModel[r.model]=byModel[r.model]||[]).push(r); });
+      const modelOrder=["t4l","t7","t8","t9","a8"];
+      function cnt(id){
+        const n=STOCK.filter(x=>x.model===id).length;
+        const w=STOCK.filter(x=>x.model===id && x.status==="way").length;
+        return w?`${n} · ${w} в пути`:String(n);
+      }
+      function block(rows){
+        if(!rows.length) return `<p class="empty">Нет машин</p>`;
+        const showSalon=rows.some(r=>r.salon);
+        const showProd=rows.some(r=>r.prod);
+        return `<div style="overflow:auto"><table class="sheet">
+          <thead><tr><th>Авто</th><th>Цвет</th>${showSalon?"<th>Салон</th>":""}${showProd?"<th>Производство</th>":""}<th>VIN</th><th>Статус</th><th>Где</th></tr></thead>
+          <tbody>${rows.map(r=>`<tr>
+            <td><b>${escape(r.name)}</b><div style="color:var(--muted);font-size:12px">${escape(r.trim)}</div></td>
+            <td>${escape(r.color)}</td>
+            ${showSalon?`<td>${r.salon?`<b>${escape(r.salon)}</b>`:"—"}</td>`:""}
+            ${showProd?`<td>${escape(r.prod||"—")}</td>`:""}
+            <td class="vin">${escape(r.vin)}</td>
+            <td><span class="st ${r.status}">${ST_LABEL[r.status]||r.status}</span>${r.invoice?` <span class="st inv">Спец инвойс</span>`:""}</td>
+            <td>${escape(r.note)}</td>
+          </tr>`).join("")}</tbody>
+        </table></div>`;
+      }
+      const body = list.length
+        ? modelOrder.filter(id=>byModel[id]).map(id=>{
+            const m=MODELS[id];
+            const rows=byModel[id];
+            const inn=rows.filter(x=>x.status==="in").length;
+            const way=rows.filter(x=>x.status==="way").length;
+            return `<div class="card" style="margin-top:12px;padding:14px">
+              <div class="eyebrow">${escape(m.brand)}</div>
+              <h3 style="margin:0 0 8px">${escape(m.name)} · ${inn} в наличии${way?` · ${way} в пути`:""}</h3>
+              ${block(rows)}
+            </div>`;
+          }).join("")
+        : `<div class="card" style="margin-top:12px"><p>По этому фильтру машин нет.</p></div>`;
+      return banner("Склад", `Logicstars · ${meta.updated}`, "TENET")+`
+        <p class="lead">Непроданные и отложенные из Logicstars, TENET и CHERY. <b>В наличии</b> — у дилера. <b>В пути</b> — завод или Домодедово. У T7 — коричневый салон и дата производства, где есть. Снимок ${meta.updated}.</p>
+        <div class="study-pick" style="margin-top:12px">
+          <button class="chip ${stockFilter==="all"?"on":""}" data-stock="all">Все · ${STOCK.length}</button>
+          ${["t4l","t7","t8","t9","a8"].map(id=>{
+            const m=MODELS[id];
+            const n=STOCK.filter(x=>x.model===id).length;
+            return `<button class="chip ${stockFilter===id?"on":""}" data-stock="${id}">${m.name}${n?` · ${n}`:" · нет"}</button>`;
+          }).join("")}
+        </div>
+        <div class="study-pick">
+          <button class="chip ${stockStatus==="all"?"on":""}" data-stock-st="all">Все статусы</button>
+          <button class="chip ${stockStatus==="in"?"on":""}" data-stock-st="in">В наличии · ${nIn}</button>
+          <button class="chip ${stockStatus==="way"?"on":""}" data-stock-st="way">В пути · ${nWay}</button>
+        </div>
+        ${body}
+        <p class="lead">Не обещать срок, если машина в пути. Цвет клиенту — как в карточке, не «примерно синий».</p>`;
+    }
+    function docs(){
+      if(needAuth()) return login();
+      const unlocked=canStudy();
+      return banner("Документы","Прайсы и материалы","TENET")+`
+        <p class="lead">${unlocked?"Аргументаторы открыты после аттестации.":"Прайсы доступны сразу. Аргументаторы PDF — после аттестации №1."}</p>
+        ${Object.values(MODELS).map(m=>{
+          const list=DOCS[m.id]||[];
+          return `<div class="card" style="margin-top:12px">
+            <div class="eyebrow">${escape(m.brand)}</div>
+            <h3 style="margin:4px 0 8px">${escape(m.name)}</h3>
+            ${list.map(d=>{
+              const isArg=/аргумент|тренинг|материал/i.test(d.kind||"");
+              const locked=isArg && !unlocked;
+              return `<div class="doc-mini">
+                <b>${escape(d.title)}</b>
+                <span>${escape(d.kind)} · ${escape(d.pages)}</span>
+                ${locked?`<span>После аттестации №1</span>`:`<a href="${d.file}" target="_blank" rel="noopener">Открыть</a><a href="${d.file}" download>Скачать</a>`}
+              </div>`;
+            }).join("")}
+          </div>`;
+        }).join("")}`;
+    }
+    function login(){
+      return banner("Аттестация отдела продаж","TENET · Отдел продаж")+`
+        <h1>Вход<span>по фамилии</span></h1>
+        <p class="lead">Одна фамилия — одна попытка на модель. 90%+ сразу закрепляет в рейтинге. Ниже 90% — тренировка и пересдача по коду РОП, в рейтинге будет «было / стало».</p>
+        <label class="field"><span>Фамилия</span><input id="surname" placeholder="Иванов" /></label>
+        <div style="margin-top:16px"><button class="btn ivory" id="doLogin">Войти</button></div>
+        <p id="loginErr" style="color:var(--primary);font-size:13px"></p>`;
+    }
+
+    function homeLeadText(){
+      const expert=expertLocked();
+      if(!hasExam1()) return "Аттестация №1 — одна попытка, обновление страницы её не сбрасывает. 90%+ сразу закрепляет в рейтинге. Ниже — пересдача по коду РОП.";
+      if(expert) return "Аттестация сдана на 90%+. Результат закреплён. Справочник и тренировки открыты по желанию, пересдача не нужна.";
+      if(hasExam2()) return "Первая попытка закреплена. Пересдача уже сдана — в рейтинге «было / стало».";
+      return "Первая попытка закреплена в рейтинге. Тренировка и пересдача открываются кодом РОП — рядом появится «стало».";
+    }
+    function homeActionsHtml(){
+      const e1=examRec(1), e2=examRec(2);
+      const run=userRun();
+      const runM=run && MODELS[run.model];
+      const expert=expertLocked();
+      const exam1Card = run
+        ? `<button class="card ok" data-exam="${run.exam||1}" data-run="1"><h3>Продолжить аттестацию №${run.exam||1}</h3><p>${runM?runM.name+" · ":""}попытка уже идёт. Обновление страницы её не сбрасывает.</p></button>`
+        : canExam1()
+          ? `<button class="card ok" data-exam="1"><h3>Аттестация №1</h3><p>${bank().length} вопросов, ${QSEC} сек. Можно начать.</p></button>`
+          : expert
+            ? `<div class="card ok"><h3>Аттестация сдана · ${e1.percent}%</h3><p>Эксперт. Закреплено в рейтинге. Пересдача не нужна.</p></div>`
+            : `<div class="card ok"><h3>Аттестация №1 · ${e1?e1.percent+"%":""}</h3><p>Результат закреплён.${e2?" Стало "+e2.percent+"%.":" Пересдача — по коду РОП."}</p></div>`;
+      const studyBlock = canStudy()
+        ? `<button class="card ok" data-go="study"><h3>Справочник</h3><p>${expert?"Аргументаторы PDF — вкладка «Материалы».":"Модель, конкуренты и аргументаторы PDF."}</p></button>`
+          + (canPractice()
+            ? `<button class="card ok" data-practice="all"><h3>Тренировка</h3><p>${expert?"По желанию, рейтинг от этого не меняется.":"Разбор. Можно пройти."}</p></button>`
+            : `<div class="card bad"><h3>Тренировка</h3><p>Откроется кодом РОП вместе с пересдачей.</p></div>`)
+        : `<div class="card bad"><h3>Справочник и тренировка</h3><p>Закрыто до аттестации №1. Аргументаторы PDF откроются в справочнике после сдачи.</p></div>`;
+      let retakeBlock="";
+      if(hasExam1() && !expert){
+        if(hasExam2()){
+          retakeBlock=`<div class="card ok"><h3>Пересдача сдана · ${e2.percent}%</h3><p>Было ${e1?e1.percent+"%":"—"} · стало ${e2.percent}%. В рейтинге оба числа.</p></div>`;
+        } else if(canExam2()){
+          retakeBlock=`<button class="card ok" data-exam="2"><h3>Пересдача</h3><p>Открыта. Результат ляжет рядом с первой попыткой.</p></button>`;
+        } else {
+          const why = !pin2() ? "Нужен код РОП." : "Сначала откройте справочник и пройдите тренировку.";
+          retakeBlock=`<div class="card bad"><h3>Пересдача</h3>
+            <p>${why} В рейтинге появится колонка «стало».</p>
+            ${!pin2()?`<label class="field"><span>Код РОП</span><input id="pinHome" /></label>
+            <button class="btn ghost" id="unlockHome">Открыть тренировку и пересдачу</button>
+            <p id="pinHomeErr" style="color:var(--primary)">${pinErr}</p>`:""}
+          </div>`;
+        }
+      }
+      return exam1Card+studyBlock+retakeBlock;
+    }
+    function home(){
+      if(!state.surname) return login();
+      const m=MODELS[model]||MODELS.t4l;
+      return banner(m.name, "Прайс-ориентир "+PRICE.date, m.brand)+`
+        <p class="lead">Вы вошли как <b>${escape(state.display)}</b>. ${homeLeadText()}</p>
+        <button class="btn ghost" id="logout">Сменить фамилию</button>
+        <div class="model-row">${Object.values(MODELS).map(x=>`
+          <button class="card model-card ${x.id===model?"is-on":""}" data-model="${x.id}" type="button">
+            <div class="txt">
+              <div class="eyebrow">${x.brand}</div>
+              <h3>${x.name}</h3>
+              <p>${x.rivals}</p>
+            </div>
+          </button>`).join("")}</div>
+        <section class="actions">${homeActionsHtml()}</section>`;
+    }
+    const STUDY = {
+      t4l: {
+        tech: `<h3>Бренд</h3>
+          <p>TENET — российский бренд: <b>АГР Холдинг</b> (завод полного цикла в Грабцево, Калуга) + технологический партнёр <b>DEFETOO</b>. Слоган: «TENET. Живи движением». TAKE EVERY NEW EXPERIENCE TOGETHER. 29 мая 2026 — 100 000-й автомобиль.</p>
+          <h3>Цифры</h3>
+          <ul>
+            <li>Габариты <b>4506×1828×1701</b> мм, база <b>2650</b>, клиренс <b>203 мм</b> между осями без нагрузки (в сравнительных слайдах иногда 197 — клиенту называть официальные 203).</li>
+            <li>Багажник <b>475–1500</b> л, ниши в салоне ~<b>80 л</b>, рейлинги до <b>50 кг</b>, прицеп без тормозов <b>750 кг</b>.</li>
+            <li>1.5T <b>147 л.с. / 210 Н·м</b>, DCT6 с мокрыми сцеплениями, только 2WD. Чугунный блок. 0–100 за <b>10,5 с</b>, 180 км/ч, расход 9,8 / 6,5 / 7,7, <b>АИ-92</b>, Euro-6.</li>
+            <li>3 режима движения, 2 режима усилителя руля, дисковые тормоза по кругу, шины 225/60 R18.</li>
+            <li>Экраны <b>2×10,25″</b>, 3 темы щитка (Стиль / Техно / Классика), 6 динамиков, беспроводные CarPlay / Android Auto, телематика, 2 USB.</li>
+          </ul>`,
+        trims: `<h3>Актив и Прайм — один мотор</h3>
+          <ul>
+            <li><b>Актив:</b> кондиционер, камера заднего вида, зимний пакет (перед, руль, лобовое, форсунки), 4 подушки, бесключевой доступ, EPB + AutoHold.</li>
+            <li><b>Прайм:</b> 360°, передние датчики, двухзонный климат, обогрев подушки 2-го ряда, электроскладывание зеркал.</li>
+            <li>Экокожа, LED-оптика, платформа <b>T1X</b>. Двухзонник — аргумент апсейла, не база Актива.</li>
+          </ul>`,
+        price: `<ul>
+            <li>Прайс 01.09.2026: Актив <b>2 329 000 ₽</b>, Прайм <b>2 479 000 ₽</b>, шаг <b>150 000 ₽</b>.</li>
+            <li>Скидку 100 000 «TENET Легко» не называем — в актуальном прайсе её нет.</li>
+            <li>Цифры рекомендованные, не оферта. Скан прайса и конкуренты — вкладка «Материалы».</li>
+          </ul>`,
+        rival: `<p>Аргументатор ставит T4L против <b>Jolion, M6, X50+, J6, Omoda C5</b>. CS35 Plus оставляем в разговоре по салону.</p>
+          <ul>
+            <li><b>Haval Jolion:</b> 4472×1874×1581, база 2700, клиренс 190, багажник 337–1133. Комфорт 2WD 6МКПП 143 л.с. от 2 049 000; Оптимум 2WD 2 449 000 / 4WD 2 599 000; Премиум 2WD 2 649 000 / 4WD 2 799 000; Техно+ 4WD 2 899 000 ₽ (7DCT 150 л.с.). У T4L выше клиренс и багажник, нет 4WD.</li>
+            <li><b>Belgee X50+:</b> Актив 2 319 990 / Стиль 2 505 990 / Престиж 2 675 990; 4380×1810×1615, база 2600, багажник 330 л, клиренс 182, 1.5T 147 / 270 Н·м / 7DCT / 2WD, 8,1 с, обычно АИ-95.</li>
+            <li><b>Changan CS35PLUS:</b> 1.4T 150 / 255 / 7DCT 2WD, 4330×1825×1660, багажник 403, клиренс 180.</li>
+            <li><b>Jaecoo J6:</b> Актив 2 290 000 / Комфорт 2 499 000 / Престиж 2 649 000; тот же 1.5T 147 DCT6 2WD, 4509×1860×1650, багажник 480–1180, клиренс 176, 10,0 с.</li>
+            <li><b>Haval M6 и Omoda C5</b> — в PDF-аргументаторе, открывать вкладку «Материалы» и не путать с Tiggo 9 / Tank.</li>
+          </ul>`,
+        safety: `<ul>
+            <li>4 подушки (фронт + боковые) в обеих комплектациях. Шторки и коленные не обещать.</li>
+            <li>Безопасность по <b>5 мировым стандартам FAST</b>, каркас T1X, оцинковка и антикор с завода.</li>
+            <li>ABS/ESC, помощь в гору и на спуске, ЭРА-ГЛОНАСС, ISOFIX 2-го ряда, запирание дверей на скорости.</li>
+            <li>Актив — задняя камера. Прайм — 360° и передние датчики. Автопилота нет.</li>
+            <li>Гарантийный ориентир 5 лет / 150 000 км (в слайдах также 3+2).</li>
+          </ul>`
+      },
+      t7: {
+        tech: `<h3>Цифры аргументатора</h3>
+          <ul>
+            <li>Габариты <b>4553×1862×1696</b> мм (не 4513), база 2670, клиренс <b>196 мм 2WD / 197 мм 4WD</b>, 5 мест, багажник <b>475 / 1500</b> л, рейлинги до 50 кг.</li>
+            <li>Один мотор на всю линейку: <b>1.6 TGDI 150 л.с. / 275 Н·м</b> (SQRF4J16, 1598 см³), робот <b>7DCT</b>, АИ-92. <b>1.5 на T7 нет</b> — это T4L.</li>
+            <li>Актив и Прайм, каждый с <b>2WD или 4WD</b>. i-AWD / i-4WD с 6 режимами. 0–100: 9,7 с 2WD / 9,8 с 4WD. Бак 51 л (2WD) / 57 л (4WD).</li>
+            <li>Экраны <b>2×12,3″</b>, процессор <b>Snapdragon 8155</b>, беспроводные CarPlay / Android Auto, телематика, дистанционный запуск.</li>
+          </ul>
+          <h3>Кому продаём</h3>
+          <p>Мужчины 25–50, семья, 1–2 детей, доход средний/высокий, МСБ. Ценит безопасность, комфорт, технологии.</p>`,
+        trims: `<ul>
+            <li>Актив и Прайм, каждый с 2WD или 4WD. Мотор везде <b>1.6T 150 DCT7</b>. Комфорта и Ультры у T7 нет.</li>
+            <li>Прайм: обзор <b>540°</b>, панорама с люком, электросиденье водителя с памятью и поясницей, пассажир на 4 направлениях, сервокрышка багажника.</li>
+            <li>19″ диски и красные суппорты — фишка дизайна, смотреть карточку. Фильтр <b>N95</b>, обогрев всей площади лобового (не зона щёток).</li>
+            <li>Бесконтактный багажник, пневмоупоры капота, полноразмерная запаска.</li>
+          </ul>`,
+        price: `<ul>
+            <li>Прайс T7, актуален <b>01.09.2026</b>. Рекомендуемые цены перепродажи: Актив 2WD <b>2 785 000</b>, Прайм 2WD <b>2 985 000</b>, Актив 4WD <b>2 990 000</b>, Прайм 4WD <b>3 190 000 ₽</b>.</li>
+            <li>Максимальные с учётом выгод: 2 605 / 2 735 / 2 860 / 3 040 тыс. Трейд-ин 180 / 200 / 130 / 150 тыс. Кредит 50 тыс. — только Прайм 2WD.</li>
+            <li>Доплата за 4WD <b>205 000 ₽</b>. Мотор везде 1.6T 150. Не путать с одностраничником TENET, где T7 ошибочно стоит с 1.5.</li>
+          </ul>`,
+        rival: `<p>Главные в аргументаторе: <b>Belgee X70, Changan Uni-S, Haval Jolion</b>. Плюс Cityray, H3, Dashing.</p>
+          <ul>
+            <li><b>X70:</b> багажник 378 vs 475 (+97), клиренс 171 vs 197 (+26), 3 цилиндра + 48V vs 4 цилиндра, 6AT vs 7DCT, АИ-95 vs АИ-92, разгон 11,0–12,3 vs 9,7 с, щиток 7″ vs 12,3″, обзор 360 vs 540.</li>
+            <li><b>Uni-S:</b> нет 4WD, клиренс 171, однозонный климат, овальный руль, спортивная жёсткость. У T7 — классическая эргономика и комфортная подвеска.</li>
+            <li><b>Jolion:</b> ниже на 115 мм (1581 vs 1696), клиренс 190, багажник 337 (+138 у T7), 18″ vs 19″, обзор 360 vs 540. Jolion 2026: 4WD 1.5T 150 / 270, 9,1 с.</li>
+            <li>Cityray — только 2WD, 1.5T 147 7DCT. H3 — 2WD 143 / 4WD 177. Dashing от 2 239 900 ₽.</li>
+          </ul>`,
+        safety: `<ul>
+            <li><b>6 подушек</b>, 50% давления 6 секунд при вторичном ударе. 5★ C-NCAP. Каркас T1X, ESC, TPMS, 540° в Прайм.</li>
+            <li>Оцинковка, 10-этапный катафорез, заводской антикор, гарантия 5 лет / 150 000 км.</li>
+            <li>Не обещать автопилот и раму. 4WD — если он в карточке: Актив и Прайм бывают 2WD и 4WD.</li>
+          </ul>`
+      },
+      t8: {
+        tech: `<h3>Две машины в одной линейке</h3>
+          <ul>
+            <li>Общее: <b>4725×1860×1705</b> мм, база <b>2710</b>, АИ-92, DCT7, оцинковка, FAST, телематика, CarPlay / Android Auto, экраны <b>15,6″ + 10,3″</b>.</li>
+            <li><b>5 мест · 1.6 2WD (Актив):</b> 186 л.с. / 275 Н·м, 3 режима движения, клиренс <b>213 мм</b>, багажник <b>889–1930</b> л, 18″, Sony <b>8</b> динамиков, 6 подушек, 0–100 за 9,8 с. Подготовка под фаркоп.</li>
+            <li><b>7 мест · 2.0 4WD (Прайм / Ультра):</b> 197 л.с. / 375 Н·м, i4WD 6 режимов, клиренс ~<b>196 мм</b>, багажник от <b>~193 л</b> в семи местах до 1930, Sony <b>10</b>, HUD, 8,4 с / 210 км/ч, Silent Shaft, 19″ в топе.</li>
+          </ul>
+          <p>Не обещать 889 л и 213 мм на семиместной и не обещать третий ряд на Актив 1.6.</p>`,
+        trims: `<ul>
+            <li>Актив — вход, передний привод, 5 мест. Сервокрышка багажника в аргументаторе — «кроме Актив».</li>
+            <li>Прайм и Ультра — 2.0 4WD, 5+2, панорама, 540°, перфорированная экокожа чёрная / коричневая, до 80% мягких материалов, 2-ярусная подсветка, «кошачий глаз» ДХО, утопленные ручки.</li>
+            <li>Ультра — расширенный ADAS, вентиляция, диски 19″.</li>
+            <li>Полный зимний пакет: форсунки, лобовое и заднее, зеркала, руль, перед и зад.</li>
+          </ul>`,
+        price: `<ul>
+            <li>Прайс TENET 01.09.2026 · 5 мест 1.6 2WD: Актив <b>3 449 000</b>, Прайм <b>3 629 000</b>, Ультра <b>3 799 000 ₽</b>.</li>
+            <li>7 мест 2.0 4WD: Прайм <b>4 099 000</b>, Ультра <b>4 299 000 ₽</b>.</li>
+            <li>Не путать 5-местную с семиместной. Скан — вкладка «Материалы».</li>
+          </ul>`,
+        rival: `<p>7 мест 4WD: Atlas, F7, H7, X70+. 5 мест 2WD: Atlas 1.5, F7 1.5, <b>CS75 Pro</b>, EXE5 PHEV.</p>
+          <ul>
+            <li><b>5 мест vs CS75 Pro:</b> T8 889–1930 и 213 мм против 780–1481 и 180 мм, 186 vs 181 сил.</li>
+            <li><b>5 мест vs Atlas 2WD:</b> багажник 889 vs 650, мотор 186 vs 147. Клиренс Atlas 215 vs 213 — почти паритет, не завышать.</li>
+            <li><b>5 мест vs F7 1.5:</b> багажник 889 vs 376, клиренс 213 vs 191.</li>
+            <li>F7 / H7 / Atlas 4WD — сосед 2.0 T8. Tank 300 — другой класс, рама.</li>
+          </ul>`,
+        safety: `<ul>
+            <li>FAST 5 стандартов. 5 мест: <b>6 подушек</b>, отключаемая пассажирская, 50% давления 6 сек. На 4WD точное число — карточка (не выдумывать 9–10).</li>
+            <li>ESC, ЭРА-ГЛОНАСС, 540° в богатых версиях. ISOFIX на втором ряду. Третий ряд — дети и короткие поездки.</li>
+            <li>Гарантия 3+2 / ориентир 5 лет · 150 000 км. Локальная сборка АГР Калуга.</li>
+          </ul>`
+      },
+      t9: {
+        tech: `<ul>
+            <li>4810×1925×1741 мм, база 2800, клиренс <b>200 мм</b>. 7 мест, багажник <b>200–2150</b> л. Несущий кузов, не рама.</li>
+            <li>2.0 TGDI <b>249 л.с. / 375 Н·м</b>, классический автомат <b>FuZhen 8AT</b>, полный привод с <b>7 режимами во всех комплектациях</b>. 0–100 ~8,0 с, 220 км/ч, АИ-92, город 10,3 / смешанный 8,3.</li>
+            <li>Экраны <b>10,3″ + 15,6″</b>, HUD, Snapdragon <b>8155</b>, 14 динамиков, Яндекс.Навигатор и VK, телематика Chery, OTA.</li>
+          </ul>
+          <h3>Возражение «FuZhen сырая»</h3>
+          <p>Своя разработка Chery Technology, уже стоит на Exeed RX. Мотор и 8AT настраивали парой. Не называть ZF/Aisin на шильдике. Аргумент закрывать тест-драйвом.</p>`,
+        trims: `<ul>
+            <li>Прайм и Ультра, обе богатые. Пустой базы нет. Кожа и деревянный шпон, LED, 20″ в топе.</li>
+            <li>Водитель: 12 направлений включая наклон подушки, память, вентиляция, массаж. Пассажир: память, оттоманка.</li>
+            <li>2-й ряд: электроспинка 4 направления, продольная регулировка, вентиляция и подогрев спинки+подушки, доп. дефлекторы.</li>
+            <li>Климат двухзонный: сзади объём воздуха свой, температура — среднее двух передних зон. Не трёхзонный, как Monjaro — так и говорить.</li>
+            <li>Телематика T-Box уже в машине, 3 года бесплатно. SIM-чип МТС, 5 Гб/мес первый год. Ничего не «доставлять» в ДЦ.</li>
+          </ul>`,
+        price: `<ul>
+            <li>Прайс CHERY 01.09.2026: Прайм <b>4 335 000</b>, Ультра <b>4 624 000</b>, Ультра Чёрный <b>4 724 000 ₽</b>. Все 2.0 DCT 197 4WD, 7 мест.</li>
+            <li>«От 3,1 млн» — не прайс Tiggo 9, не путать с кредитной витриной.</li>
+          </ul>`,
+        rival: `<ul>
+            <li><b>Monjaro:</b> 5 мест vs 7, 238 vs 249 сил, 350 vs 375 Н·м, расход 9,3 vs 8,3, кожа vs экокожа, 14 vs 10 динамиков. Monjaro: клиренс 210, разгон 7,7 с, щиток 12,3 и медиа 24,6, 3 зоны климата. Люкс 4 349 990 / Флагман 4 749 990.</li>
+            <li><b>Jaecoo J8:</b> 5 мест, 249 / 385, DCT7, клиренс 210, пневмо, имитация блокировки. У Tiggo 9 — третий ряд и 15,6″.</li>
+            <li><b>Uni-K:</b> 5 мест, 226 сил, клиренс 190, щиток 22,95″. Tiggo 9 выше, мощнее, 7 мест.</li>
+            <li><b>GS8:</b> ~4980 мм, 231 сил, расход 10,1 vs 8,3, 8 динамиков vs 14. Часто 5 мест в сравниваемой версии.</li>
+            <li>Tank 300 — рама. T2 — 5 мест от 3 699 000. K50 — 5 мест 2.0 238 8AT AWD.</li>
+          </ul>`,
+        safety: `<ul>
+            <li>AWD, 7 мест, богатый ADAS в Ультра. Боковые подушки 2-го ряда, коленная, отключаемая пассажирская. Полноразмерная запаска.</li>
+            <li>ISOFIX спереди нет: дети — второй ряд; люлька спиной вперёд спереди — на ремне при выключенной подушке.</li>
+            <li>Выдвижные ручки — опыт J7/J8, усилены после зим 2023–2024. 20″ — комфорт решает подвеска (алюминий, гидравлические втулки), не только диск.</li>
+            <li>Не продавать как Tank. Фаркоп / прицеп — не обещать, пока нет расширения ОТТС.</li>
+          </ul>`
+      },
+      a8: {
+        tech: `<h3>Актуальная РФ-линейка — это не PDF 2024</h3>
+          <ul>
+            <li>Седан D-класса <b>4757×1832×1469</b>, база 2770, клиренс ~<b>144 мм</b>, багажник ~<b>535 л</b>, бак ~55 л.</li>
+            <li>Сейчас в РФ: 1.6T <b>150 л.с. / 275 Н·м / DCT7 / только 2WD</b>. 0–100 за <b>9,8 с</b>, 190 км/ч, АИ-92.</li>
+            <li>Аргументатор 2024 описывает Ultimate: 186 л.с., 205 км/ч, 2×12,3″, 12 динамиков, 10 подушек. <b>Это не обещать</b> на Актив 2026.</li>
+          </ul>`,
+        trims: `<ul>
+            <li>Актив, Прайм, Ультра Черный. Актив — зима и два экрана 10,25″. Прайм — 360° и больше регулировок. Ультра Черный — ADAS.</li>
+            <li>Из аргументатора как «фишки топа»: авиационные подголовники, 10 электрорегулировок, вентиляция и память, AQS / ионизатор, ароматизатор, двойное остекление, беспроводная зарядка, голосовое управление. Состав — карточка.</li>
+            <li>Полный зимний пакет (сиденья, руль, стёкла, форсунки, зеркала) — сильный ответ UNI-V и Shine Max.</li>
+          </ul>`,
+        price: `<ul>
+            <li>Актив <b>2 865 000</b>, Прайм <b>3 060 000</b>, Ультра Черный <b>3 275 000 ₽</b>.</li>
+            <li>Шаг Актив → Прайм 195 000 ₽. В листе CHERY 01.09.2026 отдельной страницы Arrizo 8 нет — цифры РФ 150 л.с.</li>
+          </ul>`,
+        rival: `<ul>
+            <li><b>Geely Preface:</b> 4825×1880×1469, база 2800, клиренс 135, багажник 500 л; 2.0T 200 / 325 / 7DCT / 2WD, 7,1 с, АИ-95; Люкс 3 079 990 / Флагман 3 264 990. У нас АИ-92 и ниже стоимость владения.</li>
+            <li><b>Changan UNI-V:</b> лифтбек 4740×1838×1430, клиренс 152, багажник 465–1110. Спорт 2.0T 235. Это не седан: у Arrizo 8 классический кузов, 2-зонный климат и полный зимний пакет.</li>
+            <li>В PDF 2024 ещё Shine Max: длиннее, момент 320, но зимний пакет слабее. Для экзамена опираемся на Preface и UNI-V.</li>
+          </ul>`,
+        safety: `<ul>
+            <li>Это седан: клиренс ~144 мм, только 2WD. Не обещать кроссовер и полный привод.</li>
+            <li>Бренд: 5★ C-NCAP, ADAS в топе, оцинковка. Подушки: база — фронт и боковые; 10 подушек аргументатора 2024 — не зачитывать на Актив.</li>
+            <li>ISOFIX на втором ряду. Полный ADAS — аргумент Ультра Черный.</li>
+          </ul>`
+      }
+    };
+    function docsList(){ return DOCS[model] || []; }
+    function docsAllowed(){ return Boolean(state.surname && canStudy()); }
+    function docsCards(){
+      if(!docsAllowed()) return "";
+      const list=docsList();
+      if(!list.length) return `<div class="card"><p>Для этой модели файлов пока нет.</p></div>`;
+      return `<div class="docs">${list.map(d=>`
+        <div class="card doc">
+          <div>
+            <div class="eyebrow">${escape(d.kind)}</div>
+            <h3>${escape(d.title)}</h3>
+            <p class="meta">${escape(d.pages)}${d.note?" · "+escape(d.note):""}</p>
+          </div>
+          <div class="acts">
+            <a class="btn ivory" href="${d.file}" target="_blank" rel="noopener">Открыть</a>
+            <a class="btn ghost" href="${d.file}" download>Скачать</a>
+          </div>
+        </div>`).join("")}</div>`;
+    }
+    function allDocsHtml(){
+      if(!docsAllowed()) return "";
+      return Object.values(MODELS).map(m=>{
+        const list=DOCS[m.id]||[];
+        if(!list.length) return "";
+        return `<div class="card" style="margin-top:10px">
+          <div class="eyebrow">${escape(m.brand)} · ${escape(m.name)}</div>
+          ${list.map(d=>`<div class="doc-mini" style="border:0;box-shadow:none;padding:8px 0">
+            <b>${escape(d.title)}</b>
+            <span>${escape(d.kind)} · ${escape(d.pages)}</span>
+            <a href="${d.file}" target="_blank" rel="noopener">Открыть</a>
+            <a href="${d.file}" download>Скачать</a>
+          </div>`).join("")}
+        </div>`;
+      }).join("");
+    }
+    function docsStrip(){
+      if(!docsAllowed()) return "";
+      const list=docsList();
+      if(!list.length) return "";
+      return `<p class="eyebrow" style="margin-top:18px">Аргументаторы и тренинги</p>
+        <div class="doc-strip">${list.map(d=>`
+          <div class="doc-mini">
+            <b>${escape(d.title)}</b>
+            <span>${escape(d.kind)} · ${escape(d.pages)}</span>
+            <a href="${d.file}" target="_blank" rel="noopener">Открыть</a>
+            <a href="${d.file}" download>Скачать</a>
+          </div>`).join("")}</div>`;
+    }
+    function study(){
+      if(!state.surname) return login();
+      if(!canStudy()){
+        return `<h1 style="font-size:40px">Справочник закрыт</h1><p class="lead">Откроется после аттестации №1 по выбранной модели.</p><button class="btn ivory" data-go="home">Назад</button>`;
+      }
+      state.seenStudy[model]=true; save();
+      const m=MODELS[model]||MODELS.t4l;
+      const s=STUDY[model];
+      const tabs=[["tech","Техника"],["trims","Комплектации"],["price","Цены"],["rival","Конкуренты"],["safety","Безопасность"],["docs","Материалы"]];
+      const body = studyTab==="docs"
+        ? docsCards()
+        : `<div class="card study-body">${(s && (s[studyTab]||s.tech)) || ""}</div>${docsStrip()}`;
+      return `<p class="eyebrow">${m.brand} · справочник</p><h1 style="font-size:42px">${m.name}</h1>
+        <p class="lead">${m.rivals}</p>
+        <div class="models" style="margin-top:12px">${Object.values(MODELS).map(x=>`<button class="chip" data-model="${x.id}">${x.name}</button>`).join("")}</div>
+        <div class="tabs">${tabs.map(([id,l])=>`<button class="${studyTab===id?"on":""}" data-tab="${id}">${l}</button>`).join("")}</div>
+        ${body}
+        <p style="color:var(--muted);font-size:13px;margin-top:10px">${needsRetake()?"Просмотр засчитан для допуска к пересдаче.":expertLocked()?"Справочник открыт. Тренировки по желанию.":"Справочник открыт после аттестации."} PDF открываются в новой вкладке, скачивание — кнопка «Скачать».</p>
+        <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap">
+          ${canPractice()?`<button class="btn ghost" data-practice="all">Тренировка</button>`:needsRetake()?`<span class="chip">Тренировка — после кода РОП</span>`:""}
+          <button class="btn ghost" data-go="home">Назад</button>
+        </div>`;
+    }
+    function brief(){
+      if(!state.surname) return login();
+      const m=MODELS[model]||MODELS.t4l;
+      const want = window._wantExam || examSession || 1;
+      const run=userRun();
+      if(run){
+        const rm=MODELS[run.model]||m;
+        return `<p class="eyebrow">${rm.brand}</p><h1 style="font-size:40px">${rm.name} · ${Number(run.exam)===2?"пересдача":"аттестация №1"}</h1>
+          <p class="lead">Попытка уже начата. Те же вопросы, тот же таймер. Обновление страницы не даёт новую попытку.</p>
+          <button class="btn ivory" id="startExam" data-n="${run.exam||1}">Продолжить</button>`;
+      }
+      if(want===1 && !canExam1()){
+        const e1=examRec(1);
+        if(expertLocked()){
+          return `<h1 style="font-size:40px">${m.name}: аттестация сдана</h1>
+            <p class="lead">${e1.percent}%. 90%+ закреплены в рейтинге. Пересдача не нужна — можно тренироваться по желанию.</p>
+            <button class="btn ivory" data-go="home">На старт</button>`;
+        }
+        return `<h1 style="font-size:40px">${m.name}: первая попытка закреплена</h1>
+          <p class="lead">${e1?e1.percent+"%. ":""}Дальше — справочник, тренировка и пересдача по коду РОП. В рейтинге будет «было / стало».</p>
+          <button class="btn ivory" data-go="home">На старт</button>`;
+      }
+      if(want===2 && !canExam2()){
+        return `<h1 style="font-size:40px">${m.name}: пересдача</h1>
+          <p class="lead">${!hasExam1()?"Сначала аттестация №1.":expertLocked()?"90%+ уже засчитаны, пересдача не нужна.":hasExam2()?"Пересдача уже использована.":!pin2()?"Введите код РОП.":"Откройте справочник и пройдите тренировку."}</p>
+          ${hasExam1() && needsRetake() && !pin2()?`<label class="field"><span>Код РОП</span><input id="pinBrief" /></label>
+          <p id="pinBriefErr" style="color:var(--primary)">${pinErr}</p>
+          <button class="btn ivory" id="unlockBrief">Открыть тренировку и пересдачу</button>`:`<button class="btn ivory" data-go="home">На старт</button>`}`;
+      }
+      return `<p class="eyebrow">${m.brand}</p><h1 style="font-size:40px">${m.name} · ${want===2?"пересдача":"аттестация №1"}</h1>
+        <p class="lead">${bank().length} вопросов, ${QSEC} сек. Одна попытка. Обновить страницу = продолжить ту же попытку. ${want===2?"Результат ляжет рядом с первой попыткой.":"Зачёт "+PASS+"%, эксперт "+EXPERT+"%+."}</p>
+        <button class="btn ivory" id="startExam" data-n="${want}">${want===2?"Начать пересдачу":"Начать №1"}</button>`;
+    }
+
+    function play(){
+      const m=MODELS[model]||MODELS.t4l;
+      if(done){
+        const pct=paper.length?Math.round(correct/paper.length*100):0;
+        const g=GRADE[grade(pct)];
+        return `<p class="eyebrow">${m.name} · ${mode==="exam"?(examSession===2?"пересдача":"аттестация №1"):"тренировка"}</p>
+          <h1>${pct}<span style="font-size:24px"> / 100</span></h1>
+          <p>${g.t}. ${g.l}</p>
+          <p>${correct} из ${paper.length} · ${escape(state.display)}${mode==="exam"&&examSession===2&&examRec(1)?" · было "+examRec(1).percent+"%":""}</p>
+          <div class="grid2" style="margin-top:16px">${Object.entries(byCat).map(([k,v])=>`
+            <div class="card"><div style="display:flex;justify-content:space-between"><span>${CATS[k]||k}</span><span>${v.ok}/${v.n}</span></div>
+            <div class="bar" style="margin-top:8px"><i style="width:${v.n?v.ok/v.n*100:0}%"></i></div></div>`).join("")}</div>
+          ${missed.length?`<h2 style="margin:22px 0 10px">Разбор ошибок</h2>`+missed.map(x=>`<div class="card" style="margin:8px 0"><b>${escape(x.p)}</b><p>${escape(x.x)}</p></div>`).join(""):""}
+          <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn ivory" data-go="rate">Рейтинг</button>
+            ${mode==="exam"&&canPractice()?`<button class="btn ghost" data-practice="all">Тренировка</button>`:""}
+            <button class="btn ghost" data-go="home">Модели</button>
+          </div>`;
+      }
+      const q=paper[idx];
+      const letters="ABCDEF";
+      return `<div style="display:flex;justify-content:space-between;align-items:end">
+          <div><p class="eyebrow">${m.name} · ${idx+1} / ${paper.length}</p><h2>${CATS[q.cat]||""}</h2></div>
+          ${mode==="exam"?`<div class="clock ${left<=5?"warn":""}">${left} <small style="font-size:14px;color:var(--muted)">сек</small></div>`:""}
+        </div>
+        <div class="bar" style="margin:12px 0 20px"><i style="width:${(idx/paper.length)*100}%"></i></div>
+        ${q.type==="multi"?`<span class="chip">Несколько верных</span>`:""}
+        <h2 style="font-family:system-ui;font-size:22px">${escape(q.p)}</h2>
+        ${q.o.map(([id,txt],i)=>{
+          const on=selected.includes(id); const good=q.c.includes(id);
+          let cls="opt"+(on&&!locked?" on":"");
+          if(locked && good) cls+=" good";
+          if(locked && on && !good) cls+=" bad";
+          return `<button class="${cls}" data-opt="${id}"><b style="color:var(--muted);width:18px">${letters[i]}</b><span>${escape(txt)}</span></button>`;
+        }).join("")}
+        ${locked?`<div class="explain">${okNow(q)?"Верно. ":"Неверно. "}${escape(q.x)}</div>`:""}
+        <div style="margin-top:16px">${!locked?`<button class="btn ivory" id="answer" ${selected.length?"":"disabled"}>Ответить</button>`
+          :`<button class="btn ivory" id="nextQ">${idx+1>=paper.length?"Результат":"Дальше"}</button>`}</div>`;
+    }
+
+        function rate(){
+      if(!state.surname) return login();
+      const local=Object.values(state.locks||{});
+      const all=[...remoteLocks, ...local].filter(r=>r && r.surname);
+      function bestMap(examNo, modelId){
+        const rows=all.filter(r=>Number(r.exam||1)===examNo && (r.model||"t4l")===modelId && r.status!=="running");
+        const map={};
+        rows.forEach(r=>{
+          const k=norm(r.surname||r.display);
+          if(!map[k] || (r.percent||0)>(map[k].percent||0)) map[k]={name:r.display||r.surname, percent:r.percent, key:k};
+        });
+        return map;
+      }
+      function pair(key, name, modelId){
+        const a=bestMap(1, modelId)[key];
+        const b=bestMap(2, modelId)[key];
+        return {key, name:(a&&a.name)||(b&&b.name)||name, was:a?a.percent:null, now:b?b.percent:null};
+      }
+      function pctCell(v){
+        if(v==null) return `<span class="pct">—</span>`;
+        const cls=v>=EXPERT?"ok":v<PASS?"low":"";
+        return `<span class="pct ${cls}">${v}%</span>`;
+      }
+      function personRow(p, wait){
+        const extra=wait && p.was==null && p.now==null ? `<p>ещё не сдавал</p>` : "";
+        return `<div class="rate-person"><div><b>${escape(p.name)}</b>${extra}</div>${pctCell(p.was)}${pctCell(p.now)}</div>`;
+      }
+      function modelCol(m){
+        const staffRows=STAFF.map((key,i)=>pair(key, STAFF_SHOW[i], m.id));
+        const taken=staffRows.filter(p=>p.was!=null || p.now!=null)
+          .sort((a,b)=>(b.was||0)-(a.was||0) || a.name.localeCompare(b.name,"ru"));
+        const wait=staffRows.filter(p=>p.was==null && p.now==null);
+        const guestKeys=new Set();
+        [1,2].forEach(n=>{
+          Object.values(bestMap(n, m.id)).forEach(p=>{ if(!STAFF.includes(p.key)) guestKeys.add(p.key); });
+        });
+        const guests=Array.from(guestKeys).map(k=>{
+          const a=bestMap(1,m.id)[k]; const b=bestMap(2,m.id)[k];
+          return pair(k, (a&&a.name)||(b&&b.name)||k, m.id);
+        }).sort((a,b)=>(b.was||0)-(a.was||0) || a.name.localeCompare(b.name,"ru"));
+        return `<div class="rate-col">
+          <div class="eyebrow">${m.brand}</div>
+          <h3>${m.name}</h3>
+          <div class="rate-head"><span>состав</span><span>было</span><span>стало</span></div>
+          ${taken.length?taken.map(p=>personRow(p,false)).join(""):""}
+          ${wait.map(p=>personRow(p,true)).join("")}
+          ${!taken.length && !wait.length?`<p class="empty">Пока пусто</p>`:""}
+          <div class="rate-split">гости</div>
+          ${guests.length?guests.map(p=>personRow(p,false)).join(""):`<p class="empty">Нет гостевых сдач</p>`}
+        </div>`;
+      }
+      const pinNeeded=hasExam1() && !expertLocked() && !hasExam2();
+      return `<p class="eyebrow">Отдел продаж</p><h1 style="font-size:40px">Рейтинг</h1>
+        <p class="lead">Все модели в одном блоке. Основной список — состав салона. Гости в той же колонке, под чертой. «Стало» появляется только после пересдачи (если №1 была ниже 90%).</p>
+        <p style="color:var(--muted);font-size:13px">Облако рейтинга: ${syncOk?"онлайн, все видят одни результаты":"пока не отвечает — нажмите обновить"}. <button class="btn ghost" id="syncNow">Обновить</button></p>
+        <div class="rate-board">${Object.values(MODELS).map(modelCol).join("")}</div>
+        ${pinNeeded?`
+        <p style="color:var(--muted);font-size:13px;margin-top:16px">Код РОП открывает тренировку и пересдачу по модели, выбранной на старте.</p>
+        <div class="card" style="margin-top:12px">
+          <b>Код РОП</b>
+          <label class="field"><span>Код для ${escape(state.display)} / ${MODELS[model].name}</span><input id="pin" /></label>
+          <p id="pinErr" style="color:var(--primary)">${pinErr}</p>
+          <button class="btn ghost" id="unlockHist">Открыть тренировку и пересдачу</button>
+        </div>`:`<p style="color:var(--muted);font-size:13px;margin-top:16px">${expertLocked()?"По этой модели 90%+ уже закреплены.":hasExam2()?"Пересдача по выбранной модели уже в колонке «стало».":"Сначала аттестация №1 — затем рейтинг зафиксирует результат."}</p>`}`;
+    }
+
+        function okNow(q){ return q.c.length===selected.length && q.c.every(x=>selected.includes(x)); }
+    function tryUnlock(code){
+      if((code||"").trim().toUpperCase()!==PIN){ pinErr="Неверный код."; render(); return; }
+      if(!hasExam1()){ pinErr="Сначала аттестация №1."; render(); return; }
+      if(expertLocked()){ pinErr="90%+ уже засчитаны. Пересдача не нужна."; render(); return; }
+      if(hasExam2()){ pinErr="Пересдача по этой модели уже использована."; render(); return; }
+      state.unlock[lockKey(state.surname, model, 2)]=true; save(); pinErr=""; render();
+    }
+    function compactPaper(){ return paper.map(q=>({id:q.id, o:(q.o||[]).map(x=>x[0])})); }
+    function hydratePaper(run){
+      const Q = QBY[run.model] || T4L_Q;
+      const byId = {};
+      Q.forEach(q=>byId[q.id]=q);
+      const out=[];
+      (run.paper||[]).forEach(s=>{
+        const q = byId[s.id];
+        if(!q) return;
+        const order = Array.isArray(s.o)?s.o:[];
+        const opts = order.map(id=>q.o.find(x=>x[0]===id)).filter(Boolean);
+        out.push(opts.length===q.o.length ? {...q, o:opts} : {...q, o:q.o.slice()});
+      });
+      return out;
+    }
+    function persistRun(syncCloud){
+      if(mode!=="exam" || done || !state.surname || !paper.length) return Promise.resolve();
+      const sn=norm(state.surname);
+      const prev=(state.runs||{})[sn]||{};
+      const run={
+        surname:sn, display:state.display, model, exam:examSession||1, status:"running",
+        paper:compactPaper(), idx, answers, selected,
+        qDeadline, startedAt: prev.startedAt || Date.now(), updatedAt: Date.now()
+      };
+      state.runs = state.runs || {};
+      state.runs[sn] = run;
+      save();
+      if(!syncCloud) return Promise.resolve();
+      return upsertLock({
+        surname:run.surname, display:run.display, model:run.model, exam:run.exam,
+        percent:0, at:new Date(run.startedAt).toISOString(), attempts:1,
+        status:"running",
+        run:{paper:run.paper, idx:run.idx, answers:run.answers, selected:run.selected, qDeadline:run.qDeadline, startedAt:run.startedAt}
+      });
+    }
+    function catchUp(){
+      if(mode!=="exam" || done || !paper.length) return;
+      if(!qDeadline) qDeadline = Date.now() + QSEC*1000;
+      left = Math.max(0, Math.ceil((qDeadline - Date.now())/1000));
+      if(left>0) return;
+      if(answers[idx]==null){
+        const q=paper[idx];
+        answers[idx]={id:q.id,ok:false,cat:q.cat,p:q.p,x:q.x};
+      }
+      if(idx+1>=paper.length){ finish(); return; }
+      idx++; selected=[]; locked=false;
+      qDeadline = Date.now() + QSEC*1000;
+      left = QSEC;
+      persistRun(true);
+    }
+    function resumeExam(run){
+      if(!run) return false;
+      stopTick();
+      if(run.broken || !run.paper || !run.paper.length){
+        model = run.model || model;
+        state.model = model;
+        examSession = run.exam || 1;
+        mode="exam";
+        paper = [{id:"gone",cat:"tech",type:"single",p:"Сессия прервана",o:[["a","—"]],c:["a"],x:""}];
+        answers = [{id:"gone",ok:false,cat:"tech",p:"Сессия прервана",x:""}];
+        idx=0; done=false; closing=false;
+        finish();
+        return true;
+      }
+      model = run.model || model;
+      state.model = model; save();
+      examSession = run.exam || 1;
+      window._wantExam = examSession;
+      mode="exam";
+      paper = hydratePaper(run);
+      if(!paper.length){
+        run.broken = true;
+        return resumeExam(run);
+      }
+      idx = Math.min(Math.max(0, run.idx||0), paper.length-1);
+      answers = Array.isArray(run.answers)?run.answers.slice():[];
+      selected = Array.isArray(run.selected)?run.selected.slice():[];
+      locked=false; done=false; closing=false;
+      qDeadline = run.qDeadline || (Date.now()+QSEC*1000);
+      view="play";
+      catchUp();
+      if(!done){ render(); startTick(); persistRun(true); }
+      return true;
+    }
+    async function start(kind, cat="all", examNo){
+      if(kind==="exam"){
+        const existing = userRun();
+        if(existing){ resumeExam(existing); return; }
+        const n = examNo || examSession || 1;
+        if(n===1 && !canExam1()){ view="quiz"; render(); return; }
+        if(n===2 && !canExam2()){ view="quiz"; render(); return; }
+        examSession = n;
+        stopTick();
+        mode="exam";
+        paper = pickExam();
+        idx=0; selected=[]; locked=false; done=false; closing=false; answers=[];
+        correct=0; missed=[]; byCat={}; elapsed=0;
+        qDeadline = Date.now() + QSEC*1000;
+        left = QSEC;
+        persistRun(false);
+        view="play"; render();
+        startTick();
+        persistRun(true);
+        return;
+      }
+      if(kind==="practice"){
+        if(!canPractice()){ view="home"; render(); return; }
+        if(userRun()){ resumeExam(userRun()); return; }
+        state.seenTrain[model]=true; save();
+      }
+      stopTick();
+      mode=kind;
+      paper = pickPractice(cat);
+      idx=0; selected=[]; locked=false; done=false; closing=false; answers=[];
+      correct=0; missed=[]; byCat={}; elapsed=0; left=QSEC;
+      qDeadline=0;
+      view="play"; render();
+    }
+    function startTick(){
+      stopTick();
+      const beat=()=>{
+        if(done || mode!=="exam"){ stopTick(); return; }
+        left = Math.max(0, Math.ceil((qDeadline - Date.now())/1000));
+        if(left===0 && !locked && !done) timeout();
+        else if(!done){
+          const c=document.querySelector(".clock");
+          if(c){ c.className="clock"+(left<=5?" warn":""); c.innerHTML=left+' <small style="font-size:14px;color:var(--muted)">сек</small>'; }
+        }
+      };
+      beat();
+      tick=setInterval(beat, 250);
+    }
+    function stopTick(){ if(tick) clearInterval(tick); tick=null; }
+    function timeout(){ commitAndNext(false); }
+    function commitAndNext(ok){
+      if(done||closing) return;
+      closing=true;
+      const q=paper[idx];
+      if(answers[idx]==null) answers[idx]={id:q.id,ok:!!ok,cat:q.cat,p:q.p,x:q.x};
+      persistRun(true);
+      next(); closing=false;
+    }
+    function tally(){
+      const rows=paper.map((q,i)=>answers[i]||{id:q.id,ok:false,cat:q.cat,p:q.p,x:q.x});
+      correct=rows.filter(r=>r.ok).length;
+      missed=rows.filter(r=>!r.ok).map(r=>({id:r.id,p:r.p,x:r.x}));
+      byCat={};
+      rows.forEach(r=>{ byCat[r.cat]=byCat[r.cat]||{ok:0,n:0}; byCat[r.cat].n++; if(r.ok) byCat[r.cat].ok++; });
+      return paper.length?Math.round(correct/paper.length*100):0;
+    }
+    async function finish(){
+      stopTick(); done=true;
+      const pct=tally();
+      const item={id:Date.now().toString(36),name:state.display,model,mode,percent:pct,ok:correct,n:paper.length,date:new Date().toISOString()};
+      state.history=[item,...state.history].slice(0,50);
+      if(mode==="exam"){
+        const n=examSession||1;
+        const prev=examRec(n)||{attempts:0};
+        if(n===2) delete state.unlock[lockKey(state.surname, model, 2)];
+        const rec={surname:norm(state.surname),display:state.display,model,exam:n,percent:pct,at:item.date,attempts:(prev.attempts||0)+1,status:"done"};
+        const sn=norm(state.surname);
+        if(state.runs && state.runs[sn]) state.runs[sn].status="done";
+        state.lastCode=packResult(rec); save();
+        await upsertLock(rec);
+        if(state.runs) delete state.runs[sn];
+      }
+      save(); render();
+    }
+    function next(){ if(idx+1>=paper.length) finish(); else { idx++; selected=[]; locked=false; qDeadline=Date.now()+QSEC*1000; left=QSEC; persistRun(true); render(); } }
+    function bind(){
+      document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{
+        if(inExam() || (userRun() && !done)){ view="play"; if(!paper.length) resumeExam(userRun()); else render(); return; }
+        goSection(b.dataset.go);
+      });
+      document.querySelectorAll("[data-stock]").forEach(b=>b.onclick=()=>{ stockFilter=b.dataset.stock; render(); });
+      document.querySelectorAll("[data-stock-st]").forEach(b=>b.onclick=()=>{ stockStatus=b.dataset.stockSt; render(); });
+      const cPreset=document.getElementById("cPreset");
+      if(cPreset) cPreset.onchange=()=>{
+        const p=Number(cPreset.value)||0;
+        const price=document.getElementById("cPrice");
+        const down=document.getElementById("cDown");
+        if(price) price.value=String(p);
+        if(down) down.value=String(Math.round(p*0.2));
+        view="calc"; render();
+      };
+      ["cPrice","cDown","cMonths","cRate"].forEach(id=>{
+        const el=document.getElementById(id);
+        if(el) el.addEventListener("change", ()=>{ view="calc"; render(); });
+      });
+      document.querySelectorAll("[data-model]").forEach(b=>b.onclick=()=>{
+        if(inExam() || (userRun() && !done)){ view="play"; if(!paper.length) resumeExam(userRun()); else render(); return; }
+        model=b.dataset.model; state.model=model; save(); render();
+      });
+      document.querySelectorAll("[data-practice]").forEach(b=>b.onclick=()=>start("practice", b.dataset.practice));
+      const doLogin=document.getElementById("doLogin");
+      if(doLogin) doLogin.onclick=async()=>{
+        const v=(document.getElementById("surname").value||"").trim();
+        const pinRaw=((document.getElementById("loginPin")||{}).value||"").trim();
+        const err=document.getElementById("loginErr");
+        if(!err) return;
+        if(v.length<2){ err.textContent="Введите фамилию."; return; }
+        if(!pinRaw){ err.textContent="Введите личный код от РОП."; return; }
+        err.textContent="Проверяю код…";
+        const sn=norm(v);
+        const baked=await bakedPin(sn);
+        if(pinEq(pinRaw, baked)){
+          state.surname=sn; state.display=v.replace(/\s+/g," "); state.authed=true; save();
+          refreshLocks().catch(()=>{});
+          if(userRun()){ resumeExam(userRun()); return; }
+          view="hub"; state.section="hub"; render();
+          return;
+        }
+        await refreshLocks();
+        const rec=(remoteLocks||[]).find(x=>x && x.type==="login" && x.surname===sn);
+        const cloud=rec && rec.code;
+        const ok=pinEq(pinRaw, cloud);
+        if(!ok){
+          if(!syncOk && !baked){
+            err.textContent="Нет связи с сервером кодов. Откройте сайт в Chrome или Safari — не из Telegram — и повторите.";
+            return;
+          }
+          if(!cloud && !baked){
+            err.textContent="Код для этой фамилии ещё не выдан. Нажмите «Запросить код у РОП».";
+            return;
+          }
+          err.textContent="Неверный код. Только цифры, без пробелов. Откройте сайт в Chrome / Safari, не из Telegram.";
+          return;
+        }
+        state.surname=sn; state.display=v.replace(/\s+/g," "); state.authed=true; save();
+        if(userRun()){ resumeExam(userRun()); return; }
+        view="hub"; state.section="hub"; render();
+      };
+      ["surname","loginPin"].forEach(id=>{
+        const el=document.getElementById(id);
+        if(el) el.addEventListener("keydown", e=>{ if(e.key==="Enter"){ e.preventDefault(); if(doLogin) doLogin.click(); } });
+      });
+      const logout=document.getElementById("logout");
+      if(logout) logout.onclick=()=>{ persistRun(true); stopTick(); state.surname=""; state.display=""; state.authed=false; save(); view="login"; paper=[]; mode="exam"; done=false; render(); };
+      document.querySelectorAll("[data-exam]").forEach(b=>b.onclick=()=>{ examSession=Number(b.dataset.exam)||1; window._wantExam=examSession; view="quiz"; render(); });
+      document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{ studyTab=b.dataset.tab; render(); });
+      document.querySelectorAll("[data-rate]").forEach(b=>b.onclick=()=>{ rateModel=b.dataset.rate; render(); });
+      const se=document.getElementById("startExam");
+      if(se) se.onclick=()=>start("exam", "all", Number(se.dataset.n)||examSession||1);
+      document.querySelectorAll("[data-opt]").forEach(b=>b.onclick=()=>{
+        if(locked) return;
+        const id=b.dataset.opt; const q=paper[idx];
+        if(q.type==="single") selected=[id];
+        else selected=selected.includes(id)?selected.filter(x=>x!==id):[...selected,id];
+        if(mode==="exam") persistRun(false);
+        render();
+      });
+      const ans=document.getElementById("answer");
+      if(ans) ans.onclick=()=>{
+        const q=paper[idx]; const ok=okNow(q);
+        if(mode==="practice"){
+          if(answers[idx]==null) answers[idx]={id:q.id,ok:!!ok,cat:q.cat,p:q.p,x:q.x};
+          locked=true; render();
+        } else commitAndNext(ok);
+      };
+      const nq=document.getElementById("nextQ");
+      if(nq) nq.onclick=next;
+      const uh=document.getElementById("unlockHome");
+      if(uh) uh.onclick=()=>tryUnlock((document.getElementById("pinHome")||{}).value);
+      const ub=document.getElementById("unlockBrief");
+      if(ub) ub.onclick=()=>tryUnlock((document.getElementById("pinBrief")||{}).value);
+      const sn=document.getElementById("syncNow");
+      if(sn) sn.onclick=async()=>{ await refreshLocks(); render(); };
+      const im=document.getElementById("importNow");
+      if(im) im.onclick=async()=>{
+        try{
+          const rec=unpackResult((document.getElementById("importCode")||{}).value||"");
+          if(!rec || !rec.surname || rec.percent==null) throw new Error("Пустой код");
+          rec.status="done";
+          await upsertLock(rec);
+          pinErr="";
+          await refreshLocks();
+          render();
+        }catch(e){ pinErr="Не удалось прочитать код."; render(); }
+      };
+      const uhi=document.getElementById("unlockHist");
+      if(uhi) uhi.onclick=()=>tryUnlock((document.getElementById("pin")||{}).value);
+    }
+    try { render(); }
+    catch(e){
+      const root=document.getElementById("app");
+      if(root) root.innerHTML="<p>Сбой запуска. Обновите страницу.</p>";
+    }
+    document.addEventListener("visibilitychange", ()=>{
+      if(document.hidden){ persistRun(false); return; }
+      if(inExam()){ catchUp(); if(!done) render(); }
+    });
+    window.addEventListener("pagehide", ()=>{ persistRun(true); });
+    refreshLocks().then(()=>{
+      if(state.authed && state.surname && userRun() && !done){ resumeExam(userRun()); return; }
+      if(view==="home"||view==="rate"||view==="hub") render();
+    }).catch(()=>{});
+    if(state.authed && state.surname && userRun() && !done && !paper.length) resumeExam(userRun());
+  </script>
+</body>
+</html>

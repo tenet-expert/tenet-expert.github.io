@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" preserveAspectRatio="xMidYMid slice">
+  <rect width="800" height="500" fill="#e8dfd0"/>
+  <rect x="0" y="0" width="220" height="500" fill="#d9cbb6"/>
+  <rect x="196" y="58" width="430" height="384" rx="18" fill="#6b4f3a"/>
+  <rect x="214" y="86" width="394" height="338" rx="8" fill="#f4ead8"/>
+  <rect x="348" y="64" width="126" height="28" rx="6" fill="#c9c2b4"/>
+  <g fill="none" stroke="#2a2a2a" stroke-width="3">
+    <rect x="246" y="126" width="22" height="22" rx="3"/>
+    <rect x="246" y="176" width="22" height="22" rx="3"/>
+    <rect x="246" y="226" width="22" height="22" rx="3"/>
+    <rect x="246" y="276" width="22" height="22" rx="3"/>
+    <rect x="246" y="326" width="22" height="22" rx="3"/>
+    <path d="M250 137l6 7 12-14"/>
+    <path d="M250 187l6 7 12-14"/>
+    <path d="M250 237l6 7 12-14"/>
+    <path d="M250 287l6 7 12-14"/>
+  </g>
+  <g stroke="#cbbba3" stroke-width="3">
+    <path d="M286 138h290"/>
+    <path d="M286 188h290"/>
+    <path d="M286 238h290"/>
+    <path d="M286 288h290"/>
+    <path d="M286 338h290"/>
+  </g>
+  <rect x="520" y="350" width="150" height="18" rx="9" fill="#2b2b2b"/>
+</svg>
