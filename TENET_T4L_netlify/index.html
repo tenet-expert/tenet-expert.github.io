@@ -99,7 +99,7 @@ input,textarea{width:100%;background:#fff;border:1px solid var(--border);color:v
 .rate-col{flex:1 0 196px;min-width:196px;border:1px solid var(--border);background:var(--surface);border-radius:var(--radius);padding:12px 12px 10px;box-shadow:var(--shadow);}
 .rate-col .eyebrow{margin-bottom:2px;}
 .rate-col h3{font-size:17px;margin:0 0 10px;letter-spacing:-.03em;}
-.rate-head,.rate-person{display:grid;grid-template-columns:minmax(0,1fr) 44px 44px;gap:4px;align-items:center;}
+.rate-head,.rate-person{display:grid;grid-template-columns:minmax(0,1fr) 44px 44px;gap:4px;align-items:center;}.rate-person .pct.span2{grid-column:2/4;text-align:center;}
 .rate-head{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600;padding:0 0 6px;border-bottom:1px solid var(--border);}
 .rate-head span:nth-child(2),.rate-head span:nth-child(3),.rate-person .pct{text-align:right;}
 .rate-person{padding:8px 0;border-bottom:1px solid var(--border);}
@@ -281,9 +281,11 @@ input,textarea{width:100%;background:#fff;border:1px solid var(--border);color:v
     const PRICE = { date: "01.09.2026", active: 2329000, prime: 2479000, delta: 150000 };
     const PASS = 80, EXPERT = 90, QSEC = 30, PRACTICE_N = 12;
     const PIN = "РОП26";
-    const LOGIN_PINS = {"леонтьев":"1010","спицын":"6669","кокуркин":"8736","якубовская":"6588","сидоров":"4969","лавров":"7472","тальков":"9858","ахмадуллин":"3597","демьянов":"8942"};
+    const LOGIN_PINS = {"леонтьев":"1010","спицын":"3759","кокуркин":"8736","якубовская":"6588","сидоров":"4969","лавров":"7472","тальков":"9858","ахмадуллин":"3597","демьянов":"8942"};
     const CLOUD_ID = "o6nq7rki";
     const CLOUD_KEY = "4fmBrr2H";
+    const RATE_SEED = [{"surname": "леонтьев", "display": "Леонтьев", "model": "t8", "exam": 1, "percent": 94, "status": "done"}, {"surname": "леонтьев", "display": "Леонтьев", "model": "t4l", "exam": 1, "percent": 86, "status": "done"}, {"surname": "леонтьев", "display": "Леонтьев", "model": "t7", "exam": 1, "percent": 79, "status": "done"}, {"surname": "леонтьев", "display": "Леонтьев", "model": "t9", "exam": 1, "percent": 100, "status": "done"}, {"surname": "леонтьев", "display": "Леонтьев", "model": "a8", "exam": 1, "percent": 97, "status": "done"}, {"surname": "извеков", "display": "Извеков", "model": "t8", "exam": 1, "percent": 97, "status": "done"}, {"surname": "коропец", "display": "Коропец", "model": "t4l", "exam": 1, "percent": 85, "status": "done"}, {"surname": "коропец", "display": "Коропец", "model": "a8", "exam": 1, "percent": 92, "status": "done"}, {"surname": "коропец", "display": "Коропец", "model": "t8", "exam": 1, "percent": 94, "status": "done"}, {"surname": "коропец", "display": "Коропец", "model": "t7", "exam": 1, "percent": 90, "status": "done"}, {"surname": "коропец", "display": "Коропец", "model": "t9", "exam": 1, "percent": 92, "status": "done"}, {"surname": "ахмадуллин", "display": "Ахмадуллин", "model": "t7", "exam": 1, "percent": 78, "status": "done"}, {"surname": "ахмадуллин", "display": "Ахмадуллин", "model": "t4l", "exam": 1, "percent": 89, "status": "done"}, {"surname": "ахмадуллин", "display": "Ахмадуллин", "model": "t9", "exam": 1, "percent": 95, "status": "done"}, {"surname": "сидоров", "display": "Сидоров", "model": "t4l", "exam": 1, "percent": 98, "status": "done"}, {"surname": "сидоров", "display": "Сидоров", "model": "t7", "exam": 1, "percent": 100, "status": "done"}, {"surname": "сидоров", "display": "Сидоров", "model": "t8", "exam": 1, "percent": 97, "status": "done"}, {"surname": "сидоров", "display": "Сидоров", "model": "t9", "exam": 1, "percent": 100, "status": "done"}, {"surname": "сидоров", "display": "Сидоров", "model": "a8", "exam": 1, "percent": 94, "status": "done"}, {"surname": "спицын", "display": "Спицын", "model": "t4l", "exam": 1, "percent": 96, "status": "done"}, {"surname": "спицын", "display": "Спицын", "model": "t7", "exam": 1, "percent": 98, "status": "done"}, {"surname": "спицын", "display": "Спицын", "model": "t8", "exam": 1, "percent": 97, "status": "done"}, {"surname": "лавров", "display": "Лавров", "model": "t4l", "exam": 1, "percent": 77, "ok": 36, "n": 47, "status": "done", "at": "2026-09-16T12:38:00.000Z", "attempts": 1}];
+
     const CATS = {
       tech: "Техника", trims: "Комплектации", price: "Цены", rival: "Конкуренты", safety: "Безопасность"
     };
@@ -588,7 +590,7 @@ input,textarea{width:100%;background:#fff;border:1px solid var(--border);color:v
       {name:"T7 Прайм 4WD", rec:3190000, max:3040000, trade:150000, credit:0}
     ];
     const STOCK_META = {updated:"09.09.2026", dealer:"ООО «ЭКСПЕРТ АВТО САМАРА»"};
-    const STOCK = [{"vin": "EDELB31B1TE103208", "model": "t4l", "name": "T4L", "trim": "Актив", "color": "Белый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDELB31B2TE104643", "model": "t4l", "name": "T4L", "trim": "Актив", "color": "Белый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": true, "salon": "", "prod": "", "rrc": null}, {"vin": "EDELB31B2TE106361", "model": "t4l", "name": "T4L", "trim": "Актив", "color": "Белый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": true, "salon": "", "prod": "", "rrc": null}, {"vin": "EDELB31B4TE104739", "model": "t4l", "name": "T4L", "trim": "Актив", "color": "Белый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": true, "salon": "", "prod": "", "rrc": null}, {"vin": "EDELB31B9TE073827", "model": "t4l", "name": "T4L", "trim": "Актив", "color": "Белый", "status": "in", "note": "В салоне · с 25.06.2026", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDELB31B0TE106553", "model": "t4l", "name": "T4L", "trim": "Актив", "color": "Светло-серый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": true, "salon": "", "prod": "", "rrc": null}, {"vin": "EDELB31B1TE106724", "model": "t4l", "name": "T4L", "trim": "Актив", "color": "Светло-серый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDELB31B3TE099534", "model": "t4l", "name": "T4L", "trim": "Актив", "color": "Светло-серый", "status": "in", "note": "В салоне · с 22.08.2026", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDELB31B3TE106711", "model": "t4l", "name": "T4L", "trim": "Актив", "color": "Светло-серый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": true, "salon": "", "prod": "", "rrc": null}, {"vin": "EDELB31B5TE106502", "model": "t4l", "name": "T4L", "trim": "Актив", "color": "Светло-серый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": true, "salon": "", "prod": "", "rrc": null}, {"vin": "EDELB31B6TE106766", "model": "t4l", "name": "T4L", "trim": "Актив", "color": "Светло-серый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": true, "salon": "", "prod": "", "rrc": null}, {"vin": "EDELB31B7TE099729", "model": "t4l", "name": "T4L", "trim": "Актив", "color": "Светло-серый", "status": "in", "note": "В салоне · с 22.08.2026", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDELB31B5TE106449", "model": "t4l", "name": "T4L", "trim": "Актив", "color": "Чёрный", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": true, "salon": "", "prod": "", "rrc": null}, {"vin": "EDELB31B9TE103098", "model": "t4l", "name": "T4L", "trim": "Актив", "color": "Чёрный", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDELB31BXTE106401", "model": "t4l", "name": "T4L", "trim": "Актив", "color": "Чёрный", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": true, "salon": "", "prod": "", "rrc": null}, {"vin": "EDELB31B3TE093989", "model": "t4l", "name": "T4L", "trim": "Прайм", "color": "Белый", "status": "in", "note": "В салоне · с 06.08.2026", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDELB31B4TE106023", "model": "t4l", "name": "T4L", "trim": "Прайм", "color": "Белый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": true, "salon": "", "prod": "", "rrc": null}, {"vin": "EDELB31B6TE095588", "model": "t4l", "name": "T4L", "trim": "Прайм", "color": "Белый", "status": "in", "note": "В салоне · с 10.08.2026", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDELB31B7TE106047", "model": "t4l", "name": "T4L", "trim": "Прайм", "color": "Белый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": true, "salon": "", "prod": "", "rrc": null}, {"vin": "EDELB31B9TE105899", "model": "t4l", "name": "T4L", "trim": "Прайм", "color": "Белый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": true, "salon": "", "prod": "", "rrc": null}, {"vin": "EDELB31B9TE105966", "model": "t4l", "name": "T4L", "trim": "Прайм", "color": "Белый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": true, "salon": "", "prod": "", "rrc": null}, {"vin": "EDELB31BXTE095545", "model": "t4l", "name": "T4L", "trim": "Прайм", "color": "Белый", "status": "in", "note": "В салоне · с 06.08.2026", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDELB31BXTE104549", "model": "t4l", "name": "T4L", "trim": "Прайм", "color": "Белый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": true, "salon": "", "prod": "", "rrc": null}, {"vin": "EDEEB31B8TE003261", "model": "t4l", "name": "T4L", "trim": "Прайм", "color": "Светло-серый", "status": "in", "note": "В салоне · с 06.08.2026", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDELB31B0TE096879", "model": "t4l", "name": "T4L", "trim": "Прайм", "color": "Чёрный", "status": "in", "note": "В салоне · с 15.08.2026", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDELB31B4TE096853", "model": "t4l", "name": "T4L", "trim": "Прайм", "color": "Чёрный", "status": "in", "note": "В салоне · с 15.08.2026", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDELB31B7TE105710", "model": "t4l", "name": "T4L", "trim": "Прайм", "color": "Чёрный", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": true, "salon": "", "prod": "", "rrc": null}, {"vin": "EDELB31B9TE105739", "model": "t4l", "name": "T4L", "trim": "Прайм", "color": "Чёрный", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": true, "salon": "", "prod": "", "rrc": null}, {"vin": "EDEFB32B2TE105383", "model": "t7", "name": "T7", "trim": "Актив", "color": "Белый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": false, "salon": "", "prod": "26.08.2026", "rrc": null}, {"vin": "EDEFB32B4TE105370", "model": "t7", "name": "T7", "trim": "Актив", "color": "Белый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": false, "salon": "", "prod": "25.08.2026", "rrc": null}, {"vin": "EDEFB32B8TE105355", "model": "t7", "name": "T7", "trim": "Актив", "color": "Белый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": false, "salon": "", "prod": "25.08.2026", "rrc": null}, {"vin": "EDEFB32BXTE100707", "model": "t7", "name": "T7", "trim": "Актив", "color": "Белый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": false, "salon": "", "prod": "25.08.2026", "rrc": null}, {"vin": "EDEFB32B2TE105500", "model": "t7", "name": "T7", "trim": "Актив", "color": "Чёрный", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": false, "salon": "", "prod": "25.08.2026", "rrc": null}, {"vin": "EDXFB32B2TE041658", "model": "t7", "name": "T7", "trim": "Актив", "color": "Чёрный", "status": "in", "note": "В салоне · с 08.05.2026", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDXFB32B4TE041659", "model": "t7", "name": "T7", "trim": "Актив", "color": "Чёрный", "status": "in", "note": "В салоне · с 08.05.2026", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDXFB32B7TE062327", "model": "t7", "name": "T7", "trim": "Актив", "color": "Чёрный", "status": "in", "note": "В салоне · с 04.06.2026", "invoice": false, "salon": "", "prod": "26.05.2026", "rrc": null}, {"vin": "EDXFD32B0TE033634", "model": "t7", "name": "T7", "trim": "Актив 4WD", "color": "Белый", "status": "in", "note": "В салоне · с 13.07.2026", "invoice": false, "salon": "", "prod": "30.03.2026", "rrc": null}, {"vin": "EDXFD32B2TE042710", "model": "t7", "name": "T7", "trim": "Актив 4WD", "color": "Белый", "status": "in", "note": "В салоне · с 10.08.2026", "invoice": false, "salon": "", "prod": "16.04.2026", "rrc": null}, {"vin": "EDXFD32B3TE070113", "model": "t7", "name": "T7", "trim": "Актив 4WD", "color": "Чёрный", "status": "in", "note": "В салоне · с 10.08.2026", "invoice": false, "salon": "", "prod": "11.06.2026", "rrc": null}, {"vin": "EDXFD32B4TE070279", "model": "t7", "name": "T7", "trim": "Актив 4WD", "color": "Чёрный", "status": "in", "note": "В салоне · с 13.08.2026", "invoice": false, "salon": "", "prod": "10.06.2026", "rrc": null}, {"vin": "EDXFD32B7TE039754", "model": "t7", "name": "T7", "trim": "Актив 4WD", "color": "Чёрный", "status": "in", "note": "В салоне · с 13.05.2026", "invoice": false, "salon": "", "prod": "10.04.2026", "rrc": null}, {"vin": "EDEFB32B0TE106984", "model": "t7", "name": "T7", "trim": "Прайм", "color": "Белый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": true, "salon": "", "prod": "27.08.2026", "rrc": null}, {"vin": "EDEFB32B1TE106895", "model": "t7", "name": "T7", "trim": "Прайм", "color": "Белый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": true, "salon": "", "prod": "27.08.2026", "rrc": null}, {"vin": "EDEFB32B1TE106959", "model": "t7", "name": "T7", "trim": "Прайм", "color": "Белый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": true, "salon": "", "prod": "27.08.2026", "rrc": null}, {"vin": "EDEFB32B2TE106842", "model": "t7", "name": "T7", "trim": "Прайм", "color": "Белый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": true, "salon": "", "prod": "27.08.2026", "rrc": null}, {"vin": "EDEFB32B2TE106999", "model": "t7", "name": "T7", "trim": "Прайм", "color": "Белый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": true, "salon": "", "prod": "27.08.2026", "rrc": null}, {"vin": "EDEFB32B3TE099318", "model": "t7", "name": "T7", "trim": "Прайм", "color": "Белый", "status": "in", "note": "В салоне · с 25.08.2026", "invoice": false, "salon": "Чёрный/коричневый", "prod": "15.08.2026", "rrc": null}, {"vin": "EDEFB32B8TE099203", "model": "t7", "name": "T7", "trim": "Прайм", "color": "Белый", "status": "in", "note": "В салоне · с 22.08.2026", "invoice": false, "salon": "Чёрный/коричневый", "prod": "15.08.2026", "rrc": null}, {"vin": "EDXFB32B1TE087336", "model": "t7", "name": "T7", "trim": "Прайм", "color": "Светло-серый", "status": "in", "note": "В салоне · с 07.09.2026", "invoice": false, "salon": "Чёрный/коричневый", "prod": "", "rrc": null}, {"vin": "EDXFB32B3TE091114", "model": "t7", "name": "T7", "trim": "Прайм", "color": "Чёрный", "status": "in", "note": "В салоне · с 07.09.2026", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDEFD32B1TE101190", "model": "t7", "name": "T7", "trim": "Прайм 4WD", "color": "Белый", "status": "in", "note": "В салоне · с 23.08.2026", "invoice": false, "salon": "Чёрный/коричневый", "prod": "18.08.2026", "rrc": null}, {"vin": "EDEFD32B5TE102522", "model": "t7", "name": "T7", "trim": "Прайм 4WD", "color": "Белый", "status": "in", "note": "В салоне · с 23.08.2026", "invoice": false, "salon": "", "prod": "20.08.2026", "rrc": null}, {"vin": "EDEFD32B5TE102570", "model": "t7", "name": "T7", "trim": "Прайм 4WD", "color": "Белый", "status": "in", "note": "В салоне · с 23.08.2026", "invoice": false, "salon": "", "prod": "20.08.2026", "rrc": null}, {"vin": "EDEFD32B5TE102360", "model": "t7", "name": "T7", "trim": "Прайм 4WD", "color": "Светло-серый", "status": "in", "note": "В салоне · с 23.08.2026", "invoice": false, "salon": "", "prod": "20.08.2026", "rrc": null}, {"vin": "EDEFD32B5TE102228", "model": "t7", "name": "T7", "trim": "Прайм 4WD", "color": "Чёрный", "status": "in", "note": "В салоне · с 23.08.2026", "invoice": false, "salon": "", "prod": "20.08.2026", "rrc": null}, {"vin": "EDXFD32B3TE092581", "model": "t7", "name": "T7", "trim": "Прайм 4WD", "color": "Чёрный", "status": "in", "note": "В салоне · с 25.08.2026", "invoice": false, "salon": "", "prod": "17.08.2026", "rrc": null}, {"vin": "EDXFD32B4TE092587", "model": "t7", "name": "T7", "trim": "Прайм 4WD", "color": "Чёрный", "status": "in", "note": "В салоне · с 25.08.2026", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDXFD32B4TE092590", "model": "t7", "name": "T7", "trim": "Прайм 4WD", "color": "Чёрный", "status": "in", "note": "В салоне · с 25.08.2026", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDEFB32B2TE105108", "model": "t7", "name": "T7", "trim": "Актив", "color": "Белый", "status": "way", "note": "Калуга · склад дистрибьютора", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDEFB32B3TE112410", "model": "t7", "name": "T7", "trim": "Актив", "color": "Белый", "status": "way", "note": "Калуга · склад дистрибьютора", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDEFB32B5TE109881", "model": "t7", "name": "T7", "trim": "Актив", "color": "Белый", "status": "way", "note": "Едет к дилеру · Отгружен", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDEFB32B5TE110013", "model": "t7", "name": "T7", "trim": "Актив", "color": "Голубой", "status": "way", "note": "Калуга · Подтвержден к отгрузке", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDEFB32B2TE107327", "model": "t7", "name": "T7", "trim": "Актив", "color": "Чёрный", "status": "way", "note": "Калуга · склад дистрибьютора", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDEFB32BXTE107432", "model": "t7", "name": "T7", "trim": "Актив", "color": "Чёрный", "status": "way", "note": "Калуга · склад дистрибьютора", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDXGB32B3TE076049", "model": "t8", "name": "T8", "trim": "Актив 5 мест 2WD", "color": "Белый", "status": "in", "note": "В салоне · с 13.07.2026", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDXGD34B8TE095347", "model": "t8", "name": "T8", "trim": "Прайм 7 мест 4WD", "color": "Белый", "status": "in", "note": "В салоне · с 15.08.2026", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDXGD34B1TE022143", "model": "t8", "name": "T8", "trim": "Прайм 7 мест 4WD", "color": "Светло-серый", "status": "in", "note": "В салоне · с 29.06.2026", "invoice": true, "salon": "", "prod": "", "rrc": null}, {"vin": "EDXGD34B5TE082040", "model": "t8", "name": "T8", "trim": "Прайм 7 мест 4WD", "color": "Светло-серый", "status": "in", "note": "В салоне · с 29.07.2026", "invoice": true, "salon": "", "prod": "", "rrc": null}, {"vin": "EDXGD34BXTE081949", "model": "t8", "name": "T8", "trim": "Прайм 7 мест 4WD", "color": "Светло-серый", "status": "in", "note": "В салоне · с 29.07.2026", "invoice": true, "salon": "", "prod": "", "rrc": null}, {"vin": "EDXGD34B0TE082608", "model": "t8", "name": "T8", "trim": "Прайм 7 мест 4WD", "color": "Тёмно-зелёный", "status": "in", "note": "В салоне · с 29.07.2026", "invoice": true, "salon": "", "prod": "", "rrc": null}, {"vin": "EDXGD34B8TE082601", "model": "t8", "name": "T8", "trim": "Прайм 7 мест 4WD", "color": "Тёмно-зелёный", "status": "in", "note": "В салоне · с 29.07.2026", "invoice": true, "salon": "", "prod": "", "rrc": null}, {"vin": "EDXGD34B9TE082641", "model": "t8", "name": "T8", "trim": "Прайм 7 мест 4WD", "color": "Тёмно-зелёный", "status": "in", "note": "В салоне · с 27.07.2026", "invoice": true, "salon": "", "prod": "", "rrc": null}, {"vin": "EDXGD34B5TE095631", "model": "t8", "name": "T8", "trim": "Прайм 7 мест 4WD", "color": "Чёрный", "status": "in", "note": "В салоне · с 25.08.2026", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDXGD34B6TE031162", "model": "t8", "name": "T8", "trim": "Прайм 7 мест 4WD", "color": "Чёрный", "status": "in", "note": "В салоне · с 27.06.2026", "invoice": true, "salon": "", "prod": "", "rrc": null}, {"vin": "EDXGD34B8TE095641", "model": "t8", "name": "T8", "trim": "Прайм 7 мест 4WD", "color": "Чёрный", "status": "in", "note": "В салоне · с 06.09.2026", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDXGD34B3TE031815", "model": "t8", "name": "T8", "trim": "Ультра 7 мест 4WD", "color": "Белый", "status": "in", "note": "В салоне · с 12.06.2026", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDXGD34B2TE057953", "model": "t8", "name": "T8", "trim": "Ультра 7 мест 4WD", "color": "Тёмно-зелёный", "status": "in", "note": "В салоне · с 25.07.2026", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDXGB32B0TE110108", "model": "t8", "name": "T8", "trim": "Прайм 5 мест 2WD", "color": "Белый", "status": "way", "note": "Калуга · Подтвержден к отгрузке", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDXGD34B2TE109064", "model": "t8", "name": "T8", "trim": "Прайм 7 мест 4WD", "color": "Тёмно-зелёный", "status": "way", "note": "Калуга · Подтвержден к отгрузке", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDXGD34B4TE050793", "model": "t8", "name": "T8", "trim": "Ультра 7 мест 4WD", "color": "Светло-серый", "status": "way", "note": "Домодедово · Готов к отгрузке", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDXGD34B7TE034443", "model": "t8", "name": "T8", "trim": "Ультра 7 мест 4WD", "color": "Чёрный", "status": "way", "note": "Домодедово · Готов к отгрузке", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDEDD24BXSG010341", "model": "t9", "name": "Tiggo 9", "trim": "Ультра 4WD", "color": "Белый", "status": "in", "note": "В салоне · с 15.08.2026", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDEDD24B2SG003755", "model": "t9", "name": "Tiggo 9", "trim": "Ультра 4WD", "color": "Светло-серый", "status": "in", "note": "В салоне · с 25.04.2026", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "EDEDD24B3SG003926", "model": "t9", "name": "Tiggo 9", "trim": "Ультра 4WD", "color": "Серый матовый", "status": "in", "note": "В салоне · с 25.04.2026", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "LVVDC21B0SD594112", "model": "a8", "name": "Arrizo 8", "trim": "Прайм", "color": "Белый", "status": "in", "note": "В салоне · с 04.05.2026", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "LVVDC21B7SD594110", "model": "a8", "name": "Arrizo 8", "trim": "Прайм", "color": "Белый", "status": "in", "note": "В салоне · с 26.06.2026", "invoice": false, "salon": "", "prod": "", "rrc": null}, {"vin": "LVVDC21B2SDJ34062", "model": "a8", "name": "Arrizo 8", "trim": "Прайм", "color": "Чёрный", "status": "in", "note": "В салоне · с 23.06.2026", "invoice": false, "salon": "", "prod": "", "rrc": null}];
+    const STOCK = [{"vin": "EDELB31B1TE103208", "model": "t4l", "name": "T4L", "trim": "Актив", "color": "Белый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": false, "salon": "", "prod": "", "rrc": null, "demo": false}, {"vin": "EDELB31B2TE104643", "model": "t4l", "name": "T4L", "trim": "Актив", "color": "Белый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": true, "salon": "", "prod": "", "rrc": null, "demo": false}, {"vin": "EDELB31B2TE106361", "model": "t4l", "name": "T4L", "trim": "Актив", "color": "Белый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": true, "salon": "", "prod": "", "rrc": null, "demo": false}, {"vin": "EDELB31B4TE104739", "model": "t4l", "name": "T4L", "trim": "Актив", "color": "Белый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": true, "salon": "", "prod": "", "rrc": null, "demo": false}, {"vin": "EDELB31B9TE073827", "model": "t4l", "name": "T4L", "trim": "Актив", "color": "Белый", "status": "in", "note": "В салоне · с 25.06.2026", "invoice": false, "salon": "", "prod": "", "rrc": null, "demo": false}, {"vin": "EDELB31B0TE106553", "model": "t4l", "name": "T4L", "trim": "Актив", "color": "Светло-серый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": true, "salon": "", "prod": "", "rrc": null, "demo": false}, {"vin": "EDELB31B1TE106724", "model": "t4l", "name": "T4L", "trim": "Актив", "color": "Светло-серый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": false, "salon": "", "prod": "", "rrc": null, "demo": false}, {"vin": "EDELB31B3TE099534", "model": "t4l", "name": "T4L", "trim": "Актив", "color": "Светло-серый", "status": "in", "note": "В салоне · с 22.08.2026", "invoice": false, "salon": "", "prod": "", "rrc": null, "demo": false}, {"vin": "EDELB31B3TE106711", "model": "t4l", "name": "T4L", "trim": "Актив", "color": "Светло-серый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": true, "salon": "", "prod": "", "rrc": null, "demo": false}, {"vin": "EDELB31B5TE106502", "model": "t4l", "name": "T4L", "trim": "Актив", "color": "Светло-серый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": true, "salon": "", "prod": "", "rrc": null, "demo": false}, {"vin": "EDELB31B6TE106766", "model": "t4l", "name": "T4L", "trim": "Актив", "color": "Светло-серый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": true, "salon": "", "prod": "", "rrc": null, "demo": false}, {"vin": "EDELB31B7TE099729", "model": "t4l", "name": "T4L", "trim": "Актив", "color": "Светло-серый", "status": "in", "note": "В салоне · с 22.08.2026", "invoice": false, "salon": "", "prod": "", "rrc": null, "demo": false}, {"vin": "EDELB31B5TE106449", "model": "t4l", "name": "T4L", "trim": "Актив", "color": "Чёрный", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": true, "salon": "", "prod": "", "rrc": null, "demo": false}, {"vin": "EDELB31B9TE103098", "model": "t4l", "name": "T4L", "trim": "Актив", "color": "Чёрный", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": false, "salon": "", "prod": "", "rrc": null, "demo": false}, {"vin": "EDELB31BXTE106401", "model": "t4l", "name": "T4L", "trim": "Актив", "color": "Чёрный", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": true, "salon": "", "prod": "", "rrc": null, "demo": false}, {"vin": "EDELB31B3TE093989", "model": "t4l", "name": "T4L", "trim": "Прайм", "color": "Белый", "status": "in", "note": "В салоне · с 06.08.2026", "invoice": false, "salon": "", "prod": "", "rrc": null, "demo": false}, {"vin": "EDELB31B4TE106023", "model": "t4l", "name": "T4L", "trim": "Прайм", "color": "Белый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": true, "salon": "", "prod": "", "rrc": null, "demo": false}, {"vin": "EDELB31B6TE095588", "model": "t4l", "name": "T4L", "trim": "Прайм", "color": "Белый", "status": "in", "note": "В салоне · с 10.08.2026", "invoice": false, "salon": "", "prod": "", "rrc": null, "demo": false}, {"vin": "EDELB31B7TE106047", "model": "t4l", "name": "T4L", "trim": "Прайм", "color": "Белый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": true, "salon": "", "prod": "", "rrc": null, "demo": false}, {"vin": "EDELB31B9TE105899", "model": "t4l", "name": "T4L", "trim": "Прайм", "color": "Белый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": true, "salon": "", "prod": "", "rrc": null, "demo": false}, {"vin": "EDELB31B9TE105966", "model": "t4l", "name": "T4L", "trim": "Прайм", "color": "Белый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": true, "salon": "", "prod": "", "rrc": null, "demo": false}, {"vin": "EDELB31BXTE095545", "model": "t4l", "name": "T4L", "trim": "Прайм", "color": "Белый", "status": "in", "note": "В салоне · с 06.08.2026", "invoice": false, "salon": "", "prod": "", "rrc": null, "demo": false}, {"vin": "EDELB31BXTE104549", "model": "t4l", "name": "T4L", "trim": "Прайм", "color": "Белый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": true, "salon": "", "prod": "", "rrc": null, "demo": false}, {"vin": "EDEEB31B8TE003261", "model": "t4l", "name": "T4L", "trim": "Прайм", "color": "Светло-серый", "status": "in", "note": "В салоне · с 06.08.2026", "invoice": false, "salon": "", "prod": "", "rrc": null, "demo": false}, {"vin": "EDELB31B0TE096879", "model": "t4l", "name": "T4L", "trim": "Прайм", "color": "Чёрный", "status": "in", "note": "В салоне · с 15.08.2026", "invoice": false, "salon": "", "prod": "", "rrc": null, "demo": false}, {"vin": "EDELB31B4TE096853", "model": "t4l", "name": "T4L", "trim": "Прайм", "color": "Чёрный", "status": "in", "note": "В салоне · с 15.08.2026", "invoice": false, "salon": "", "prod": "", "rrc": null, "demo": false}, {"vin": "EDELB31B7TE105710", "model": "t4l", "name": "T4L", "trim": "Прайм", "color": "Чёрный", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": true, "salon": "", "prod": "", "rrc": null, "demo": false}, {"vin": "EDELB31B9TE105739", "model": "t4l", "name": "T4L", "trim": "Прайм", "color": "Чёрный", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": true, "salon": "", "prod": "", "rrc": null, "demo": false}, {"vin": "EDEFB32B2TE105383", "model": "t7", "name": "T7", "trim": "Актив", "color": "Белый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": false, "salon": "", "prod": "26.08.2026", "rrc": null, "demo": false}, {"vin": "EDEFB32B4TE105370", "model": "t7", "name": "T7", "trim": "Актив", "color": "Белый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": false, "salon": "", "prod": "25.08.2026", "rrc": null, "demo": false}, {"vin": "EDEFB32B8TE105355", "model": "t7", "name": "T7", "trim": "Актив", "color": "Белый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": false, "salon": "", "prod": "25.08.2026", "rrc": null, "demo": false}, {"vin": "EDEFB32BXTE100707", "model": "t7", "name": "T7", "trim": "Актив", "color": "Белый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": false, "salon": "", "prod": "25.08.2026", "rrc": null, "demo": false}, {"vin": "EDEFB32B2TE105500", "model": "t7", "name": "T7", "trim": "Актив", "color": "Чёрный", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": false, "salon": "", "prod": "25.08.2026", "rrc": null, "demo": false}, {"vin": "EDXFB32B2TE041658", "model": "t7", "name": "T7", "trim": "Актив", "color": "Чёрный", "status": "in", "note": "В салоне · с 08.05.2026", "invoice": false, "salon": "", "prod": "", "rrc": null, "demo": false}, {"vin": "EDXFB32B4TE041659", "model": "t7", "name": "T7", "trim": "Актив", "color": "Чёрный", "status": "in", "note": "В салоне · с 08.05.2026", "invoice": false, "salon": "", "prod": "", "rrc": null, "demo": false}, {"vin": "EDXFB32B7TE062327", "model": "t7", "name": "T7", "trim": "Актив", "color": "Чёрный", "status": "in", "note": "В салоне · с 04.06.2026", "invoice": false, "salon": "", "prod": "26.05.2026", "rrc": null, "demo": false}, {"vin": "EDXFD32B0TE033634", "model": "t7", "name": "T7", "trim": "Актив 4WD", "color": "Белый", "status": "in", "note": "В салоне · с 13.07.2026", "invoice": false, "salon": "", "prod": "30.03.2026", "rrc": null, "demo": false}, {"vin": "EDXFD32B2TE042710", "model": "t7", "name": "T7", "trim": "Актив 4WD", "color": "Белый", "status": "in", "note": "В салоне · с 10.08.2026", "invoice": false, "salon": "", "prod": "16.04.2026", "rrc": null, "demo": false}, {"vin": "EDXFD32B3TE070113", "model": "t7", "name": "T7", "trim": "Актив 4WD", "color": "Чёрный", "status": "in", "note": "В салоне · с 10.08.2026", "invoice": false, "salon": "", "prod": "11.06.2026", "rrc": null, "demo": false}, {"vin": "EDXFD32B4TE070279", "model": "t7", "name": "T7", "trim": "Актив 4WD", "color": "Чёрный", "status": "in", "note": "В салоне · с 13.08.2026", "invoice": false, "salon": "", "prod": "10.06.2026", "rrc": null, "demo": false}, {"vin": "EDXFD32B7TE039754", "model": "t7", "name": "T7", "trim": "Актив 4WD", "color": "Чёрный", "status": "in", "note": "В салоне · с 13.05.2026", "invoice": false, "salon": "", "prod": "10.04.2026", "rrc": null, "demo": false}, {"vin": "EDEFB32B0TE106984", "model": "t7", "name": "T7", "trim": "Прайм", "color": "Белый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": true, "salon": "", "prod": "27.08.2026", "rrc": null, "demo": false}, {"vin": "EDEFB32B1TE106895", "model": "t7", "name": "T7", "trim": "Прайм", "color": "Белый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": true, "salon": "", "prod": "27.08.2026", "rrc": null, "demo": false}, {"vin": "EDEFB32B1TE106959", "model": "t7", "name": "T7", "trim": "Прайм", "color": "Белый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": true, "salon": "", "prod": "27.08.2026", "rrc": null, "demo": false}, {"vin": "EDEFB32B2TE106842", "model": "t7", "name": "T7", "trim": "Прайм", "color": "Белый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": true, "salon": "", "prod": "27.08.2026", "rrc": null, "demo": false}, {"vin": "EDEFB32B2TE106999", "model": "t7", "name": "T7", "trim": "Прайм", "color": "Белый", "status": "in", "note": "В салоне · с 31.08.2026", "invoice": true, "salon": "", "prod": "27.08.2026", "rrc": null, "demo": false}, {"vin": "EDEFB32B3TE099318", "model": "t7", "name": "T7", "trim": "Прайм", "color": "Белый", "status": "in", "note": "В салоне · с 25.08.2026", "invoice": false, "salon": "Чёрный/коричневый", "prod": "15.08.2026", "rrc": null, "demo": false}, {"vin": "EDEFB32B8TE099203", "model": "t7", "name": "T7", "trim": "Прайм", "color": "Белый", "status": "in", "note": "В салоне · с 22.08.2026", "invoice": false, "salon": "Чёрный/коричневый", "prod": "15.08.2026", "rrc": null, "demo": false}, {"vin": "EDXFB32B1TE087336", "model": "t7", "name": "T7", "trim": "Прайм", "color": "Светло-серый", "status": "in", "note": "В салоне · с 07.09.2026", "invoice": false, "salon": "Чёрный/коричневый", "prod": "", "rrc": null, "demo": false}, {"vin": "EDXFB32B3TE091114", "model": "t7", "name": "T7", "trim": "Прайм", "color": "Чёрный", "status": "in", "note": "В салоне · с 07.09.2026", "invoice": false, "salon": "", "prod": "", "rrc": null, "demo": false}, {"vin": "EDEFD32B1TE101190", "model": "t7", "name": "T7", "trim": "Прайм 4WD", "color": "Белый", "status": "in", "note": "В салоне · с 23.08.2026", "invoice": false, "salon": "Чёрный/коричневый", "prod": "18.08.2026", "rrc": null, "demo": false}, {"vin": "EDEFD32B5TE102522", "model": "t7", "name": "T7", "trim": "Прайм 4WD", "color": "Белый", "status": "in", "note": "В салоне · с 23.08.2026", "invoice": false, "salon": "", "prod": "20.08.2026", "rrc": null, "demo": false}, {"vin": "EDEFD32B5TE102570", "model": "t7", "name": "T7", "trim": "Прайм 4WD", "color": "Белый", "status": "in", "note": "В салоне · с 23.08.2026", "invoice": false, "salon": "", "prod": "20.08.2026", "rrc": null, "demo": false}, {"vin": "EDEFD32B5TE102360", "model": "t7", "name": "T7", "trim": "Прайм 4WD", "color": "Светло-серый", "status": "in", "note": "В салоне · с 23.08.2026", "invoice": false, "salon": "", "prod": "20.08.2026", "rrc": null, "demo": false}, {"vin": "EDEFD32B5TE102228", "model": "t7", "name": "T7", "trim": "Прайм 4WD", "color": "Чёрный", "status": "in", "note": "В салоне · с 23.08.2026", "invoice": false, "salon": "", "prod": "20.08.2026", "rrc": null, "demo": false}, {"vin": "EDXFD32B3TE092581", "model": "t7", "name": "T7", "trim": "Прайм 4WD", "color": "Чёрный", "status": "in", "note": "В салоне · с 25.08.2026", "invoice": false, "salon": "", "prod": "17.08.2026", "rrc": null, "demo": false}, {"vin": "EDXFD32B4TE092587", "model": "t7", "name": "T7", "trim": "Прайм 4WD", "color": "Чёрный", "status": "in", "note": "В салоне · с 25.08.2026", "invoice": false, "salon": "", "prod": "", "rrc": null, "demo": false}, {"vin": "EDXFD32B4TE092590", "model": "t7", "name": "T7", "trim": "Прайм 4WD", "color": "Чёрный", "status": "in", "note": "В салоне · с 25.08.2026", "invoice": false, "salon": "", "prod": "", "rrc": null, "demo": false}, {"vin": "EDEFB32B2TE105108", "model": "t7", "name": "T7", "trim": "Актив", "color": "Белый", "status": "way", "note": "Калуга · склад дистрибьютора", "invoice": false, "salon": "", "prod": "", "rrc": null, "demo": false}, {"vin": "EDEFB32B3TE112410", "model": "t7", "name": "T7", "trim": "Актив", "color": "Белый", "status": "way", "note": "Калуга · склад дистрибьютора", "invoice": false, "salon": "", "prod": "", "rrc": null, "demo": false}, {"vin": "EDEFB32B5TE109881", "model": "t7", "name": "T7", "trim": "Актив", "color": "Белый", "status": "way", "note": "Едет к дилеру · Отгружен", "invoice": false, "salon": "", "prod": "", "rrc": null, "demo": false}, {"vin": "EDEFB32B5TE110013", "model": "t7", "name": "T7", "trim": "Актив", "color": "Голубой", "status": "way", "note": "Калуга · Подтвержден к отгрузке", "invoice": false, "salon": "", "prod": "", "rrc": null, "demo": false}, {"vin": "EDEFB32B2TE107327", "model": "t7", "name": "T7", "trim": "Актив", "color": "Чёрный", "status": "way", "note": "Калуга · склад дистрибьютора", "invoice": false, "salon": "", "prod": "", "rrc": null, "demo": false}, {"vin": "EDEFB32BXTE107432", "model": "t7", "name": "T7", "trim": "Актив", "color": "Чёрный", "status": "way", "note": "Калуга · склад дистрибьютора", "invoice": false, "salon": "", "prod": "", "rrc": null, "demo": false}, {"vin": "EDXGB32B3TE076049", "model": "t8", "name": "T8", "trim": "Актив 5 мест 2WD", "color": "Белый", "status": "in", "note": "В салоне · с 13.07.2026", "invoice": false, "salon": "", "prod": "", "rrc": null, "demo": false}, {"vin": "EDXGD34B8TE095347", "model": "t8", "name": "T8", "trim": "Прайм 7 мест 4WD", "color": "Белый", "status": "in", "note": "В салоне · с 15.08.2026", "invoice": false, "salon": "", "prod": "", "rrc": null, "demo": false}, {"vin": "EDXGD34B1TE022143", "model": "t8", "name": "T8", "trim": "Прайм 7 мест 4WD", "color": "Светло-серый", "status": "in", "note": "В салоне · с 29.06.2026", "invoice": true, "salon": "", "prod": "", "rrc": null, "demo": false}, {"vin": "EDXGD34B5TE082040", "model": "t8", "name": "T8", "trim": "Прайм 7 мест 4WD", "color": "Светло-серый", "status": "in", "note": "В салоне · с 29.07.2026", "invoice": true, "salon": "", "prod": "", "rrc": null, "demo": false}, {"vin": "EDXGD34BXTE081949", "model": "t8", "name": "T8", "trim": "Прайм 7 мест 4WD", "color": "Светло-серый", "status": "in", "note": "В салоне · с 29.07.2026", "invoice": true, "salon": "", "prod": "", "rrc": null, "demo": false}, {"vin": "EDXGD34B0TE082608", "model": "t8", "name": "T8", "trim": "Прайм 7 мест 4WD", "color": "Тёмно-зелёный", "status": "in", "note": "В салоне · с 29.07.2026", "invoice": true, "salon": "", "prod": "", "rrc": null, "demo": false}, {"vin": "EDXGD34B8TE082601", "model": "t8", "name": "T8", "trim": "Прайм 7 мест 4WD", "color": "Тёмно-зелёный", "status": "in", "note": "В салоне · с 29.07.2026", "invoice": true, "salon": "", "prod": "", "rrc": null, "demo": false}, {"vin": "EDXGD34B9TE082641", "model": "t8", "name": "T8", "trim": "Прайм 7 мест 4WD", "color": "Тёмно-зелёный", "status": "in", "note": "В салоне · с 27.07.2026", "invoice": true, "salon": "", "prod": "", "rrc": null, "demo": false}, {"vin": "EDXGD34B5TE095631", "model": "t8", "name": "T8", "trim": "Прайм 7 мест 4WD", "color": "Чёрный", "status": "in", "note": "В салоне · с 25.08.2026", "invoice": false, "salon": "", "prod": "", "rrc": null, "demo": false}, {"vin": "EDXGD34B6TE031162", "model": "t8", "name": "T8", "trim": "Прайм 7 мест 4WD", "color": "Чёрный", "status": "in", "note": "В салоне · с 27.06.2026", "invoice": true, "salon": "", "prod": "", "rrc": null, "demo": false}, {"vin": "EDXGD34B8TE095641", "model": "t8", "name": "T8", "trim": "Прайм 7 мест 4WD", "color": "Чёрный", "status": "in", "note": "В салоне · с 06.09.2026", "invoice": false, "salon": "", "prod": "", "rrc": null, "demo": false}, {"vin": "EDXGD34B3TE031815", "model": "t8", "name": "T8", "trim": "Ультра 7 мест 4WD", "color": "Белый", "status": "in", "note": "В салоне · с 12.06.2026", "invoice": false, "salon": "", "prod": "", "rrc": null, "demo": false}, {"vin": "EDXGD34B2TE057953", "model": "t8", "name": "T8", "trim": "Ультра 7 мест 4WD", "color": "Тёмно-зелёный", "status": "in", "note": "В салоне · с 25.07.2026", "invoice": false, "salon": "", "prod": "", "rrc": null, "demo": false}, {"vin": "EDXGB32B0TE110108", "model": "t8", "name": "T8", "trim": "Прайм 5 мест 2WD", "color": "Белый", "status": "way", "note": "Калуга · Подтвержден к отгрузке", "invoice": false, "salon": "", "prod": "", "rrc": null, "demo": true}, {"vin": "EDXGD34B2TE109064", "model": "t8", "name": "T8", "trim": "Прайм 7 мест 4WD", "color": "Тёмно-зелёный", "status": "way", "note": "Калуга · Подтвержден к отгрузке", "invoice": false, "salon": "", "prod": "", "rrc": null, "demo": true}, {"vin": "EDXGD34B4TE050793", "model": "t8", "name": "T8", "trim": "Ультра 7 мест 4WD", "color": "Светло-серый", "status": "way", "note": "Домодедово · Готов к отгрузке", "invoice": false, "salon": "", "prod": "", "rrc": null, "demo": false}, {"vin": "EDXGD34B7TE034443", "model": "t8", "name": "T8", "trim": "Ультра 7 мест 4WD", "color": "Чёрный", "status": "way", "note": "Домодедово · Готов к отгрузке", "invoice": false, "salon": "", "prod": "", "rrc": null, "demo": false}, {"vin": "EDEDD24BXSG010341", "model": "t9", "name": "Tiggo 9", "trim": "Ультра 4WD", "color": "Белый", "status": "in", "note": "В салоне · с 15.08.2026", "invoice": false, "salon": "", "prod": "", "rrc": null, "demo": false}, {"vin": "EDEDD24B2SG003755", "model": "t9", "name": "Tiggo 9", "trim": "Ультра 4WD", "color": "Светло-серый", "status": "in", "note": "В салоне · с 25.04.2026", "invoice": false, "salon": "", "prod": "", "rrc": null, "demo": false}, {"vin": "EDEDD24B3SG003926", "model": "t9", "name": "Tiggo 9", "trim": "Ультра 4WD", "color": "Серый матовый", "status": "in", "note": "В салоне · с 25.04.2026", "invoice": false, "salon": "", "prod": "", "rrc": null, "demo": false}, {"vin": "LVVDC21B0SD594112", "model": "a8", "name": "Arrizo 8", "trim": "Прайм", "color": "Белый", "status": "in", "note": "В салоне · с 04.05.2026", "invoice": false, "salon": "", "prod": "", "rrc": null, "demo": false}, {"vin": "LVVDC21B7SD594110", "model": "a8", "name": "Arrizo 8", "trim": "Прайм", "color": "Белый", "status": "in", "note": "В салоне · с 26.06.2026", "invoice": false, "salon": "", "prod": "", "rrc": null, "demo": false}, {"vin": "LVVDC21B2SDJ34062", "model": "a8", "name": "Arrizo 8", "trim": "Прайм", "color": "Чёрный", "status": "in", "note": "В салоне · с 23.06.2026", "invoice": false, "salon": "", "prod": "", "rrc": null, "demo": false}];
     const ST_LABEL = {in:"В наличии", hold:"Бронь", way:"В пути"};
     const QBY = {t4l:null, t7:T7_Q, t8:T8_Q, t9:T9_Q, a8:A8_Q};
 
@@ -615,6 +617,41 @@ input,textarea{width:100%;background:#fff;border:1px solid var(--border);color:v
       catch { return {surname:"",display:"",model:"t4l",history:[],locks:{},unlock:{},seenStudy:{},seenTrain:{},runs:{}}; }
     }
     function save(){ localStorage.setItem(KEY, JSON.stringify(state)); }
+        function staffKey(s){
+      const n=norm(s);
+      if(!n) return '';
+      if(STAFF.includes(n)) return n;
+      const parts=n.split(/[\s.,/]+/).filter(Boolean);
+      for(const p of parts){ if(STAFF.includes(p)) return p; }
+      return n;
+    }
+    function canonPerson(rec){
+      if(!rec) return rec;
+      const key=staffKey(rec.surname||rec.display);
+      const out=Object.assign({}, rec);
+      if(key){
+        out.surname=key;
+        const i=STAFF.indexOf(key);
+        if(i>=0) out.display=STAFF_SHOW[i];
+        else if(!out.display) out.display=rec.display||rec.surname;
+      }
+      if(out.percent!=null) out.percent=Number(out.percent);
+      if(out.exam!=null) out.exam=Number(out.exam||1);
+      if(!out.status) out.status='done';
+      return out;
+    }
+    function loadCloudCache(){
+      try{
+        const x=JSON.parse(localStorage.getItem('tenet-cloud-locks-v1')||'[]');
+        return Array.isArray(x)?x:[];
+      }catch(e){ return []; }
+    }
+    function saveCloudCache(list){
+      try{
+        const slim=(list||[]).filter(x=>x && x.surname);
+        localStorage.setItem('tenet-cloud-locks-v1', JSON.stringify(slim));
+      }catch(e){}
+    }
     function norm(s){ return (s||"").trim().replace(/\s+/g," ").replace(/ё/g,"е").replace(/Ё/g,"е").toLowerCase(); }
     function pinDigits(s){ return String(s||"").replace(/\D/g,""); }
     function pinEq(a,b){
@@ -655,9 +692,14 @@ input,textarea{width:100%;background:#fff;border:1px solid var(--border);color:v
     function lockKey(sn, md, exam){ return norm(sn)+"|"+(md||model)+"|e"+(exam||1); }
     function localExam(n){ return state.locks[lockKey(state.surname, model, n)]; }
     function remoteExam(n){
-      return remoteLocks.find(x => x.surname===norm(state.surname) && x.model===model && Number(x.exam||1)===n);
+      const rows=(remoteLocks||[]).filter(x => x && !x.type && x.surname===norm(state.surname) && x.model===model && Number(x.exam||1)===n);
+      return rows.find(x => recDone(x)) || rows[0];
     }
-    function examRec(n){ return remoteExam(n) || localExam(n); }
+    function examRec(n){
+      const loc=localExam(n), rem=remoteExam(n);
+      if(recDone(loc) && (!recDone(rem) || Number(loc.percent||0)>=Number(rem.percent||0))) return loc;
+      return rem || loc;
+    }
     function lockOf(){ return examRec(2) || examRec(1); }
     function recDone(r){ return Boolean(r && r.status !== "running"); }
     function hasExam1(){ return recDone(examRec(1)); }
@@ -671,8 +713,10 @@ input,textarea{width:100%;background:#fff;border:1px solid var(--border);color:v
       if(!sn) return null;
       const local=(state.runs||{})[sn];
       if(local && local.status==="running" && local.paper && local.paper.length) return local;
-      const rem=(remoteLocks||[]).find(x=>x && x.surname===sn && x.status==="running");
+      const rem=(remoteLocks||[]).find(x=>x && !x.type && x.surname===sn && x.status==="running");
       if(!rem) return null;
+      const localDone=state.locks[lockKey(rem.surname, rem.model, rem.exam||1)];
+      if(recDone(localDone)) return null;
       if(rem.run && rem.run.paper && rem.run.paper.length){
         return {
           surname:sn, display:rem.display||state.display, model:rem.model, exam:rem.exam||1, status:"running",
@@ -711,6 +755,8 @@ input,textarea{width:100%;background:#fff;border:1px solid var(--border);color:v
       try {
         remoteLocks = await pullList();
         syncOk = true;
+        saveCloudCache(remoteLocks);
+        await flushLocalDone();
       } catch(e) {
         syncOk = false;
         remoteLocks = remoteLocks || [];
@@ -723,23 +769,75 @@ input,textarea{width:100%;background:#fff;border:1px solid var(--border);color:v
         status: rec.status || "done"
       };
       if(body.status==="running" && rec.run) body.run = rec.run;
+      if(Array.isArray(rec.missed)) body.missed=rec.missed;
+      if(rec.ok!=null) body.ok=rec.ok;
+      if(rec.n!=null) body.n=rec.n;
+      if(body.status==="done"){ if(body.tgSent==null) body.tgSent=false; delete body.run; }
       state.locks[lockKey(rec.display, rec.model, rec.exam||1)] = rec;
       state.locks[lockKey(rec.surname, rec.model, rec.exam||1)] = rec;
       save();
-      for(let i=0;i<3;i++){
+      const job = cloudChain.then(()=>writeCloud(body), ()=>writeCloud(body));
+      cloudChain = job.catch(()=>{});
+      return job;
+    }
+    function recKey(x){
+      if(!x) return "";
+      if(x.type==="login") return "login|"+norm(x.surname);
+      if(x.type==="pass") return "pass|"+norm(x.surname)+"|"+(x.model||"")+"|"+String(x.code||"").toUpperCase();
+      if(x.type==="pin_request") return "pin|"+(x.kind||"login")+"|"+norm(x.surname)+"|"+(x.model||"")+"|"+(x.at||"");
+      return "exam|"+norm(x.surname)+"|"+(x.model||"")+"|"+String(Number(x.exam||1));
+    }
+    function isExamRow(x){ return Boolean(x && x.surname && !x.type); }
+    function betterExam(a,b){
+      if(!a) return b;
+      if(!b) return a;
+      const ad=a.status!=="running", bd=b.status!=="running";
+      if(ad && !bd) return Object.assign({}, a, {status:"done"});
+      if(bd && !ad) return Object.assign({}, b, {status:"done"});
+      const ap=Number(a.percent||0), bp=Number(b.percent||0);
+      let win, lose;
+      if(bp>ap){ win=b; lose=a; }
+      else if(ap>bp){ win=a; lose=b; }
+      else { win = String(b.at||"")>=String(a.at||"") ? b : a; lose = win===b?a:b; }
+      const out=Object.assign({}, lose, win);
+      if(ad || bd) out.status="done";
+      if(a.tgSent || b.tgSent) out.tgSent=true;
+      if(out.status==="done") delete out.run;
+      return out;
+    }
+    function mergeCloud(base, extra){
+      const map=new Map();
+      (base||[]).concat(extra||[]).forEach(x=>{
+        if(!x) return;
+        const k=recKey(x);
+        const prev=map.get(k);
+        if(!prev) map.set(k, x);
+        else if(isExamRow(prev) || isExamRow(x)) map.set(k, betterExam(prev, x));
+        else map.set(k, Object.assign({}, prev, x));
+      });
+      return Array.from(map.values());
+    }
+    function sleep(ms){ return new Promise(r=>setTimeout(r, ms)); }
+    let cloudChain = Promise.resolve();
+    const RELAY = "https://ntfy.sh/tenet-expert-o6nq7rki";
+    async function pingRelay(body){
+      if(body.status!=="done") return false;
+      const slim={surname:body.surname,display:body.display,model:body.model,exam:body.exam,percent:body.percent,at:body.at,attempts:body.attempts||1,status:"done"};
+      if(body.ok!=null) slim.ok=body.ok;
+      if(body.n!=null) slim.n=body.n;
+      const r=await withTimeout(fetch(RELAY,{
+        method:"POST",
+        headers:{"Content-Type":"application/json","Title":(slim.display||slim.surname)+" "+slim.model+" "+slim.percent+"%"},
+        body:JSON.stringify(slim)
+      }),8000);
+      return r.ok;
+    }
+    async function writeCloud(body){
+      let rentryOk=false;
+      const tries=body.status==="done"?3:1;
+      for(let i=0;i<tries;i++){
         try{
-          const list = await pullList();
-          const idx = list.findIndex(x => x && x.surname===body.surname && x.model===body.model && Number(x.exam||1)===Number(body.exam));
-          if(idx>=0){
-            const prev = list[idx] || {};
-            if(prev.status==="done" && body.status==="running"){
-              remoteLocks = list;
-              syncOk = true;
-              return;
-            }
-            list[idx] = Object.assign({}, prev, body);
-            if(body.status==="done") delete list[idx].run;
-          } else list.push(body);
+          const list = mergeCloud(await pullList(), [body]);
           const r = await withTimeout(fetch("https://rentry.co/api/edit/"+CLOUD_ID, {
             method:"POST",
             headers:{"Content-Type":"application/x-www-form-urlencoded"},
@@ -748,11 +846,31 @@ input,textarea{width:100%;background:#fff;border:1px solid var(--border);color:v
           if(!r.ok) throw new Error("edit");
           const out = await r.json().catch(()=>({status:"200"}));
           if(String(out.status)!=="200") throw new Error("edit status");
-          remoteLocks = list;
-          syncOk = true;
-          return;
+          const check = await pullList();
+          const got = (check||[]).find(x => recKey(x)===recKey(body));
+          if(body.status==="done"){
+            if(!got || got.status==="running" || Number(got.percent||0)<Number(body.percent||0)) throw new Error("verify");
+          }
+          remoteLocks = check;
+          rentryOk = true;
+          break;
         }catch(e){
-          if(i===2){ syncOk = false; }
+          await sleep(400*(i+1));
+        }
+      }
+      let relayOk=false;
+      if(body.status==="done"){
+        try{ relayOk=await pingRelay(body); }catch(e){ relayOk=false; }
+      }
+      syncOk = rentryOk || relayOk;
+      return syncOk;
+    }
+    async function flushLocalDone(){
+      const locals=Object.values(state.locks||{}).filter(r=>r && recDone(r) && r.surname && r.model && r.percent!=null);
+      for(const rec of locals){
+        const rem=(remoteLocks||[]).find(x=>isExamRow(x) && x.surname===rec.surname && x.model===rec.model && Number(x.exam||1)===Number(rec.exam||1));
+        if(!rem || rem.status==="running" || Number(rem.percent||0)<Number(rec.percent||0)){
+          await upsertLock(Object.assign({}, rec, {status:"done"}));
         }
       }
     }
@@ -812,9 +930,12 @@ input,textarea{width:100%;background:#fff;border:1px solid var(--border);color:v
       }catch(err){
         const root=document.getElementById("app");
         if(root) root.innerHTML=`<div class="card"><h2>Ошибка экрана</h2><p>${escape(err.message||String(err))}</p>
-          <button class="btn ivory" id="hardReset">Обновить</button></div>`;
+          <button class="btn ivory" id="hardReset">Обновить</button>
+          <button class="btn ghost" id="backHub">В кабинет</button></div>`;
         const r=document.getElementById("hardReset");
-        if(r) r.onclick=()=>{ location.reload(); };
+        if(r) r.onclick=()=>{ view="hub"; state.section="hub"; try{save();}catch(e){} location.assign(location.pathname); };
+        const b=document.getElementById("backHub");
+        if(b) b.onclick=()=>{ view="hub"; state.section="hub"; try{save();}catch(e){} render(); };
       }
     }
     function banner(title, sub, brand){
@@ -1350,6 +1471,7 @@ input,textarea{width:100%;background:#fff;border:1px solid var(--border);color:v
           <h1>${pct}<span style="font-size:24px"> / 100</span></h1>
           <p>${g.t}. ${g.l}</p>
           <p>${correct} из ${paper.length} · ${escape(state.display)}${mode==="exam"&&examSession===2&&examRec(1)?" · было "+examRec(1).percent+"%":""}</p>
+          ${mode==="exam"?`<p style="margin-top:10px;font-size:14px;color:${syncOk?"#1b7f3a":"#b42318"}">${syncOk?"Результат отправлен в общий рейтинг и Telegram.":"Отправляю в рейтинг… не закрывайте страницу."}</p>`:""}
           <div class="grid2" style="margin-top:16px">${Object.entries(byCat).map(([k,v])=>`
             <div class="card"><div style="display:flex;justify-content:space-between"><span>${CATS[k]||k}</span><span>${v.ok}/${v.n}</span></div>
             <div class="bar" style="margin-top:8px"><i style="width:${v.n?v.ok/v.n*100:0}%"></i></div></div>`).join("")}</div>
@@ -1386,10 +1508,10 @@ input,textarea{width:100%;background:#fff;border:1px solid var(--border);color:v
       const local=Object.values(state.locks||{});
       const all=[...remoteLocks, ...local].filter(r=>r && r.surname);
       function bestMap(examNo, modelId){
-        const rows=all.filter(r=>Number(r.exam||1)===examNo && (r.model||"t4l")===modelId && r.status!=="running");
+        const rows=all.filter(r=>r && !r.type && r.percent!=null && Number(r.exam||1)===examNo && (r.model||"t4l")===modelId && r.status!=="running");
         const map={};
         rows.forEach(r=>{
-          const k=norm(r.surname||r.display);
+          const k=staffKey(r.surname||r.display);
           if(!map[k] || (r.percent||0)>(map[k].percent||0)) map[k]={name:r.display||r.surname, percent:r.percent, key:k};
         });
         return map;
@@ -1406,7 +1528,7 @@ input,textarea{width:100%;background:#fff;border:1px solid var(--border);color:v
       }
       function personRow(p, wait){
         const extra=wait && p.was==null && p.now==null ? `<p>ещё не сдавал</p>` : "";
-        return `<div class="rate-person"><div><b>${escape(p.name)}</b>${extra}</div>${pctCell(p.was)}${pctCell(p.now)}</div>`;
+        if(!wait && ((p.was===100 && p.now==null) || (p.now===100 && p.was==null))){ return `<div class="rate-person is-100"><div><b>${escape(p.name)}</b></div><span class="pct ok span2">100%</span></div>`; } return `<div class="rate-person"><div><b>${escape(p.name)}</b>${extra}</div>${pctCell(p.was)}${pctCell(p.now)}</div>`;
       }
       function modelCol(m){
         const staffRows=STAFF.map((key,i)=>pair(key, STAFF_SHOW[i], m.id));
@@ -1428,8 +1550,7 @@ input,textarea{width:100%;background:#fff;border:1px solid var(--border);color:v
           ${taken.length?taken.map(p=>personRow(p,false)).join(""):""}
           ${wait.map(p=>personRow(p,true)).join("")}
           ${!taken.length && !wait.length?`<p class="empty">Пока пусто</p>`:""}
-          <div class="rate-split">гости</div>
-          ${guests.length?guests.map(p=>personRow(p,false)).join(""):`<p class="empty">Нет гостевых сдач</p>`}
+          ${guests.length?`<div class="rate-split">гости</div>${guests.map(p=>personRow(p,false)).join("")}`:""}
         </div>`;
       }
       const pinNeeded=hasExam1() && !expertLocked() && !hasExam2();
@@ -1503,7 +1624,7 @@ input,textarea{width:100%;background:#fff;border:1px solid var(--border);color:v
       idx++; selected=[]; locked=false;
       qDeadline = Date.now() + QSEC*1000;
       left = QSEC;
-      persistRun(true);
+      persistRun(false);
     }
     function resumeExam(run){
       if(!run) return false;
@@ -1594,7 +1715,7 @@ input,textarea{width:100%;background:#fff;border:1px solid var(--border);color:v
       closing=true;
       const q=paper[idx];
       if(answers[idx]==null) answers[idx]={id:q.id,ok:!!ok,cat:q.cat,p:q.p,x:q.x};
-      persistRun(true);
+      persistRun(false);
       next(); closing=false;
     }
     function tally(){
@@ -1618,12 +1739,13 @@ input,textarea{width:100%;background:#fff;border:1px solid var(--border);color:v
         const sn=norm(state.surname);
         if(state.runs && state.runs[sn]) state.runs[sn].status="done";
         state.lastCode=packResult(rec); save();
-        await upsertLock(rec);
+        const saved=await upsertLock(rec);
+        if(!saved){ await sleep(1500); await upsertLock(rec); }
         if(state.runs) delete state.runs[sn];
       }
       save(); render();
     }
-    function next(){ if(idx+1>=paper.length) finish(); else { idx++; selected=[]; locked=false; qDeadline=Date.now()+QSEC*1000; left=QSEC; persistRun(true); render(); } }
+    function next(){ if(idx+1>=paper.length) finish(); else { idx++; selected=[]; locked=false; qDeadline=Date.now()+QSEC*1000; left=QSEC; persistRun(false); render(); } }
     function bind(){
       document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{
         if(inExam() || (userRun() && !done)){ view="play"; if(!paper.length) resumeExam(userRun()); else render(); return; }
@@ -1658,7 +1780,7 @@ input,textarea{width:100%;background:#fff;border:1px solid var(--border);color:v
         if(v.length<2){ err.textContent="Введите фамилию."; return; }
         if(!pinRaw){ err.textContent="Введите личный код от РОП."; return; }
         err.textContent="Проверяю код…";
-        const sn=norm(v);
+        const sn=staffKey(v)||norm(v);
         const baked=await bakedPin(sn);
         if(pinEq(pinRaw, baked)){
           state.surname=sn; state.display=v.replace(/\s+/g," "); state.authed=true; save();

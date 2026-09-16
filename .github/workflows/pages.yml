@@ -85,6 +85,9 @@ jobs:
             cp -f docs/*.pdf docs/*.html _site/docs/ 2>/dev/null || true
             if [ -d docs/prices ]; then cp -f docs/prices/* _site/docs/prices/ 2>/dev/null || true; fi
           fi
+          cp -f TENET_T4L_netlify/index.html _site/index.html
+          touch _site/.nojekyll
+
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
