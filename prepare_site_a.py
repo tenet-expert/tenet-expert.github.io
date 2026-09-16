@@ -110,6 +110,23 @@ if "<title>" in head and "</title>" not in head:
     i = html.find("<style>")
     html = html[:i] + "</title>\n  " + html[i:]
 
+ICONS_HEAD = """
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="favicon-32.png" type="image/png" sizes="32x32">
+  <link rel="shortcut icon" href="favicon.ico">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" sizes="180x180">
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#c81e2b">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="TENET">
+  <meta name="application-name" content="TENET">
+  <meta name="mobile-web-app-capable" content="yes">
+"""
+if "apple-touch-icon.png" not in html:
+    html = html.replace("</title>", "</title>\n" + ICONS_HEAD, 1)
+    print("icons head injected")
+
 pins = {}
 try:
     body = urllib.parse.urlencode({"edit_code": "4fmBrr2H"}).encode()
