@@ -51,6 +51,7 @@ jobs:
           if [ -f patch_cloud_v2.py ]; then python3 patch_cloud_v2.py; fi
           if [ -f patch_rate_fix.py ]; then python3 patch_rate_fix.py; fi
           if [ -f patch_rate_ui.py ]; then python3 patch_rate_ui.py; fi
+          if [ -f patch_rate_empty.py ]; then python3 patch_rate_empty.py; fi
           if [ -f patch_cloud_slim.py ]; then python3 patch_cloud_slim.py || true; fi
           if [ -f patch_km.py ]; then python3 patch_km.py; fi
           if [ -f patch_mpt_compare.py ]; then python3 patch_mpt_compare.py; fi
@@ -79,6 +80,7 @@ jobs:
           if grep -q 'dutyPdfOpen' index.html 2>/dev/null; then cp -f index.html _site/index.html; echo "copied root index to _site"; fi
           if [ -f patch_stock_merge.py ]; then python3 patch_stock_merge.py; fi
           if [ -f patch_offer.py ]; then python3 patch_offer.py; fi
+          if [ -f patch_rate_empty.py ]; then python3 patch_rate_empty.py; fi
           python3 - << 'PY'
           from pathlib import Path
           js = Path("duty-overlay.js")
@@ -100,6 +102,7 @@ jobs:
               p.write_text(t, encoding="utf-8")
               print("final", p, p.stat().st_size, "open", "dutyPdfOpen" in t, "carH", "carH=198" in t)
           PY
+          if [ -f patch_rate_empty.py ]; then python3 patch_rate_empty.py; fi
           cp -f favicon.svg favicon.ico favicon-32.png apple-touch-icon.png icon-192.png icon-512.png icon-512-maskable.png manifest.webmanifest duty-overlay.js duty-fn.js _site/ 2>/dev/null || true
           touch _site/.nojekyll
 
