@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+<!-- duty-vert-d3 -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
@@ -431,9 +432,9 @@ input,textarea{width:100%;background:#fff;border:1px solid var(--border);color:v
 .cl-prog{flex:1;min-width:160px;height:10px;background:#efe6d8;border-radius:99px;overflow:hidden;position:relative}
 .cl-prog i{display:block;height:100%;background:#2e7d32;border-radius:99px}
 .cl-prog span{position:absolute;right:8px;top:-18px;font-size:11px;color:#6d6458}
-.cl-cars{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
-@media (max-width:1100px){.cl-cars{grid-template-columns:repeat(3,minmax(0,1fr))}}
-@media (max-width:720px){.cl-cars{grid-template-columns:1fr 1fr}}
+.cl-cars{display:grid;grid-template-columns:1fr;gap:8px}
+@media (min-width:900px){.cl-cars{grid-template-columns:1fr 1fr}}
+@media (min-width:1280px){.cl-cars{grid-template-columns:repeat(3,minmax(0,1fr))}}
 .cl-car{background:#fff;border:1px solid #eadfcf;border-radius:14px;padding:10px}
 .cl-car h3{margin:0 0 8px;font-size:14px}
 .cl-item{display:flex;align-items:center;gap:8px;padding:4px 0;font-size:12px;cursor:pointer}
@@ -444,7 +445,7 @@ input,textarea{width:100%;background:#fff;border:1px solid var(--border);color:v
 .cl-nums{display:flex;gap:6px;margin-top:6px}
 .cl-nums label{flex:1;font-size:10px;color:#7a7166}
 .cl-nums input,.cl-car select{width:100%;min-height:30px;border:1px solid #eadfcf;border-radius:8px;padding:4px 6px}
-.cl-foot{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.cl-foot{display:grid;grid-template-columns:1fr;gap:8px}
 .cl-box{background:#fff;border:1px solid #eadfcf;border-radius:14px;padding:10px}
 .cl-box b{display:block;margin-bottom:6px;font-size:12px}
 .cl-chips{display:flex;flex-wrap:wrap;gap:6px}
@@ -469,7 +470,7 @@ input,textarea{width:100%;background:#fff;border:1px solid var(--border);color:v
   header,nav,.bot,.banner,.who-line,.hub-grid,.cl-bar .btn,.cl-log,.cl-prog{display:none!important}
   .wrap{max-width:none!important;padding:0!important}
   .cl{gap:4px;page-break-inside:avoid}
-  .cl-cars{grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:4px}
+  .cl-cars{grid-template-columns:1fr!important;gap:6px}
   .cl-car,.cl-box{padding:6px;border-radius:6px}
   .cl-item input{appearance:none!important;border:1.4px solid #000!important;background:#fff!important}
   .cl-item input:checked + .cl-mark{color:#000!important}
@@ -2827,6 +2828,35 @@ async function pingTelegram(body){
       if(v==="no") return "грязный";
       return "чистый";
     }
+    function dutyPdfClose(){
+      const box=document.getElementById("dutyPdfView");
+      if(!box) return;
+      box.remove();
+      document.body.style.overflow="";
+      if(location.hash==="#pdf"){
+        try{ history.replaceState(null,"",location.pathname+location.search+location.hash.replace("#pdf","")); }catch(e){}
+      }
+    }
+    function dutyPdfOpen(src){
+      dutyPdfClose();
+      const box=document.createElement("div");
+      box.id="dutyPdfView";
+      box.style.cssText="position:fixed;inset:0;z-index:99999;background:#111;display:flex;flex-direction:column;";
+      box.innerHTML='<div style="flex:none;display:flex;gap:8px;align-items:center;padding:calc(12px + env(safe-area-inset-top,0px)) 12px 12px;background:#111;color:#fff">'+
+        '<button type="button" id="dutyPdfBack" style="min-height:44px;padding:0 16px;border:0;border-radius:12px;background:#f3eadc;color:#111;font:700 15px Inter,Arial,sans-serif">Назад</button>'+
+        '<b style="flex:1;font:700 16px Inter,Arial,sans-serif">Чек-лист</b></div>'+
+        '<div style="flex:1;overflow:auto;-webkit-overflow-scrolling:touch;background:#2a2a2a;padding:8px 8px 24px">'+
+        '<img id="dutyPdfImg" alt="Чек-лист" style="width:100%;max-width:720px;display:block;margin:0 auto;background:#fff;border-radius:8px"/></div>';
+      document.body.appendChild(box);
+      document.body.style.overflow="hidden";
+      box.querySelector("#dutyPdfImg").src=src;
+      box.querySelector("#dutyPdfBack").onclick=function(){ dutyPdfClose(); };
+      try{ if(location.hash!=="#pdf") history.pushState({dutyPdf:1},"", "#pdf"); }catch(e){}
+    }
+    if(!window.__dutyPdfHash){
+      window.__dutyPdfHash=true;
+      window.addEventListener("popstate", function(){ if(document.getElementById("dutyPdfView")) dutyPdfClose(); });
+    }
     function dutyPdf(src){
       const d=src||dutyRead();
       const p=dutyCount(d);
@@ -2836,29 +2866,49 @@ async function pingTelegram(body){
       c.width=W; c.height=H;
       const ctx=c.getContext("2d");
       ctx.fillStyle="#ffffff"; ctx.fillRect(0,0,W,H);
-      const pad=36;
+      const pad=40;
+      const inner=W-pad*2;
+      function roundRect(x,y,w,h,r){
+        ctx.beginPath();
+        ctx.moveTo(x+r,y);
+        ctx.arcTo(x+w,y,x+w,y+h,r);
+        ctx.arcTo(x+w,y+h,x,y+h,r);
+        ctx.arcTo(x,y+h,x,y,r);
+        ctx.arcTo(x,y,x+w,y,r);
+        ctx.closePath();
+      }
+      function tick(x,y,on){
+        ctx.strokeStyle="#1a1a1a";
+        ctx.lineWidth=1.6;
+        ctx.strokeRect(x, y-15, 18, 18);
+        if(on){
+          ctx.fillStyle="#145a1f";
+          ctx.font="800 16px Inter, Arial, sans-serif";
+          ctx.fillText("✓", x+2, y);
+        }
+      }
       ctx.fillStyle="#c81e2b";
-      ctx.fillRect(pad, pad, 28, 28);
+      ctx.fillRect(pad, pad, 32, 32);
       ctx.fillStyle="#fff";
-      ctx.font="800 16px Inter, Arial, sans-serif";
-      ctx.fillText("T", pad+8, pad+21);
+      ctx.font="800 18px Inter, Arial, sans-serif";
+      ctx.fillText("T", pad+9, pad+23);
       ctx.fillStyle="#111";
-      ctx.font="800 28px Inter, Arial, sans-serif";
-      ctx.fillText("Чек-лист дежурного", pad+42, pad+24);
-      ctx.font="600 16px Inter, Arial, sans-serif";
+      ctx.font="800 30px Inter, Arial, sans-serif";
+      ctx.fillText("Чек-лист дежурного", pad+46, pad+26);
+      ctx.font="600 17px Inter, Arial, sans-serif";
       ctx.fillStyle="#5c5346";
-      ctx.fillText((d.manager||"—")+"  ·  "+(d.date||dutyToday())+"  ·  "+pct+"%  ·  "+p.on+" из "+p.tot, pad+42, pad+48);
-      const cols=DUTY_CARS.length;
-      const gap=10;
-      const colW=(W-pad*2-(cols-1)*gap)/cols;
-      let y=pad+72;
-      DUTY_CARS.forEach((car,i)=>{
-        const x=pad+i*(colW+gap);
+      ctx.fillText((d.manager||"—")+"  ·  "+(d.date||dutyToday())+"  ·  "+pct+"%  ·  "+p.on+" из "+p.tot, pad+46, pad+52);
+      let y=pad+78;
+      const carH=198;
+      DUTY_CARS.forEach((car)=>{
         ctx.fillStyle="#f7f1e7";
-        ctx.fillRect(x, y, colW, 430);
-        ctx.strokeStyle="#eadfcf"; ctx.strokeRect(x, y, colW, 430);
-        ctx.fillStyle="#111"; ctx.font="800 16px Inter, Arial, sans-serif";
-        ctx.fillText(car.title, x+12, y+28);
+        roundRect(pad, y, inner, carH, 14);
+        ctx.fill();
+        ctx.strokeStyle="#eadfcf"; ctx.lineWidth=1;
+        roundRect(pad, y, inner, carH, 14);
+        ctx.stroke();
+        ctx.fillStyle="#111"; ctx.font="800 22px Inter, Arial, sans-serif";
+        ctx.fillText(car.title, pad+20, y+34);
         const rows=[
           ["Омывающая", !!d[car.id+"_wash"]],
           ["Коврики и пороги", !!d[car.id+"_mats"]],
@@ -2867,57 +2917,53 @@ async function pingTelegram(body){
           ["Багажник", !!d[car.id+"_trunk"]],
         ];
         rows.forEach((row,ri)=>{
-          const ry=y+54+ri*36;
-          ctx.strokeStyle="#111"; ctx.strokeRect(x+12, ry-14, 16, 16);
-          if(row[1]){
-            ctx.fillStyle="#145a1f";
-            ctx.font="800 16px Inter, Arial, sans-serif";
-            ctx.fillText("✓", x+14, ry);
-          }
-          ctx.fillStyle="#111"; ctx.font="500 14px Inter, Arial, sans-serif";
-          ctx.fillText(row[0], x+36, ry);
+          const col=ri%2;
+          const line=Math.floor(ri/2);
+          const cx=pad+20+col*((inner-40)/2);
+          const cy=y+72+line*36;
+          tick(cx, cy, row[1]);
+          ctx.fillStyle="#111"; ctx.font="500 17px Inter, Arial, sans-serif";
+          ctx.fillText(row[0], cx+28, cy);
         });
-        ctx.fillStyle="#5c5346"; ctx.font="600 13px Inter, Arial, sans-serif";
-        ctx.fillText("Кузов: "+dutyBodyWord(d[car.id+"_body"]||"ok"), x+12, y+250);
-        ctx.fillText("Пробег: "+(d[car.id+"_km"]||"—"), x+12, y+278);
-        ctx.fillText("Топливо: "+(d[car.id+"_fuel"]?d[car.id+"_fuel"]+"%":"—"), x+12, y+306);
+        ctx.fillStyle="#5c5346"; ctx.font="600 16px Inter, Arial, sans-serif";
+        const meta="Кузов: "+dutyBodyWord(d[car.id+"_body"]||"ok")+"     Пробег: "+(d[car.id+"_km"]||"—")+"     Топливо: "+(d[car.id+"_fuel"]?d[car.id+"_fuel"]+"%":"—");
+        ctx.fillText(meta, pad+20, y+176);
+        y+=carH+12;
       });
-      y+=450;
-      function chips(title, keys, x0, w0){
-        ctx.fillStyle="#f7f1e7"; ctx.fillRect(x0, y, w0, 210);
-        ctx.strokeStyle="#eadfcf"; ctx.strokeRect(x0, y, w0, 210);
-        ctx.fillStyle="#111"; ctx.font="800 16px Inter, Arial, sans-serif";
-        ctx.fillText(title, x0+14, y+28);
+      function block(title, keys){
+        const rows=Math.ceil(keys.length/3);
+        const h=54+rows*40;
+        ctx.fillStyle="#f7f1e7";
+        roundRect(pad, y, inner, h, 14); ctx.fill();
+        ctx.strokeStyle="#eadfcf"; ctx.lineWidth=1;
+        roundRect(pad, y, inner, h, 14); ctx.stroke();
+        ctx.fillStyle="#111"; ctx.font="800 20px Inter, Arial, sans-serif";
+        ctx.fillText(title, pad+20, y+32);
         keys.forEach((pair,i)=>{
-          const cx=x0+14+(i%3)*((w0-28)/3);
-          const cy=y+58+Math.floor(i/3)*42;
-          ctx.strokeStyle="#111"; ctx.strokeRect(cx, cy-14, 16, 16);
-          if(d[pair[0]]){ ctx.fillStyle="#145a1f"; ctx.font="800 16px Inter, Arial, sans-serif"; ctx.fillText("✓", cx+2, cy); }
-          ctx.fillStyle="#111"; ctx.font="500 14px Inter, Arial, sans-serif";
-          ctx.fillText(pair[1], cx+24, cy);
+          const col=i%3;
+          const line=Math.floor(i/3);
+          const cx=pad+20+col*((inner-40)/3);
+          const cy=y+68+line*38;
+          tick(cx, cy, !!d[pair[0]]);
+          ctx.fillStyle="#111"; ctx.font="500 16px Inter, Arial, sans-serif";
+          ctx.fillText(pair[1], cx+28, cy);
         });
+        y+=h+12;
       }
-      const half=(W-pad*2-gap)/2;
-      chips("Дилерский центр",[
+      block("Дилерский центр",[
         ["dc_light","Свет"],["dc_avito","Авито"],["dc_music","Музыка"],
         ["dc_price_avito","Цены Авито"],["dc_price_hold","Прайсхолдеры"],["dc_desk","Столы"],["dc_trash","Бумаги"]
-      ], pad, half);
-      chips("Демонстрационные",[
+      ]);
+      block("Демонстрационные",[
         ["dm_body","Кузов"],["dm_mats","Коврики"],["dm_trunk","Багажник"],
         ["dm_dust","Пыль"],["dm_wheel","Колёса"],["dm_bat","АКБ"]
-      ], pad+half+gap, half);
-      y+=230;
-      ctx.fillStyle="#5c5346"; ctx.font="500 14px Inter, Arial, sans-serif";
-      ctx.fillText("Заметка: "+(d.note||"—"), pad, y);
-      ctx.fillText("Подпись: "+(d.sign||d.manager||""), pad, y+28);
-      ctx.fillStyle="#9a9186"; ctx.font="500 12px Inter, Arial, sans-serif";
+      ]);
+      ctx.fillStyle="#5c5346"; ctx.font="500 16px Inter, Arial, sans-serif";
+      ctx.fillText("Заметка: "+(d.note||"—"), pad, y+8);
+      ctx.fillText("Подпись: "+(d.sign||d.manager||""), pad, y+36);
+      ctx.fillStyle="#9a9186"; ctx.font="500 13px Inter, Arial, sans-serif";
       ctx.fillText("TENET · Отдел продаж · Эксперт Авто Самара", pad, H-28);
-      const w=window.open("");
-      if(!w) return;
-      const name="checklist-"+(d.date||dutyToday()).replace(/\./g,"-")+".pdf";
-      w.document.write("<title>"+name+"</title><style>@page{size:A4 portrait;margin:8mm}html,body{margin:0;background:#fff}img{width:100%;display:block}</style><img src='"+c.toDataURL("image/png")+"' />");
-      w.document.close();
-      setTimeout(()=>{ try{ w.print(); }catch(e){} }, 400);
+      dutyPdfOpen(c.toDataURL("image/png"));
     }
     function dutyRead(){
       const out=dutyLoad();
@@ -4139,5 +4185,6 @@ async function confirmCloud(rec){
     }).catch(()=>{});
     if(state.authed && state.surname && userRun() && !done && !paper.length) resumeExam(userRun());
   </script>
+<script src="duty-overlay.js?v=d3"></script>
 </body>
 </html>
