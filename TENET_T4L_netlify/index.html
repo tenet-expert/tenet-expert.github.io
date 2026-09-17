@@ -121,7 +121,7 @@ input,textarea{width:100%;background:#fff;border:1px solid var(--border);color:v
 .rate-person .pct{font-size:14px;font-weight:800;letter-spacing:-.03em;font-variant-numeric:tabular-nums;white-space:nowrap;}
 .rate-person .pct.ok{color:var(--pass);}
 .rate-person .pct.low{color:var(--primary);}
-.rate-split{margin:10px 0 4px;border:0;border-top:1px solid var(--fg);padding-top:8px;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:700;}
+.rate-split{margin:10px 0 4px;border:0;border-top:1px solid var(--fg);padding-top:8px;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:700;}.rate-avg{display:grid;grid-template-columns:minmax(0,1fr) 44px 44px;gap:4px;align-items:center;margin:8px 0 2px;padding:8px 0;border-top:1px dashed var(--border);border-bottom:1px dashed var(--border);}.rate-avg b{font-size:12px;font-weight:700;color:var(--muted);}.rate-avg .pct{text-align:right;font-size:14px;font-weight:800;letter-spacing:-.03em;font-variant-numeric:tabular-nums;}
 .rate-col .empty{font-size:12px;padding:6px 0 4px;}
 
 .model-card .car{display:none;}
@@ -1581,6 +1581,10 @@ input,textarea{width:100%;background:#fff;border:1px solid var(--border);color:v
           const a=bestMap(1,m.id)[k]; const b=bestMap(2,m.id)[k];
           return pair(k, (a&&a.name)||(b&&b.name)||k, m.id);
         }).sort((a,b)=>(b.was||0)-(a.was||0) || a.name.localeCompare(b.name,"ru"));
+        const firsts=staffRows.filter(p=>p.was!=null).map(p=>Number(p.was));
+        const avg=firsts.length?Math.round(firsts.reduce((s,v)=>s+v,0)/firsts.length):null;
+        const avgCls=avg==null?"":(avg>=(typeof EXPERT==="number"?EXPERT:90)?" ok":avg<(typeof PASS==="number"?PASS:70)?" low":"");
+        const avgRow=avg==null?"":`<div class="rate-avg"><div><b>Средний по отделу</b></div><span class="pct${avgCls}">${avg}%</span><span class="pct">—</span></div>`;
         return `<div class="rate-col">
           <div class="eyebrow">${m.brand}</div>
           <h3>${m.name}</h3>
@@ -1588,7 +1592,7 @@ input,textarea{width:100%;background:#fff;border:1px solid var(--border);color:v
           ${taken.length?taken.map(p=>personRow(p,false)).join(""):""}
           ${wait.map(p=>personRow(p,true)).join("")}
           ${!taken.length && !wait.length?`<p class="empty">Пока пусто</p>`:""}
-          ${guests.length?`<div class="rate-split">гости</div>${guests.map(p=>personRow(p,false)).join("")}`:""}
+          ${avgRow}${guests.length?`<div class="rate-split">гости</div>${guests.map(p=>personRow(p,false)).join("")}`:""}
         </div>`;
       }
       const pinNeeded=hasExam1() && !expertLocked() && !hasExam2();
