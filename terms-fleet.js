@@ -32,18 +32,73 @@
     function fleetOf(id){
       return FLEET_BFS[id] || FLEET_BFS.t9u;
     }
-    function fleetCreditBox(price){
-      const downMode=(typeof kmStr==="function"?kmStr("cDownMode","pct"):"pct");
-      const months=typeof kmVal==="function"?kmVal("cMonths", 60):60;
+    function fleetPayRows(list, payKey, overKey, months){
+      return list.map(b=>{
+        const yearsWant=Math.round(months/12);
+        const yearsHave=Math.round(b.term/12);
+        const note=b.capped?`нет ${yearsWant} ${yearsWant===1?"года":"лет"} · считаем ${b.term} мес. (${yearsHave} ${yearsHave===1?"год":yearsHave<5?"года":"лет"})`: `${b.term} мес.`;
+        const pay=Math.round(b[payKey]||0);
+        const over=Math.round(b[overKey]||0);
+        return `<div class="bank-row"><span><b>${escape(b.name)}</b><br/><small>${b.rate}% · ${note} · переплата ~${rub(over)}</small></span><span class="pay">${rub(pay)} ₽</span></div>`;
+      }).join("");
+    }
+    function fleetCreditBox(price, m, f, useFleet, useTi){
+      const downMode=(typeof kmStr==="function"?kmStr("cDownMode","sum"):"sum");
+      const months=typeof kmVal==="function"?kmVal("cMonths", 84):84;
       let downPct=typeof kmVal==="function"?kmVal("cDownPct", 20):20;
-      let down=typeof kmVal==="function"?kmVal("cDown", Math.round(price*0.2)):Math.round(price*0.2);
-      if(downMode==="pct") down=Math.round(price*Math.max(0,downPct)/100);
-      else downPct=price>0?Math.round(down*1000/price)/10:0;
-      down=Math.max(0,Math.min(price,down));
-      const pay=typeof calcPay==="function"?calcPay(price, down, months, 19.2):0;
+      const priceMpt=Math.round(price);
+      let down=typeof kmVal==="function"?kmVal("cDown", Math.round(priceMpt*0.2)):Math.round(priceMpt*0.2);
+      if(downMode==="pct") down=Math.round(priceMpt*Math.max(0,downPct)/100);
+      else downPct=priceMpt>0?Math.round(down*1000/priceMpt)/10:0;
+      down=Math.max(0,Math.min(priceMpt,down));
+      const MPT_EXTRA=200000;
+      const downMptShow=down;
+      const downMptCar=Math.max(0, downMptShow-MPT_EXTRA);
+      const creditMpt=Math.max(0, priceMpt-downMptCar);
+      const mptTerm=Math.min(Math.max(1, months), 84);
+      const payMpt=typeof calcPay==="function"?calcPay(priceMpt, downMptCar, mptTerm, 19.2):0;
+      const overMpt=payMpt*mptTerm-creditMpt;
+      const banksMpt=[{id:"sovcom", name:"Совкомбанк", rate:19.2, term:mptTerm, capped:mptTerm!==months, payMpt, overMpt}];
+      const priceReg=Math.max(0, (m&&m.rrc?m.rrc:f.rrc)-(useTi&&m&&m.ti?m.ti:0));
+      const addons=70000;
+      const pack=150000;
+      const fee=typeof KM_BANK_FEE==="number"?KM_BANK_FEE:30000;
+      const extras=addons+pack+fee;
+      const downReg=downMode==="pct"?Math.round(priceReg*Math.max(0,downPct)/100):Math.max(0,Math.min(priceReg,down));
+      const creditReg=Math.max(0, priceReg-downReg+extras);
+      const rateGroup=typeof kmRateGroup==="function"?kmRateGroup(m):"t4l_t7";
+      const banks=(typeof KM_BANKS!=="undefined"?KM_BANKS:[{id:"sovcom",name:"Совкомбанк",rate:19.2}]).map(b=>{
+        const look=typeof kmBankRate==="function"?kmBankRate(b.id, rateGroup, months, downMode==="pct"?downPct:(priceReg>0?Math.round(downReg*1000/priceReg)/10:0)):{rate:b.rate||19.2, term:months, capped:false};
+        const term=look.term||months;
+        const pay=typeof calcPay==="function"?calcPay(priceReg+extras, downReg, term, look.rate):0;
+        return Object.assign({}, b, {rate:look.rate, term, capped:!!look.capped, pay, over:pay*term-creditReg});
+      });
+      const stockCars=typeof kmStockCars==="function"?kmStockCars(m):[];
+      const analog=stockCars.find(c=>!c.mpt && !c.corp) || stockCars.find(c=>!c.mpt) || null;
+      const mptBreak=`<div class="mpt-break">
+                <div><span>Комплектация</span><b>${escape((f&&f.name)||(m&&m.name)||"")}</b></div>
+                <div><span>РРЦ</span><b>${rub(f.rrc)}</b></div>
+                <div><span>Флит</span><b>${rub(useFleet?f.tidy:f.rrc)}</b></div>
+                ${useTi?`<div><span>Трейд-ин</span><b>− ${rub(FLEET_TI)}</b></div>`:""}
+                <div><span>МПТ −10%</span><b>${rub(priceMpt)}</b></div>
+                <div><span>Первый взнос</span><b>${rub(downMptShow)}</b></div>
+                <div><span>из них каско и Д/О</span><b>${rub(Math.min(MPT_EXTRA, downMptShow))}</b></div>
+                <div><span>ПВ в авто</span><b>${rub(downMptCar)}</b></div>
+                <div><span>Тело кредита</span><b>${rub(creditMpt)}</b></div>
+              </div>`;
+      const regBreak=`<div class="mpt-break">
+                <div><span>Комплектация</span><b>${escape((m&&m.name)||(f&&f.name)||"")}</b></div>
+                ${analog?`<div><span>Аналог на складе</span><b>${escape(analog.color||"—")} · ${escape(analog.vin||"")}</b></div>`:`<div><span>Аналог</span><b>та же комплектация, обычный кредит</b></div>`}
+                <div><span>РРЦ</span><b>${rub(m&&m.rrc?m.rrc:f.rrc)}</b></div>
+                ${useTi?`<div><span>Трейд-ин</span><b>− ${rub(m&&m.ti?m.ti:0)}</b></div>`:""}
+                <div><span>Цена авто</span><b>${rub(priceReg)}</b></div>
+                <div><span>ПВ</span><b>${rub(downReg)}</b></div>
+                <div><span>В кредит ещё Д/О + каско + комиссия</span><b>${rub(extras)}</b></div>
+                <div><span>Тело кредита</span><b>${rub(creditReg)}</b></div>
+              </div>`;
       return `<div class="note-box" style="margin-top:12px">
-        <p class="eyebrow" style="margin:0 0 6px">Кредит 19,2% · МПТ + Совкомбанк лизинг</p>
-        <p class="calc-note">Доп. расчёт к лизингу. Цена ${rub(Math.round(price))} ₽.</p>
+        <p class="eyebrow" style="margin:0 0 6px">Сравнение · стандартный кредит и МПТ</p>
+        <p class="calc-note">Одинаковые ПВ и срок. Слева — обычная машина этой комплектации. Справа — эта МПТ.</p>
         <p class="eyebrow" style="margin-top:8px">Первый взнос</p>
         <div class="down-mode">
           <button type="button" class="chip ${downMode==="sum"?"on":""}" data-down-mode="sum">Сумма, ₽</button>
@@ -53,15 +108,28 @@
         ${downMode==="sum"
           ?`<label class="field" style="max-width:none"><span>Первый взнос, ₽</span><input id="cDown" inputmode="numeric" value="${down}" /></label>`
           :`<label class="field" style="max-width:none"><span>Первый взнос, %</span><input id="cDownPct" inputmode="decimal" value="${downPct}" /></label>`}
-        <p class="calc-note">${rub(down)} ₽ · ${downPct}% от цены</p>
+        <p class="calc-note">${rub(down)} ₽ · ${downPct}% от цены МПТ</p>
         <label class="field" style="max-width:none"><span>Срок, мес.</span><input id="cMonths" inputmode="numeric" value="${months}" /></label>
-        <div class="bank-row"><span><b>Платёж 19,2%</b><br/><small>${months} мес. · ПВ ${downPct}%</small></span><span class="pay">${rub(Math.round(pay))} ₽</span></div>
+        <div class="pay-split">
+          <div class="pay-col">
+            <p class="eyebrow">Стандартный кредит</p>
+            <p class="calc-note">ПВ ${rub(downReg)} · тело ${rub(creditReg)}</p>
+            ${fleetPayRows(banks,"pay","over",months)}
+            ${regBreak}
+          </div>
+          <div class="pay-col mpt">
+            <p class="eyebrow">Гос. программа · МПТ · Совкомбанк 19,2%</p>
+            <p class="calc-note">ПВ ${rub(downMptShow)} · из них ${rub(Math.min(MPT_EXTRA, downMptShow))} на каско и Д/О · тело ${rub(creditMpt)}</p>
+            ${fleetPayRows(banksMpt,"payMpt","overMpt",months)}
+            ${mptBreak}
+          </div>
+        </div>
       </div>`;
     }
     function calcFleet(m){
       const f=fleetOf(m.id);
-      const useFleet=kmVal("kmFleetDisc", false);
-      const useMpt=kmVal("kmFleetMpt", false);
+      const useFleet=kmVal("kmFleetDisc", true);
+      const useMpt=kmVal("kmFleetMpt", true);
       const useTi=kmVal("kmUseTi", false);
       let price=f.rrc;
       const fleetCut=Math.max(0, f.rrc-(f.tidy||f.rrc));
@@ -72,13 +140,13 @@
       const car=(typeof STOCK!=="undefined"?STOCK:[]).find(x=>x.vin===kmVin);
       const mptCut=Math.round((useFleet?f.tidy:f.rrc)*(useTi?0.9:1)*0.1);
       return banner("Калькулятор","Флит · BFS Совкомбанк лизинг","TENET")+`
-        <p class="lead">Корпоративный VIN. Стандартный кредит запрещён. Считаем BFS Совкомбанк лизинг.</p>
+        <p class="lead">Корпоративный / МПТ VIN. Справа сравнение с обычным кредитом той же комплектации.</p>
         ${kmChipGroups(m.id)}
         <div class="km-layout">
           <div class="card">
             <p class="eyebrow">BFS Совкомбанк лизинг · ${escape(f.name)}</p>
-            ${car?`<p class="calc-note">${escape(car.vin)} · ${escape(car.color||"")} · ${escape(car.trim||"")}</p>`:""}
-            <div class="note-box">Сбер / Альфа / Т-Банк нельзя. BFS: Каркаде, Т-Лизинг, Европлан, Сберлизинг, Газпромбанк Лизинг, Совкомбанк Лизинг.</div>
+            ${car?`<p class="calc-note">${escape(car.vin)} · ${escape(car.color||"")} · ${escape(car.trim||"")}${car.mpt?" · МПТ":""}</p>`:""}
+            <div class="note-box">Сбер / Альфа / Т-Банк на этот VIN нельзя. Сравнение справа — платёж обычной машины этой комплектации.</div>
             <label class="check-row"><input id="kmFleetDisc" type="checkbox" ${useFleet?"checked":""} /> <span>Флит скидка ${rub(fleetCut)} · макс. выгода ${rub(f.an)}</span></label>
             <label class="check-row"><input id="kmUseTi" type="checkbox" ${useTi?"checked":""} /> <span>Трейд-ин ${rub(FLEET_TI)}</span></label>
             <label class="check-row"><input id="kmFleetMpt" type="checkbox" ${useMpt?"checked":""} /> <span>МПТ −10%</span></label>
@@ -88,7 +156,7 @@
               <div class="calc-out">${rub(Math.round(price))} ₽</div>
               <p class="calc-note">${steps.length?steps.join(" → "):"Базовая цена без скидок."}${useFleet?" · AP без тюнинга "+rub(f.tidy):""}</p>
             </div>
-            ${useMpt?fleetCreditBox(price):""}
+            ${fleetCreditBox(price, m, f, useFleet, useTi)}
           </div>
           <div class="km-right">
             <div class="card">
