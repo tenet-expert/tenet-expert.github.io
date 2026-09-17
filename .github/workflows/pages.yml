@@ -87,6 +87,7 @@ jobs:
             python3 patch_ops.py || true
           fi
           if [ -f patch_duty_vert.py ]; then python3 patch_duty_vert.py || true; fi
+          if grep -q 'dutyPdfOpen' index.html 2>/dev/null; then cp -f index.html _site/index.html; echo "copied root index to _site"; fi
           if [ -f patch_hub_previews.py ]; then python3 patch_hub_previews.py || true; fi
           mkdir -p _site/cars _site/docs/prices _site/hub _site/epts
           if [ -d cars ]; then cp -f cars/*.jpg _site/cars/ 2>/dev/null || true; fi
