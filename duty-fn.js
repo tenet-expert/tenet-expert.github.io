@@ -25,6 +25,136 @@
     function dutySave(data){
       try{ localStorage.setItem("tenet-duty-v1", JSON.stringify(data||{})); }catch(e){}
     }
+    function dutyLogLoad(){
+      try{
+        const x=JSON.parse(localStorage.getItem("tenet-duty-log")||"[]");
+        return Array.isArray(x)?x:[];
+      }catch(e){ return []; }
+    }
+    function dutyLogWrite(list){
+      try{ localStorage.setItem("tenet-duty-log", JSON.stringify((list||[]).slice(0,80))); }catch(e){}
+    }
+    function dutyLogKey(d){
+      return String(d.date||dutyToday())+"|"+String(d.manager||"").trim().toLowerCase();
+    }
+    function dutyArchive(d){
+      const data=Object.assign({}, d||{});
+      const rec={
+        id:dutyLogKey(data),
+        date:data.date||dutyToday(),
+        manager:String(data.manager||"").trim()||"без фамилии",
+        at:new Date().toISOString(),
+        pct:(()=>{ const p=dutyCount(data); return p.tot?Math.round(p.on*100/p.tot):0; })(),
+        data:data
+      };
+      const list=dutyLogLoad().filter(x=>x && x.id!==rec.id);
+      list.unshift(rec);
+      dutyLogWrite(list);
+      return rec;
+    }
+    function dutyOpenSaved(id){
+      const rec=dutyLogLoad().find(x=>x && x.id===id);
+      if(!rec || !rec.data) return;
+      dutySave(rec.data);
+      if(typeof render==="function") render();
+    }
+    function dutyBodyWord(v){
+      if(v==="pm") return "±";
+      if(v==="no") return "грязный";
+      return "чистый";
+    }
+    function dutyPdf(src){
+      const d=src||dutyRead();
+      const p=dutyCount(d);
+      const pct=p.tot?Math.round(p.on*100/p.tot):0;
+      const W=1240, H=1754;
+      const c=document.createElement("canvas");
+      c.width=W; c.height=H;
+      const ctx=c.getContext("2d");
+      ctx.fillStyle="#ffffff"; ctx.fillRect(0,0,W,H);
+      const pad=36;
+      ctx.fillStyle="#c81e2b";
+      ctx.fillRect(pad, pad, 28, 28);
+      ctx.fillStyle="#fff";
+      ctx.font="800 16px Inter, Arial, sans-serif";
+      ctx.fillText("T", pad+8, pad+21);
+      ctx.fillStyle="#111";
+      ctx.font="800 28px Inter, Arial, sans-serif";
+      ctx.fillText("Чек-лист дежурного", pad+42, pad+24);
+      ctx.font="600 16px Inter, Arial, sans-serif";
+      ctx.fillStyle="#5c5346";
+      ctx.fillText((d.manager||"—")+"  ·  "+(d.date||dutyToday())+"  ·  "+pct+"%  ·  "+p.on+" из "+p.tot, pad+42, pad+48);
+      const cols=DUTY_CARS.length;
+      const gap=10;
+      const colW=(W-pad*2-(cols-1)*gap)/cols;
+      let y=pad+72;
+      DUTY_CARS.forEach((car,i)=>{
+        const x=pad+i*(colW+gap);
+        ctx.fillStyle="#f7f1e7";
+        ctx.fillRect(x, y, colW, 430);
+        ctx.strokeStyle="#eadfcf"; ctx.strokeRect(x, y, colW, 430);
+        ctx.fillStyle="#111"; ctx.font="800 16px Inter, Arial, sans-serif";
+        ctx.fillText(car.title, x+12, y+28);
+        const rows=[
+          ["Омывающая", !!d[car.id+"_wash"]],
+          ["Коврики и пороги", !!d[car.id+"_mats"]],
+          ["Нет ошибок", !!d[car.id+"_err"]],
+          ["Нет пыли", !!d[car.id+"_dust"]],
+          ["Багажник", !!d[car.id+"_trunk"]],
+        ];
+        rows.forEach((row,ri)=>{
+          const ry=y+54+ri*36;
+          ctx.strokeStyle="#111"; ctx.strokeRect(x+12, ry-14, 16, 16);
+          if(row[1]){
+            ctx.fillStyle="#145a1f";
+            ctx.font="800 16px Inter, Arial, sans-serif";
+            ctx.fillText("✓", x+14, ry);
+          }
+          ctx.fillStyle="#111"; ctx.font="500 14px Inter, Arial, sans-serif";
+          ctx.fillText(row[0], x+36, ry);
+        });
+        ctx.fillStyle="#5c5346"; ctx.font="600 13px Inter, Arial, sans-serif";
+        ctx.fillText("Кузов: "+dutyBodyWord(d[car.id+"_body"]||"ok"), x+12, y+250);
+        ctx.fillText("Пробег: "+(d[car.id+"_km"]||"—"), x+12, y+278);
+        ctx.fillText("Топливо: "+(d[car.id+"_fuel"]?d[car.id+"_fuel"]+"%":"—"), x+12, y+306);
+      });
+      y+=450;
+      function chips(title, keys, x0, w0){
+        ctx.fillStyle="#f7f1e7"; ctx.fillRect(x0, y, w0, 210);
+        ctx.strokeStyle="#eadfcf"; ctx.strokeRect(x0, y, w0, 210);
+        ctx.fillStyle="#111"; ctx.font="800 16px Inter, Arial, sans-serif";
+        ctx.fillText(title, x0+14, y+28);
+        keys.forEach((pair,i)=>{
+          const cx=x0+14+(i%3)*((w0-28)/3);
+          const cy=y+58+Math.floor(i/3)*42;
+          ctx.strokeStyle="#111"; ctx.strokeRect(cx, cy-14, 16, 16);
+          if(d[pair[0]]){ ctx.fillStyle="#145a1f"; ctx.font="800 16px Inter, Arial, sans-serif"; ctx.fillText("✓", cx+2, cy); }
+          ctx.fillStyle="#111"; ctx.font="500 14px Inter, Arial, sans-serif";
+          ctx.fillText(pair[1], cx+24, cy);
+        });
+      }
+      const half=(W-pad*2-gap)/2;
+      chips("Дилерский центр",[
+        ["dc_light","Свет"],["dc_avito","Авито"],["dc_music","Музыка"],
+        ["dc_price_avito","Цены Авито"],["dc_price_hold","Прайсхолдеры"],["dc_desk","Столы"],["dc_trash","Бумаги"]
+      ], pad, half);
+      chips("Демонстрационные",[
+        ["dm_body","Кузов"],["dm_mats","Коврики"],["dm_trunk","Багажник"],
+        ["dm_dust","Пыль"],["dm_wheel","Колёса"],["dm_bat","АКБ"]
+      ], pad+half+gap, half);
+      y+=230;
+      ctx.fillStyle="#5c5346"; ctx.font="500 14px Inter, Arial, sans-serif";
+      ctx.fillText("Заметка: "+(d.note||"—"), pad, y);
+      ctx.fillText("Подпись: "+(d.sign||d.manager||""), pad, y+28);
+      ctx.fillStyle="#9a9186"; ctx.font="500 12px Inter, Arial, sans-serif";
+      ctx.fillText("TENET · Отдел продаж · Эксперт Авто Самара", pad, H-28);
+      const w=window.open("");
+      if(!w) return;
+      const name="checklist-"+(d.date||dutyToday()).replace(/\./g,"-")+".pdf";
+      w.document.write("<title>"+name+"</title><style>@page{size:A4 portrait;margin:8mm}html,body{margin:0;background:#fff}img{width:100%;display:block}</style><img src='"+c.toDataURL("image/png")+"' />");
+      w.document.close();
+      setTimeout(()=>{ try{ w.print(); }catch(e){} }, 400);
+    }
     function dutyRead(){
       const out=dutyLoad();
       document.querySelectorAll("[data-duty]").forEach(el=>{
@@ -101,7 +231,7 @@
             <input data-duty="sign" placeholder="Подпись" value="${escape(d.sign||d.manager||"")}" />
             <div class="cl-prog"><i style="width:${pct}%"></i><span>${pct}%</span></div>
             <button type="button" class="btn ivory" id="dutySave">Сохранить</button>
-            <button type="button" class="btn ghost" id="dutyPrint">Печать</button>
+            <button type="button" class="btn ghost" id="dutyPrint">PDF</button>
             <button type="button" class="btn ghost" id="dutyClear">Сброс</button>
           </div>
           <div class="cl-cars">${cards}</div>
@@ -125,6 +255,14 @@
             </div>
             <input data-duty="note" placeholder="Заметка: помыть T7, T4L" value="${escape(d.note||"")}" style="width:100%;margin-top:8px;min-height:34px" />
             </div>
+          </div>
+          <div class="cl-log">
+            <h3>Сохранённые чек-листы</h3>
+            ${dutyLogLoad().length?dutyLogLoad().map(x=>`
+              <button type="button" class="cl-log-row" data-duty-open="${escape(x.id)}">
+                <span><b>${escape(x.date||"")}</b> · ${escape(x.manager||"")}</span>
+                <small>${x.pct||0}% · открыть</small>
+              </button>`).join(""):`<p class="lead" style="margin:0">Пока пусто. Нажмите «Сохранить» — запись появится здесь с датой и фамилией.</p>`}
           </div>
         </div>`;
     }
@@ -331,12 +469,26 @@
       document.addEventListener("click", function(ev){
         const open=ev.target && ev.target.closest ? ev.target.closest("[data-gopen]") : null;
         if(open){ ev.preventDefault(); gibddOpen(open.getAttribute("data-gopen")); return; }
-        const t=ev.target && ev.target.closest ? ev.target.closest("#gRun,#gPdf,#gPdfLast,#dutySave,#dutyPrint,#dutyClear") : ev.target;
-        if(!t || !t.id) return;
+        const t=ev.target && ev.target.closest ? ev.target.closest("#gRun,#gPdf,#gPdfLast,#dutySave,#dutyPrint,#dutyClear,[data-duty-open]") : ev.target;
+        if(!t) return;
+        const openLog=t.closest ? t.closest("[data-duty-open]") : (t.getAttribute && t.getAttribute("data-duty-open")?t:null);
+        if(openLog && openLog.getAttribute){
+          ev.preventDefault();
+          dutyOpenSaved(openLog.getAttribute("data-duty-open"));
+          return;
+        }
+        if(!t.id) return;
         if(t.id==="gRun"){ ev.preventDefault(); gibddRun(); }
         if(t.id==="gPdf" || t.id==="gPdfLast"){ ev.preventDefault(); gibddPdf(window.__gibddLast); }
-        if(t.id==="dutySave"){ ev.preventDefault(); dutySave(dutyRead()); dutyPaintProg(); t.textContent="Ок"; setTimeout(()=>t.textContent="Сохранить",900); }
-        if(t.id==="dutyPrint"){ ev.preventDefault(); dutySave(dutyRead()); window.print(); }
+        if(t.id==="dutySave"){
+          ev.preventDefault();
+          const cur=dutyRead();
+          dutySave(cur);
+          dutyArchive(cur);
+          dutyPaintProg();
+          if(typeof render==="function") render();
+        }
+        if(t.id==="dutyPrint"){ ev.preventDefault(); const cur=dutyRead(); dutySave(cur); dutyPdf(cur); }
         if(t.id==="dutyClear"){ ev.preventDefault(); localStorage.removeItem("tenet-duty-v1"); if(typeof render==="function") render(); }
       });
     }

@@ -50,6 +50,10 @@ CSS = """
 .cl-box b{display:block;margin-bottom:6px;font-size:12px}
 .cl-chips{display:flex;flex-wrap:wrap;gap:6px}
 .cl-chips label{display:inline-flex;gap:6px;align-items:center;padding:6px 8px;border:1px solid #eadfcf;border-radius:999px;font-size:12px;background:#fbf7f0}
+.cl-log{margin-top:4px}
+.cl-log h3{font-size:14px;margin:8px 0}
+.cl-log-row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 12px;border:1px solid #eadfcf;border-radius:12px;background:#fff;margin:0 0 6px;width:100%;text-align:left;cursor:pointer;font:inherit;color:inherit}
+.cl-log-row small{color:#7a7166;white-space:nowrap}
 .st-filters{display:flex;flex-wrap:wrap;gap:8px}
 .st-acc{border:1px solid #eadfcf;border-radius:14px;background:#fff;margin:8px 0;overflow:hidden}
 .st-acc summary{list-style:none;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px;cursor:pointer}
@@ -66,10 +70,18 @@ CSS = """
 .st-flags{margin-top:6px;display:flex;flex-wrap:wrap;justify-content:flex-end;gap:4px}
 .study-pick{flex-wrap:wrap}
 @media print{
-  header,nav,.who-line,.hub-grid,.cl-bar .btn{display:none!important}
+  @page{size:A4 portrait;margin:8mm}
+  header,nav,.bot,.banner,.who-line,.hub-grid,.cl-bar .btn,.cl-log,.cl-prog{display:none!important}
+  .wrap{max-width:none!important;padding:0!important}
+  .cl{gap:4px;page-break-inside:avoid}
+  .cl-cars{grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:4px}
+  .cl-car,.cl-box{padding:6px;border-radius:6px}
+  .cl-car h3{font-size:11px;margin:0 0 4px}
+  .cl-item{padding:1px 0;font-size:10px;gap:4px}
+  .cl-item input,.cl-mark{width:12px;height:12px}
+  .cl-foot{gap:4px}
   .cl-item input{appearance:none!important;border:1.4px solid #000!important;background:#fff!important}
   .cl-item input:checked + .cl-mark{color:#000!important}
-  .cl-mark{color:#000}
   .st-acc{break-inside:avoid}
 }
 """ + HUB_CSS
@@ -78,7 +90,7 @@ def patch(html: str) -> str:
     js = JS.read_text(encoding="utf-8") if JS.exists() else ""
     if js:
         if "function stockBlob(c){" in html:
-            html = re.sub(r"    function stockBlob\(c\)\{[\s\S]*?(?=    function login\(\)\{)", js, count=1)
+            html = re.sub(r"    function stockBlob\(c\)\{[\s\S]*?(?=    function login\(\)\{)", lambda _m: js, html, count=1)
             print("duty fn replaced")
         elif "    function login(){" in html:
             html = html.replace("    function login(){", js + "    function login(){", 1)
@@ -118,6 +130,35 @@ def patch(html: str) -> str:
     if ".st-acc{" not in html:
         html = html.replace("</style>", CSS + "\n</style>", 1)
         print("stock/duty css")
+    elif ".cl-log-row{" not in html:
+        extra = """
+.cl-log{margin-top:4px}
+.cl-log h3{font-size:14px;margin:8px 0}
+.cl-log-row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 12px;border:1px solid #eadfcf;border-radius:12px;background:#fff;margin:0 0 6px;width:100%;text-align:left;cursor:pointer;font:inherit;color:inherit}
+.cl-log-row small{color:#7a7166;white-space:nowrap}
+"""
+        html = html.replace("</style>", extra + "\n</style>", 1)
+        print("duty log css")
+    html = html.replace(
+        """@media print{
+  header,nav,.who-line,.hub-grid,.cl-bar .btn{display:none!important}
+  .cl-item input{appearance:none!important;border:1.4px solid #000!important;background:#fff!important}
+  .cl-item input:checked + .cl-mark{color:#000!important}
+  .cl-mark{color:#000}
+  .st-acc{break-inside:avoid}
+}""",
+        """@media print{
+  @page{size:A4 portrait;margin:8mm}
+  header,nav,.bot,.banner,.who-line,.hub-grid,.cl-bar .btn,.cl-log,.cl-prog{display:none!important}
+  .wrap{max-width:none!important;padding:0!important}
+  .cl{gap:4px;page-break-inside:avoid}
+  .cl-cars{grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:4px}
+  .cl-car,.cl-box{padding:6px;border-radius:6px}
+  .cl-item input{appearance:none!important;border:1.4px solid #000!important;background:#fff!important}
+  .cl-item input:checked + .cl-mark{color:#000!important}
+  .st-acc{break-inside:avoid}
+}""",
+    )
     if '["duty","Ч"' not in html:
         needle = '["epts","Э","Заказ ЭПТС","Гарантийное письмо: VIN, PDF и отправка"]'
         if needle in html:
