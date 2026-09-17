@@ -61,28 +61,6 @@ jobs:
             fi
             python3 patch_ops.py || true
           fi
-          if [ -f patch_duty_vert.py ]; then python3 patch_duty_vert.py || true; fi
-          python3 - << 'PY'
-          from pathlib import Path
-          js = Path("duty-overlay.js")
-          if js.exists():
-              Path("_site").mkdir(exist_ok=True)
-              Path("_site/duty-overlay.js").write_text(js.read_text(encoding="utf-8"), encoding="utf-8")
-              tag = '<script src="duty-overlay.js"></script>'
-              for p in (Path("_site/index.html"), Path("index.html")):
-                  if not p.exists() or p.stat().st_size < 1000:
-                      continue
-                  t = p.read_text(encoding="utf-8")
-                  if "duty-overlay.js" in t:
-                      print("overlay already", p)
-                      continue
-                  if "</body>" in t:
-                      t = t.replace("</body>", tag + "</body>", 1)
-                  else:
-                      t += tag
-                  p.write_text(t, encoding="utf-8")
-                  print("injected overlay", p, p.stat().st_size)
-          PY
           if [ -f patch_hub_previews.py ]; then python3 patch_hub_previews.py || true; fi
           mkdir -p _site/cars _site/docs/prices _site/hub _site/epts
           if [ -d cars ]; then cp -f cars/*.jpg _site/cars/ 2>/dev/null || true; fi
@@ -94,7 +72,30 @@ jobs:
             cp -f docs/*.pdf docs/*.html _site/docs/ 2>/dev/null || true
             if [ -d docs/prices ]; then cp -f docs/prices/* _site/docs/prices/ 2>/dev/null || true; fi
           fi
-          cp -f favicon.svg favicon.ico favicon-32.png apple-touch-icon.png icon-192.png icon-512.png icon-512-maskable.png manifest.webmanifest duty-overlay.js _site/ 2>/dev/null || true
+          python3 patch_duty_vert.py
+          if grep -q 'dutyPdfOpen' index.html 2>/dev/null; then cp -f index.html _site/index.html; echo "copied root index to _site"; fi
+          python3 - << 'PY'
+          from pathlib import Path
+          js = Path("duty-overlay.js")
+          Path("_site").mkdir(exist_ok=True)
+          if js.exists():
+              Path("_site/duty-overlay.js").write_text(js.read_text(encoding="utf-8"), encoding="utf-8")
+          tag = '<script src="duty-overlay.js?v=d3"></script>'
+          for p in (Path("_site/index.html"), Path("index.html")):
+              if not p.exists() or p.stat().st_size < 1000:
+                  continue
+              t = p.read_text(encoding="utf-8")
+              if "duty-overlay.js" not in t:
+                  if "</body>" in t:
+                      t = t.replace("</body>", tag + "\n</body>", 1)
+                  else:
+                      t += tag
+              if "<!-- duty-vert-d3 -->" not in t:
+                  t = t.replace("<head>", "<head>\n<!-- duty-vert-d3 -->", 1)
+              p.write_text(t, encoding="utf-8")
+              print("final", p, p.stat().st_size, "open", "dutyPdfOpen" in t, "carH", "carH=198" in t, "5col", "repeat(5,minmax(0,1fr))" in t)
+          PY
+          cp -f favicon.svg favicon.ico favicon-32.png apple-touch-icon.png icon-192.png icon-512.png icon-512-maskable.png manifest.webmanifest duty-overlay.js duty-fn.js _site/ 2>/dev/null || true
           touch _site/.nojekyll
 
       - uses: actions/configure-pages@v5
