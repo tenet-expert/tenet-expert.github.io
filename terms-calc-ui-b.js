@@ -72,20 +72,17 @@
       const mptTidy=fMpt&&fMpt.tidy?fMpt.tidy:mptRrc;
       const fleetCutMpt=Math.max(0, mptRrc-mptTidy);
       const tiMpt=useTi?(typeof FLEET_TI==="number"?FLEET_TI:50000):0;
-      let priceMpt=Math.max(0, mptTidy-tiMpt);
-      const beforeMptPct=priceMpt;
-      priceMpt=Math.round(priceMpt*0.9);
-      const MPT_CUT=200000;
-      let downMpt=downMode==="pct"?Math.round(priceMpt*Math.max(0,downPct)/100):down;
-      downMpt=Math.max(0, Math.min(priceMpt, downMpt-MPT_CUT));
-      const creditMpt=Math.max(0,priceMpt-downMpt+extras);
+      const beforeMptPct=Math.max(0, mptTidy-tiMpt);
+      const priceMpt=Math.round(beforeMptPct*0.9);
+      const downMpt=Math.max(0, Math.min(priceMpt, down));
+      const creditMpt=Math.max(0, priceMpt-downMpt);
       const mptTermMax=84;
       const mptTerm=Math.min(Math.max(1, months), mptTermMax);
       const mptRate=19.2;
-      const payMptOne=calcPay(priceMpt+extras, downMpt, mptTerm, mptRate);
+      const payMptOne=calcPay(priceMpt, downMpt, mptTerm, mptRate);
       const overMptOne=payMptOne*mptTerm-creditMpt;
       const banksMpt=[{id:"sovcom", name:"Совкомбанк", rate:mptRate, term:mptTerm, capped:mptTerm!==months, payMpt:payMptOne, overMpt:overMptOne}];
-      const mptSteps=["флит −"+rub(fleetCutMpt)+(useTi?(" → трейд-ин −"+rub(tiMpt)):"")+" → МПТ −10%"];
+      const mptSteps=["флит "+rub(mptTidy)+(useTi?(" − ТИ "+rub(tiMpt)):"")+" − 10% − ПВ "+rub(downMpt)];
       const banks=(typeof KM_BANKS!=="undefined"?KM_BANKS:[]).map(b=>{
         const look=typeof kmBankRate==="function"?kmBankRate(b.id, rateGroup, months, downPct):{rate:b.rate||0, term:months, capped:false};
         const term=look.term||months;
@@ -143,7 +140,7 @@
               ${downMode==="sum"
                 ?`<label class="field" style="max-width:none"><span>Первый взнос, ₽</span><input id="cDown" inputmode="numeric" value="${down}" /></label>`
                 :`<label class="field" style="max-width:none"><span>Первый взнос, %</span><input id="cDownPct" inputmode="decimal" value="${downPct}" /></label>`}
-              <p class="calc-note">${rub(down)} ₽ · ${downPct}% от цены авто${showMpt?` · МПТ: цена ${rub(priceMpt)}, ПВ банка ${rub(downMpt)} ₽ (−200 тыс.)`:""}</p>
+              <p class="calc-note">${rub(down)} ₽ · ${downPct}% от цены авто${showMpt?` · МПТ: ${rub(beforeMptPct)} − 10% = ${rub(priceMpt)}, ПВ ${rub(downMpt)}, тело ${rub(creditMpt)}`:""}</p>
               <label class="field" style="max-width:none"><span>Срок, мес.</span><input id="cMonths" inputmode="numeric" value="${months}" /></label>
               ${showSplit?`<div class="pay-split">
                 <div class="pay-col">
@@ -153,12 +150,12 @@
                 </div>
                 <div class="pay-col mpt">
                   <p class="eyebrow">МПТ · Совкомбанк 19,2%</p>
-                  <p class="calc-note">Аналог ${escape((fMpt&&fMpt.name)||m.name)}${mptSample?` · ${escape(mptSample.color||"")} ${escape(mptSample.vin||"")}`:""}. ${mptSteps[0]}. Цена ${rub(priceMpt)} (РРЦ ${rub(mptRrc)} → флит ${rub(mptTidy)}${useTi?` → ТИ ${rub(beforeMptPct)}`:""} → МПТ). ПВ банка ${rub(downMpt)} = ПВ − 200 тыс. · тело ${rub(creditMpt)}</p>
+                  <p class="calc-note">Аналог ${escape((fMpt&&fMpt.name)||m.name)}${mptSample?` · ${escape(mptSample.color||"")} ${escape(mptSample.vin||"")}`:""}. Флит ${rub(mptTidy)}${useTi?` − ТИ ${rub(tiMpt)}`:""} − 10% = ${rub(priceMpt)} − ПВ ${rub(downMpt)} = тело ${rub(creditMpt)}. Без Д/О и каско.</p>
                   ${kmPayRows(banksMpt,"payMpt","overMpt")}
                 </div>
               </div>`
               :showMpt?`<p class="eyebrow" style="margin-top:16px">Платёж в месяц · МПТ · Совкомбанк 19,2%</p>
-              <p class="calc-note">Аналог ${escape((fMpt&&fMpt.name)||m.name)}${mptSample?` · ${escape(mptSample.color||"")} ${escape(mptSample.vin||"")}`:""}. ${mptSteps[0]}. Цена ${rub(priceMpt)}. ПВ банка ${rub(downMpt)} = ПВ − 200 тыс. Тело ${rub(creditMpt)}.</p>
+              <p class="calc-note">Аналог ${escape((fMpt&&fMpt.name)||m.name)}${mptSample?` · ${escape(mptSample.color||"")} ${escape(mptSample.vin||"")}`:""}. Флит ${rub(mptTidy)}${useTi?` − ТИ ${rub(tiMpt)}`:""} − 10% = ${rub(priceMpt)} − ПВ ${rub(downMpt)} = тело ${rub(creditMpt)}. Без Д/О и каско.</p>
               ${kmPayRows(banksMpt,"payMpt","overMpt")}`
               :`<p class="eyebrow" style="margin-top:16px">Платёж в месяц</p>
               ${kmPayRows(banks,"pay","over")}`}
