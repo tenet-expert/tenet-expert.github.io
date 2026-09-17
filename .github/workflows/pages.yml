@@ -6,13 +6,13 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   deploy:
@@ -93,7 +93,7 @@ jobs:
               if "<!-- duty-vert-d3 -->" not in t:
                   t = t.replace("<head>", "<head>\n<!-- duty-vert-d3 -->", 1)
               p.write_text(t, encoding="utf-8")
-              print("final", p, p.stat().st_size, "open", "dutyPdfOpen" in t, "carH", "carH=198" in t, "5col", "repeat(5,minmax(0,1fr))" in t)
+              print("final", p, p.stat().st_size, "open", "dutyPdfOpen" in t, "carH", "carH=198" in t)
           PY
           cp -f favicon.svg favicon.ico favicon-32.png apple-touch-icon.png icon-192.png icon-512.png icon-512-maskable.png manifest.webmanifest duty-overlay.js duty-fn.js _site/ 2>/dev/null || true
           touch _site/.nojekyll
@@ -104,3 +104,15 @@ jobs:
           path: _site
       - id: deployment
         uses: actions/deploy-pages@v4
+      - name: Sync patched index to branch
+        if: github.event.head_commit.message != 'sync patched duty index'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A index.html TENET_T4L_netlify/index.html || true
+          if git diff --staged --quiet; then
+            echo "index already synced"
+          else
+            git commit -m "sync patched duty index"
+            git push || echo "git push failed"
+          fi
