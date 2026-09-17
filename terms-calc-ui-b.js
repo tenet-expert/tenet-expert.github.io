@@ -176,8 +176,7 @@
               ${kmPayRows(banks,"pay","over")}`}
               <p class="calc-note">${showMpt&&!showSplit?"МПТ. ":""}Ставки TENET ФИНАНС, ИП 1890/И. Кредит = авто ${rub(price)} − ПВ + Д/О ${rub(addons)} + каско ${rub(pack)} + комиссия банка.</p>
             </div>`:`<div class="card"><p class="eyebrow">Кредит</p><p class="lead" style="max-width:none">Включите галочку «Кредит», чтобы открыть расчёт платежа${hasMpt?" и сравнение с МПТ":""}.</p></div>`}
-            ${typeof kmPrioRecs==="function"?kmPrioRecs(m, price, downPct, months, extras):""}
-            ${kmSideList(m)}
+            ${kmSideList(m, price, downPct, months, extras)}
           </div>
         </div>
         <div class="card dc-result ${ok?"ok":"bad"}">
