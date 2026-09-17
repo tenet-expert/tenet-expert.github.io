@@ -7,7 +7,9 @@
 .km-line{margin:4px 0 12px}
 .km-line .stock-h{margin:10px 0 6px}
 .km-right{display:flex;flex-direction:column;gap:14px}
-.stock-side{max-height:520px;overflow:auto}
+.stock-side{max-height:640px;overflow:auto}
+.stock-car.rec{border-color:#c28b2a;box-shadow:inset 3px 0 0 #c28b2a}
+.rec-tag{color:#8d6e00!important}
 .down-mode{display:flex;gap:8px;margin:10px 0 6px}
 .down-mode .chip{min-height:40px;padding:8px 12px}
 .bank-row{display:flex;justify-content:space-between;gap:10px;align-items:baseline;padding:10px 0;border-bottom:1px solid var(--border)}
