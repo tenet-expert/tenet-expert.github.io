@@ -1705,6 +1705,16 @@ async function pingTelegram(body){
         return `<div class="bank-row"><span><b>${escape(b.name)}</b><br/><small>${b.rate}% · ${note} · переплата ~${rub(over)}</small></span><span class="pay">${rub(pay)} ₽</span></div>`;
       }).join("");
     }
+    function fleetPayRows(list, payKey, overKey, months){
+      return list.map(b=>{
+        const yearsWant=Math.round(months/12);
+        const yearsHave=Math.round(b.term/12);
+        const note=b.capped?`нет ${yearsWant} ${yearsWant===1?"года":"лет"} · считаем ${b.term} мес. (${yearsHave} ${yearsHave===1?"год":yearsHave<5?"года":"лет"})`: `${b.term} мес.`;
+        const pay=Math.round(b[payKey]||0);
+        const over=Math.round(b[overKey]||0);
+        return `<div class="bank-row"><span><b>${escape(b.name)}</b><br/><small>${b.rate}% · ${note} · переплата ~${rub(over)}</small></span><span class="pay">${rub(pay)} ₽</span></div>`;
+      }).join("");
+    }
     function fleetCreditBox(price, m, f, useFleet, useTi){
       const downMode=(typeof kmStr==="function"?kmStr("cDownMode","sum"):"sum");
       const months=typeof kmVal==="function"?kmVal("cMonths", 84):84;
@@ -2009,7 +2019,7 @@ async function pingTelegram(body){
         const st=c.status==="in"?"в наличии":"в пути";
         return `<button type="button" class="stock-car${prio?" prio":""}${c.mpt?" mpt":""}${on?" on":""}" data-km-vin="${escape(c.vin)}">
           <b>${escape(c.color||"—")} · ${escape(c.trim||"")}${prio?" · приоритет":""}</b>
-          ${c.mpt?`<span class="mpt-tag">Доступна гос программа −20%</span>`:""}${(c.corp|| (typeof kmIsCorp==="function"&&kmIsCorp(c.vin)))?`<span class="mpt-tag corp-tag">Корпоративный · кредит нельзя · BFS лизинг</span>`:""}${(c.corp|| (typeof kmIsCorp==="function"&&kmIsCorp(c.vin)))?`<span class="mpt-tag corp-tag">Корпоративный · кредит нельзя · BFS лизинг</span>`:""}${(c.corp|| (typeof kmIsCorp==="function"&&kmIsCorp(c.vin)))?`<span class="mpt-tag corp-tag">Корпоративный · кредит нельзя · BFS лизинг</span>`:""}${(c.corp|| (typeof kmIsCorp==="function"&&kmIsCorp(c.vin)))?`<span class="mpt-tag corp-tag">Корпоративный · кредит нельзя · BFS лизинг</span>`:""}
+          ${c.mpt?`<span class="mpt-tag">Доступна гос программа −20%</span>`:""}${(c.corp|| (typeof kmIsCorp==="function"&&kmIsCorp(c.vin)))?`<span class="mpt-tag corp-tag">Корпоративный · кредит нельзя · BFS лизинг</span>`:""}${(c.corp|| (typeof kmIsCorp==="function"&&kmIsCorp(c.vin)))?`<span class="mpt-tag corp-tag">Корпоративный · кредит нельзя · BFS лизинг</span>`:""}${(c.corp|| (typeof kmIsCorp==="function"&&kmIsCorp(c.vin)))?`<span class="mpt-tag corp-tag">Корпоративный · кредит нельзя · BFS лизинг</span>`:""}${(c.corp|| (typeof kmIsCorp==="function"&&kmIsCorp(c.vin)))?`<span class="mpt-tag corp-tag">Корпоративный · кредит нельзя · BFS лизинг</span>`:""}${(c.corp|| (typeof kmIsCorp==="function"&&kmIsCorp(c.vin)))?`<span class="mpt-tag corp-tag">Корпоративный · кредит нельзя · BFS лизинг</span>`:""}
           <span class="vin">${escape(c.vin)}</span>
           <span class="stock-meta">${st}${c.invoice?" · спец инвойс":""}${c.mpt?" · МПТ":""}${c.note?" · "+escape(c.note):""}</span>
         </button>`;
@@ -4205,7 +4215,7 @@ async function confirmCloud(rec){
         }
         view="calc"; render();
       });
-      ["kmRrc","kmInv","kmUseTi","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","cDownMode","cDown","cDownPct","cMonths","cDownMode","cDown","cDownPct","cMonths","kmUseLoan","kmUseCr","kmSpec","kmUseDcTi","kmUseDcCr","kmDcTi","kmDcCr","kmDo","kmPack","kmCasco","cDown","cDownPct","cDownMode","cMonths"].forEach(id=>{
+      ["kmRrc","kmInv","kmUseTi","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","cDownMode","cDown","cDownPct","cMonths","cDownMode","cDown","cDownPct","cMonths","kmUseLoan","kmUseCr","kmSpec","kmUseDcTi","kmUseDcCr","kmDcTi","kmDcCr","kmDo","kmPack","kmCasco","cDown","cDownPct","cDownMode","cMonths"].forEach(id=>{
         const el=document.getElementById(id);
         if(el) el.addEventListener("change", ()=>{ view="calc"; render(); });
       });
