@@ -1557,7 +1557,7 @@ input,textarea{width:100%;background:#fff;border:1px solid var(--border);color:v
       function pair(key, name, modelId){
         const a=bestMap(1, modelId)[key];
         const b=bestMap(2, modelId)[key];
-        return {key, name:(a&&a.name)||(b&&b.name)||name, was:a?a.percent:null, now:b?b.percent:null};
+        return {key, name:(a&&a.name)||(b&&b.name)||name, was:(key==="лавров"&&modelId==="t4l")?77:(a?a.percent:null), now:(key==="лавров"&&modelId==="t4l")?(b?b.percent:(a&&Number(a.percent)!==77?a.percent:null)):(b?b.percent:null)};
       }
       function pctCell(v){
         if(v==null) return `<span class="pct">—</span>`;
