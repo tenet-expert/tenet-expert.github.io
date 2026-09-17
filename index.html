@@ -2035,11 +2035,11 @@ async function pingTelegram(body){
       const mptCars=stockCars.filter(c=>c.mpt);
       const hasMpt=mptCars.length>0;
       const hasReg=stockCars.some(c=>!c.mpt) || !stockCars.length;
-      const showMpt=hasMpt;
-      const showSplit=hasMpt && hasReg;
       const selected=(typeof STOCK!=="undefined"?STOCK:[]).find(c=>c && c.vin===kmVin);
       const pickMpt=!!(selected && selected.mpt);
-      const mptSample=mptCars[0]||null;
+      const showMpt=hasMpt || pickMpt;
+      const showSplit=showMpt;
+      const mptSample=mptCars[0]||(pickMpt&&selected?selected:null);
       const fMpt=typeof fleetOf==="function"?fleetOf(m.id):null;
       const mptRrc=fMpt&&fMpt.rrc?fMpt.rrc:price;
       const mptTidy=fMpt&&fMpt.tidy?fMpt.tidy:mptRrc;
@@ -2116,7 +2116,7 @@ async function pingTelegram(body){
           <div class="km-right">
             ${useLoan?`<div class="card">
               <p class="eyebrow">Кредит · ${escape(m.name)}</p>
-              <p class="calc-note">ПВ от цены авто ${rub(price)} ₽, без Д/О и каско. В кредит входят авто − ПВ, Д/О, каско расширенное и комиссия банка.${showSplit?" Справа МПТ: цена аналога с флит и МПТ −10%, трейд-ин как слева, только Совкомбанк 19,2%.":showMpt?" По этой комплектации в наличии есть МПТ.":""}${pickMpt?" Выбран VIN с меткой МПТ.":""}</p>
+              <p class="calc-note">ПВ от цены авто ${rub(price)} ₽, без Д/О и каско. В кредит входят авто − ПВ, Д/О, каско расширенное и комиссия банка.${showSplit?" Сравнение: стандартный кредит и МПТ рядом.":""}${pickMpt?" Выбран VIN с меткой МПТ.":""}</p>
               <p class="eyebrow" style="margin-top:12px">Первый взнос</p>
               <div class="down-mode">
                 <button type="button" class="chip ${downMode==="sum"?"on":""}" data-down-mode="sum">Сумма, ₽</button>
@@ -2130,7 +2130,7 @@ async function pingTelegram(body){
               <label class="field" style="max-width:none"><span>Срок, мес.</span><input id="cMonths" inputmode="numeric" value="${months}" /></label>
               ${showSplit?`<div class="pay-split">
                 <div class="pay-col">
-                  <p class="eyebrow">Обычный кредит</p>
+                  <p class="eyebrow">Стандартный кредит</p>
                   <p class="calc-note">ПВ ${rub(down)} · тело ${rub(credit)}</p>
                   ${kmPayRows(banks,"pay","over")}
                 </div>
