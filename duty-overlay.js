@@ -77,8 +77,21 @@
     ctx.font="600 17px Inter, Arial, sans-serif";
     ctx.fillStyle="#5c5346";
     ctx.fillText((d.manager||"—")+"  ·  "+(d.date||today)+"  ·  "+pct+"%  ·  "+p.on+" из "+p.tot, pad+46, pad+52);
-    let y=pad+78;
-    const carH=198;
+    let y=pad+70;
+    function fitText(s, maxW){
+      s=String(s||"").replace(/\s+/g," ").trim();
+      if(!s) return "—";
+      if(ctx.measureText(s).width<=maxW) return s;
+      let out=s;
+      while(out.length>1 && ctx.measureText(out+"…").width>maxW) out=out.slice(0,-1);
+      return out+"…";
+    }
+    ctx.fillStyle="#8a7d6e"; ctx.font="800 13px Inter, Arial, sans-serif";
+    ctx.fillText("ТЕСТОВЫЕ АВТОМОБИЛИ", pad, y);
+    ctx.strokeStyle="#eadfcf"; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(pad+210, y-4); ctx.lineTo(pad+inner, y-4); ctx.stroke();
+    y+=16;
+    const carH=214;
     cars.forEach(function(car){
       ctx.fillStyle="#f7f1e7";
       roundRect(pad, y, inner, carH, 14);
@@ -99,16 +112,30 @@
         const col=ri%2;
         const line=Math.floor(ri/2);
         const cx=pad+20+col*((inner-40)/2);
-        const cy=y+72+line*36;
+        const cy=y+68+line*34;
         tick(cx, cy, row[1]);
         ctx.fillStyle="#111"; ctx.font="500 17px Inter, Arial, sans-serif";
         ctx.fillText(row[0], cx+28, cy);
       });
-      ctx.fillStyle="#5c5346"; ctx.font="600 16px Inter, Arial, sans-serif";
+      ctx.fillStyle="#5c5346"; ctx.font="600 15px Inter, Arial, sans-serif";
       const meta="Кузов: "+bodyWord(d[car.id+"_body"]||"ok")+"     Пробег: "+(d[car.id+"_km"]||"—")+"     Топливо: "+(d[car.id+"_fuel"]?d[car.id+"_fuel"]+"%":"—");
-      ctx.fillText(meta, pad+20, y+176);
-      y+=carH+12;
+      ctx.fillText(meta, pad+20, y+168);
+      ctx.fillStyle="#fff";
+      roundRect(pad+16, y+178, inner-32, 26, 6);
+      ctx.fill();
+      ctx.strokeStyle="#eadfcf"; ctx.lineWidth=1;
+      roundRect(pad+16, y+178, inner-32, 26, 6);
+      ctx.stroke();
+      ctx.fillStyle="#8a7d6e"; ctx.font="500 14px Inter, Arial, sans-serif";
+      ctx.fillText("Примечание: "+fitText(d[car.id+"_note"], inner-130), pad+24, y+196);
+      y+=carH+10;
     });
+    y+=8;
+    ctx.fillStyle="#8a7d6e"; ctx.font="800 13px Inter, Arial, sans-serif";
+    ctx.fillText("САЛОН", pad, y);
+    ctx.strokeStyle="#d9cbb6"; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(pad+70, y-4); ctx.lineTo(pad+inner, y-4); ctx.stroke();
+    y+=16;
     function block(title, keys){
       const rows=Math.ceil(keys.length/3);
       const h=54+rows*40;
