@@ -1,12 +1,30 @@
 from pathlib import Path
+import base64
 
-src = Path("offer-fn.js")
+ROOT = Path(".")
+src = ROOT / "offer-fn.js"
 fn = src.read_text(encoding="utf-8") if src.exists() else ""
 
 css = """
 .hub-card[data-go="offer"]::before{
-  background-image:linear-gradient(135deg,#1f4e79 0%,#8d6e3c 55%,#e8d5b0 100%);
-  background-position:50% 50%;
+  background-image:url("hub/offer.jpg?v=2");
+  background-position:50% 48%;
+  background-size:cover;
+}
+.hub-card[data-offer-tab="new"]::before{
+  background-image:url("hub/offer-new.jpg?v=2");
+  background-position:48% 52%;
+  background-size:cover;
+}
+.hub-card[data-offer-tab="service"]::before{
+  background-image:url("hub/offer-service.jpg?v=2");
+  background-position:50% 46%;
+  background-size:cover;
+}
+.hub-card[data-offer-tab="lease"]::before{
+  background-image:url("hub/offer-lease.jpg?v=2");
+  background-position:50% 58%;
+  background-size:cover;
 }
 .offer-sheet{
   white-space:pre-wrap;
@@ -18,6 +36,31 @@ css = """
   margin:0 0 12px;
 }
 """
+
+def write_jpgs():
+    names = ["offer", "offer-new", "offer-service", "offer-lease"]
+    dirs = [ROOT / "hub", ROOT / "_site" / "hub", ROOT / "hub_b64"]
+    for name in names:
+        raw = None
+        for d in dirs:
+            for cand in (d / f"{name}.jpg.b64", d / f"{name}.b64"):
+                if cand.exists() and cand.stat().st_size > 1000:
+                    raw = base64.b64decode(cand.read_text(encoding="utf-8").strip())
+                    break
+            if raw:
+                break
+        jpg = ROOT / "hub" / f"{name}.jpg"
+        if not raw and jpg.exists():
+            raw = jpg.read_bytes()
+        if not raw:
+            print("no preview", name)
+            continue
+        for out in (ROOT / "hub" / f"{name}.jpg", ROOT / "_site" / "hub" / f"{name}.jpg"):
+            out.parent.mkdir(parents=True, exist_ok=True)
+            out.write_bytes(raw)
+            print("jpg", out, out.stat().st_size)
+
+write_jpgs()
 
 HUB_OLD = '        ["gibdd","Г","Проверки ГИБДД","ФССП, залоги, банкроты"]'
 HUB_NEW = HUB_OLD + '\n        ,["offer","КП","Коммерческое предложение","Новый а/м, сервис и лизинг"]'
@@ -31,12 +74,17 @@ MAP_NEW = "const map={login,hub,home,study,quiz:brief,play,rate,hist:rate,review
 BIND_OLD = '      document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{'
 BIND_NEW = '      if(typeof offerBind==="function") offerBind();\n      document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{'
 
+CSS_OLD_GRAD = """.hub-card[data-go=\"offer\"]::before{\n  background-image:linear-gradient(135deg,#1f4e79 0%,#8d6e3c 55%,#e8d5b0 100%);\n  background-position:50% 50%;\n}"""
+
 for p in (Path("index.html"), Path("_site/index.html")):
     if not p.exists() or p.stat().st_size < 1000:
         print("skip", p)
         continue
     html = p.read_text(encoding="utf-8")
-    if ".hub-card[data-go=\"offer\"]" not in html:
+    if CSS_OLD_GRAD in html:
+        html = html.replace(CSS_OLD_GRAD, css.strip(), 1)
+        print(p, "css upgrade")
+    elif 'hub/offer.jpg' not in html:
         html = html.replace("</style>", css + "\n</style>", 1)
         print(p, "css")
     if '["offer","КП"' not in html:
