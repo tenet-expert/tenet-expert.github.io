@@ -2024,22 +2024,39 @@ async function pingTelegram(body){
       down=Math.max(0, Math.min(price, down));
       const credit=Math.max(0,price-down+extras);
       const rateGroup=typeof kmRateGroup==="function"?kmRateGroup(m):"t4l_t7";
-      const MPT_CUT=200000;
-      const downMpt=Math.max(0, down-MPT_CUT);
-      const creditMpt=Math.max(0,price-downMpt+extras);
       const stockCars=typeof kmStockCars==="function"?kmStockCars(m):[];
-      const hasMpt=stockCars.some(c=>c.mpt);
+      const mptCars=stockCars.filter(c=>c.mpt);
+      const hasMpt=mptCars.length>0;
       const hasReg=stockCars.some(c=>!c.mpt) || !stockCars.length;
       const showMpt=hasMpt;
       const showSplit=hasMpt && hasReg;
       const selected=(typeof STOCK!=="undefined"?STOCK:[]).find(c=>c && c.vin===kmVin);
       const pickMpt=!!(selected && selected.mpt);
+      const mptSample=mptCars[0]||null;
+      const fMpt=typeof fleetOf==="function"?fleetOf(m.id):null;
+      const mptRrc=fMpt&&fMpt.rrc?fMpt.rrc:price;
+      const mptTidy=fMpt&&fMpt.tidy?fMpt.tidy:mptRrc;
+      const fleetCutMpt=Math.max(0, mptRrc-mptTidy);
+      const tiMpt=useTi?(typeof FLEET_TI==="number"?FLEET_TI:50000):0;
+      let priceMpt=Math.max(0, mptTidy-tiMpt);
+      const beforeMptPct=priceMpt;
+      priceMpt=Math.round(priceMpt*0.9);
+      const MPT_CUT=200000;
+      let downMpt=downMode==="pct"?Math.round(priceMpt*Math.max(0,downPct)/100):down;
+      downMpt=Math.max(0, Math.min(priceMpt, downMpt-MPT_CUT));
+      const creditMpt=Math.max(0,priceMpt-downMpt+extras);
+      const mptTermMax=84;
+      const mptTerm=Math.min(Math.max(1, months), mptTermMax);
+      const mptRate=19.2;
+      const payMptOne=calcPay(priceMpt+extras, downMpt, mptTerm, mptRate);
+      const overMptOne=payMptOne*mptTerm-creditMpt;
+      const banksMpt=[{id:"sovcom", name:"Совкомбанк", rate:mptRate, term:mptTerm, capped:mptTerm!==months, payMpt:payMptOne, overMpt:overMptOne}];
+      const mptSteps=["флит −"+rub(fleetCutMpt)+(useTi?(" → трейд-ин −"+rub(tiMpt)):"")+" → МПТ −10%"];
       const banks=(typeof KM_BANKS!=="undefined"?KM_BANKS:[]).map(b=>{
         const look=typeof kmBankRate==="function"?kmBankRate(b.id, rateGroup, months, downPct):{rate:b.rate||0, term:months, capped:false};
         const term=look.term||months;
         const pay=calcPay(price+extras, down, term, look.rate);
-        const payMpt=calcPay(price+extras, downMpt, term, look.rate);
-        return Object.assign({}, b, {rate:look.rate, term, capped:!!look.capped, pay, payMpt, over:pay*term-credit, overMpt:payMpt*term-creditMpt});
+        return Object.assign({}, b, {rate:look.rate, term, capped:!!look.capped, pay, over:pay*term-credit});
       });
       function kmPayRows(list, payKey, overKey){
         return list.map(b=>{
@@ -2082,7 +2099,7 @@ async function pingTelegram(body){
           <div class="km-right">
             ${useLoan?`<div class="card">
               <p class="eyebrow">Кредит · ${escape(m.name)}</p>
-              <p class="calc-note">ПВ от цены авто ${rub(price)} ₽, без Д/О и каско. В кредит входят авто − ПВ, Д/О, каско расширенное и комиссия банка.${showSplit?" В наличии эта комплектация и как обычный кредит, и как МПТ — платежи рядом при равных ставке, сроке и % ПВ.":showMpt?" По этой комплектации в наличии есть МПТ.":""}${pickMpt?" Выбран VIN с меткой МПТ.":""}</p>
+              <p class="calc-note">ПВ от цены авто ${rub(price)} ₽, без Д/О и каско. В кредит входят авто − ПВ, Д/О, каско расширенное и комиссия банка.${showSplit?" Справа МПТ: цена аналога с флит и МПТ −10%, трейд-ин как слева, только Совкомбанк 19,2%.":showMpt?" По этой комплектации в наличии есть МПТ.":""}${pickMpt?" Выбран VIN с меткой МПТ.":""}</p>
               <p class="eyebrow" style="margin-top:12px">Первый взнос</p>
               <div class="down-mode">
                 <button type="button" class="chip ${downMode==="sum"?"on":""}" data-down-mode="sum">Сумма, ₽</button>
@@ -2092,7 +2109,7 @@ async function pingTelegram(body){
               ${downMode==="sum"
                 ?`<label class="field" style="max-width:none"><span>Первый взнос, ₽</span><input id="cDown" inputmode="numeric" value="${down}" /></label>`
                 :`<label class="field" style="max-width:none"><span>Первый взнос, %</span><input id="cDownPct" inputmode="decimal" value="${downPct}" /></label>`}
-              <p class="calc-note">${rub(down)} ₽ · ${downPct}% от цены авто${showMpt?` · для МПТ банк видит ПВ ${rub(downMpt)} ₽ (−200 тыс.)`:""}</p>
+              <p class="calc-note">${rub(down)} ₽ · ${downPct}% от цены авто${showMpt?` · МПТ: цена ${rub(priceMpt)}, ПВ банка ${rub(downMpt)} ₽ (−200 тыс.)`:""}</p>
               <label class="field" style="max-width:none"><span>Срок, мес.</span><input id="cMonths" inputmode="numeric" value="${months}" /></label>
               ${showSplit?`<div class="pay-split">
                 <div class="pay-col">
@@ -2101,14 +2118,14 @@ async function pingTelegram(body){
                   ${kmPayRows(banks,"pay","over")}
                 </div>
                 <div class="pay-col mpt">
-                  <p class="eyebrow">МПТ</p>
-                  <p class="calc-note">ПВ для банка ${rub(downMpt)} = ${rub(down)} − 200 тыс. (130 каско+карта + 70 Д/О) · тело ${rub(creditMpt)}</p>
-                  ${kmPayRows(banks,"payMpt","overMpt")}
+                  <p class="eyebrow">МПТ · Совкомбанк 19,2%</p>
+                  <p class="calc-note">Аналог ${escape((fMpt&&fMpt.name)||m.name)}${mptSample?` · ${escape(mptSample.color||"")} ${escape(mptSample.vin||"")}`:""}. ${mptSteps[0]}. Цена ${rub(priceMpt)} (РРЦ ${rub(mptRrc)} → флит ${rub(mptTidy)}${useTi?` → ТИ ${rub(beforeMptPct)}`:""} → МПТ). ПВ банка ${rub(downMpt)} = ПВ − 200 тыс. · тело ${rub(creditMpt)}</p>
+                  ${kmPayRows(banksMpt,"payMpt","overMpt")}
                 </div>
               </div>`
-              :showMpt?`<p class="eyebrow" style="margin-top:16px">Платёж в месяц · МПТ</p>
-              <p class="calc-note">ПВ для банка ${rub(downMpt)} = ${rub(down)} − 200 тыс. (130 каско+карта + 70 Д/О). Тело кредита ${rub(creditMpt)}.</p>
-              ${kmPayRows(banks,"payMpt","overMpt")}`
+              :showMpt?`<p class="eyebrow" style="margin-top:16px">Платёж в месяц · МПТ · Совкомбанк 19,2%</p>
+              <p class="calc-note">Аналог ${escape((fMpt&&fMpt.name)||m.name)}${mptSample?` · ${escape(mptSample.color||"")} ${escape(mptSample.vin||"")}`:""}. ${mptSteps[0]}. Цена ${rub(priceMpt)}. ПВ банка ${rub(downMpt)} = ПВ − 200 тыс. Тело ${rub(creditMpt)}.</p>
+              ${kmPayRows(banksMpt,"payMpt","overMpt")}`
               :`<p class="eyebrow" style="margin-top:16px">Платёж в месяц</p>
               ${kmPayRows(banks,"pay","over")}`}
               <p class="calc-note">${showMpt&&!showSplit?"МПТ. ":""}Ставки TENET ФИНАНС, ИП 1890/И. Кредит = авто ${rub(price)} − ПВ + Д/О ${rub(addons)} + каско ${rub(pack)} + комиссия банка.</p>
