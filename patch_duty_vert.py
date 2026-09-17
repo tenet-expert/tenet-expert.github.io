@@ -18,26 +18,11 @@ EXTRA_CSS = """
 """
 
 CSS_REPL = [
-    (
-        ".cl-cars{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}",
-        ".cl-cars{display:grid;grid-template-columns:1fr;gap:8px}",
-    ),
-    (
-        "@media (max-width:1100px){.cl-cars{grid-template-columns:repeat(3,minmax(0,1fr))}}",
-        "@media (min-width:900px){.cl-cars{grid-template-columns:1fr 1fr}}",
-    ),
-    (
-        "@media (max-width:720px){.cl-cars{grid-template-columns:1fr 1fr}}",
-        "@media (min-width:1280px){.cl-cars{grid-template-columns:repeat(3,minmax(0,1fr))}}",
-    ),
-    (
-        ".cl-foot{display:grid;grid-template-columns:1fr 1fr;gap:8px}",
-        ".cl-foot{display:grid;grid-template-columns:1fr;gap:8px}",
-    ),
-    (
-        ".cl-cars{grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:4px}",
-        ".cl-cars{grid-template-columns:1fr!important;gap:6px}",
-    ),
+    (".cl-cars{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}", ".cl-cars{display:grid;grid-template-columns:1fr;gap:8px}"),
+    ("@media (max-width:1100px){.cl-cars{grid-template-columns:repeat(3,minmax(0,1fr))}}", "@media (min-width:900px){.cl-cars{grid-template-columns:1fr 1fr}}"),
+    ("@media (max-width:720px){.cl-cars{grid-template-columns:1fr 1fr}}", "@media (min-width:1280px){.cl-cars{grid-template-columns:repeat(3,minmax(0,1fr))}}"),
+    (".cl-foot{display:grid;grid-template-columns:1fr 1fr;gap:8px}", ".cl-foot{display:grid;grid-template-columns:1fr;gap:8px}"),
+    (".cl-cars{grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:4px}", ".cl-cars{grid-template-columns:1fr!important;gap:6px}"),
 ]
 
 
@@ -47,6 +32,12 @@ def load_js():
 
 
 def load_pdf():
+    for cand in (Path("duty-pdf-snippet.js"),):
+        if cand.exists():
+            t = cand.read_text(encoding="utf-8")
+            if "carH=214" in t or "dutyPdfOpen" in t:
+                print("pdf from", cand)
+                return t if t.endswith("\n") else t + "\n"
     t = load_js()
     a = t.find("    function dutyPdfClose(){")
     if a < 0:
@@ -58,6 +49,12 @@ def load_pdf():
 
 
 def load_duty_ui():
+    for cand in (Path("duty-ui-snippet.js"),):
+        if cand.exists():
+            t = cand.read_text(encoding="utf-8")
+            if "cl-sec-title" in t:
+                print("ui from", cand)
+                return t if t.endswith("\n") else t + "\n"
     t = load_js()
     a = t.find("    function duty(){")
     b = t.find("    function gibddSplitFio(")
@@ -141,7 +138,7 @@ def fix_duty_ui(html: str, ui: str) -> str:
 def main():
     pdf = load_pdf()
     ui = load_duty_ui()
-    print("pdf snippet", len(pdf), "open", "dutyPdfOpen" in pdf, "notes", "carH=214" in pdf)
+    print("pdf snippet", len(pdf), "open", "dutyPdfOpen" in pdf, "notes", "carH=214" in pdf or "_note" in pdf)
     print("ui snippet", len(ui), "sec", "cl-sec-title" in ui)
     targets = [
         Path("index.html"),
@@ -158,15 +155,7 @@ def main():
         html = fix_css(html)
         html = inject_overlay(html)
         p.write_text(html, encoding="utf-8")
-        print(
-            "patched",
-            p,
-            p.stat().st_size,
-            "notes",
-            "_note" in html and "cl-sec-title" in html,
-            "overlay",
-            "dutyPdfOpen" in html,
-        )
+        print("patched", p, p.stat().st_size, "notes", "_note" in html and "cl-sec-title" in html)
     site = Path("_site")
     site.mkdir(exist_ok=True)
     root = Path("index.html")
