@@ -182,7 +182,6 @@
         const st=c.status==="in"?"в наличии":"в пути";
         return `<button type="button" class="stock-car${prio?" prio":""}${rec?" rec":""}${c.mpt?" mpt":""}${c.demo?" demo":""}${on?" on":""}" data-km-vin="${escape(c.vin)}">
           <b>${escape(c.color||"—")} · ${escape(c.trim||"")}${prio?" · приоритет":""}</b>
-          ${rec?`<span class="mpt-tag rec-tag">Рекомендуем рассмотреть</span>`:""}
           ${c.mpt?`<span class="mpt-tag">Доступна гос программа −20%</span>`:""}${c.demo?`<span class="mpt-tag demo-tag">ДЕМО</span>`:""}
           <span class="vin">${escape(c.vin)}</span>
           <span class="stock-meta">${st}${c.invoice?" · спец инвойс":""}${c.mpt?" · МПТ":""}${c.demo?" · ДЕМО":""}${c.note?" · "+escape(c.note):""}</span>
@@ -191,12 +190,10 @@
       if(!cars.length && !recOther.length){
         return `<div class="card stock-side"><p class="eyebrow">В наличии · ${escape(m.name)}</p><p class="lead" style="max-width:none">Нет этой комплектации в наличии и в пути.</p></div>`;
       }
-      const recBlock=!recOther.length?"":`<p class="stock-h">Рекомендуем рассмотреть · ${recOther.length}</p>
-        <p class="calc-note" style="margin:0 0 8px">Приоритетные авто рядом по цене и платежу — другие комплектации.</p>`+recOther.map(r=>{
+      const recBlock=!recOther.length?"":recOther.map(r=>{
           const st=r.c.status==="in"?"в наличии":"в пути";
           return `<button type="button" class="stock-car prio rec${r.c.mpt?" mpt":""}" data-km-vin="${escape(r.c.vin)}">
             <b>${escape((r.mm&&r.mm.name)||r.c.name)} · ${escape(r.c.color||"—")}</b>
-            <span class="mpt-tag rec-tag">Рекомендуем рассмотреть</span>
             ${r.c.mpt?`<span class="mpt-tag">Доступна гос программа −20%</span>`:""}
             <span class="vin">${escape(r.c.vin)} · ${escape(r.c.trim||"")} · ${st}</span>
             <span class="stock-meta">РРЦ ${rub(r.price)} · платёж ~${rub(Math.round(r.pay))} ₽ · приоритет</span>
@@ -204,7 +201,7 @@
         }).join("");
       return `<div class="card stock-side rec-box">
         <p class="eyebrow">В наличии · ${escape(m.name)}</p>
-        <p class="lead" style="max-width:none;margin:0 0 10px">${inn.length} в салоне · ${way.length} в пути.${recs.length?" Приоритетные варианты отмечены.":""}</p>
+        <p class="lead" style="max-width:none;margin:0 0 10px">${inn.length} в салоне · ${way.length} в пути.</p>
         ${recBlock}
         ${inn.length?`<p class="stock-h">Эта комплектация · ${inn.length}</p>`+inn.map(c=>carBtn(c)).join(""):""}
         ${way.length?`<p class="stock-h">В пути · ${way.length}</p>`+way.map(c=>carBtn(c)).join(""):""}
