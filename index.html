@@ -1895,6 +1895,16 @@ async function pingTelegram(body){
         return `<div class="bank-row"><span><b>${escape(b.name)}</b><br/><small>${b.rate}% · ${note} · переплата ~${rub(over)}</small></span><span class="pay">${rub(pay)} ₽</span></div>`;
       }).join("");
     }
+    function fleetPayRows(list, payKey, overKey, months){
+      return list.map(b=>{
+        const yearsWant=Math.round(months/12);
+        const yearsHave=Math.round(b.term/12);
+        const note=b.capped?`нет ${yearsWant} ${yearsWant===1?"года":"лет"} · считаем ${b.term} мес. (${yearsHave} ${yearsHave===1?"год":yearsHave<5?"года":"лет"})`: `${b.term} мес.`;
+        const pay=Math.round(b[payKey]||0);
+        const over=Math.round(b[overKey]||0);
+        return `<div class="bank-row"><span><b>${escape(b.name)}</b><br/><small>${b.rate}% · ${note} · переплата ~${rub(over)}</small></span><span class="pay">${rub(pay)} ₽</span></div>`;
+      }).join("");
+    }
     function fleetCreditBox(price, m, f, useFleet, useTi){
       const downMode=(typeof kmStr==="function"?kmStr("cDownMode","sum"):"sum");
       const months=typeof kmVal==="function"?kmVal("cMonths", 84):84;
@@ -2179,6 +2189,42 @@ async function pingTelegram(body){
         (groups[g]=groups[g]||[]).push(x);
       });
       return order.filter(g=>groups[g]).map(g=>`<div class="km-line"><p class="stock-h">${g}</p><div class="km-grid">${groups[g].map(x=>`<button type="button" class="chip ${x.id===active?"on":""}" data-km-id="${x.id}">${escape(x.name)}<small>${x.brand} · РРЦ ${rub(x.rrc)}</small></button>`).join("")}</div></div>`).join("");
+    }
+    function kmPrioRecRows(cur, carPrice, downPct, months, extras){
+      const list=typeof STOCK!=="undefined"?STOCK:[];
+      const price0=Number(carPrice)|| (cur&&cur.rrc)||0;
+      const pct=Number(downPct)||20;
+      const term=Number(months)||60;
+      const extra=Number(extras)||0;
+      const refPay=typeof calcPay==="function"?calcPay(price0+extra, Math.round(price0*pct/100), term, 10):0;
+      return list.filter(c=>PRIO_VINS.has(c.vin) && c.vin!==kmVin).map(c=>{
+        const id=typeof kmIdFromCar==="function"?kmIdFromCar(c):"";
+        const mm=KM_MODELS.find(x=>x.id===id);
+        const price=mm?mm.rrc:price0;
+        const group=typeof kmRateGroup==="function"?kmRateGroup(mm||cur):"t4l_t7";
+        const look=typeof kmBankRate==="function"?kmBankRate("sber", group, term, pct):{rate:10, term};
+        const down=Math.round(price*Math.max(0,pct)/100);
+        const pay=typeof calcPay==="function"?calcPay(price+extra, down, look.term||term, look.rate):0;
+        return {c, mm, price, pay, d:Math.abs(price-price0)+Math.abs(pay-refPay)};
+      }).sort((a,b)=>a.d-b.d).slice(0,4);
+    }
+    function kmPrioRecRows(cur, carPrice, downPct, months, extras){
+      const list=typeof STOCK!=="undefined"?STOCK:[];
+      const price0=Number(carPrice)|| (cur&&cur.rrc)||0;
+      const pct=Number(downPct)||20;
+      const term=Number(months)||60;
+      const extra=Number(extras)||0;
+      const refPay=typeof calcPay==="function"?calcPay(price0+extra, Math.round(price0*pct/100), term, 10):0;
+      return list.filter(c=>PRIO_VINS.has(c.vin) && c.vin!==kmVin).map(c=>{
+        const id=typeof kmIdFromCar==="function"?kmIdFromCar(c):"";
+        const mm=KM_MODELS.find(x=>x.id===id);
+        const price=mm?mm.rrc:price0;
+        const group=typeof kmRateGroup==="function"?kmRateGroup(mm||cur):"t4l_t7";
+        const look=typeof kmBankRate==="function"?kmBankRate("sber", group, term, pct):{rate:10, term};
+        const down=Math.round(price*Math.max(0,pct)/100);
+        const pay=typeof calcPay==="function"?calcPay(price+extra, down, look.term||term, look.rate):0;
+        return {c, mm, price, pay, d:Math.abs(price-price0)+Math.abs(pay-refPay)};
+      }).sort((a,b)=>a.d-b.d).slice(0,4);
     }
     function kmPrioRecRows(cur, carPrice, downPct, months, extras){
       const list=typeof STOCK!=="undefined"?STOCK:[];
@@ -4938,7 +4984,7 @@ async function confirmCloud(rec){
         }
         view="calc"; render();
       });
-      ["kmRrc","kmInv","kmUseTi","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","cDownMode","cDown","cDownPct","cMonths","cDownMode","cDown","cDownPct","cMonths","kmUseLoan","kmUseCr","kmSpec","kmUseDcTi","kmUseDcCr","kmDcTi","kmDcCr","kmDo","kmPack","kmCasco","cDown","cDownPct","cDownMode","cMonths"].forEach(id=>{
+      ["kmRrc","kmInv","kmUseTi","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","cDownMode","cDown","cDownPct","cMonths","cDownMode","cDown","cDownPct","cMonths","kmUseLoan","kmUseCr","kmSpec","kmUseDcTi","kmUseDcCr","kmDcTi","kmDcCr","kmDo","kmPack","kmCasco","cDown","cDownPct","cDownMode","cMonths"].forEach(id=>{
         const el=document.getElementById(id);
         if(el) el.addEventListener("change", ()=>{ view="calc"; render(); });
       });
