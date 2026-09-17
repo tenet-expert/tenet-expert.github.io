@@ -82,7 +82,17 @@
       const payMptOne=calcPay(priceMpt, downMpt, mptTerm, mptRate);
       const overMptOne=payMptOne*mptTerm-creditMpt;
       const banksMpt=[{id:"sovcom", name:"Совкомбанк", rate:mptRate, term:mptTerm, capped:mptTerm!==months, payMpt:payMptOne, overMpt:overMptOne}];
-      const mptSteps=["флит "+rub(mptTidy)+(useTi?(" − ТИ "+rub(tiMpt)):"")+" − 10% − ПВ "+rub(downMpt)];
+      const mptBreak=`<div class="mpt-break">
+                <div><span>Комплектация</span><b>${escape((fMpt&&fMpt.name)||m.name)}</b></div>
+                ${mptSample?`<div><span>На складе</span><b>${escape(mptSample.color||"—")} · ${escape(mptSample.vin||"")}</b></div>`:""}
+                <div><span>РРЦ</span><b>${rub(mptRrc)}</b></div>
+                <div><span>Флит</span><b>${rub(mptTidy)}</b></div>
+                ${useTi?`<div><span>Трейд-ин</span><b>− ${rub(tiMpt)}</b></div>`:""}
+                <div><span>МПТ −10%</span><b>${rub(priceMpt)}</b></div>
+                <div><span>Первый взнос</span><b>${rub(downMpt)}</b></div>
+                <div><span>Тело кредита</span><b>${rub(creditMpt)}</b></div>
+                <small>Без Д/О и каско</small>
+              </div>`;
       const banks=(typeof KM_BANKS!=="undefined"?KM_BANKS:[]).map(b=>{
         const look=typeof kmBankRate==="function"?kmBankRate(b.id, rateGroup, months, downPct):{rate:b.rate||0, term:months, capped:false};
         const term=look.term||months;
@@ -149,14 +159,16 @@
                   ${kmPayRows(banks,"pay","over")}
                 </div>
                 <div class="pay-col mpt">
-                  <p class="eyebrow">МПТ · Совкомбанк 19,2%</p>
-                  <p class="calc-note">Аналог ${escape((fMpt&&fMpt.name)||m.name)}${mptSample?` · ${escape(mptSample.color||"")} ${escape(mptSample.vin||"")}`:""}. Флит ${rub(mptTidy)}${useTi?` − ТИ ${rub(tiMpt)}`:""} − 10% = ${rub(priceMpt)} − ПВ ${rub(downMpt)} = тело ${rub(creditMpt)}. Без Д/О и каско.</p>
+                  <p class="eyebrow">Гос. программа · МПТ · Совкомбанк 19,2%</p>
+                  <p class="calc-note">ПВ ${rub(downMpt)} · тело ${rub(creditMpt)}</p>
                   ${kmPayRows(banksMpt,"payMpt","overMpt")}
+                  ${mptBreak}
                 </div>
               </div>`
-              :showMpt?`<p class="eyebrow" style="margin-top:16px">Платёж в месяц · МПТ · Совкомбанк 19,2%</p>
-              <p class="calc-note">Аналог ${escape((fMpt&&fMpt.name)||m.name)}${mptSample?` · ${escape(mptSample.color||"")} ${escape(mptSample.vin||"")}`:""}. Флит ${rub(mptTidy)}${useTi?` − ТИ ${rub(tiMpt)}`:""} − 10% = ${rub(priceMpt)} − ПВ ${rub(downMpt)} = тело ${rub(creditMpt)}. Без Д/О и каско.</p>
-              ${kmPayRows(banksMpt,"payMpt","overMpt")}`
+              :showMpt?`<p class="eyebrow" style="margin-top:16px">Гос. программа · МПТ · Совкомбанк 19,2%</p>
+              <p class="calc-note">ПВ ${rub(downMpt)} · тело ${rub(creditMpt)}</p>
+              ${kmPayRows(banksMpt,"payMpt","overMpt")}
+              ${mptBreak}`
               :`<p class="eyebrow" style="margin-top:16px">Платёж в месяц</p>
               ${kmPayRows(banks,"pay","over")}`}
               <p class="calc-note">${showMpt&&!showSplit?"МПТ. ":""}Ставки TENET ФИНАНС, ИП 1890/И. Кредит = авто ${rub(price)} − ПВ + Д/О ${rub(addons)} + каско ${rub(pack)} + комиссия банка.</p>

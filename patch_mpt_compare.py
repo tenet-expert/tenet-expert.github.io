@@ -10,6 +10,11 @@ CSS = """
 .pay-col.mpt{background:#f3eee4;border-style:dashed;border-color:#d9cbb6}
 .pay-col .eyebrow{margin:0 0 6px}
 .pay-col .bank-row{margin-top:8px}
+.mpt-break{margin-top:12px;padding-top:10px;border-top:1px dashed #d9cbb6}
+.mpt-break div{display:flex;justify-content:space-between;gap:10px;align-items:baseline;padding:3px 0;font-size:13px}
+.mpt-break span{color:var(--muted,#6d5a3e)}
+.mpt-break b{font-variant-numeric:tabular-nums;font-weight:700;text-align:right}
+.mpt-break small{display:block;color:var(--muted,#6d5a3e);margin-top:6px}
 """
 
 
@@ -26,10 +31,19 @@ def load_calc():
 
 
 def inject_css(html: str) -> str:
-    if ".pay-split{" in html:
-        return html
-    if "</style>" in html:
-        return html.replace("</style>", CSS + "\n</style>", 1)
+    extra = ""
+    if ".pay-split{" not in html:
+        extra += CSS
+    elif ".mpt-break{" not in html:
+        extra += """
+.mpt-break{margin-top:12px;padding-top:10px;border-top:1px dashed #d9cbb6}
+.mpt-break div{display:flex;justify-content:space-between;gap:10px;align-items:baseline;padding:3px 0;font-size:13px}
+.mpt-break span{color:var(--muted,#6d5a3e)}
+.mpt-break b{font-variant-numeric:tabular-nums;font-weight:700;text-align:right}
+.mpt-break small{display:block;color:var(--muted,#6d5a3e);margin-top:6px}
+"""
+    if extra and "</style>" in html:
+        return html.replace("</style>", extra + "\n</style>", 1)
     return html
 
 
