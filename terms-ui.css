@@ -48,6 +48,13 @@
 .mpt-info small{display:block;color:var(--muted);margin-top:4px}
 .mpt-keys{margin-top:10px}
 .mpt-keys small{display:block;color:var(--muted);font-size:12px;line-height:1.4;margin-top:4px}
+
 .st.demo{background:#fff3e0;color:#e65100;border:1px solid #ffcc80}
 .stock-car.demo{border-color:#ef6c00;background:#fff8f1}
 .demo-tag{color:#e65100}
+.pay-split{display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px}
+@media (min-width:720px){.pay-split{grid-template-columns:1fr 1fr;align-items:start}}
+.pay-col{border:1px solid #eadfcf;border-radius:14px;padding:10px 12px;background:#fff}
+.pay-col.mpt{background:#f3eee4;border-style:dashed;border-color:#d9cbb6}
+.pay-col .eyebrow{margin:0 0 6px}
+.pay-col .bank-row{margin-top:8px}

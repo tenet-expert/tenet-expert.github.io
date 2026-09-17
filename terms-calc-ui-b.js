@@ -2,6 +2,7 @@
       if(typeof kmId!=="string" || !KM_MODELS.some(x=>x.id===kmId)) kmId=KM_MODELS[0].id;
       if(typeof kmVin!=="string") kmVin="";
       const m=KM_MODELS.find(x=>x.id===kmId)||KM_MODELS[0];
+      if(typeof kmIsCorp==="function" && kmIsCorp(kmVin) && typeof calcFleet==="function") return calcFleet(m);
       const fresh=(typeof kmShown==="undefined")||kmShown!==kmId;
       kmShown=kmId;
       const rrc=fresh?m.rrc:kmVal("kmRrc", m.rrc);
@@ -57,12 +58,33 @@
       down=Math.max(0, Math.min(price, down));
       const credit=Math.max(0,price-down+extras);
       const rateGroup=typeof kmRateGroup==="function"?kmRateGroup(m):"t4l_t7";
+      const MPT_CUT=200000;
+      const downMpt=Math.max(0, down-MPT_CUT);
+      const creditMpt=Math.max(0,price-downMpt+extras);
+      const stockCars=typeof kmStockCars==="function"?kmStockCars(m):[];
+      const hasMpt=stockCars.some(c=>c.mpt);
+      const hasReg=stockCars.some(c=>!c.mpt) || !stockCars.length;
+      const showMpt=hasMpt;
+      const showSplit=hasMpt && hasReg;
+      const selected=(typeof STOCK!=="undefined"?STOCK:[]).find(c=>c && c.vin===kmVin);
+      const pickMpt=!!(selected && selected.mpt);
       const banks=(typeof KM_BANKS!=="undefined"?KM_BANKS:[]).map(b=>{
         const look=typeof kmBankRate==="function"?kmBankRate(b.id, rateGroup, months, downPct):{rate:b.rate||0, term:months, capped:false};
         const term=look.term||months;
         const pay=calcPay(price+extras, down, term, look.rate);
-        return Object.assign({}, b, {rate:look.rate, term, capped:!!look.capped, pay, over:pay*term-credit});
+        const payMpt=calcPay(price+extras, downMpt, term, look.rate);
+        return Object.assign({}, b, {rate:look.rate, term, capped:!!look.capped, pay, payMpt, over:pay*term-credit, overMpt:payMpt*term-creditMpt});
       });
+      function kmPayRows(list, payKey, overKey){
+        return list.map(b=>{
+          const yearsWant=Math.round(months/12);
+          const yearsHave=Math.round(b.term/12);
+          const note=b.capped?`нет ${yearsWant} ${yearsWant===1?"года":"лет"} · считаем ${b.term} мес. (${yearsHave} ${yearsHave===1?"год":yearsHave<5?"года":"лет"})`: `${b.term} мес.`;
+          const pay=Math.round(b[payKey]||0);
+          const over=Math.round(b[overKey]||0);
+          return `<div class="bank-row"><span><b>${escape(b.name)}</b><br/><small>${b.rate}% · ${note} · переплата ~${rub(over)}</small></span><span class="pay">${rub(pay)} ₽</span></div>`;
+        }).join("");
+      }
       return banner("Калькулятор","КМ и платёж · база "+TERMS_DATE,"TENET")+`
         <p class="lead">Сначала комплектация. Кредит и СЖ открываются галочкой «Кредит».</p>
         ${kmChipGroups(m.id)}
@@ -94,7 +116,7 @@
           <div class="km-right">
             ${useLoan?`<div class="card">
               <p class="eyebrow">Кредит · ${escape(m.name)}</p>
-              <p class="calc-note">ПВ от цены авто ${rub(price)} ₽, без Д/О и каско. В кредит входят авто − ПВ, Д/О, каско расширенное и комиссия банка.</p>
+              <p class="calc-note">ПВ от цены авто ${rub(price)} ₽, без Д/О и каско. В кредит входят авто − ПВ, Д/О, каско расширенное и комиссия банка.${showSplit?" В наличии эта комплектация и как обычный кредит, и как МПТ — платежи рядом при равных ставке, сроке и % ПВ.":showMpt?" По этой комплектации в наличии есть МПТ.":""}${pickMpt?" Выбран VIN с меткой МПТ.":""}</p>
               <p class="eyebrow" style="margin-top:12px">Первый взнос</p>
               <div class="down-mode">
                 <button type="button" class="chip ${downMode==="sum"?"on":""}" data-down-mode="sum">Сумма, ₽</button>
@@ -104,17 +126,27 @@
               ${downMode==="sum"
                 ?`<label class="field" style="max-width:none"><span>Первый взнос, ₽</span><input id="cDown" inputmode="numeric" value="${down}" /></label>`
                 :`<label class="field" style="max-width:none"><span>Первый взнос, %</span><input id="cDownPct" inputmode="decimal" value="${downPct}" /></label>`}
-              <p class="calc-note">${rub(down)} ₽ · ${downPct}% от цены авто</p>
+              <p class="calc-note">${rub(down)} ₽ · ${downPct}% от цены авто${showMpt?` · для МПТ банк видит ПВ ${rub(downMpt)} ₽ (−200 тыс.)`:""}</p>
               <label class="field" style="max-width:none"><span>Срок, мес.</span><input id="cMonths" inputmode="numeric" value="${months}" /></label>
-              <p class="eyebrow" style="margin-top:16px">Платёж в месяц</p>
-              ${banks.map(b=>{
-                const yearsWant=Math.round(months/12);
-                const yearsHave=Math.round(b.term/12);
-                const note=b.capped?`нет ${yearsWant} ${yearsWant===1?"года":"лет"} · считаем ${b.term} мес. (${yearsHave} ${yearsHave===1?"год":yearsHave<5?"года":"лет"})`: `${b.term} мес.`;
-                return `<div class="bank-row"><span><b>${escape(b.name)}</b><br/><small>${b.rate}% · ПВ ${downPct}% от авто · ${note} · переплата ~${rub(Math.round(b.over))}</small></span><span class="pay">${rub(Math.round(b.pay))} ₽</span></div>`;
-              }).join("")}
-              <p class="calc-note">Кредит ${rub(credit)} ₽ = авто ${rub(price)} − ПВ ${rub(down)} + Д/О ${rub(addons)} + каско ${rub(pack)} + комиссия банка. Ставки TENET ФИНАНС, ИП 1890/И.</p>
-            </div>`:`<div class="card"><p class="eyebrow">Кредит</p><p class="lead" style="max-width:none">Включите галочку «Кредит», чтобы открыть расчёт платежа и каско расширенное.</p></div>`}
+              ${showSplit?`<div class="pay-split">
+                <div class="pay-col">
+                  <p class="eyebrow">Обычный кредит</p>
+                  <p class="calc-note">ПВ ${rub(down)} · тело ${rub(credit)}</p>
+                  ${kmPayRows(banks,"pay","over")}
+                </div>
+                <div class="pay-col mpt">
+                  <p class="eyebrow">МПТ</p>
+                  <p class="calc-note">ПВ для банка ${rub(downMpt)} = ${rub(down)} − 200 тыс. (130 каско+карта + 70 Д/О) · тело ${rub(creditMpt)}</p>
+                  ${kmPayRows(banks,"payMpt","overMpt")}
+                </div>
+              </div>`
+              :showMpt?`<p class="eyebrow" style="margin-top:16px">Платёж в месяц · МПТ</p>
+              <p class="calc-note">ПВ для банка ${rub(downMpt)} = ${rub(down)} − 200 тыс. (130 каско+карта + 70 Д/О). Тело кредита ${rub(creditMpt)}.</p>
+              ${kmPayRows(banks,"payMpt","overMpt")}`
+              :`<p class="eyebrow" style="margin-top:16px">Платёж в месяц</p>
+              ${kmPayRows(banks,"pay","over")}`}
+              <p class="calc-note">${showMpt&&!showSplit?"МПТ. ":""}Ставки TENET ФИНАНС, ИП 1890/И. Кредит = авто ${rub(price)} − ПВ + Д/О ${rub(addons)} + каско ${rub(pack)} + комиссия банка.</p>
+            </div>`:`<div class="card"><p class="eyebrow">Кредит</p><p class="lead" style="max-width:none">Включите галочку «Кредит», чтобы открыть расчёт платежа${hasMpt?" и сравнение с МПТ":""}.</p></div>`}
             ${typeof kmPrioRecs==="function"?kmPrioRecs(m, price, downPct, months, extras):""}
             ${kmSideList(m)}
           </div>
