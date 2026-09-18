@@ -5,8 +5,14 @@ import re
 ROOT = Path(".")
 src = ROOT / "offer-fn.js"
 body = src.read_text(encoding="utf-8") if src.exists() else ""
-equip = (ROOT / "offer-equip.js").read_text(encoding="utf-8") if (ROOT / "offer-equip.js").exists() else ""
-if "const OFFER_SPEC" in body:
+equip = ""
+for cand in ("offer-equip-mini.js", "offer-equip.js"):
+    p = ROOT / cand
+    if p.exists():
+        equip = p.read_text(encoding="utf-8")
+        break
+
+if "function offerPack(" in body:
     fn = body
 elif body and equip:
     fn = equip.rstrip() + "\n" + body
@@ -55,6 +61,15 @@ css = """
 .offer-eq-h{margin:12px 0 4px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700;}
 """
 
+EQUIP_CSS = """
+.offer-sheet{max-height:520px;overflow:auto;}
+.offer-equip-card{margin-top:14px;}
+.offer-eq{margin:0 0 12px;padding:0 0 0 18px;font-size:13px;line-height:1.45;}
+.offer-eq li{margin:0 0 4px;}
+.offer-eq-h{margin:12px 0 4px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700;}
+"""
+
+
 def write_jpgs():
     names = ["offer", "offer-new", "offer-service", "offer-lease"]
     dirs = [
@@ -87,7 +102,87 @@ def write_jpgs():
             out.write_bytes(raw)
             print("jpg", out, out.stat().st_size)
 
+
+def bake_offer_new(text):
+    if "const pack=typeof offerPack" not in text:
+        old_pay = (
+            '      const pay=typeof calcPay==="function"?Math.round(calcPay(out, down, months, 19.2)):0;\n'
+            "      const text=`Коммерческое предложение · новый автомобиль"
+        )
+        new_pay = (
+            '      const pay=typeof calcPay==="function"?Math.round(calcPay(out, down, months, 19.2)):0;\n'
+            '      const pack=typeof offerPack==="function"?offerPack(m.id):null;\n'
+            '      const equip=typeof offerPackText==="function"?offerPackText(pack):"";\n'
+            "      const text=`Коммерческое предложение · новый автомобиль"
+        )
+        if old_pay in text:
+            text = text.replace(old_pay, new_pay, 1)
+            print("bake pack vars")
+        else:
+            print("WARN no pay-anchor for pack vars")
+
+    if "${equip}" not in text:
+        old_line = (
+            'Ориентир платежа (Совкомбанк 19,2%): ${pay?rub(pay)+" ₽ / мес.":"—"}\n'
+            "\nПредложение действует ${valid}."
+        )
+        new_line = (
+            'Ориентир платежа (Совкомбанк 19,2%): ${pay?rub(pay)+" ₽ / мес.":"—"}\n'
+            "${equip}\n"
+            "\nПредложение действует ${valid}."
+        )
+        if old_line in text:
+            text = text.replace(old_line, new_line, 1)
+            print("bake equip in text")
+        else:
+            print("WARN no pay-line for equip text")
+
+    if 'class="card offer-equip-card"' not in text and "Лист оснащения" not in text:
+        old_end = (
+            '            <button type="button" class="btn ivory" data-offer-copy="ofTextNew">Скопировать</button>\n'
+            "          </div>\n"
+            "        </div>`;"
+        )
+        new_end = (
+            '            <button type="button" class="btn ivory" data-offer-copy="ofTextNew">Скопировать</button>\n'
+            "          </div>\n"
+            "        </div>\n"
+            '        <div class="card offer-equip-card">\n'
+            '          <p class="eyebrow">Лист оснащения</p>\n'
+            '          <h3 style="margin:0 0 10px">${escape(m.name)}</h3>\n'
+            '          ${typeof offerPackHtml==="function"?offerPackHtml(pack):""}\n'
+            "        </div>`;"
+        )
+        if old_end in text:
+            text = text.replace(old_end, new_end, 1)
+            print("bake equip card")
+        else:
+            print("WARN no card-end for equip html")
+    return text
+
+
+def inject_equip(html):
+    if "function offerPack(" in html:
+        print("equip functions already in html")
+        return html
+    if not equip:
+        print("WARN no equip source")
+        return html
+    block = equip.rstrip() + "\n"
+    if '    let offerTab = "home";' in html:
+        html = html.replace('    let offerTab = "home";', block + '    let offerTab = "home";', 1)
+        print("equip inject before offerTab")
+        return html
+    if "    function offerNew(){" in html:
+        html = html.replace("    function offerNew(){", block + "    function offerNew(){", 1)
+        print("equip inject before offerNew")
+        return html
+    print("WARN no inject anchor for equip")
+    return html
+
+
 write_jpgs()
+fn = bake_offer_new(fn)
 
 HUB_OLD = '        ["gibdd","Г","Проверки ГИБДД","ФССП, залоги, банкроты"]'
 HUB_NEW = HUB_OLD + '\n        ,["offer","КП","Коммерческое предложение","Новый а/м, сервис и лизинг"]'
@@ -115,20 +210,11 @@ for p in (Path("index.html"), Path("_site/index.html")):
         )
         if n:
             html = html2
-        if ".offer-sheet{" in html and "hub/offer.jpg?v=3" not in html:
-            html = html.replace("</style>", css + "\n</style>", 1)
-            print(p, "css inject extra")
-        elif "hub/offer.jpg?v=3" not in html:
+        if "hub/offer.jpg?v=3" not in html:
             html = html.replace("</style>", css + "\n</style>", 1)
             print(p, "css inject")
     if ".offer-equip-card{" not in html:
-        html = html.replace("</style>", """
-.offer-sheet{max-height:520px;overflow:auto;}
-.offer-equip-card{margin-top:14px;}
-.offer-eq{margin:0 0 12px;padding:0 0 0 18px;font-size:13px;line-height:1.45;}
-.offer-eq li{margin:0 0 4px;}
-.offer-eq-h{margin:12px 0 4px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700;}
-</style>""", 1)
+        html = html.replace("</style>", EQUIP_CSS + "\n</style>", 1)
         print(p, "equip css")
     if '["offer","КП"' not in html:
         html = html.replace(HUB_OLD, HUB_NEW, 1)
@@ -138,23 +224,28 @@ for p in (Path("index.html"), Path("_site/index.html")):
     if "offerBind()" not in html:
         html = html.replace(BIND_OLD, BIND_NEW, 1)
         print(p, "bind")
-    if fn:
-        html2, n = re.subn(
-            r"(?:    const OFFER_SPEC = \{[\s\S]*?\n    function offerPackHtml[\s\S]*?\n    \}\n)?    let offerTab = \"home\";[\s\S]*?    function offerBind\(\)\{[\s\S]*?\n    \}\n",
-            fn.rstrip() + "\n",
-            html,
-            count=1,
-        )
-        if n:
-            html = html2
-            print(p, "functions replaced")
-        elif "function offer()" not in html:
-            anchor = "    function docs(){"
-            if anchor in html:
-                html = html.replace(anchor, fn + "\n    function docs(){", 1)
-                print(p, "functions")
-            else:
-                html = html.replace("</script>", fn + "\n</script>", 1)
-                print(p, "functions at script end")
+
+    html = inject_equip(html)
+    html = bake_offer_new(html)
+
+    if fn and "function offer()" not in html:
+        anchor = "    function docs(){"
+        if anchor in html:
+            html = html.replace(anchor, fn + "\n    function docs(){", 1)
+            print(p, "functions")
+        else:
+            html = html.replace("</script>", fn + "\n</script>", 1)
+            print(p, "functions at script end")
+
     p.write_text(html, encoding="utf-8")
-    print("offer patched", p, p.stat().st_size)
+    print(
+        "offer patched",
+        p,
+        p.stat().st_size,
+        "pack",
+        "function offerPack(" in html,
+        "equipText",
+        "${equip}" in html,
+        "card",
+        "Лист оснащения" in html,
+    )
