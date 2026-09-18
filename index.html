@@ -1,1 +1,30 @@
-@file:///tmp/index_to_push.html
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>TENET · загрузка</title>
+<script>
+(async () => {
+  const urls = [
+    "https://cdn.jsdelivr.net/gh/tenet-expert/tenet-expert.github.io@d285b6ea1e36f1d713042999ea81dc6d2b8096bc/index.html",
+    "https://raw.githubusercontent.com/tenet-expert/tenet-expert.github.io/d285b6ea1e36f1d713042999ea81dc6d2b8096bc/index.html"
+  ];
+  for (const u of urls) {
+    try {
+      const r = await fetch(u, { cache: "no-store" });
+      if (!r.ok) continue;
+      const html = await r.text();
+      if (html.length < 10000 || html.indexOf("@file://") === 0) continue;
+      document.open();
+      document.write(html);
+      document.close();
+      return;
+    } catch (e) {}
+  }
+  document.body.textContent = "Не удалось загрузить страницу. Обновите позже.";
+})();
+</script>
+</head>
+<body>Загрузка…</body>
+</html>
