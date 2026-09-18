@@ -1,0 +1,65 @@
+name: restore-index-reserved-ui
+on:
+  workflow_dispatch:
+jobs:
+  restore:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Restore index from last good commit and sync stockCard from stock-fn.js
+        run: |
+          set -euo pipefail
+          GOOD=d285b6ea1e36f1d713042999ea81dc6d2b8096bc
+          git show "$GOOD:index.html" > index.html
+          python3 <<'PY'
+          from pathlib import Path
+          import re
+          html = Path("index.html").read_text(encoding="utf-8")
+          stock = Path("stock-fn.js").read_text(encoding="utf-8")
+          m = re.search(
+              r"(    function stockBadges\(r\)\{.*?\n    \}\n    function stockCard\(r\)\{.*?\n    \}\n)(    function stock\()",
+              stock,
+              re.S,
+          )
+          if not m:
+              raise SystemExit("stock-fn.js funcs not found")
+          local_funcs = m.group(1)
+          m2 = re.search(
+              r"(    function stockBadges\(r\)\{.*?\n    \}\n    function stockCard\(r\)\{.*?\n    \}\n)(    function stock\()",
+              html,
+              re.S,
+          )
+          if not m2:
+              raise SystemExit("index.html funcs not found")
+          html = html.replace(m2.group(1), local_funcs, 1)
+          if "reservedCls" not in html:
+              raise SystemExit("reservedCls missing after patch")
+          if ".st-row.is-reserved{background:#e8f1fc;position:relative}" not in html:
+              css = (
+                  ".st-row.is-reserved{background:#e8f1fc;position:relative}\n"
+                  ".st-row .st-reserved-mid{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);"
+                  "z-index:1;pointer-events:none;box-shadow:0 1px 4px rgba(13,71,161,.18)}"
+              )
+              badge = ".st.reserved{background:#e3f2fd;color:#0d47a1;border:1px solid #90caf9}"
+              if badge in html:
+                  html = html.replace(badge, badge + "\n" + css, 1)
+              else:
+                  html = html.replace("</style>", css + "\n</style>", 1)
+          Path("index.html").write_text(html, encoding="utf-8")
+          print("patched index.html", len(html))
+          PY
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          if git diff --staged --quiet; then
+            echo "no changes"
+            exit 0
+          fi
+          git commit -m "ui: center Забронирован badge + tint reserved row"
+          git push
