@@ -1,21 +1,19 @@
 #!/usr/bin/env python3
-"""Heal broken template literals in index (do not touch stock/offer catalogs)."""
 from pathlib import Path
-
-FIXES = [
-    (
-        '${vin?"\nVIN: "+vin:""}',
-        '${vin?"\\nVIN: "+vin:""}',
-    ),
-    (
-        '${inn?"\nИНН: "+inn:""}',
-        '${inn?"\\nИНН: "+inn:""}',
-    ),
-]
 
 def heal(text):
     n = 0
-    for old, new in FIXES:
+    pairs = [
+        ("${vin?\"" + chr(10) + "VIN: \"+vin:\"\"}", '${vin?"\\nVIN: "+vin:""}'),
+        ("${inn?\"" + chr(10) + "ИНН: \"+inn:\"\"}", '${inn?"\\nИНН: "+inn:""}'),
+        ("${vin?'" + chr(10) + "VIN: '+vin:''}", "${vin?'\\nVIN: '+vin:''}"),
+    ]
+    # built at runtime so JSON transport cannot eat the newline
+    broken_vin = '${vin?"' + chr(10) + 'VIN: "+vin:""}'
+    good_vin = '${vin?"' + '\\n' + 'VIN: "+vin:""}'
+    broken_inn = '${inn?"' + chr(10) + 'ИНН: "+inn:""}'
+    good_inn = '${inn?"' + '\\n' + 'ИНН: "+inn:""}'
+    for old, new in ((broken_vin, good_vin), (broken_inn, good_inn)):
         if old in text:
             text = text.replace(old, new)
             n += 1
