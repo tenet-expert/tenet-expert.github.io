@@ -1,29 +1,37 @@
 from pathlib import Path
+import base64
 import re
 
 ROOT = Path(".")
 src = ROOT / "offer-fn.js"
-fn = src.read_text(encoding="utf-8") if src.exists() else ""
+body = src.read_text(encoding="utf-8") if src.exists() else ""
+equip = (ROOT / "offer-equip.js").read_text(encoding="utf-8") if (ROOT / "offer-equip.js").exists() else ""
+if "const OFFER_SPEC" in body:
+    fn = body
+elif body and equip:
+    fn = equip.rstrip() + "\n" + body
+else:
+    fn = body or equip
 
 css = """
 .hub-card[data-go="offer"]::before{
-  background-image:url("hub/terms.jpg?v=3");
+  background-image:url("hub/offer.jpg?v=3");
   background-position:50% 48%;
   background-size:cover;
 }
 .hub-card[data-offer-tab="new"]::before{
-  background-image:url("hub/stock.jpg?v=3");
-  background-position:50% 58%;
+  background-image:url("hub/offer-new.jpg?v=3");
+  background-position:48% 52%;
   background-size:cover;
 }
 .hub-card[data-offer-tab="service"]::before{
-  background-image:url("hub/duty.jpg?v=5");
-  background-position:50% 48%;
+  background-image:url("hub/offer-service.jpg?v=3");
+  background-position:50% 46%;
   background-size:cover;
 }
 .hub-card[data-offer-tab="lease"]::before{
-  background-image:url("hub/calc.jpg?v=3");
-  background-position:38% 48%;
+  background-image:url("hub/offer-lease.jpg?v=3");
+  background-position:50% 58%;
   background-size:cover;
 }
 .offer-grid{margin-top:12px;}
@@ -38,8 +46,48 @@ css = """
   border-radius:12px;
   padding:14px;
   margin:0 0 12px;
+  max-height:520px;
+  overflow:auto;
 }
+.offer-equip-card{margin-top:14px;}
+.offer-eq{margin:0 0 12px;padding:0 0 0 18px;font-size:13px;line-height:1.45;}
+.offer-eq li{margin:0 0 4px;}
+.offer-eq-h{margin:12px 0 4px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700;}
 """
+
+def write_jpgs():
+    names = ["offer", "offer-new", "offer-service", "offer-lease"]
+    dirs = [
+        ROOT / "hub",
+        ROOT / "_site" / "hub",
+        ROOT / "hub_b64",
+        Path("/home/workdir/artifacts/hub_b64"),
+        Path("/home/workdir/artifacts/hub_previews"),
+    ]
+    for name in names:
+        raw = None
+        for d in dirs:
+            for cand in (d / f"{name}.jpg.b64", d / f"{name}.b64", d / f"{name}.jpg"):
+                if cand.exists() and cand.stat().st_size > 1000:
+                    if cand.name.endswith(".b64"):
+                        raw = base64.b64decode(cand.read_text(encoding="utf-8").strip())
+                    else:
+                        raw = cand.read_bytes()
+                    break
+            if raw:
+                break
+        jpg = ROOT / "hub" / f"{name}.jpg"
+        if not raw and jpg.exists():
+            raw = jpg.read_bytes()
+        if not raw:
+            print("no preview", name)
+            continue
+        for out in (ROOT / "hub" / f"{name}.jpg", ROOT / "_site" / "hub" / f"{name}.jpg"):
+            out.parent.mkdir(parents=True, exist_ok=True)
+            out.write_bytes(raw)
+            print("jpg", out, out.stat().st_size)
+
+write_jpgs()
 
 HUB_OLD = '        ["gibdd","Г","Проверки ГИБДД","ФССП, залоги, банкроты"]'
 HUB_NEW = HUB_OLD + '\n        ,["offer","КП","Коммерческое предложение","Новый а/м, сервис и лизинг"]'
@@ -58,9 +106,30 @@ for p in (Path("index.html"), Path("_site/index.html")):
         print("skip", p)
         continue
     html = p.read_text(encoding="utf-8")
-    if ".offer-grid" not in html or 'data-offer-tab="new"]::before' not in html:
-        html = html.replace("</style>", css + "\n</style>", 1)
-        print(p, "css")
+    if "hub/offer.jpg?v=3" not in html or ".offer-grid" not in html:
+        html2, n = re.subn(
+            r'\.hub-card\[data-go="offer"\]::before\{[\s\S]*?background-size:cover;\n\}',
+            "",
+            html,
+            count=1,
+        )
+        if n:
+            html = html2
+        if ".offer-sheet{" in html and "hub/offer.jpg?v=3" not in html:
+            html = html.replace("</style>", css + "\n</style>", 1)
+            print(p, "css inject extra")
+        elif "hub/offer.jpg?v=3" not in html:
+            html = html.replace("</style>", css + "\n</style>", 1)
+            print(p, "css inject")
+    if ".offer-equip-card{" not in html:
+        html = html.replace("</style>", """
+.offer-sheet{max-height:520px;overflow:auto;}
+.offer-equip-card{margin-top:14px;}
+.offer-eq{margin:0 0 12px;padding:0 0 0 18px;font-size:13px;line-height:1.45;}
+.offer-eq li{margin:0 0 4px;}
+.offer-eq-h{margin:12px 0 4px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700;}
+</style>""", 1)
+        print(p, "equip css")
     if '["offer","КП"' not in html:
         html = html.replace(HUB_OLD, HUB_NEW, 1)
         print(p, "hub card")
@@ -70,7 +139,16 @@ for p in (Path("index.html"), Path("_site/index.html")):
         html = html.replace(BIND_OLD, BIND_NEW, 1)
         print(p, "bind")
     if fn:
-        if "function offer()" not in html:
+        html2, n = re.subn(
+            r"(?:    const OFFER_SPEC = \{[\s\S]*?\n    function offerPackHtml[\s\S]*?\n    \}\n)?    let offerTab = \"home\";[\s\S]*?    function offerBind\(\)\{[\s\S]*?\n    \}\n",
+            fn.rstrip() + "\n",
+            html,
+            count=1,
+        )
+        if n:
+            html = html2
+            print(p, "functions replaced")
+        elif "function offer()" not in html:
             anchor = "    function docs(){"
             if anchor in html:
                 html = html.replace(anchor, fn + "\n    function docs(){", 1)
@@ -78,15 +156,5 @@ for p in (Path("index.html"), Path("_site/index.html")):
             else:
                 html = html.replace("</script>", fn + "\n</script>", 1)
                 print(p, "functions at script end")
-        elif "offer-grid" not in html or "function offerNew()" not in html:
-            html2, n = re.subn(
-                r"    let offerTab = \"home\";[\s\S]*?    function offerBind\(\)\{[\s\S]*?\n    \}\n",
-                fn + "\n",
-                html,
-                count=1,
-            )
-            if n:
-                html = html2
-                print(p, "functions replaced")
     p.write_text(html, encoding="utf-8")
     print("offer patched", p, p.stat().st_size)
