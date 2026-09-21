@@ -2,7 +2,9 @@
       "EDXFB32B2TE041658","EDXFB32B4TE041659","EDXFB32B1TE087336",
       "EDXFB32B3TE091114","EDXFD32B4TE092587","EDXFD32B4TE092590",
       "EDXGB32B1TE110196","EDXGB32B8TE110275","EDXGB32B0TE089261",
-      "EDXGB32B1TE104317","EDXGB32B4TE110225","EDXGB32BXTE087470"
+      "EDXGB32B1TE104317","EDXGB32B4TE110225","EDXGB32BXTE087470",
+      "EDXGB32B3TE076049",
+      "EDXGB32B0TE110108"
     ]);
     const FLEET_BFS = {
       t9p:{name:"Tiggo 9 Prime 4WD",rrc:4335000,dealer:3895000,an:546000,client:3814800,prem:166900,km:49918,tidy:3789000,sub:241000,do:70000,casco:80000},
@@ -27,11 +29,28 @@
       ta8u:{name:"A8 Ultra 2.0",rrc:3499000,dealer:3354000,an:500000,client:3044130,prem:379850,km:20369,tidy:2999000,sub:150000,do:70000,casco:80000}
     };
     const FLEET_TI = 50000;
+    function isT8TwoWd(c){
+      if(!c) return false;
+      const vin=String(c.vin||"").toUpperCase();
+      if(vin.indexOf("EDXGB32B")===0) return true;
+      if(String(c.model||"").toLowerCase()!=="t8") return false;
+      const t=String(c.trim||"").toLowerCase();
+      if(t.includes("4wd")||t.includes("ультра")||t.includes("7 мест")) return false;
+      return t.includes("2wd") || t.includes("актив") || t.includes("прайм") || !t;
+    }
+    function carIsMpt(c){ return !!(c && (c.mpt || isT8TwoWd(c))); }
+    function carIsCorp(c){ return !!(c && (c.corp || (typeof CORP_VINS!=="undefined"&&CORP_VINS.has(c.vin)) || isT8TwoWd(c))); }
+    function kmHasBrandSub(m){
+      if(!m || m.id==="tt9p" || m.id==="tt9u" || m.stock==="tt9") return false;
+      const f=typeof fleetOf==="function"?fleetOf(m.id):null;
+      return !!(f && (f.sub||0)>0);
+    }
     function kmIsCorp(vin){
       const v=String(vin||"");
-      if(CORP_VINS.has(v)) return true;
+      if(typeof CORP_VINS!=="undefined" && CORP_VINS.has(v)) return true;
+      if(v.toUpperCase().indexOf("EDXGB32B")===0) return true;
       const car=(typeof STOCK!=="undefined"?STOCK:[]).find(x=>x.vin===v);
-      return !!(car && car.corp);
+      return !!(car && (typeof carIsCorp==="function"?carIsCorp(car):car.corp));
     }
     function fleetOf(id){
       return FLEET_BFS[id] || FLEET_BFS.t9u;
@@ -46,7 +65,11 @@
         return `<div class="bank-row"><span><b>${escape(b.name)}</b><br/><small>${b.rate}% · ${note} · переплата ~${rub(over)}</small></span><span class="pay">${rub(pay)} ₽</span></div>`;
       }).join("");
     }
-    function fleetCreditBox(price, m, f, useFleet, useTi){
+    function fleetCreditBox(price, m, f, useFleet, useTi, mode){
+      const isSub=mode==="sub";
+      const cutLabel=isSub?"Субсидия бренда":"МПТ −10%";
+      const headLabel=isSub?"Субсидия бренда · Совкомбанк 19,2%":"Гос. программа · МПТ · Совкомбанк 19,2%";
+
       const downMode=(typeof kmStr==="function"?kmStr("cDownMode","sum"):"sum");
       const months=typeof kmVal==="function"?kmVal("cMonths", 84):84;
       let downPct=typeof kmVal==="function"?kmVal("cDownPct", 20):20;
@@ -78,13 +101,13 @@
         return Object.assign({}, b, {rate:look.rate, term, capped:!!look.capped, pay, over:pay*term-creditReg});
       });
       const stockCars=typeof kmStockCars==="function"?kmStockCars(m):[];
-      const analog=stockCars.find(c=>!c.mpt && !c.corp) || stockCars.find(c=>!c.mpt) || null;
+      const analog=stockCars.find(c=>!(typeof carIsMpt==="function"?carIsMpt(c):c.mpt) && !(typeof carIsCorp==="function"?carIsCorp(c):c.corp)) || stockCars.find(c=>!(typeof carIsMpt==="function"?carIsMpt(c):c.mpt)) || null;
       const mptBreak=`<div class="mpt-break">
                 <div><span>Комплектация</span><b>${escape((f&&f.name)||(m&&m.name)||"")}</b></div>
                 <div><span>РРЦ</span><b>${rub(f.rrc)}</b></div>
                 <div><span>Флит</span><b>${rub(useFleet?f.tidy:f.rrc)}</b></div>
                 ${useTi?`<div><span>Трейд-ин</span><b>− ${rub(FLEET_TI)}</b></div>`:""}
-                <div><span>МПТ −10%</span><b>${rub(priceMpt)}</b></div>
+                <div><span>${cutLabel}</span><b>${rub(priceMpt)}</b></div>
                 <div><span>Первый взнос</span><b>${rub(downMptShow)}</b></div>
                 <div><span>из них каско и Д/О</span><b>${rub(Math.min(MPT_EXTRA, downMptShow))}</b></div>
                 <div><span>ПВ в авто</span><b>${rub(downMptCar)}</b></div>
@@ -101,8 +124,8 @@
                 <div><span>Тело кредита</span><b>${rub(creditReg)}</b></div>
               </div>`;
       return `<div class="note-box" style="margin-top:12px">
-        <p class="eyebrow" style="margin:0 0 6px">Сравнение · стандартный кредит и МПТ</p>
-        <p class="calc-note">Одинаковые ПВ и срок. Слева — обычная машина этой комплектации. Справа — эта МПТ.</p>
+        <p class="eyebrow" style="margin:0 0 6px">Сравнение · стандартный кредит и ${isSub?"субсидия бренда":"МПТ"}</p>
+        <p class="calc-note">Одинаковые ПВ и срок. Слева — обычный кредит. Справа — ${isSub?"субсидия бренда (AQ)":"эта МПТ"}.</p>
         <p class="eyebrow" style="margin-top:8px">Первый взнос</p>
         <div class="down-mode">
           <button type="button" class="chip ${downMode==="sum"?"on":""}" data-down-mode="sum">Сумма, ₽</button>
@@ -122,7 +145,7 @@
             ${regBreak}
           </div>
           <div class="pay-col mpt">
-            <p class="eyebrow">Гос. программа · МПТ · Совкомбанк 19,2%</p>
+            <p class="eyebrow">${headLabel}</p>
             <p class="calc-note">ПВ ${rub(downMptShow)} · из них ${rub(Math.min(MPT_EXTRA, downMptShow))} на каско и Д/О · тело ${rub(creditMpt)}</p>
             ${fleetPayRows(banksMpt,"payMpt","overMpt",months)}
             ${mptBreak}
@@ -133,34 +156,40 @@
     function calcFleet(m){
       const f=fleetOf(m.id);
       const useFleet=kmVal("kmFleetDisc", true);
-      const useMpt=kmVal("kmFleetMpt", true);
       const useTi=kmVal("kmUseTi", false);
       let price=f.rrc;
       const fleetCut=Math.max(0, f.rrc-(f.tidy||f.rrc));
       const steps=[];
+      const car=(typeof STOCK!=="undefined"?STOCK:[]).find(x=>x.vin===kmVin);
+      const carMpt=typeof carIsMpt==="function"?carIsMpt(car):!!(car&&car.mpt);
+      const canSub=typeof kmHasBrandSub==="function"?kmHasBrandSub(m):((f.sub||0)>0 && m.id!=="tt9p" && m.id!=="tt9u");
+      const useMpt=carMpt && kmVal("kmFleetMpt", true);
+      const useSub=!useMpt && canSub && kmVal("kmFleetSub", true);
       if(useFleet){ price=f.tidy; steps.push("флит −"+rub(fleetCut)); }
       if(useTi){ price=Math.max(0, price-FLEET_TI); steps.push("трейд-ин −"+rub(FLEET_TI)); }
       if(useMpt){ price=Math.round(price*0.9); steps.push("МПТ −10%"); }
-      const car=(typeof STOCK!=="undefined"?STOCK:[]).find(x=>x.vin===kmVin);
+      else if(useSub){ price=Math.max(0, price-(f.sub||0)); steps.push("субс. бренда −"+rub(f.sub||0)); }
       const mptCut=Math.round((useFleet?f.tidy:f.rrc)*(useTi?0.9:1)*0.1);
+      const subCut=f.sub||0;
       return banner("Калькулятор","Флит · BFS Совкомбанк лизинг","TENET")+`
         <p class="lead">Корпоративный / МПТ VIN. Справа сравнение с обычным кредитом той же комплектации.</p>
         ${kmChipGroups(m.id)}
         <div class="km-layout">
           <div class="card">
             <p class="eyebrow">BFS Совкомбанк лизинг · ${escape(f.name)}</p>
-            ${car?`<p class="calc-note">${escape(car.vin)} · ${escape(car.color||"")} · ${escape(car.trim||"")}${car.mpt?" · МПТ":""}</p>`:""}
+            ${car?`<p class="calc-note">${escape(car.vin)} · ${escape(car.color||"")} · ${escape(car.trim||"")}${carMpt?" · МПТ":""}${carIsCorp(car)?" · корп":""}</p>`:""}
             <div class="note-box">Сбер / Альфа / Т-Банк на этот VIN нельзя. Сравнение справа — платёж обычной машины этой комплектации.</div>
             <label class="check-row"><input id="kmFleetDisc" type="checkbox" ${useFleet?"checked":""} /> <span>Флит скидка ${rub(fleetCut)} · макс. выгода ${rub(f.an)}</span></label>
             <label class="check-row"><input id="kmUseTi" type="checkbox" ${useTi?"checked":""} /> <span>Трейд-ин ${rub(FLEET_TI)}</span></label>
-            <label class="check-row"><input id="kmFleetMpt" type="checkbox" ${useMpt?"checked":""} /> <span>МПТ −10%</span></label>
+            ${carMpt?`<label class="check-row"><input id="kmFleetMpt" type="checkbox" ${useMpt?"checked":""} /> <span>МПТ −10%</span></label>`:""}
+            ${!useMpt&&canSub?`<label class="check-row"><input id="kmFleetSub" type="checkbox" ${useSub?"checked":""} /> <span>Субсидия бренда ${rub(subCut)}</span></label>`:""}
             <div class="note-box" style="margin-top:14px">
               <p class="eyebrow" style="margin:0 0 6px">Итоговая цена</p>
               ${price<f.rrc?`<div class="calc-out" style="text-decoration:line-through;opacity:.42;margin-bottom:2px">${rub(f.rrc)} ₽</div>`:""}
               <div class="calc-out">${rub(Math.round(price))} ₽</div>
               <p class="calc-note">${steps.length?steps.join(" → "):"Базовая цена без скидок."}${useFleet?" · AP без тюнинга "+rub(f.tidy):""}</p>
             </div>
-            ${fleetCreditBox(price, m, f, useFleet, useTi)}
+            ${(useMpt||useSub)?fleetCreditBox(price, m, f, useFleet, useTi, useMpt?"mpt":"sub"):""}
           </div>
           <div class="km-right">
             <div class="card">
@@ -170,8 +199,8 @@
               <div class="bank-row"><span>Цена AP без тюнинга</span><span class="pay">${rub(f.tidy)} ₽</span></div>
               ${useMpt
                 ? `<div class="bank-row"><span>МПТ −10%</span><span class="pay">${rub(mptCut)} ₽</span></div>`
-                : `<div class="bank-row"><span>Субсидия TENET</span><span class="pay">${rub(f.sub)} ₽</span></div>`}
-              <p class="calc-note">${useMpt?"На цену действует МПТ −10%, не субсидия бренда.":"Порядок: флит скидка → трейд-ин → МПТ −10%."}</p>
+                : (useSub?`<div class="bank-row"><span>Субсидия бренда AQ</span><span class="pay">${rub(subCut)} ₽</span></div>`:`<div class="bank-row"><span>Субсидия TENET</span><span class="pay">${rub(f.sub||0)} ₽</span></div>`)}
+              <p class="calc-note">${useMpt?"На цену действует МПТ −10%, не субсидия бренда.":useSub?"Порядок: флит скидка → трейд-ин → субсидия бренда (AQ). МПТ и субсидия не суммируются.":"Порядок: флит скидка → трейд-ин."}</p>
             </div>
             ${kmSideList(m)}
           </div>
