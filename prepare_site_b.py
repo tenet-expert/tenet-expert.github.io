@@ -11,7 +11,10 @@ if m:
         _vin=str(x.get("vin") or "").upper()
         _t=str(x.get("trim") or "").lower()
         _mid=str(x.get("model") or "")
-        if _vin.startswith("EDXGB32B") or (_mid=="t8" and "4wd" not in _t and "ультра" not in _t and "7 мест" not in _t):
+        if x.get("invoice"):
+            x["mpt"]=False
+            x["corp"]=False
+        elif _vin.startswith("EDXGB32B") or (_mid=="t8" and "4wd" not in _t and "ультра" not in _t and "7 мест" not in _t):
             x["mpt"]=True
             x["corp"]=True
         salon=str(x.get("salon") or "")
