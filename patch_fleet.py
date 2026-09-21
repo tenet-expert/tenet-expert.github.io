@@ -44,7 +44,7 @@ for p in (Path("index.html"), Path("_site/index.html")):
     )
     if block:
         html2, n = re.subn(
-            r"    function fleetCreditBox\([\s\S]*?    function calcFleet\(m\)\{[\s\S]*?\n    \}\n",
+            r"(?:    function fleetPayRows\([^)]*\)\{[\s\S]*?\n    \}\n)*    function fleetCreditBox\([\s\S]*?    function calcFleet\(m\)\{[\s\S]*?\n    \}\n",
             block if block.startswith("    ") else "    " + block,
             html,
             count=1,

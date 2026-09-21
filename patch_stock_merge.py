@@ -26,8 +26,8 @@ for p in (Path("index.html"), Path("_site/index.html")):
         continue
     html = p.read_text(encoding="utf-8")
     html2, n = re.subn(
-        r"    function kmSideList\([^)]*\)\{[\s\S]*?\n    function kmPrioRecs\([\s\S]*?\n    \}\n",
-        block,
+        r"(?:    function kmPrioRecRows\([^)]*\)\{[\s\S]*?\n    \}\n)*    function kmSideList\([^)]*\)\{[\s\S]*?\n    function kmPrioRecs\([\s\S]*?\n    \}\n",
+        block if block.startswith("    ") else "    " + block,
         html,
         count=1,
     )
