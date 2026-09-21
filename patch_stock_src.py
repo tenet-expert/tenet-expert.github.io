@@ -49,8 +49,7 @@ for c in cars:
     uniq.append(c)
 
 DEMO_VINS = {"EDXGD34B2TE109064", "EDXGB32B0TE110108"}
-for c in uniq:
-    c["demo"] = c.get("vin") in DEMO_VINS
+uniq = [c for c in uniq if c.get("vin") not in DEMO_VINS and not c.get("demo")]
 
 if len(uniq) < 40:
     print("skip stock inject, only", len(uniq), "cars")
