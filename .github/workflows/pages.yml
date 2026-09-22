@@ -58,6 +58,7 @@ jobs:
           if [ -f patch_mpt_compare.py ]; then python3 patch_mpt_compare.py; fi
           if [ -f patch_stock_merge.py ]; then python3 patch_stock_merge.py; fi
           if [ -f patch_offer.py ]; then python3 patch_offer.py || true; fi
+          if [ -f patch_offer_fmt.py ]; then python3 patch_offer_fmt.py || true; fi
           if [ -f patch_epts.py ]; then python3 patch_epts.py; fi
           if [ -f patch_ops.py ]; then
             bytes=$(wc -c < patch_ops.py)
@@ -81,6 +82,7 @@ jobs:
           if grep -q 'dutyPdfOpen' index.html 2>/dev/null; then cp -f index.html _site/index.html; echo "copied root index to _site"; fi
           if [ -f patch_stock_merge.py ]; then python3 patch_stock_merge.py; fi
           if [ -f patch_offer.py ]; then python3 patch_offer.py || true; fi
+          if [ -f patch_offer_fmt.py ]; then python3 patch_offer_fmt.py || true; fi
           if [ -f patch_rate_empty.py ]; then python3 patch_rate_empty.py || true; fi
           python3 - << 'PY'
           from pathlib import Path
