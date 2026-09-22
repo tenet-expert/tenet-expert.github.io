@@ -194,12 +194,12 @@
               <p class="calc-note">${rub(down)} ₽ · ${downPct}% от цены авто${(showMpt||showSub)?` · ${showSub?"субс. бренда":"МПТ"}: ${rub(priceMpt)} − ПВ в авто ${rub(downMptCar)} = тело ${rub(creditMpt)}`:""}</p>
               <label class="field" style="max-width:none"><span>Срок, мес.</span><input id="cMonths" inputmode="numeric" value="${months}" /></label>
               ${showSplit?`<div class="pay-split">
-                <div class="pay-col">
+                <div class="pay-col std">
                   <p class="eyebrow">Стандартный кредит</p>
                   <p class="calc-note">ПВ ${rub(down)} · тело ${rub(credit)}</p>
                   ${kmPayRows(banks,"pay","over")}
                 </div>
-                <div class="pay-col mpt">
+                <div class="pay-col ${showSub?"sub":"mpt"}">
                   <p class="eyebrow">${showSub?"Субсидия бренда · Совкомбанк 19,2%":"Гос. программа · МПТ · Совкомбанк 19,2%"}</p>
                   <p class="calc-note">ПВ ${rub(downMptShow)} · из них ${rub(Math.min(MPT_EXTRA, downMptShow))} на каско и Д/О · тело ${rub(creditMpt)}</p>
                   ${kmPayRows(banksMpt,"payMpt","overMpt")}

@@ -512,12 +512,20 @@ input,textarea{width:100%;background:#fff;border:1px solid var(--border);color:v
 .cl-log-row small{color:#7a7166;white-space:nowrap}
 
 
-.pay-split{display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px}
-@media (min-width:720px){.pay-split{grid-template-columns:1fr 1fr;align-items:start}}
-.pay-col{border:1px solid #eadfcf;border-radius:14px;padding:10px 12px;background:#fff}
-.pay-col.mpt{background:#f3eee4;border-style:dashed;border-color:#d9cbb6}
+.pay-split{display:grid;grid-template-columns:1fr;gap:14px;margin-top:14px}
+@media (min-width:720px){.pay-split{grid-template-columns:1fr 1fr;align-items:start;gap:16px}}
+.pay-col{border:1.5px solid #9bb0c7;border-radius:14px;padding:12px 14px;background:#f4f7fb;box-shadow:inset 4px 0 0 #1f4e79}
+.pay-col.std{border-color:#9bb0c7;background:#f4f7fb;box-shadow:inset 4px 0 0 #1f4e79}
+.pay-col.mpt{background:#eef6ee;border:1.5px solid #7fb084;border-style:solid;box-shadow:inset 4px 0 0 #2e7d32}
+.pay-col.sub{background:#fbf4e6;border:1.5px solid #d4a84a;border-style:solid;box-shadow:inset 4px 0 0 #c28b2a}
 .pay-col .eyebrow{margin:0 0 6px}
+.pay-col.std .eyebrow{color:#1f4e79}
+.pay-col.mpt .eyebrow{color:#1e5c24}
+.pay-col.sub .eyebrow{color:#8a5a10}
 .pay-col .bank-row{margin-top:8px}
+.pay-col.std .mpt-break{border-top-color:rgba(31,78,121,.28)}
+.pay-col.mpt .mpt-break{border-top-color:rgba(46,125,50,.32)}
+.pay-col.sub .mpt-break{border-top-color:rgba(194,139,42,.4)}
 
 
 .mpt-break{margin-top:12px;padding-top:10px;border-top:1px dashed #d9cbb6}
@@ -1966,13 +1974,13 @@ async function pingTelegram(body){
         <p class="calc-note">${rub(down)} ₽ · ${downPct}% от цены МПТ</p>
         <label class="field" style="max-width:none"><span>Срок, мес.</span><input id="cMonths" inputmode="numeric" value="${months}" /></label>
         <div class="pay-split">
-          <div class="pay-col">
+          <div class="pay-col std">
             <p class="eyebrow">Стандартный кредит</p>
             <p class="calc-note">ПВ ${rub(downReg)} · тело ${rub(creditReg)}</p>
             ${fleetPayRows(banks,"pay","over",months)}
             ${regBreak}
           </div>
-          <div class="pay-col mpt">
+          <div class="pay-col ${isSub?"sub":"mpt"}">
             <p class="eyebrow">${headLabel}</p>
             <p class="calc-note">ПВ ${rub(downMptShow)} · из них ${rub(Math.min(MPT_EXTRA, downMptShow))} на каско и Д/О · тело ${rub(creditMpt)}</p>
             ${fleetPayRows(banksMpt,"payMpt","overMpt",months)}
@@ -2453,12 +2461,12 @@ async function pingTelegram(body){
               <p class="calc-note">${rub(down)} ₽ · ${downPct}% от цены авто${(showMpt||showSub)?` · ${showSub?"субс. бренда":"МПТ"}: ${rub(priceMpt)} − ПВ в авто ${rub(downMptCar)} = тело ${rub(creditMpt)}`:""}</p>
               <label class="field" style="max-width:none"><span>Срок, мес.</span><input id="cMonths" inputmode="numeric" value="${months}" /></label>
               ${showSplit?`<div class="pay-split">
-                <div class="pay-col">
+                <div class="pay-col std">
                   <p class="eyebrow">Стандартный кредит</p>
                   <p class="calc-note">ПВ ${rub(down)} · тело ${rub(credit)}</p>
                   ${kmPayRows(banks,"pay","over")}
                 </div>
-                <div class="pay-col mpt">
+                <div class="pay-col ${showSub?"sub":"mpt"}">
                   <p class="eyebrow">${showSub?"Субсидия бренда · Совкомбанк 19,2%":"Гос. программа · МПТ · Совкомбанк 19,2%"}</p>
                   <p class="calc-note">ПВ ${rub(downMptShow)} · из них ${rub(Math.min(MPT_EXTRA, downMptShow))} на каско и Д/О · тело ${rub(creditMpt)}</p>
                   ${kmPayRows(banksMpt,"payMpt","overMpt")}

@@ -146,13 +146,13 @@
         <p class="calc-note">${rub(down)} ₽ · ${downPct}% от цены МПТ</p>
         <label class="field" style="max-width:none"><span>Срок, мес.</span><input id="cMonths" inputmode="numeric" value="${months}" /></label>
         <div class="pay-split">
-          <div class="pay-col">
+          <div class="pay-col std">
             <p class="eyebrow">Стандартный кредит</p>
             <p class="calc-note">ПВ ${rub(downReg)} · тело ${rub(creditReg)}</p>
             ${fleetPayRows(banks,"pay","over",months)}
             ${regBreak}
           </div>
-          <div class="pay-col mpt">
+          <div class="pay-col ${isSub?"sub":"mpt"}">
             <p class="eyebrow">${headLabel}</p>
             <p class="calc-note">ПВ ${rub(downMptShow)} · из них ${rub(Math.min(MPT_EXTRA, downMptShow))} на каско и Д/О · тело ${rub(creditMpt)}</p>
             ${fleetPayRows(banksMpt,"payMpt","overMpt",months)}
