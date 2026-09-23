@@ -12,6 +12,8 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Merge stock-part1/part2 into stock.json
         run: |
           python3 << 'PY'
@@ -40,4 +42,9 @@ jobs:
           git add stock.json
           git diff --staged --quiet && echo "no change" && exit 0
           git commit -m "склад: rebuild stock.json from parts 23.09.2026 (morning)"
-          git push
+          for i in 1 2 3 4 5; do
+            git pull --rebase origin main && git push && exit 0
+            echo "push retry $i"
+            sleep 3
+          done
+          exit 1
