@@ -742,6 +742,27 @@ input,textarea{width:100%;background:#fff;border:1px solid var(--border);color:v
   .km-bottom .stock-side{max-height:min(72vh,720px)}
 }
 
+.km-pv{padding:12px 14px}
+.km-pv .eyebrow{margin:0 0 8px}
+.km-pv-row{display:grid;grid-template-columns:auto minmax(140px,1fr) minmax(110px,150px);gap:10px 14px;align-items:end}
+.km-pv .down-mode{margin:0}
+.km-pv label.field{max-width:none;margin:0}
+.km-pv .calc-note{margin:8px 0 0}
+@media(max-width:720px){
+  .km-pv-row{grid-template-columns:1fr}
+}
+@media(min-width:1100px){
+  .km-stage.km-4,.km-stage.km-3{display:grid;align-items:start}
+  .km-stage.km-4{grid-template-columns:1fr 1fr 1fr 1fr;gap:14px}
+  .km-stage.km-3{grid-template-columns:minmax(220px,.7fr) minmax(300px,1.2fr) minmax(300px,1.2fr);gap:16px}
+  .km-stage.km-4 > .km-chips,.km-stage.km-3 > .km-chips{grid-column:1 / -1;grid-row:1;min-width:0}
+  .km-stage.km-4 > .km-pv,.km-stage.km-3 > .km-pv{grid-column:2 / -1;grid-row:1;align-self:end;z-index:2;min-width:0}
+  .km-stage.km-4 > .km-chips .km-line:nth-last-child(-n+3){max-width:calc((100% - 42px) / 4)}
+  .km-stage.km-3 > .km-chips .km-line:nth-last-child(-n+3){max-width:calc((100% - 32px) * 0.226)}
+  .km-stage > .km-layout{grid-column:1 / -1;grid-row:2;margin-top:0}
+}
+
+
 </style>
 </head>
 <body>
@@ -2021,17 +2042,21 @@ async function pingTelegram(body){
                 <div class="bank-row"><span>В кредит ещё Д/О + каско + комиссия</span><span class="pay">${rub(extras)}</span></div>
                 <div class="bank-row"><span>Тело кредита</span><span class="pay">${rub(creditReg)}</span></div>
               </div>`;
-      const inputs=`<p class="eyebrow" style="margin-top:12px">Первый взнос</p>
-        <div class="down-mode">
-          <button type="button" class="chip ${downMode==="sum"?"on":""}" data-down-mode="sum">Сумма, ₽</button>
-          <button type="button" class="chip ${downMode!=="sum"?"on":""}" data-down-mode="pct">Проценты</button>
+      const inputs=`<div class="card km-pv">
+        <p class="eyebrow">Первый взнос</p>
+        <div class="km-pv-row">
+          <div class="down-mode">
+            <button type="button" class="chip ${downMode==="sum"?"on":""}" data-down-mode="sum">Сумма, ₽</button>
+            <button type="button" class="chip ${downMode!=="sum"?"on":""}" data-down-mode="pct">Проценты</button>
+          </div>
+          ${downMode==="sum"
+            ?`<label class="field"><span>Первый взнос, ₽</span><input id="cDown" inputmode="numeric" value="${down}" /></label>`
+            :`<label class="field"><span>Первый взнос, %</span><input id="cDownPct" inputmode="decimal" value="${downPct}" /></label>`}
+          <label class="field"><span>Срок, мес.</span><input id="cMonths" inputmode="numeric" value="${months}" /></label>
         </div>
         <input type="hidden" id="cDownMode" value="${downMode==="sum"?"sum":"pct"}" />
-        ${downMode==="sum"
-          ?`<label class="field" style="max-width:none"><span>Первый взнос, ₽</span><input id="cDown" inputmode="numeric" value="${down}" /></label>`
-          :`<label class="field" style="max-width:none"><span>Первый взнос, %</span><input id="cDownPct" inputmode="decimal" value="${downPct}" /></label>`}
         <p class="calc-note">${rub(down)} ₽ · ${downPct}% · одинаковые ПВ и срок для обоих расчётов</p>
-        <label class="field" style="max-width:none"><span>Срок, мес.</span><input id="cMonths" inputmode="numeric" value="${months}" /></label>`;
+      </div>`;
       const stdCol=`<div class="pay-col std km-pay">
             <p class="eyebrow">Стандартный кредит</p>
             <p class="calc-note">Та же комплектация без флита. ПВ ${rub(downReg)} · тело ${rub(creditReg)}</p>
@@ -2109,7 +2134,9 @@ async function pingTelegram(body){
       const fleetBox=(useMpt||useSub)?fleetCreditBox(price, m, f, useFleet, useTi, useMpt?"mpt":"sub"):null;
       return banner("Калькулятор","Флит · BFS Совкомбанк лизинг","TENET")+`
         <p class="lead">${fleetBox?(fleetBox.pangoCol?"Три расчёта рядом: стандартный кредит, "+(useSub?"флит с субсидией бренда":"МПТ")+" и спеццена PANGO.":(useSub?"Три блока: скидки флита, стандартный кредит той же комплектации и справа флит с субсидией бренда — машина не под МПТ.":"Три блока: скидки флита, стандартный кредит и МПТ.")):"Корпоративный VIN. Сбер / Альфа / Т-Банк на этот VIN нельзя."}</p>
-        ${kmChipGroups(m.id)}
+        <div class="km-stage${fleetBox?(fleetBox.pangoCol?" km-4":" km-3"):""}">
+        <div class="km-chips">${kmChipGroups(m.id)}</div>
+        ${fleetBox?fleetBox.inputs:""}
         <div class="km-layout${fleetBox?(fleetBox.pangoCol?" km-4":" km-3"):""}">
           <div class="card km-disc">
             <p class="eyebrow">BFS Совкомбанк лизинг · ${escape(f.name)}</p>
@@ -2125,9 +2152,9 @@ async function pingTelegram(body){
               <div class="calc-out">${rub(Math.round(price))} ₽</div>
               <p class="calc-note">${steps.length?steps.join(" → "):"Базовая цена без скидок."}${useFleet?" · AP без тюнинга "+rub(f.tidy):""}</p>
             </div>
-            ${fleetBox?fleetBox.inputs:""}
           </div>
           ${fleetBox?fleetBox.stdCol+fleetBox.altCol+(fleetBox.pangoCol||""):""}
+        </div>
         </div>
         <div class="card">
               <p class="eyebrow">Лист «Флит» BFS</p>
@@ -2553,7 +2580,23 @@ async function pingTelegram(body){
       }
       return banner("Калькулятор","КМ и платёж · база "+TERMS_DATE,"TENET")+`
         <p class="lead">${pShow?"Три расчёта рядом: стандартный кредит, "+(showSub?"флит с субсидией бренда":"МПТ")+" и спеццена PANGO.":"Сначала комплектация. Кредит и СЖ открываются галочкой «Кредит»."}</p>
-        ${kmChipGroups(m.id)}
+        <div class="km-stage${pShow?" km-4":useLoan&&showSplit?" km-3":""}">
+        <div class="km-chips">${kmChipGroups(m.id)}</div>
+        ${(useLoan&&showSplit)||pShow?`<div class="card km-pv">
+          <p class="eyebrow">Первый взнос</p>
+          <div class="km-pv-row">
+            <div class="down-mode">
+              <button type="button" class="chip ${downMode==="sum"?"on":""}" data-down-mode="sum">Сумма, ₽</button>
+              <button type="button" class="chip ${downMode!=="sum"?"on":""}" data-down-mode="pct">Проценты</button>
+            </div>
+            ${downMode==="sum"
+              ?`<label class="field"><span>Первый взнос, ₽</span><input id="cDown" inputmode="numeric" value="${down}" /></label>`
+              :`<label class="field"><span>Первый взнос, %</span><input id="cDownPct" inputmode="decimal" value="${downPct}" /></label>`}
+            <label class="field"><span>Срок, мес.</span><input id="cMonths" inputmode="numeric" value="${months}" /></label>
+          </div>
+          <input type="hidden" id="cDownMode" value="${downMode==="sum"?"sum":"pct"}" />
+          <p class="calc-note">${rub(down)} ₽ · ${downPct}% от цены авто${(showMpt||showSub)?` · ${showSub?"субс. бренда":"МПТ"}: ${rub(priceMpt)} − ПВ в авто ${rub(downMptCar)} = тело ${rub(creditMpt)}`:""}</p>
+        </div>`:""}
         <div class="km-layout${pShow?" km-4":useLoan&&showSplit?" km-3":""}">
           <div class="card km-disc">
             <p class="eyebrow">Калькулятор КМ · ${escape(m.name)}</p>
@@ -2579,7 +2622,7 @@ async function pingTelegram(body){
               ?`<label class="field" style="max-width:none"><span>Каско расширенное, ₽</span><input id="kmPack" inputmode="numeric" value="${pack}" /></label>`
               :`<label class="field" style="max-width:none"><span>КАСКО, ₽</span><input id="kmCasco" inputmode="numeric" value="${casco}" /></label>`}
             ${prio?`<div class="note-box">Приоритетный VIN ${escape(kmVin)}. Коридор ${lo} … ${hi} тыс.</div>`:""}
-            ${useLoan||pShow?`<p class="eyebrow" style="margin-top:12px">Первый взнос</p>
+            ${useLoan&&!showSplit&&!pShow?`<p class="eyebrow" style="margin-top:12px">Первый взнос</p>
               <div class="down-mode">
                 <button type="button" class="chip ${downMode==="sum"?"on":""}" data-down-mode="sum">Сумма, ₽</button>
                 <button type="button" class="chip ${downMode!=="sum"?"on":""}" data-down-mode="pct">Проценты</button>
@@ -2640,6 +2683,7 @@ async function pingTelegram(body){
             </div>`:`<div class="card"><p class="eyebrow">Кредит</p><p class="lead" style="max-width:none">Включите галочку «Кредит», чтобы открыть расчёт платежа${hasMpt?" и сравнение с МПТ":canSub?" и сравнение с субсидией бренда":""}.</p></div>`}
             ${kmSideList(m, price, downPct, months, extras)}
           </div>`}
+        </div>
         </div>
         <div class="${(useLoan&&showSplit)||pShow?"km-bottom":""}">
           <div class="card dc-result ${(selected&&selected.invoice&&_pg?pOk:ok)?"ok":"bad"}">
