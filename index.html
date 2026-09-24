@@ -2049,14 +2049,12 @@ async function pingTelegram(body){
       const cutLabel=isSub?"Субсидия бренда":"МПТ −10%";
       const headLabel=isSub?"Субсидия бренда · Совкомбанк 19,2%":"Гос. программа · МПТ · Совкомбанк 19,2%";
 
-      const downMode=(typeof kmStr==="function"?kmStr("cDownMode","sum"):"sum");
-      const months=typeof kmVal==="function"?kmVal("cMonths", 84):84;
-      let downPct=typeof kmVal==="function"?kmVal("cDownPct", 20):20;
       const priceMpt=Math.round(price);
-      let down=typeof kmVal==="function"?kmVal("cDown", Math.round(priceMpt*0.2)):Math.round(priceMpt*0.2);
-      if(downMode==="pct") down=Math.round(priceMpt*Math.max(0,downPct)/100);
-      else downPct=priceMpt>0?Math.round(down*1000/priceMpt)/10:0;
-      down=Math.max(0,Math.min(priceMpt,down));
+      const _down=typeof kmDownRead==="function"?kmDownRead(priceMpt, false, false):null;
+      const downMode=_down?_down.downMode:(typeof kmStr==="function"?kmStr("cDownMode","sum"):"sum");
+      const months=typeof kmVal==="function"?kmVal("cMonths", 84):84;
+      let downPct=_down?_down.downPct:20;
+      let down=_down?_down.down:Math.round(priceMpt*0.2);
       const MPT_EXTRA=200000;
       const downMptShow=down;
       const downMptCar=Math.max(0, downMptShow-MPT_EXTRA);
@@ -2382,6 +2380,39 @@ async function pingTelegram(body){
       const v=String(el.value||"").trim();
       return v||def;
     }
+    let kmDownKeep={sum:null,pct:null,price:null};
+    function kmDownRead(price, fresh, persist){
+      const downMode=kmStr("cDownMode","pct");
+      const priceN=Math.max(0, Number(price)||0);
+      const pctEl=document.getElementById("cDownPct");
+      const sumEl=document.getElementById("cDown");
+      const keep=kmDownKeep;
+      let downPct, down, exactSum=false;
+      if(fresh){
+        downPct=20;
+        down=Math.round(priceN*0.2);
+      }else if(sumEl && !pctEl){
+        down=kmVal("cDown", keep.sum!=null?keep.sum:Math.round(priceN*0.2));
+        exactSum=keep.sum===down && keep.pct!=null && keep.price===priceN;
+        downPct=exactSum?keep.pct:(priceN>0?Math.round(down*1000/priceN)/10:0);
+      }else if(pctEl && !sumEl){
+        downPct=kmVal("cDownPct", keep.pct!=null?keep.pct:20);
+        exactSum=keep.pct===downPct && keep.sum!=null && keep.price===priceN;
+        down=exactSum?keep.sum:Math.round(priceN*Math.max(0,downPct)/100);
+      }else if(downMode==="pct"){
+        downPct=keep.pct!=null?keep.pct:20;
+        exactSum=keep.pct===downPct && keep.sum!=null && keep.price===priceN;
+        down=exactSum?keep.sum:Math.round(priceN*Math.max(0,downPct)/100);
+      }else{
+        down=keep.sum!=null?keep.sum:Math.round(priceN*0.2);
+        exactSum=keep.sum===down && keep.price===priceN && keep.pct!=null;
+        downPct=exactSum?keep.pct:(priceN>0?Math.round(down*1000/priceN)/10:0);
+      }
+      down=Math.max(0, Math.min(priceN, down));
+      if(exactSum) down=keep.sum;
+      if(persist!==false) kmDownKeep={sum:down, pct:downPct, price:priceN};
+      return {downMode, down, downPct};
+    }
     function kmChipGroups(active){
       const groups={};
       KM_MODELS.forEach(x=>{
@@ -2552,14 +2583,11 @@ async function pingTelegram(body){
       if(_pgTrim && !useLoan) pack=150000;
       const extras=(useLoan||_pgTrim)?(addons+(pack||0)+fee):0;
       const finDelta=(addons-70000)+((useLoan||_pgTrim)?((pack||0)-150000):0);
-      const downMode=kmStr("cDownMode","pct");
       const months=kmVal("cMonths", 60);
-      let downPct=kmVal("cDownPct", 20);
-      let down=kmVal("cDown", Math.round(price*0.2));
-      if(fresh){ downPct=20; down=Math.round(price*0.2); }
-      if(downMode==="pct") down=Math.round(price*Math.max(0,downPct)/100);
-      else downPct=price>0?Math.round(down*1000/price)/10:0;
-      down=Math.max(0, Math.min(price, down));
+      const _down=kmDownRead(price, fresh);
+      const downMode=_down.downMode;
+      let downPct=_down.downPct;
+      let down=_down.down;
       const credit=Math.max(0,price-down+extras);
       const rateGroup=typeof kmRateGroup==="function"?kmRateGroup(m):"t4l_t7";
       const stockCars=typeof kmStockCars==="function"?kmStockCars(m):[];
