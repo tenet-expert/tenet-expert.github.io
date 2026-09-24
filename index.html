@@ -315,6 +315,12 @@ input,textarea{width:100%;background:#fff;border:1px solid var(--border);color:v
 .term-card b{display:block;font-size:15px;letter-spacing:-.02em}
 .term-card .num{font-weight:800;margin-top:6px;font-variant-numeric:tabular-nums}
 .term-card small{display:block;color:var(--muted);font-size:12px;line-height:1.35;margin-top:6px}
+.terms-top{display:block}
+.terms-top h2{margin-top:0}
+@media(min-width:900px){
+  .terms-top{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;align-items:start}
+  .terms-top .terms-cards{grid-template-columns:1fr}
+}
 .km-line{margin:4px 0 12px}
 .km-line .stock-h{margin:10px 0 6px}
 .km-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:8px;margin:0}
@@ -375,6 +381,12 @@ input,textarea{width:100%;background:#fff;border:1px solid var(--border);color:v
 .term-card b{display:block;font-size:15px;letter-spacing:-.02em}
 .term-card .num{font-weight:800;margin-top:6px;font-variant-numeric:tabular-nums}
 .term-card small{display:block;color:var(--muted);font-size:12px;line-height:1.35;margin-top:6px}
+.terms-top{display:block}
+.terms-top h2{margin-top:0}
+@media(min-width:900px){
+  .terms-top{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;align-items:start}
+  .terms-top .terms-cards{grid-template-columns:1fr}
+}
 .km-line{margin:4px 0 12px}
 .km-line .stock-h{margin:10px 0 6px}
 .km-right{display:flex;flex-direction:column;gap:14px}
@@ -2344,12 +2356,14 @@ async function pingTelegram(body){
         `<div class="terms-col">`+
         `<p class="lead">Клиенту называть рекомендованную цену. Максимум с выгодами — после расчёта РОП. КМ — коридор доходности без НДС, тыс. руб.</p>`+
         `<div class="note-box">Скидки импортёра не обещать, если их нет в прайсе. Цифры внутренние.</div>`+
-        `<h2>Доходность</h2>`+
-        `<div class="terms-cards">`+termGroup(KM_CORRIDOR,"km")+`</div>`+
-        `<h2>Бонусы</h2>`+
-        `<div class="terms-cards">`+termGroup(TERMS_BONUS,"bonus")+`</div>`+
-        `<h2>Спец инвойс</h2>`+
-        `<div class="terms-cards">`+TERMS_INV.map(r=>termCard(r.model+" · "+r.trim, escape(r.price), "")).join("")+`</div>`+
+        `<div class="terms-top">`+
+        `<section><h2>Доходность</h2>`+
+        `<div class="terms-cards">`+termGroup(KM_CORRIDOR,"km")+`</div></section>`+
+        `<section><h2>Бонусы</h2>`+
+        `<div class="terms-cards">`+termGroup(TERMS_BONUS,"bonus")+`</div></section>`+
+        `<section><h2>Спец инвойс</h2>`+
+        `<div class="terms-cards">`+TERMS_INV.map(r=>termCard(r.model+" · "+r.trim, escape(r.price), "")).join("")+`</div></section>`+
+        `</div>`+
         `<h2>МПТ / субсидия TENET</h2>`+
         `<p class="lead">По дате производства T7. Зелёный — МПТ, песочный — субсидия бренда. Нажмите день.</p>`+mptCal()+
         `<h2>Приоритет · ${TERMS_PRIO.length} авто</h2>`+
