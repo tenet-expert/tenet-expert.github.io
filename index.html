@@ -486,36 +486,44 @@ input,textarea{width:100%;background:#fff;border:1px solid var(--border);color:v
 .cl-note{width:100%;margin-top:4px;min-height:44px;border:1px solid #eadfcf;border-radius:10px;padding:8px 10px;font:500 12px/1.35 Inter,Arial,sans-serif;resize:vertical;background:#fff;box-sizing:border-box}
 .cl-salon .cl-note{margin-top:8px;background:#fbf7f0}
 .cl-chips label{display:inline-flex;gap:6px;align-items:center;padding:6px 8px;border:1px solid #eadfcf;border-radius:999px;font-size:12px;background:#fbf7f0}
+/* st-look */
 .st-filters{display:flex;flex-wrap:wrap;gap:8px}
-.st-acc{border:1px solid #eadfcf;border-radius:14px;background:#fff;margin:8px 0;overflow:hidden}
-.st-acc summary{list-style:none;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px;cursor:pointer}
-.st-acc summary::-webkit-details-marker{display:none}
-.st-acc summary small{display:block;font-size:11px;color:#7a7166;font-weight:500}
-.st-acc summary b{font-size:16px}
-.st-count{font-size:12px;color:#6d6458;white-space:nowrap}
-.st-list{border-top:1px solid #f0e6d8}
-.st-row{display:grid;grid-template-columns:1fr auto;gap:6px 12px;padding:10px 14px;border-top:1px solid #f3eadc}
+.st-board{display:flex;flex-direction:column;gap:10px;margin-top:12px}
+.st-acc{border:1px solid #eadfcf;border-radius:16px;background:#fff;box-shadow:0 10px 28px rgba(70,50,20,.05);overflow:hidden}
+.st-acc>summary,.st-trim>summary{list-style:none;cursor:pointer}
+.st-acc>summary::-webkit-details-marker,.st-trim>summary::-webkit-details-marker{display:none}
+.st-acc>summary::marker,.st-trim>summary::marker{content:""}
+.st-acc>summary{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;background:#fff}
+.st-id{display:flex;flex-direction:column;gap:2px;min-width:0}
+.st-id small{display:block;font-size:11px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#8a6840}
+.st-acc.chery .st-id small{color:#3e5870}
+.st-id b{display:block;font-size:20px;letter-spacing:-.03em;line-height:1.1}
+.st-meta{display:flex;align-items:center;gap:10px;margin-left:auto}
+.st-count{font-size:13px;color:#6d6458;font-weight:600;white-space:nowrap}
+.st-chev{width:32px;height:32px;border-radius:50%;border:1px solid #eadfcf;background:#fbf7f1;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.st-chev:before{content:"";width:7px;height:7px;border-right:2px solid #1c1a17;border-bottom:2px solid #1c1a17;transform:rotate(45deg) translateY(-2px)}
+.st-acc[open]>summary .st-chev:before,.st-trim[open]>summary .st-chev:before{transform:rotate(225deg) translateY(-1px)}
+.st-trims{display:flex;flex-direction:column;gap:8px;padding:0 12px 12px;background:#fff;border-top:0}
+.st-trim{border:1px solid #eadfcf;border-radius:12px;background:#fbf7f1;overflow:hidden}
+.st-trim>summary{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;background:#fbf7f1}
+.st-trim>summary b{font-size:14px;font-weight:700}
+.st-trim>summary b::before{content:none!important}
+.st-trim .st-chev{width:26px;height:26px;background:#fff}
+.st-list{background:#fff;border-top:1px solid #f0e6d8}
+.st-row{display:grid;grid-template-columns:1fr auto;gap:6px 12px;padding:12px 14px;border-top:1px solid #f3eadc;background:#fff}
 .st-row:first-child{border-top:0}
 .st-row small{display:block;color:#7a7166;font-size:12px;line-height:1.35}
 .st-vin{word-break:break-all;font-family:ui-monospace,Menlo,monospace;font-size:11px}
-.st-side{text-align:right;min-width:92px}
+.st-side{text-align:right;min-width:110px}
+.st-side>b{font-variant-numeric:tabular-nums}
+.st-flags{margin-top:6px;display:flex;flex-wrap:wrap;justify-content:flex-end;gap:4px}
+.st-sorts{margin-top:8px}
+.st-sort-lab{font-size:12px;color:#6d6458;align-self:center}
 @media(min-width:900px){
   .st-list{display:grid;grid-template-columns:1fr 1fr}
   .st-row{align-items:center;border-top:0;border-bottom:1px solid #f3eadc}
   .st-list>.st-row:nth-child(odd){box-shadow:inset -1px 0 0 #f3eadc}
 }
-.st-flags{margin-top:6px;display:flex;flex-wrap:wrap;justify-content:flex-end;gap:4px}
-.st-sorts{margin-top:8px}
-.st-sort-lab{font-size:12px;color:#6d6458;align-self:center}
-.st-trims{border-top:1px solid #f0e6d8}
-.st-trim{border-bottom:1px solid #f3eadc;background:#fff}
-.st-trim:last-child{border-bottom:0}
-.st-trim>summary{list-style:none;padding:9px 14px 9px 22px;display:flex;justify-content:space-between;align-items:center;gap:10px;cursor:pointer;background:#fbf7f1}
-.st-trim>summary::-webkit-details-marker{display:none}
-.st-trim>summary b{font-size:14px}
-.st-trim>summary b::before{content:"▸  ";font-size:11px;color:#8a7560}
-.st-trim[open]>summary b::before{content:"▾  "}
-.st-trim .st-list{border-top:1px solid #f0e6d8}
 .study-pick{flex-wrap:wrap}
 @media print{
   @page{size:A4 portrait;margin:8mm}
@@ -2880,6 +2888,12 @@ async function pingTelegram(body){
       const map={t4p:2449000,t4la:2329000,t4lp:2479000,t7a:2785000,t7p:2985000,t7a4:2990000,t7p4:3190000,t8a:3099000,t8p:3299000,t8p4:3630000,t8u4:3885000,tt9p:3949000,tt9u:4299000,t9p:4335000,t9u:4640000,ta8p:2999000,ta8u:3499000,a8a:2865000,a8p:3060000,a8u:3275000,t7l:2735000};
       return map[id]||0;
     }
+    function stockIsDemo(c){
+      if(!c) return false;
+      if(c.demo) return true;
+      const v=String(c.vin||"").toUpperCase();
+      return v==="EDXGD34B2TE109064" || v==="EDXGB32B0TE110108";
+    }
     function stockBadges(r){
       const bits=[];
       bits.push(`<span class="st ${r.status}">${(ST_LABEL&&ST_LABEL[r.status])||r.status}</span>`);
@@ -2989,7 +3003,7 @@ async function pingTelegram(body){
         return `<button type="button" class="chip ${on?"on":""}" data-stock-sort="${k}">${lab}${arrow}</button>`;
       }).join("");
       const body = list.length
-        ? ids.map(id=>{
+        ? `<div class="st-board">`+ids.map(id=>{
             const titles={t4:["TENET","T4"],t4l:["TENET","T4L"],t7:["TENET","T7"],t8:["TENET","T8"],tt9:["TENET","T9"],t9:["CHERY","Tiggo 9"],t7l:["CHERY","Tiggo 7 L"],ta8:["TENET","A8"],a8:["CHERY","Arrizo 8"]};
             const known=titles[id];
             const base=MODELS[id]||{id,brand:"TENET",name:id.toUpperCase()};
@@ -3010,19 +3024,20 @@ async function pingTelegram(body){
               return `<details class="st-trim" data-acc="${escape(tkey)}" ${tOpen?"open":""}>
                 <summary>
                   <b>${escape(g.trim)}</b>
-                  <span class="st-count">${g.rows.length}${from?" · от "+rub(from)+" ₽":""}</span>
+                  <span class="st-meta"><span class="st-count">${g.rows.length}${from?" · от "+rub(from)+" ₽":""}</span><i class="st-chev" aria-hidden="true"></i></span>
                 </summary>
                 <div class="st-list">${g.rows.map(stockCard).join("")}</div>
               </details>`;
             }).join("");
-            return `<details class="st-acc" data-acc="m:${id}" ${opened?"open":""}>
+            const tone=m.brand==="CHERY"?" chery":"";
+            return `<details class="st-acc${tone}" data-acc="m:${id}" ${opened?"open":""}>
               <summary>
-                <span><small>${escape(m.brand)}</small><b>${escape(m.name)}</b></span>
-                <span class="st-count">${rows.length}${bits.length?" · "+bits.join(" · "):""}</span>
+                <span class="st-id"><small>${escape(m.brand)}</small><b>${escape(m.name)}</b></span>
+                <span class="st-meta"><span class="st-count">${rows.length}${bits.length?" · "+bits.join(" · "):""}</span><i class="st-chev" aria-hidden="true"></i></span>
               </summary>
               <div class="st-trims">${trims}</div>
             </details>`;
-          }).join("")
+          }).join("")+`</div>`
         : `<div class="card" style="margin-top:12px"><p>По этому фильтру машин нет.</p></div>`;
       return banner("Склад", `Logicstars · ${meta.updated}`, "TENET")+`
         <p class="lead">Сначала модель, внутри — комплектация. Сортировка меняет порядок машин и групп.</p>
@@ -3037,7 +3052,6 @@ async function pingTelegram(body){
         </div>
         ${body}`;
     }
-
     function offerSpecOf(id){
       const S={
         t4l:[["Кузов","кроссовер, 5 мест, несущий"],["Мотор","SQRE4T15C 1.5 турбо 147 л.с., 210 Н·м"],["КПП","робот DCT6"],["Привод","передний"],["Габариты","4506×1828×1701, база 2650"],["Масса","1543 / 2000 кг"],["Багажник","475–1500 л"],["Бак","51 л"],["Клиренс","203 мм"],["Шины","225/60 R18"],["0–100 / макс.","10,5 с / 180 км/ч"],["Расход смеш.","7,7 л"],["Топливо","АИ-92 / Евро 6"]],
