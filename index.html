@@ -771,6 +771,15 @@ input,textarea{width:100%;background:#fff;border:1px solid var(--border);color:v
   .km-stage.km-4 .km-pays{grid-template-columns:1fr 1fr 1fr;gap:14px}
   .km-stage.km-3 .km-pays{grid-template-columns:1fr 1fr;gap:16px}
 }
+.km-chips{display:flex;flex-direction:column;gap:10px}
+.km-pair{display:grid;gap:10px;min-width:0}
+.km-pair > .km-line{margin:0;padding:8px 10px 10px;border-radius:14px;min-width:0}
+.km-line.tone-a{background:#f4efe6;border:1px solid #e3d5c2;border-left:3px solid #c4a574}
+.km-line.tone-b{background:#e8eef3;border:1px solid #d0dbe3;border-left:3px solid #7f97ab}
+.km-pair > .km-line .stock-h{margin:2px 2px 8px}
+@media(min-width:1100px){
+  .km-pair.is-2{grid-template-columns:1fr 1fr;align-items:start}
+}
 
 
 </style>
@@ -2330,13 +2339,18 @@ async function pingTelegram(body){
       return v||def;
     }
     function kmChipGroups(active){
-      const order=["T4","T4L","T7","T8","TENET T9","TENET A8","Tiggo 9","Arrizo 8","Tiggo 7 L"];
+      const rows=[["T4","T4L"],["T7","Tiggo 7 L"],["T8"],["Tiggo 9","TENET T9"],["Arrizo 8","TENET A8"]];
       const groups={};
       KM_MODELS.forEach(x=>{
         const g=kmLineOf(x.id);
         (groups[g]=groups[g]||[]).push(x);
       });
-      return order.filter(g=>groups[g]).map(g=>`<div class="km-line"><p class="stock-h">${g}</p><div class="km-grid">${groups[g].map(x=>`<button type="button" class="chip ${x.id===active?"on":""}" data-km-id="${x.id}">${escape(x.name)}<small>${x.brand} · РРЦ ${rub(x.rrc)}</small></button>`).join("")}</div></div>`).join("");
+      const line=(g,tone)=>`<div class="km-line tone-${tone}"><p class="stock-h">${escape(g)}</p><div class="km-grid">${groups[g].map(x=>`<button type="button" class="chip ${x.id===active?"on":""}" data-km-id="${x.id}">${escape(x.name)}<small>${x.brand} · РРЦ ${rub(x.rrc)}</small></button>`).join("")}</div></div>`;
+      return rows.map(pair=>{
+        const present=pair.filter(g=>groups[g]&&groups[g].length);
+        if(!present.length) return "";
+        return `<div class="km-pair${present.length>1?" is-2":""}">${present.map((g,i)=>line(g,i?"b":"a")).join("")}</div>`;
+      }).join("");
     }
     function kmPrioRecRows(cur, carPrice, downPct, months, extras){
       const list=typeof STOCK!=="undefined"?STOCK:[];
