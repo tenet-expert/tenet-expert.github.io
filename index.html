@@ -487,6 +487,11 @@ input,textarea{width:100%;background:#fff;border:1px solid var(--border);color:v
 .st-row small{display:block;color:#7a7166;font-size:12px;line-height:1.35}
 .st-vin{word-break:break-all;font-family:ui-monospace,Menlo,monospace;font-size:11px}
 .st-side{text-align:right;min-width:92px}
+@media(min-width:900px){
+  .st-list{display:grid;grid-template-columns:1fr 1fr}
+  .st-row{align-items:center;border-top:0;border-bottom:1px solid #f3eadc}
+  .st-list>.st-row:nth-child(odd){box-shadow:inset -1px 0 0 #f3eadc}
+}
 .st-flags{margin-top:6px;display:flex;flex-wrap:wrap;justify-content:flex-end;gap:4px}
 .study-pick{flex-wrap:wrap}
 @media print{
@@ -2842,7 +2847,10 @@ async function pingTelegram(body){
       const ids=modelOrder.filter(id=>byModel[id]);
       const body = list.length
         ? ids.map(id=>{
-            const m=MODELS[id]||{id,brand:"TENET",name:id.toUpperCase()};
+            const titles={t4:["TENET","T4"],t4l:["TENET","T4L"],t7:["TENET","T7"],t8:["TENET","T8"],tt9:["TENET","T9"],t9:["CHERY","Tiggo 9"],t7l:["CHERY","Tiggo 7 L"],ta8:["TENET","A8"],a8:["CHERY","Arrizo 8"]};
+            const known=titles[id];
+            const base=MODELS[id]||{id,brand:"TENET",name:id.toUpperCase()};
+            const m=known?Object.assign({},base,{brand:known[0],name:known[1]}):base;
             const rows=byModel[id];
             const inn=rows.filter(x=>x.status==="in").length;
             const way=rows.filter(x=>x.status==="way").length;
