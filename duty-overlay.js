@@ -166,7 +166,6 @@
     ]);
     ctx.fillStyle="#5c5346"; ctx.font="500 16px Inter, Arial, sans-serif";
     ctx.fillText("Заметка: "+(d.note||"—"), pad, y+8);
-    ctx.fillText("Подпись: "+(d.sign||d.manager||""), pad, y+36);
     ctx.fillStyle="#9a9186"; ctx.font="500 13px Inter, Arial, sans-serif";
     ctx.fillText("TENET · Отдел продаж · Эксперт Авто Самара", pad, H-28);
     dutyPdfOpen(c.toDataURL("image/png"));

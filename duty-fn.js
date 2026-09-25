@@ -55,7 +55,8 @@
     function dutyOpenSaved(id){
       const rec=dutyLogLoad().find(x=>x && x.id===id);
       if(!rec || !rec.data) return;
-      dutySave(rec.data);
+      const data=Object.assign({}, rec.data, {_archive:1});
+      dutySave(data);
       if(typeof render==="function") render();
     }
     function dutyBodyWord(v){
@@ -230,7 +231,6 @@
       ctx.fillStyle="#5c5346"; ctx.font="500 16px Inter, Arial, sans-serif";
       ctx.fillText("ДЦ: "+(d.dc_note||"—"), pad, y+8);
       ctx.fillText("Шоурум: "+(d.note||"—"), pad, y+32);
-      ctx.fillText("Подпись: "+(d.sign||d.manager||""), pad, y+56);
       ctx.fillStyle="#9a9186"; ctx.font="500 13px Inter, Arial, sans-serif";
       ctx.fillText("TENET · Отдел продаж · Эксперт Авто Самара", pad, H-28);
       dutyPdfOpen(c.toDataURL("image/png"));
@@ -297,9 +297,11 @@
     function duty(){
       if(needAuth()) return login();
       const d=dutyLoad();
-      if(!d.date) d.date=dutyToday();
+      if(!d._archive) d.date=dutyToday();
+      else if(!d.date) d.date=dutyToday();
       const who=(typeof state!=="undefined" && state && state.display)?state.display:"";
-      if(!d.manager && who) d.manager=who;
+      const name=String(d.manager||who||"").trim().split(/\s+/).filter(Boolean).filter((p,i,a)=>a.findIndex(x=>x.toLowerCase()===p.toLowerCase())===i).join(" ");
+      if(!d._archive) d.manager=name;
       const prog=dutyCount(d);
       const pct=prog.tot?Math.round(prog.on*100/prog.tot):0;
       const cards=DUTY_CARS.map(car=>{
@@ -324,8 +326,7 @@
         <div class="cl">
           <div class="cl-bar">
             <input data-duty="manager" placeholder="Менеджер" value="${escape(d.manager||"")}" />
-            <input data-duty="date" value="${escape(d.date||"")}" style="width:96px" />
-            <input data-duty="sign" placeholder="Подпись" value="${escape(d.sign||d.manager||"")}" />
+            <input data-duty="date" readonly value="${escape(d.date||dutyToday())}" style="width:96px" />
             <div class="cl-prog"><i style="width:${pct}%"></i><span>${pct}%</span></div>
             <button type="button" class="btn ivory" id="dutySave">Сохранить</button>
             <button type="button" class="btn ghost" id="dutyPrint">PDF</button>
