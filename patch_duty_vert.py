@@ -4,7 +4,7 @@ from pathlib import Path
 import re
 
 MARKER = "<!-- duty-vert-d4 -->"
-OVERLAY_TAG = '<script src="duty-overlay.js?v=d4"></script>'
+OVERLAY_TAG = '<script src="duty-overlay.js?v=d5"></script>'
 
 EXTRA_CSS = """
 .cl-sec{margin:2px 0 8px}

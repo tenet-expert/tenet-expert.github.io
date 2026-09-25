@@ -31,6 +31,7 @@
   window.dutyPdfClose=dutyPdfClose;
   window.dutyPdfOpen=dutyPdfOpen;
   window.dutyPdf=function(src){
+    if(typeof window.__dutyPagePdf==="function") return window.__dutyPagePdf(src);
     const d=src||(typeof dutyRead==="function"?dutyRead():{});
     const p=typeof dutyCount==="function"?dutyCount(d):{on:0,tot:0};
     const pct=p.tot?Math.round(p.on*100/p.tot):0;
