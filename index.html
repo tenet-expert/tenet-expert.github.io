@@ -321,6 +321,16 @@ input,textarea{width:100%;background:#fff;border:1px solid var(--border);color:v
   .terms-top{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;align-items:start}
   .terms-top .terms-cards{grid-template-columns:1fr}
 }
+.terms-top section{border-radius:16px;padding:10px 10px 2px}
+.terms-top section:nth-child(1){background:#eef3f8}
+.terms-top section:nth-child(2){background:#eef6ee}
+.terms-top section:nth-child(3){background:#fbf6ee}
+.terms-top section:nth-child(1) h2{color:#1f4e79}
+.terms-top section:nth-child(2) h2{color:#1e5c24}
+.terms-top section:nth-child(3) h2{color:#8a5a10}
+.terms-top section:nth-child(1) .term-card{background:#f7fbff;border-color:#c9d8e8}
+.terms-top section:nth-child(2) .term-card{background:#f7fbf7;border-color:#c9e0c8}
+.terms-top section:nth-child(3) .term-card{background:#fffaf3;border-color:#ead4b0}
 .km-line{margin:4px 0 12px}
 .km-line .stock-h{margin:10px 0 6px}
 .km-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:8px;margin:0}
@@ -387,6 +397,16 @@ input,textarea{width:100%;background:#fff;border:1px solid var(--border);color:v
   .terms-top{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;align-items:start}
   .terms-top .terms-cards{grid-template-columns:1fr}
 }
+.terms-top section{border-radius:16px;padding:10px 10px 2px}
+.terms-top section:nth-child(1){background:#eef3f8}
+.terms-top section:nth-child(2){background:#eef6ee}
+.terms-top section:nth-child(3){background:#fbf6ee}
+.terms-top section:nth-child(1) h2{color:#1f4e79}
+.terms-top section:nth-child(2) h2{color:#1e5c24}
+.terms-top section:nth-child(3) h2{color:#8a5a10}
+.terms-top section:nth-child(1) .term-card{background:#f7fbff;border-color:#c9d8e8}
+.terms-top section:nth-child(2) .term-card{background:#f7fbf7;border-color:#c9e0c8}
+.terms-top section:nth-child(3) .term-card{background:#fffaf3;border-color:#ead4b0}
 .km-line{margin:4px 0 12px}
 .km-line .stock-h{margin:10px 0 6px}
 .km-right{display:flex;flex-direction:column;gap:14px}
@@ -1728,12 +1748,12 @@ async function pingTelegram(body){
       {model:"T8",vin:"EDXGD34B6TE031162",trim:"Prime 4WD",year:"2026",color:"Чёрный",extra:"",pay:500,bonus:2000},
       {model:"T8",vin:"EDXGD34B3TE031815",trim:"Ultra 4WD",year:"2026",color:"Белый",extra:"",pay:500,bonus:2000},
       {model:"Tiggo 9",vin:"EDEDD24B2SG003755",trim:"Ultra",year:"2025",color:"Светло-серый",extra:"",pay:500,bonus:3000},
-      {model:"Tiggo 9",vin:"EDEDD24B3SG003926",trim:"Ultra",year:"2025",color:"Матовый",extra:"",pay:500,bonus:3000},
+      {model:"Tiggo 9",vin:"EDEDD24B3SG003926",trim:"Ultra",year:"2025",color:"Матовый",extra:"",pay:500,bonus:3000,sold:true},
       {model:"Tiggo 9",vin:"EDEDD24B1SG002595",trim:"Ultra",year:"2025",color:"Чёрный",extra:"Новиков",pay:500,bonus:0,sold:true,seller:"Новиков"},
       {model:"Arrizo 8",vin:"LVVDC21B7SD594110",trim:"Prime",year:"2025",color:"Белый",extra:"",pay:500,bonus:3000},
       {model:"Arrizo 8",vin:"LVVDC21B0SD594112",trim:"Prime",year:"2025",color:"Белый",extra:"",pay:500,bonus:3000},
       {model:"Arrizo 8",vin:"LVVDC21B2SDJ34062",trim:"Prime",year:"2025",color:"Чёрный",extra:"",pay:500,bonus:3000},
-      {model:"8 Pro Max",vin:"LVTDD24B5RD409189",trim:"Ultimate",year:"2024",color:"Белый",extra:"ТЕСТ // 2850",pay:500,bonus:10000}
+      {model:"8 Pro Max",vin:"LVTDD24B5RD409189",trim:"Ultimate",year:"2024",color:"Белый",extra:"ТЕСТ // 2850",pay:500,bonus:10000,sold:true}
     ];
     const KM_MODELS = [
       {id:"t4p",brand:"TENET",name:"T4 Prime 2025",stock:"t4",rrc:2449000,dealer:2369000,ti:100000,tiBack:80000,cr:0,crBack:0,bonus:0.03,vat:1.22,fee:0.01,kmMin:-30,kmMax:20,prioMin:-30,prioMax:20},
@@ -2319,7 +2339,7 @@ async function pingTelegram(body){
       return `<ol class="prio-list">`+TERMS_PRIO.map((r,i)=>{
         const sold=!!r.sold;
         const n=r.seller?soldBy[r.seller]||0:0;
-        const mark=sold&&r.seller?`<span class="sold-mark"><em>Продано</em> ${escape(r.seller)} <i>${n>=2?"2":"1"}</i></span>`:"";
+        const mark=sold?(r.seller?`<span class="sold-mark"><em>Продано</em> ${escape(r.seller)} <i>${n>=2?"2":"1"}</i></span>`:`<span class="sold-mark"><em>Продано</em></span>`):"";
         const go=!sold?`<button type="button" class="btn ivory prio-go" data-prio-go="${escape(r.vin)}">Перейти к расчету цены и кредита</button>`:"";
         const extra=r.extra?` · ${escape(r.extra)}`:"";
         return `<li class="prio-item${sold?" sold":""}">
