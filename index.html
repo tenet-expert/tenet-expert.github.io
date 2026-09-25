@@ -555,6 +555,15 @@ input,textarea{width:100%;background:#fff;border:1px solid var(--border);color:v
 .st-trim .st-chev{width:26px;height:26px;background:#fff}
 .st-list{background:#fff;border-top:1px solid #f0e6d8}
 .st-row{display:grid;grid-template-columns:1fr auto;gap:6px 12px;padding:12px 14px;border-top:1px solid #f3eadc;background:#fff}
+.st-row.tone-black:not(.is-reserved):not(.is-invoice){background:#f2f2f3;border-left:3px solid #6a6a6e}
+.st-row.tone-white:not(.is-reserved):not(.is-invoice){background:#fffdf9;border-left:3px solid #e4ddd2}
+.st-row.tone-red:not(.is-reserved):not(.is-invoice){background:#fdf3f3;border-left:3px solid #d98989}
+.st-row.tone-green:not(.is-reserved):not(.is-invoice){background:#f2f6f2;border-left:3px solid #7d9e84}
+.st-row.tone-blue:not(.is-reserved):not(.is-invoice){background:#f2f6fb;border-left:3px solid #86a9c6}
+.st-row.tone-silver:not(.is-reserved):not(.is-invoice){background:#f4f5f6;border-left:3px solid #b4bac1}
+.st-row.tone-bamboo:not(.is-reserved):not(.is-invoice){background:#f4f5f0;border-left:3px solid #a3ad90}
+.st-row.tone-light:not(.is-reserved):not(.is-invoice){background:#f5f6f7;border-left:3px solid #c5c9ce}
+.st-row.tone-gray:not(.is-reserved):not(.is-invoice){background:#f1f2f3;border-left:3px solid #9ea3a8}
 .st-row:first-child{border-top:0}
 .st-row small{display:block;color:#7a7166;font-size:12px;line-height:1.35}
 .st-vin{word-break:break-all;font-family:ui-monospace,Menlo,monospace;font-size:11px}
@@ -3044,6 +3053,19 @@ async function pingTelegram(body){
       if(typeof stockOpen==="object" && stockOpen && Object.prototype.hasOwnProperty.call(stockOpen, key)) return !!stockOpen[key];
       return !!fallback;
     }
+    function stockTone(color){
+      const c=String(color||"").toLowerCase().replace(/ё/g,"е");
+      if(c.includes("черн")) return "tone-black";
+      if(c.includes("бел")) return "tone-white";
+      if(c.includes("крас")) return "tone-red";
+      if(c.includes("зелен")) return "tone-green";
+      if(c.includes("голуб")||c.includes("син")) return "tone-blue";
+      if(c.includes("сереб")) return "tone-silver";
+      if(c.includes("bamboo")||c.includes("бамбу")) return "tone-bamboo";
+      if(c.includes("светл")) return "tone-light";
+      if(c.includes("сер")) return "tone-gray";
+      return "";
+    }
     function stockCard(r){
       const salon=salonLabel(r.salon);
       const price=stockRrc(r);
@@ -3051,7 +3073,8 @@ async function pingTelegram(body){
       const meta=[r.color, year?String(year):"", salon].filter(Boolean).join(" · ");
       const reservedCls=r.reserved?" is-reserved":"";
       const reservedBadge=r.reserved?`<span class="st reserved st-reserved-mid">Забронирован</span>`:"";
-      return `<article class="st-row${reservedCls}${r.invoice?" is-invoice":""}">
+      const tone=stockTone(r.color);
+      return `<article class="st-row${tone?" "+tone:""}${reservedCls}${r.invoice?" is-invoice":""}">
         <div>
           <b>${escape(r.name||"")}</b>
           <small>${escape(meta)}</small>
