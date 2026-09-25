@@ -112,14 +112,30 @@
         ctx.arcTo(x,y,x+w,y,r);
         ctx.closePath();
       }
-      function tick(x,y,on){
-        ctx.strokeStyle="#1a1a1a";
+      function tick(x,y,state){
+        const st=state==="bad"?"bad":(state==="ok"||state===true?"ok":"");
+        if(st==="bad"){
+          ctx.fillStyle="#ff8a80";
+          ctx.fillRect(x-8, y-22, 280, 30);
+        }
         ctx.lineWidth=1.6;
-        ctx.strokeRect(x, y-15, 18, 18);
-        if(on){
-          ctx.fillStyle="#145a1f";
-          ctx.font="800 16px Inter, Arial, sans-serif";
-          ctx.fillText("✓", x+2, y);
+        ctx.strokeStyle="#2e7d32";
+        ctx.strokeRect(x, y-15, 16, 16);
+        if(st==="ok"){
+          ctx.fillStyle="#1b5e20";
+          ctx.fillRect(x, y-15, 16, 16);
+          ctx.fillStyle="#fff";
+          ctx.font="800 13px Inter, Arial, sans-serif";
+          ctx.fillText("✓", x+2, y-2);
+        }
+        ctx.strokeStyle="#c62828";
+        ctx.strokeRect(x+20, y-15, 16, 16);
+        if(st==="bad"){
+          ctx.fillStyle="#b71c1c";
+          ctx.fillRect(x+20, y-15, 16, 16);
+          ctx.fillStyle="#fff";
+          ctx.font="800 13px Inter, Arial, sans-serif";
+          ctx.fillText("×", x+22, y-2);
         }
       }
       ctx.fillStyle="#c81e2b";
@@ -145,11 +161,12 @@
         ctx.fillStyle="#111"; ctx.font="800 22px Inter, Arial, sans-serif";
         ctx.fillText(car.title, pad+20, y+34);
         const rows=[
-          ["Омывающая", !!d[car.id+"_wash"]],
-          ["Коврики и пороги", !!d[car.id+"_mats"]],
-          ["Нет ошибок", !!d[car.id+"_err"]],
-          ["Нет пыли", !!d[car.id+"_dust"]],
-          ["Багажник", !!d[car.id+"_trunk"]],
+          ["Омывающая", dutyTri(d[car.id+"_wash"])],
+          ["Коврики и пороги", dutyTri(d[car.id+"_mats"])],
+          ["Нет ошибок", dutyTri(d[car.id+"_err"])],
+          ["Нет пыли", dutyTri(d[car.id+"_dust"])],
+          ["Багажник", dutyTri(d[car.id+"_trunk"])],
+          ["Кузов", dutyTri(d[car.id+"_body"])],
         ];
         rows.forEach((row,ri)=>{
           const col=ri%2;
@@ -157,11 +174,11 @@
           const cx=pad+20+col*((inner-40)/2);
           const cy=y+72+line*36;
           tick(cx, cy, row[1]);
-          ctx.fillStyle="#111"; ctx.font="500 17px Inter, Arial, sans-serif";
-          ctx.fillText(row[0], cx+28, cy);
+          ctx.fillStyle=row[1]==="bad"?"#7f0000":"#111"; ctx.font="500 17px Inter, Arial, sans-serif";
+          ctx.fillText(row[0], cx+44, cy);
         });
         ctx.fillStyle="#5c5346"; ctx.font="600 16px Inter, Arial, sans-serif";
-        const meta="Кузов: "+dutyBodyWord(d[car.id+"_body"]||"ok")+"     Пробег: "+(d[car.id+"_km"]||"—")+"     Топливо: "+(d[car.id+"_fuel"]?d[car.id+"_fuel"]+"%":"—");
+        const meta="Пробег: "+(d[car.id+"_km"]||"—")+"     Топливо: "+(d[car.id+"_fuel"]?d[car.id+"_fuel"]+"%":"—");
         ctx.fillText(meta, pad+20, y+176);
         y+=carH+12;
       });
@@ -179,9 +196,9 @@
           const line=Math.floor(i/3);
           const cx=pad+20+col*((inner-40)/3);
           const cy=y+68+line*38;
-          tick(cx, cy, !!d[pair[0]]);
-          ctx.fillStyle="#111"; ctx.font="500 16px Inter, Arial, sans-serif";
-          ctx.fillText(pair[1], cx+28, cy);
+          tick(cx, cy, dutyTri(d[pair[0]]));
+          ctx.fillStyle=dutyTri(d[pair[0]])==="bad"?"#7f0000":"#111"; ctx.font="500 16px Inter, Arial, sans-serif";
+          ctx.fillText(pair[1], cx+44, cy);
         });
         y+=h+12;
       }
@@ -217,14 +234,20 @@
       {id:"t7",title:"TENET T7"},
       {id:"t9",title:"Tiggo 9"}
     ];
+    function dutyTri(v){
+      if(v==="ok" || v==="bad") return v;
+      if(v===true || v==="true") return "ok";
+      if(v==="no") return "bad";
+      return "";
+    }
+    function dutyOk(v){ return dutyTri(v)==="ok"; }
     function dutyCount(d){
       let tot=0, on=0;
       DUTY_CARS.forEach(car=>{
-        ["_wash","_mats","_err","_dust","_trunk"].forEach(s=>{ tot++; if(d[car.id+s]) on++; });
-        tot++; if((d[car.id+"_body"]||"ok")!=="no") on++;
+        ["_wash","_mats","_err","_dust","_trunk","_body"].forEach(s=>{ tot++; if(dutyOk(d[car.id+s])) on++; });
         tot+=2; if(d[car.id+"_km"]) on++; if(d[car.id+"_fuel"]) on++;
       });
-      ["dc_light","dc_avito","dc_music","dc_price_avito","dc_price_hold","dc_desk","dc_trash","dm_body","dm_mats","dm_trunk","dm_dust","dm_wheel","dm_bat"].forEach(k=>{ tot++; if(d[k]) on++; });
+      ["dc_light","dc_avito","dc_music","dc_price_avito","dc_price_hold","dc_desk","dc_trash","dm_body","dm_mats","dm_trunk","dm_dust","dm_wheel","dm_bat"].forEach(k=>{ tot++; if(dutyOk(d[k])) on++; });
       return {on, tot};
     }
     function dutyPaintProg(){
@@ -235,8 +258,17 @@
       if(bar) bar.style.width=pct+"%";
       if(lab) lab.textContent=pct+"%";
     }
-    function dutyItem(k, label, on){
-      return `<label class="cl-item"><input type="checkbox" data-duty="${k}" ${on?"checked":""} /><span class="cl-mark">✓</span><span>${label}</span></label>`;
+    function dutyItem(k, label, raw){
+      const st=dutyTri(raw);
+      const cls=st==="bad"?" is-bad":(st==="ok"?" is-ok":"");
+      return `<div class="cl-item${cls}">
+        <span class="cl-lab">${label}</span>
+        <span class="cl-pair">
+          <button type="button" class="cl-sq ok${st==="ok"?" on":""}" data-duty-pick="${k}" data-val="ok" aria-label="Норма">✓</button>
+          <button type="button" class="cl-sq bad${st==="bad"?" on":""}" data-duty-pick="${k}" data-val="bad" aria-label="Проблема">✕</button>
+        </span>
+        <input type="hidden" data-duty="${k}" value="${st}" />
+      </div>`;
     }
     function duty(){
       if(needAuth()) return login();
@@ -247,7 +279,6 @@
       const prog=dutyCount(d);
       const pct=prog.tot?Math.round(prog.on*100/prog.tot):0;
       const cards=DUTY_CARS.map(car=>{
-        const body=d[car.id+"_body"]||"ok";
         return `<article class="cl-car">
           <h3>${car.title}</h3>
           ${dutyItem(car.id+"_wash","Омывающая", d[car.id+"_wash"])}
@@ -255,13 +286,7 @@
           ${dutyItem(car.id+"_err","Нет ошибок", d[car.id+"_err"])}
           ${dutyItem(car.id+"_dust","Нет пыли", d[car.id+"_dust"])}
           ${dutyItem(car.id+"_trunk","Багажник", d[car.id+"_trunk"])}
-          <label class="cl-item" style="display:block">Кузов
-            <select data-duty="${car.id}_body">
-              <option value="ok" ${body==="ok"?"selected":""}>чистый</option>
-              <option value="pm" ${body==="pm"?"selected":""}>±</option>
-              <option value="no" ${body==="no"?"selected":""}>грязный</option>
-            </select>
-          </label>
+          ${dutyItem(car.id+"_body","Кузов", d[car.id+"_body"])}
           <div class="cl-nums">
             <label>Пробег<input data-duty="${car.id}_km" inputmode="numeric" value="${escape(d[car.id+"_km"]||"")}" /></label>
             <label>Топливо %<input data-duty="${car.id}_fuel" inputmode="numeric" value="${escape(d[car.id+"_fuel"]||"")}" /></label>
@@ -493,6 +518,21 @@
         document.querySelectorAll("[data-duty]").forEach(el=>{
           el.addEventListener("change", persist);
           el.addEventListener("input", persist);
+        });
+        document.querySelectorAll("[data-duty-pick]").forEach(btn=>{
+          btn.addEventListener("click", ()=>{
+            const row=btn.closest(".cl-item");
+            if(!row) return;
+            const val=btn.getAttribute("data-val");
+            const hid=row.querySelector('input[type="hidden"]');
+            const cur=hid?hid.value:"";
+            const next=cur===val?"":val;
+            if(hid) hid.value=next;
+            row.classList.toggle("is-ok", next==="ok");
+            row.classList.toggle("is-bad", next==="bad");
+            row.querySelectorAll(".cl-sq").forEach(b=>b.classList.toggle("on", b.getAttribute("data-val")===next));
+            persist();
+          });
         });
         dutyPaintProg();
       }
