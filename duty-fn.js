@@ -179,8 +179,19 @@
           ctx.fillText(row[0], cx+44, cy);
         });
         ctx.fillStyle="#5c5346"; ctx.font="600 16px Inter, Arial, sans-serif";
-        const meta="Пробег: "+(d[car.id+"_km"]||"—")+"     Топливо: "+(d[car.id+"_fuel"]!=null&&d[car.id+"_fuel"]!==""?d[car.id+"_fuel"]+"%":"—");
-        ctx.fillText(meta, pad+20, y+146);
+        const kmText="Пробег: "+(d[car.id+"_km"]||"—");
+        ctx.fillText(kmText, pad+20, y+146);
+        const fuelNum=Number(d[car.id+"_fuel"]);
+        const fuelLow=!Number.isNaN(fuelNum) && d[car.id+"_fuel"]!=="" && d[car.id+"_fuel"]!=null && fuelNum<=50;
+        const fuelText="Топливо: "+(d[car.id+"_fuel"]!=null&&d[car.id+"_fuel"]!==""?d[car.id+"_fuel"]+"%":"—");
+        const fuelX=pad+20+ctx.measureText(kmText).width+28;
+        if(fuelLow){
+          const fw=ctx.measureText(fuelText).width+18;
+          ctx.fillStyle="#e53935";
+          ctx.fillRect(fuelX-8, y+130, fw, 22);
+          ctx.fillStyle="#fff";
+        }else ctx.fillStyle="#5c5346";
+        ctx.fillText(fuelText, fuelX, y+146);
         if(carNote){
           ctx.fillStyle="#5c5346";
           ctx.font="500 14px Inter, Arial, sans-serif";
@@ -281,7 +292,7 @@
       const num=Number(raw);
       const n=raw===""||raw==null||Number.isNaN(num)?0:Math.max(0,Math.min(100,Math.round(num/10)*10));
       const ticks=[0,10,20,30,40,50,60,70,80,90,100].map(x=>`<i>${x}</i>`).join("");
-      return `<div class="cl-fuel"><div class="cl-fuel-top"><span>Топливо</span><b>${n}%</b></div><input type="range" min="0" max="100" step="10" data-duty="${id}_fuel" value="${n}" /><div class="cl-ticks">${ticks}</div></div>`;
+      return `<div class="cl-fuel${n<=50?" is-low":""}"><div class="cl-fuel-top"><span>Топливо</span><b>${n}%</b></div><input type="range" min="0" max="100" step="10" data-duty="${id}_fuel" value="${n}" /><div class="cl-ticks">${ticks}</div></div>`;
     }
     function duty(){
       if(needAuth()) return login();
@@ -552,8 +563,10 @@
         });
         document.querySelectorAll(".cl-fuel input").forEach(el=>{
           el.addEventListener("input", ()=>{
-            const b=el.parentElement && el.parentElement.querySelector("b");
+            const box=el.closest(".cl-fuel");
+            const b=box && box.querySelector("b");
             if(b) b.textContent=el.value+"%";
+            if(box) box.classList.toggle("is-low", Number(el.value)<=50);
           });
         });
         dutyPaintProg();
