@@ -152,7 +152,7 @@
       let y=pad+78;
       DUTY_CARS.forEach((car)=>{
         const carNote=String(d[car.id+"_note"]||"");
-        const carH=carNote?230:198;
+        const carH=carNote?176:156;
         ctx.fillStyle="#f7f1e7";
         roundRect(pad, y, inner, carH, 14);
         ctx.fill();
@@ -173,24 +173,24 @@
           const col=ri%2;
           const line=Math.floor(ri/2);
           const cx=pad+20+col*((inner-40)/2);
-          const cy=y+72+line*36;
+          const cy=y+56+line*28;
           tick(cx, cy, row[1]);
           ctx.fillStyle=row[1]==="bad"?"#7f0000":"#111"; ctx.font="500 17px Inter, Arial, sans-serif";
           ctx.fillText(row[0], cx+44, cy);
         });
         ctx.fillStyle="#5c5346"; ctx.font="600 16px Inter, Arial, sans-serif";
         const meta="Пробег: "+(d[car.id+"_km"]||"—")+"     Топливо: "+(d[car.id+"_fuel"]!=null&&d[car.id+"_fuel"]!==""?d[car.id+"_fuel"]+"%":"—");
-        ctx.fillText(meta, pad+20, y+176);
+        ctx.fillText(meta, pad+20, y+146);
         if(carNote){
           ctx.fillStyle="#5c5346";
           ctx.font="500 14px Inter, Arial, sans-serif";
-          ctx.fillText("Заметка: "+carNote.slice(0,80), pad+20, y+206);
+          ctx.fillText("Заметка: "+carNote.slice(0,80), pad+20, y+166);
         }
         y+=carH+12;
       });
       function block(title, keys){
         const rows=Math.ceil(keys.length/3);
-        const h=54+rows*40;
+        const h=42+rows*32;
         ctx.fillStyle="#f7f1e7";
         roundRect(pad, y, inner, h, 14); ctx.fill();
         ctx.strokeStyle="#eadfcf"; ctx.lineWidth=1;
@@ -201,7 +201,7 @@
           const col=i%3;
           const line=Math.floor(i/3);
           const cx=pad+20+col*((inner-40)/3);
-          const cy=y+68+line*38;
+          const cy=y+50+line*30;
           tick(cx, cy, dutyTri(d[pair[0]]));
           ctx.fillStyle=dutyTri(d[pair[0]])==="bad"?"#7f0000":"#111"; ctx.font="500 16px Inter, Arial, sans-serif";
           ctx.fillText(pair[1], cx+44, cy);
