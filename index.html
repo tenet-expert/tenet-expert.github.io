@@ -4334,6 +4334,7 @@ ${f.an?`Авансовый платёж BFS (ориентир): ${rub(f.an)} ₽
       const prog=dutyCount(d);
       const pct=prog.tot?Math.round(prog.on*100/prog.tot):0;
       const cards=DUTY_CARS.map(car=>{
+        const body=d[car.id+"_body"]||"ok";
         return `<article class="cl-car">
           <h3>${car.title}</h3>
           ${dutyItem(car.id+"_wash","Омывающая", d[car.id+"_wash"])}
@@ -4341,7 +4342,13 @@ ${f.an?`Авансовый платёж BFS (ориентир): ${rub(f.an)} ₽
           ${dutyItem(car.id+"_err","Нет ошибок", d[car.id+"_err"])}
           ${dutyItem(car.id+"_dust","Нет пыли", d[car.id+"_dust"])}
           ${dutyItem(car.id+"_trunk","Багажник", d[car.id+"_trunk"])}
-          ${dutyItem(car.id+"_body","Кузов", d[car.id+"_body"])}
+          <label class="cl-item" style="display:block">Кузов
+            <select data-duty="${car.id}_body">
+              <option value="ok" ${body==="ok"?"selected":""}>чистый</option>
+              <option value="pm" ${body==="pm"?"selected":""}>±</option>
+              <option value="no" ${body==="no"?"selected":""}>грязный</option>
+            </select>
+          </label>
           <div class="cl-nums">
             <label>Пробег<input data-duty="${car.id}_km" inputmode="numeric" value="${escape(d[car.id+"_km"]||"")}" /></label>
             <label>Топливо %<input data-duty="${car.id}_fuel" inputmode="numeric" value="${escape(d[car.id+"_fuel"]||"")}" /></label>
@@ -5408,7 +5415,7 @@ async function confirmCloud(rec){
         }
         view="calc"; render();
       });
-      ["kmRrc","kmInv","kmUseTi","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","cDownMode","cDown","cDownPct","cMonths","kmUseLoan","kmUseCr","kmSpec","kmUseDcTi","kmUseDcCr","kmDcTi","kmDcCr","kmDo","kmPack","kmCasco","kmFleetSub"].forEach(id=>{
+      ["kmRrc","kmInv","kmUseTi","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","cDownMode","cDown","cDownPct","cMonths","kmUseLoan","kmUseCr","kmSpec","kmUseDcTi","kmUseDcCr","kmDcTi","kmDcCr","kmDo","kmPack","kmCasco","kmFleetSub"].forEach(id=>{
         const el=document.getElementById(id);
         if(el) el.addEventListener("change", ()=>{ view="calc"; render(); });
       });
