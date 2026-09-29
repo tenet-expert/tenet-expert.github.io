@@ -640,6 +640,9 @@ input,textarea{width:100%;background:#fff;border:1px solid var(--border);color:v
 .pay-col.sub .eyebrow{color:#8a5a10}
 .pay-col.pango{background:#f6f3fb;border:1.5px solid #b79bc7;box-shadow:inset 4px 0 0 #6a3d86}
 .pay-col.pango .eyebrow{color:#5b2d7a}
+.pay-col.plus{background:#f7f4ef;border:1.5px solid #d7c8b0;box-shadow:inset 4px 0 0 #8a6840}
+.pay-col.plus .eyebrow{color:#8a6840}
+.pay-col.plus select{width:100%;margin:0 0 6px;padding:8px 10px;border:1px solid #e3d5c2;border-radius:10px;background:#fff;font:inherit;color:inherit}
 .pay-col.pango-nss{background:#fdecee;border:1.5px solid #e3a0a8;box-shadow:inset 4px 0 0 #c81e2b}
 .pay-col.pango-nss .eyebrow{color:#9a1b28}
 
@@ -839,6 +842,7 @@ input,textarea{width:100%;background:#fff;border:1px solid var(--border);color:v
   .km-layout.km-4{grid-template-columns:1fr 1fr 1fr 1fr;align-items:start;gap:14px}
   .km-layout.km-4 > .km-disc{grid-column:auto}
   body:has(.km-layout.km-4) .wrap{max-width:1680px}
+  body:has(.km-layout.km-5) .wrap{max-width:1920px}
 }
 .km-bottom{display:grid;gap:14px;margin-top:14px;align-items:start}
 .km-bottom .dc-result{margin-top:0}
@@ -860,12 +864,13 @@ input,textarea{width:100%;background:#fff;border:1px solid var(--border);color:v
   .km-pv-row{grid-template-columns:1fr}
 }
 @media(min-width:1100px){
-  .km-stage.km-4,.km-stage.km-3{display:block}
-  .km-stage.km-4 > .km-layout,.km-stage.km-3 > .km-layout{display:grid;align-items:start;margin-top:0}
+  .km-stage.km-5,.km-stage.km-4,.km-stage.km-3{display:block}
+  .km-stage.km-5 > .km-layout,.km-stage.km-4 > .km-layout,.km-stage.km-3 > .km-layout{display:grid;align-items:start;margin-top:0}
+  .km-stage.km-5 > .km-layout{grid-template-columns:minmax(200px,.62fr) repeat(4,minmax(0,1fr));gap:12px}
   .km-stage.km-4 > .km-layout{grid-template-columns:1fr 1fr 1fr 1fr;gap:14px}
   .km-stage.km-3 > .km-layout{grid-template-columns:minmax(220px,.7fr) minmax(300px,1.2fr) minmax(300px,1.2fr);gap:16px}
-  .km-stage.km-4 > .km-layout > .km-disc,.km-stage.km-3 > .km-layout > .km-disc{grid-column:1;grid-row:1}
-  .km-stage.km-4 > .km-layout > .km-credit,.km-stage.km-3 > .km-layout > .km-credit{grid-column:2 / -1;grid-row:1}
+  .km-stage.km-5 > .km-layout > .km-disc,.km-stage.km-4 > .km-layout > .km-disc,.km-stage.km-3 > .km-layout > .km-disc{grid-column:1;grid-row:1}
+  .km-stage.km-5 > .km-layout > .km-credit,.km-stage.km-4 > .km-layout > .km-credit,.km-stage.km-3 > .km-layout > .km-credit{grid-column:2 / -1;grid-row:1}
 }
 .km-credit{min-width:0}
 .km-pays{display:grid;gap:14px;margin-top:14px;align-items:start}
@@ -873,6 +878,7 @@ input,textarea{width:100%;background:#fff;border:1px solid var(--border);color:v
   .km-pays{grid-template-columns:1fr 1fr}
 }
 @media(min-width:1100px){
+  .km-stage.km-5 .km-pays{grid-template-columns:1fr 1fr 1fr 1fr;gap:12px}
   .km-stage.km-4 .km-pays{grid-template-columns:1fr 1fr 1fr;gap:14px}
   .km-stage.km-3 .km-pays{grid-template-columns:1fr 1fr;gap:16px}
 }
@@ -1835,6 +1841,28 @@ async function pingTelegram(body){
           20:[4.30,10.50,12.30,13.50,14.30,14.80,15.20,15.50,16.10,16.30],
           10:[5.80,10.90,12.90,14.00,14.80,15.30,15.40,15.90,16.40,16.80],
           0:[5.80,10.90,12.90,14.00,14.80,15.30,15.40,15.90,16.40,16.80]
+        },
+        plusL6:{
+          80:[0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,2.90,3.90],
+          70:[0.01,0.01,0.01,0.01,0.01,2.00,3.60,4.60,7.00,7.60],
+          60:[0.01,0.01,0.01,1.20,3.90,5.40,6.70,6.70,7.40,9.20],
+          50:[0.01,0.01,0.90,4.20,5.70,6.90,8.10,8.70,9.30,10.80],
+          40:[0.01,0.01,3.50,6.20,7.60,8.60,9.70,10.10,10.60,11.80],
+          30:[0.01,0.90,5.40,7.20,9.00,9.80,10.70,11.10,11.60,12.60],
+          20:[0.01,2.90,6.40,8.50,10.00,10.70,11.60,11.90,12.30,12.80],
+          10:[0.01,4.50,7.60,9.40,10.90,11.50,12.30,12.50,12.90,13.60],
+          0:[0.01,5.50,8.60,10.30,11.90,12.50,13.20,13.70,13.80,14.40]
+        },
+        plusL4:{
+          80:[0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.50,3.60,4.60],
+          70:[0.01,0.01,0.01,0.01,0.50,2.70,4.30,5.30,7.70,8.30],
+          60:[0.01,0.01,0.01,1.90,4.60,6.10,7.40,7.40,8.10,9.90],
+          50:[0.01,0.01,1.60,4.90,6.40,7.60,8.80,9.60,10.20,11.70],
+          40:[0.01,0.01,4.20,6.90,8.30,9.30,10.40,11.00,11.50,12.70],
+          30:[0.01,1.60,6.10,7.90,9.70,10.50,11.40,12.00,12.50,13.50],
+          20:[0.01,3.60,7.10,9.20,10.70,11.40,12.30,12.80,13.20,13.70],
+          10:[0.01,5.20,8.30,10.10,11.60,12.20,13.00,13.40,13.80,14.50],
+          0:[0.01,6.20,9.30,11.00,12.60,13.20,13.90,14.40,14.50,15.10]
         }
       },
       sovcom:{
@@ -1870,6 +1898,28 @@ async function pingTelegram(body){
           20:[7.55,11.80,13.50,14.65,14.80,15.55,15.40],
           10:[9.15,12.90,14.05,15.00,15.30,16.00,16.00],
           0:[10.00,13.80,14.65,15.55,15.80,16.45,16.45]
+        },
+        plusL6:{
+          80:[0.01,0.01,0.01,0.01,0.01,0.01,0.01],
+          70:[0.01,0.01,0.01,0.01,0.01,2.20,3.00],
+          60:[0.01,0.01,0.01,1.80,3.50,4.90,5.20],
+          50:[0.01,0.01,2.80,4.30,6.60,7.30,8.00],
+          40:[0.01,1.00,4.60,6.60,8.40,9.00,9.70],
+          30:[0.01,3.00,6.40,8.10,9.60,9.90,10.50],
+          20:[0.01,5.40,8.10,10.50,11.00,11.90,12.10],
+          10:[0.80,6.90,9.00,11.20,12.00,12.60,null],
+          0:[2.80,8.00,10.30,11.90,12.90,13.40,null]
+        },
+        plusL4:{
+          80:[0.01,0.01,0.01,0.01,0.01,0.01,0.01],
+          70:[0.01,0.01,0.01,0.01,0.80,2.40,3.20],
+          60:[0.01,0.01,0.01,2.30,4.00,5.00,5.50],
+          50:[0.01,0.01,3.00,5.10,7.60,8.30,8.80],
+          40:[0.01,1.70,5.50,6.80,8.80,9.30,10.10],
+          30:[0.01,4.20,6.80,8.40,10.00,10.30,11.00],
+          20:[0.01,5.80,9.00,10.70,11.30,12.20,12.30],
+          10:[1.60,7.40,10.00,11.40,12.30,12.80,null],
+          0:[3.60,8.50,10.60,12.10,13.00,13.60,null]
         }
       },
       alfa:{
@@ -1905,6 +1955,28 @@ async function pingTelegram(body){
           20:[7.80,11.20,13.00,13.80,14.30,14.90,15.40,15.90],
           10:[9.60,12.20,13.60,14.40,14.90,15.40,15.80,16.30],
           0:[9.60,12.20,13.60,14.40,14.90,15.40,15.80,16.30]
+        },
+        plusL6:{
+          80:[0.01,0.01,0.01,0.01,0.01,0.01,0.01,1.20],
+          70:[0.01,0.01,0.01,0.01,0.01,1.70,3.50,5.90],
+          60:[0.01,0.01,0.01,1.30,3.40,5.40,6.80,8.70],
+          50:[0.01,0.01,1.80,4.50,6.70,7.90,9.00,10.60],
+          40:[0.01,0.01,4.50,6.70,8.20,9.50,10.60,11.90],
+          30:[0.01,2.10,6.60,8.50,9.80,11.00,11.90,13.00],
+          20:[0.01,4.40,8.30,10.00,11.20,12.20,13.00,14.00],
+          10:[0.01,6.30,9.70,11.20,12.20,13.20,13.80,14.70],
+          0:[0.01,6.30,9.70,11.20,12.20,13.20,13.80,14.70]
+        },
+        plusL4:{
+          80:[0.01,0.01,0.01,0.01,0.01,0.01,0.01,2.50],
+          70:[0.01,0.01,0.01,0.01,1.50,2.60,4.30,6.60],
+          60:[0.01,0.01,0.01,1.90,3.90,5.80,7.30,9.10],
+          50:[0.01,0.01,2.50,4.90,6.50,8.20,9.20,10.90],
+          40:[0.01,1.30,5.00,7.00,8.40,9.70,10.60,12.10],
+          30:[0.01,2.90,7.00,8.70,9.90,11.10,12.00,13.20],
+          20:[0.01,5.10,8.70,10.20,11.20,12.30,13.00,14.10],
+          10:[2.00,6.90,10.00,11.30,12.20,13.20,13.80,14.80],
+          0:[2.00,6.90,10.00,11.30,12.20,13.20,13.80,14.80]
         }
       },
       tbank:{
@@ -1940,9 +2012,37 @@ async function pingTelegram(body){
           20:[6.60,11.00,12.50,13.50,14.00,14.40,14.70,14.90],
           10:[8.20,12.00,13.20,14.10,14.50,14.80,15.10,15.30],
           0:[9.60,12.80,13.90,14.60,15.00,15.30,15.50,15.70]
+        },
+        plusL6:{
+          80:[0.01,0.01,0.01,1.00,2.00,3.30,4.50,5.30],
+          70:[0.01,0.01,0.01,1.70,2.90,4.40,5.30,6.70],
+          60:[0.01,0.01,0.01,3.60,4.90,5.70,6.70,7.60],
+          50:[0.01,0.01,1.60,4.90,5.50,6.70,7.70,8.50],
+          40:[0.01,0.30,4.70,6.60,8.00,9.00,9.70,10.30],
+          30:[0.01,3.00,6.20,8.50,9.80,10.60,11.20,11.70],
+          20:[0.01,5.10,8.00,10.00,11.10,11.90,12.40,12.80],
+          10:[0.01,7.00,9.80,11.70,12.70,13.30,13.80,14.20],
+          0:[1.90,8.50,11.10,12.80,13.70,14.30,14.70,15.10]
+        },
+        plusL4:{
+          80:[0.01,0.01,0.01,1.50,2.60,3.90,5.20,5.90],
+          70:[0.01,0.01,0.01,2.20,3.70,5.10,5.90,7.80],
+          60:[0.01,0.01,0.30,4.10,5.50,6.70,7.10,8.20],
+          50:[0.01,0.01,2.90,5.30,6.30,7.20,8.20,8.80],
+          40:[0.01,1.60,5.10,7.50,8.80,9.80,10.40,10.90],
+          30:[0.01,4.20,7.10,9.30,10.40,11.20,11.80,12.20],
+          20:[0.01,5.80,8.70,10.60,11.70,12.40,12.90,13.30],
+          10:[0.70,7.80,10.50,12.20,13.10,13.80,14.20,14.60],
+          0:[3.20,9.30,11.70,13.30,14.10,14.70,15.10,15.40]
         }
       }
     };
+    const PLUS_CARS = [
+      {id:"l4s",name:"L4 Style",line:"L4",rrc:2540000,bfs:2235200,sub:100000},
+      {id:"l4e",name:"L4 Elegant",line:"L4",rrc:2690000,bfs:2313400,sub:100000},
+      {id:"l6e",name:"L6 Elegant",line:"L6",rrc:2890000,bfs:2456500,sub:150000},
+      {id:"l6u",name:"L6 Ultra",line:"L6",rrc:3040000,bfs:2584000,sub:150000}
+    ];
     function kmRateGroup(m){
       const s=(m&&m.stock)||"";
       if(s==="t4l"||s==="t7"||s==="t7l") return "t4l_t7";
@@ -1982,10 +2082,13 @@ async function pingTelegram(body){
       const table=(KM_BANK_RATES[bankId]||{})[group]||(KM_BANK_RATES[bankId]||{}).t4l_t7||{};
       const row=table[band]||table[10]||table[20]||[];
       let rate=row[idx];
-      if(!(rate>=0)){
-        for(let i=idx;i>=0;i--){ if(row[i]>=0){ rate=row[i]; break; } }
+      let term=terms[idx];
+      if(rate==null || !(rate>=0)){
+        for(let i=idx;i>=0;i--){
+          if(row[i]!=null && row[i]>=0){ rate=row[i]; term=terms[i]; break; }
+        }
       }
-      return {rate: Number(rate)||0, term: terms[idx], band, capped: terms[idx]!==n};
+      return {rate: Number(rate)||0, term, band, capped: term!==n};
     }
     function mptParseProd(s){
       const m=String(s||"").match(/(\d{1,2})\.(\d{1,2})\.(\d{4})/);
@@ -2798,11 +2901,54 @@ async function pingTelegram(body){
         pKmK=pKm/1000;
         pOk=pKmK+0.05>=lo && pKmK-0.05<=hi;
       }
+      const plusList=(typeof PLUS_CARS!=="undefined"&&PLUS_CARS.length)?PLUS_CARS:[
+        {id:"l4s",name:"L4 Style",line:"L4",rrc:2540000,bfs:2235200,sub:100000},
+        {id:"l4e",name:"L4 Elegant",line:"L4",rrc:2690000,bfs:2313400,sub:100000},
+        {id:"l6e",name:"L6 Elegant",line:"L6",rrc:2890000,bfs:2456500,sub:150000},
+        {id:"l6u",name:"L6 Ultra",line:"L6",rrc:3040000,bfs:2584000,sub:150000}
+      ];
+      const plusId=typeof kmStr==="function"?kmStr("plusTrim","l4s"):"l4s";
+      const plus=plusList.find(x=>x.id===plusId)||plusList[0];
+      const plusPrice=plus.rrc;
+      const plusDown=Math.max(0, Math.min(plusPrice, down));
+      const plusPct=plusPrice>0?Math.round(plusDown*1000/plusPrice)/10:0;
+      const plusGroup=plus.line==="L6"?"plusL6":"plusL4";
+      const plusCredit=Math.max(0, plusPrice-plusDown+extras);
+      const plusBanks=(typeof KM_BANKS!=="undefined"?KM_BANKS:[]).map(b=>{
+        const look=typeof kmBankRate==="function"?kmBankRate(b.id, plusGroup, months, plusPct):{rate:0, term:months, capped:false};
+        const term=look.term||months;
+        const pay=calcPay(plusPrice+extras, plusDown, term, look.rate);
+        return Object.assign({}, b, {rate:look.rate, term, capped:!!look.capped, pay, over:pay*term-plusCredit});
+      });
+      const plusTi=useTi?(typeof FLEET_TI==="number"?FLEET_TI:50000):0;
+      const plusFleetPrice=Math.max(0, plus.bfs-plusTi-(plus.sub||0));
+      const plusDownShow=Math.max(0, Math.min(plusFleetPrice, down));
+      const plusExtra=200000;
+      const plusDownCar=Math.max(0, plusDownShow-plusExtra);
+      const plusFleetCredit=Math.max(0, plusFleetPrice-plusDownCar+finDelta);
+      const plusTerm=Math.min(Math.max(1, months), 84);
+      const plusRate=19.2;
+      const plusPay=calcPay(plusFleetPrice+finDelta, plusDownCar, plusTerm, plusRate);
+      const plusOver=plusPay*plusTerm-plusFleetCredit;
+      const plusOpts=plusList.map(x=>`<option value="${x.id}"${x.id===plus.id?" selected":""}>${escape(x.name)} · РРЦ ${rub(x.rrc)}</option>`).join("");
+      const plusCol=`<div class="pay-col plus km-pay">
+            <p class="eyebrow">TENET PLUS</p>
+            <select id="plusTrim">${plusOpts}</select>
+            <p class="eyebrow" style="margin-top:8px">Директ</p>
+            <p class="calc-note">РРЦ ${rub(plusPrice)} · ПВ ${rub(plusDown)} · ${plusPct}% · тело ${rub(plusCredit)}</p>
+            ${kmPayRows(plusBanks,"pay","over")}
+            <p class="calc-note">Без скидок выбранной машины. Кредит = РРЦ − ПВ + Д/О ${rub(addons)} + каско ${rub(pack)} + комиссия. ИП 1938/И.</p>
+            <p class="eyebrow" style="margin-top:10px">Флит · Совкомбанк 19,2%</p>
+            <div class="bank-row"><span><b>Совкомбанк</b><br/><small>${plusRate}% · ${plusTerm} мес.${plusTerm!==months?" · считаем "+plusTerm+" мес.":""} · переплата ~${rub(Math.round(plusOver))}</small></span><span class="pay">${rub(Math.round(plusPay))} ₽</span></div>
+            <div class="bank-row"><span>BFS − субсидия${plusTi?" − трейд-ин":""}</span><span class="pay">${rub(plusFleetPrice)}</span></div>
+            <div class="bank-row"><span>Тело кредита</span><span class="pay">${rub(plusFleetCredit)}</span></div>
+            <p class="calc-note">Панго нет. BFS ${rub(plus.bfs)} − субсидия ${rub(plus.sub)}${plusTi?" − трейд-ин "+rub(plusTi):""}. ПВ ${rub(plusDownShow)} · из них ${rub(Math.min(plusExtra, plusDownShow))} на каско и Д/О.</p>
+          </div>`;
       return banner("Калькулятор","КМ и платёж · база "+TERMS_DATE,"TENET")+`
-        <p class="lead">${pShow?"Три расчёта рядом: стандартный кредит, "+(showSub?"флит с субсидией бренда":"МПТ")+" и спеццена PANGO.":"Сначала комплектация. Кредит и СЖ открываются галочкой «Кредит»."}</p>
-        <div class="km-stage${pShow?" km-4":useLoan&&showSplit?" km-3":""}">
+        <p class="lead">${pShow?"Стандарт, "+(showSub?"флит":"МПТ")+", TENET PLUS и PANGO.":(useLoan&&showSplit?"Стандарт, "+(showFleet?"флит":showSub?"субсидия бренда":"МПТ")+" и TENET PLUS.":"Сначала комплектация. Кредит и СЖ открываются галочкой «Кредит».")}</p>
+        <div class="km-stage${pShow?" km-5":useLoan&&showSplit?" km-4":""}">
         <div class="km-chips">${kmChipGroups(m.id)}</div>
-        <div class="km-layout${pShow?" km-4":useLoan&&showSplit?" km-3":""}">
+        <div class="km-layout${pShow?" km-5":useLoan&&showSplit?" km-4":""}">
           <div class="card km-disc">
             <p class="eyebrow">Калькулятор КМ · ${escape(m.name)}</p>
             <label class="field" style="max-width:none;margin-top:8px"><span>РРЦ, ₽ · из условий ${TERMS_DATE}</span><input id="kmRrc" inputmode="numeric" value="${rrc}" /></label>
@@ -2870,6 +3016,7 @@ async function pingTelegram(body){
               ${mptBreak}
             </details>
           </div>
+          ${plusCol}
           ${pShow?`<div class="pay-col pango km-pay">
             <p class="eyebrow">Спеццена · PANGO</p>
             <p class="eyebrow" style="margin-top:8px">17,4% без комиссий</p>
@@ -5584,7 +5731,7 @@ async function confirmCloud(rec){
         }
         view="calc"; render();
       });
-      ["kmRrc","kmInv","kmUseTi","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","cDownMode","cDown","cDownPct","cMonths","kmUseLoan","kmUseCr","kmSpec","kmUseDcTi","kmUseDcCr","kmDcTi","kmDcCr","kmDo","kmPack","kmCasco","kmFleetSub"].forEach(id=>{
+      ["kmRrc","kmInv","kmUseTi","kmFleetDisc","kmFleetMpt","cDownMode","cDown","cDownPct","cMonths","plusTrim","kmUseLoan","kmUseCr","kmSpec","kmUseDcTi","kmUseDcCr","kmDcTi","kmDcCr","kmDo","kmPack","kmCasco","kmFleetSub"].forEach(id=>{
         const el=document.getElementById(id);
         if(el) el.addEventListener("change", ()=>{ view="calc"; render(); });
       });
