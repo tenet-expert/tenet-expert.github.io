@@ -890,27 +890,32 @@ input,textarea{width:100%;background:#fff;border:1px solid var(--border);color:v
 .km-pair > .km-line,.km-slot > .km-line{margin:0;padding:8px 10px 10px;border-radius:14px;min-width:0}
 .km-line.tone-a{background:#f4efe6;border:1px solid #e3d5c2;border-left:3px solid #c4a574}
 .km-line.tone-b{background:#e8eef3;border:1px solid #d0dbe3;border-left:3px solid #7f97ab}
+.km-line.tone-c{background:#fbf6ee;border:1px solid #ead4b0;border-left:3px solid #c28b2a}
 .km-pair > .km-line .stock-h,.km-slot > .km-line .stock-h{margin:2px 2px 8px}
 @media(min-width:1100px){
-  .km-board{display:grid;grid-template-columns:minmax(600px,1.32fr) minmax(440px,1fr);gap:10px 12px;align-items:start}
+  .km-board{display:grid;grid-template-columns:minmax(460px,1.2fr) minmax(210px,.72fr) minmax(300px,.95fr);gap:10px 12px;align-items:start}
   .km-brand{display:block;margin:0 2px 0;font-size:13px;font-weight:800;letter-spacing:.18em}
   .km-brand.tenet{grid-column:1;grid-row:1;color:#8a6840}
-  .km-brand.chery{grid-column:2;grid-row:1;color:#3e5870}
+  .km-brand.plus{grid-column:2;grid-row:1;color:#8a5a10}
+  .km-brand.chery{grid-column:3;grid-row:1;color:#3e5870}
   .km-slot.s-t4{grid-column:1;grid-row:2}
+  .km-slot.s-plus{grid-column:2;grid-row:2 / span 2}
   .km-slot.s-t7{grid-column:1;grid-row:3}
-  .km-slot.s-c7{grid-column:2;grid-row:3}
+  .km-slot.s-c7{grid-column:3;grid-row:3}
   .km-slot.s-t8{grid-column:1 / -1;grid-row:4}
   .km-slot.s-t9{grid-column:1;grid-row:5}
-  .km-slot.s-c9{grid-column:2;grid-row:5}
+  .km-slot.s-c9{grid-column:3;grid-row:5}
   .km-slot.s-a8{grid-column:1;grid-row:6}
-  .km-slot.s-ca{grid-column:2;grid-row:6}
+  .km-slot.s-ca{grid-column:3;grid-row:6}
+  .km-slot.s-plus .km-pair{grid-template-columns:1fr}
+  .km-slot.s-plus .km-grid{grid-template-columns:1fr}
   .km-pair.is-2{grid-template-columns:1fr 1fr;align-items:start}
   .km-slot.s-t4 .km-pair.is-2{grid-template-columns:minmax(168px,.58fr) minmax(0,1.42fr)}
   .km-slot.s-t4 .km-line:last-child .km-grid{grid-template-columns:1fr 1fr}
   .km-slot.s-t7 .km-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
   .km-slot.s-t7 .chip{min-width:0;padding-left:8px;padding-right:8px}
   .km-slot.s-t7 .chip small{white-space:nowrap}
-  body:has(.km-board) .wrap{max-width:1680px !important}
+  body:has(.km-board) .wrap{max-width:1880px !important}
 }
 
 
@@ -1791,7 +1796,11 @@ async function pingTelegram(body){
       {id:"a8a",brand:"CHERY",name:"Arrizo 8 Active",stock:"a8",rrc:2865000,dealer:2649000,ti:250000,tiBack:230000,cr:0,crBack:0,bonus:0.02,vat:1.2,fee:0.02,kmMin:-30,kmMax:0,prioMin:-30,prioMax:0},
       {id:"a8p",brand:"CHERY",name:"Arrizo 8 Prime",stock:"a8",rrc:3060000,dealer:2699000,ti:200000,tiBack:180000,cr:261000,crBack:0,bonus:0.02,vat:1.2,fee:0.02,kmMin:-30,kmMax:0,prioMin:-30,prioMax:0},
       {id:"a8u",brand:"CHERY",name:"Arrizo 8 Ultra Black",stock:"a8",rrc:3275000,dealer:2899000,ti:200000,tiBack:180000,cr:0,crBack:0,bonus:0.02,vat:1.2,fee:0.02,kmMin:-30,kmMax:0,prioMin:-30,prioMax:0},
-      {id:"t7l",brand:"CHERY",name:"Tiggo 7 L Active",stock:"t7l",rrc:2735000,dealer:2620000,ti:100000,tiBack:70000,cr:0,crBack:0,bonus:0.02,vat:1.2,fee:0.02,kmMin:0,kmMax:30,prioMin:0,prioMax:30}
+      {id:"t7l",brand:"CHERY",name:"Tiggo 7 L Active",stock:"t7l",rrc:2735000,dealer:2620000,ti:100000,tiBack:70000,cr:0,crBack:0,bonus:0.02,vat:1.2,fee:0.02,kmMin:0,kmMax:30,prioMin:0,prioMax:30},
+      {id:"l4s",brand:"TENET PLUS",name:"L4 Style",stock:"pl4",rrc:2540000,dealer:2438400,ti:150000,tiBack:150000,cr:0,crBack:0,bonus:0.022,vat:1.22,fee:0.01,kmMin:0,kmMax:50,prioMin:0,prioMax:50},
+      {id:"l4e",brand:"TENET PLUS",name:"L4 Elegant",stock:"pl4",rrc:2690000,dealer:2582400,ti:150000,tiBack:150000,cr:0,crBack:0,bonus:0.022,vat:1.22,fee:0.01,kmMin:0,kmMax:50,prioMin:0,prioMax:50},
+      {id:"l6e",brand:"TENET PLUS",name:"L6 Elegant",stock:"pl6",rrc:2890000,dealer:2745500,ti:100000,tiBack:70000,cr:0,crBack:0,bonus:0.022,vat:1.22,fee:0.01,kmMin:0,kmMax:50,prioMin:0,prioMax:50},
+      {id:"l6u",brand:"TENET PLUS",name:"L6 Ultra",stock:"pl6",rrc:3040000,dealer:2888000,ti:100000,tiBack:70000,cr:0,crBack:0,bonus:0.022,vat:1.22,fee:0.01,kmMin:0,kmMax:50,prioMin:0,prioMax:50}
     ];
     const PRIO_VINS = new Set(["EDEED31B1SE053704", "EDXFB32B4TE041659", "EDXFB32B2TE041658", "EDXFB32B7TE062327", "EDXGD34B1TE022143", "EDXGD34B6TE031162", "EDXGD34B3TE031815", "EDEDD24B2SG003755", "EDEDD24B3SG003926", "EDEDD24B1SG002595", "LVVDC21B7SD594110", "LVVDC21B0SD594112", "LVVDC21B2SDJ34062", "LVTDD24B5RD409189"]);
     const KM_DC_DEF = 100000;
@@ -2037,17 +2046,13 @@ async function pingTelegram(body){
         }
       }
     };
-    const PLUS_CARS = [
-      {id:"l4s",name:"L4 Style",line:"L4",rrc:2540000,bfs:2235200,sub:100000},
-      {id:"l4e",name:"L4 Elegant",line:"L4",rrc:2690000,bfs:2313400,sub:100000},
-      {id:"l6e",name:"L6 Elegant",line:"L6",rrc:2890000,bfs:2456500,sub:150000},
-      {id:"l6u",name:"L6 Ultra",line:"L6",rrc:3040000,bfs:2584000,sub:150000}
-    ];
     function kmRateGroup(m){
       const s=(m&&m.stock)||"";
       if(s==="t4l"||s==="t7"||s==="t7l") return "t4l_t7";
       if(s==="t4"||s==="t8") return "t4_t8";
       if(s==="a8"||s==="ta8"||s==="t9") return "a8";
+      if(s==="pl4") return "plusL4";
+      if(s==="pl6") return "plusL6";
       return "t4l_t7";
     }
     function kmDownBand(pct){
@@ -2189,7 +2194,11 @@ async function pingTelegram(body){
       tt9p:{name:"T9 Prime 5-seat",rrc:3949000,dealer:3799000,an:550000,client:3435630,prem:442350,km:34713,tidy:3399000,sub:0,do:70000,casco:80000},
       tt9u:{name:"T9 Ultra 5-seat",rrc:4299000,dealer:4099000,an:650000,client:3697140,prem:487840,km:31016,tidy:3649000,sub:0,do:70000,casco:80000},
       ta8p:{name:"A8 Prime 1.6",rrc:2999000,dealer:2874000,an:400000,client:2639120,prem:294860,km:16279,tidy:2599000,sub:150000,do:70000,casco:80000},
-      ta8u:{name:"A8 Ultra 2.0",rrc:3499000,dealer:3354000,an:500000,client:3044130,prem:379850,km:20369,tidy:2999000,sub:150000,do:70000,casco:80000}
+      ta8u:{name:"A8 Ultra 2.0",rrc:3499000,dealer:3354000,an:500000,client:3044130,prem:379850,km:20369,tidy:2999000,sub:150000,do:70000,casco:80000},
+      l4s:{name:"L4 Style",rrc:2540000,dealer:2438400,an:0,client:2235200,prem:0,km:0,tidy:2235200,sub:100000,do:70000,casco:80000},
+      l4e:{name:"L4 Elegant",rrc:2690000,dealer:2582400,an:0,client:2313400,prem:0,km:0,tidy:2313400,sub:100000,do:70000,casco:80000},
+      l6e:{name:"L6 Elegant",rrc:2890000,dealer:2745500,an:0,client:2456500,prem:0,km:0,tidy:2456500,sub:150000,do:70000,casco:80000},
+      l6u:{name:"L6 Ultra",rrc:3040000,dealer:2888000,an:0,client:2584000,prem:0,km:0,tidy:2584000,sub:150000,do:70000,casco:80000}
     };
     const FLEET_TI = 50000;
     function isT8TwoWd(c){
@@ -2524,6 +2533,8 @@ async function pingTelegram(body){
       if(id==="t9p"||id==="t9u") return "Tiggo 9";
       if(id==="a8a"||id==="a8p"||id==="a8u") return "Arrizo 8";
       if(id==="t7l") return "Tiggo 7 L";
+      if(id==="l4s"||id==="l4e") return "L4";
+      if(id==="l6e"||id==="l6u") return "L6";
       return "Другие";
     }
     function kmStockCars(m){
@@ -2617,11 +2628,12 @@ async function pingTelegram(body){
       });
       const line=(g,tone)=>groups[g]&&groups[g].length?`<div class="km-line tone-${tone}"><p class="stock-h">${escape(g)}</p><div class="km-grid">${groups[g].map(x=>`<button type="button" class="chip ${x.id===active?"on":""}" data-km-id="${x.id}">${escape(x.name)}<small>${x.brand} · РРЦ ${rub(x.rrc)}</small></button>`).join("")}</div></div>`:"";
       const slot=(cls,html)=>html?`<div class="km-slot ${cls}">${html}</div>`:"";
-      return `<div class="km-board"><span class="km-brand tenet">TENET</span><span class="km-brand chery">CHERY</span>`
+      return `<div class="km-board"><span class="km-brand tenet">TENET</span><span class="km-brand plus">TENET PLUS</span><span class="km-brand chery">CHERY</span>`
         +slot("s-t4",`<div class="km-pair is-2">${line("T4","a")}${line("T4L","a")}</div>`)
         +slot("s-t7",line("T7","a"))
         +slot("s-c7",line("Tiggo 7 L","b"))
         +slot("s-t8",line("T8","a"))
+        +slot("s-plus",`<div class="km-pair">${line("L4","c")}${line("L6","c")}</div>`)
         +slot("s-t9",line("TENET T9","a"))
         +slot("s-c9",line("Tiggo 9","b"))
         +slot("s-a8",line("TENET A8","a"))
@@ -2822,6 +2834,7 @@ async function pingTelegram(body){
       const showMpt=pickMpt || (!selected && hasMpt);
       const showSub=!showMpt && canSub;
       const showFleet=!showMpt && !showSub && !!fMpt && (m.stock==="tt9" || m.id==="tt9p" || m.id==="tt9u");
+      const isPlus=m.stock==="pl4"||m.stock==="pl6";
       const showSplit=showMpt || showSub || showFleet;
       const mptSample=mptCars[0]||(pickMpt&&selected?selected:null);
       const mptRrc=fMpt&&fMpt.rrc?fMpt.rrc:price;
@@ -2901,54 +2914,11 @@ async function pingTelegram(body){
         pKmK=pKm/1000;
         pOk=pKmK+0.05>=lo && pKmK-0.05<=hi;
       }
-      const plusList=(typeof PLUS_CARS!=="undefined"&&PLUS_CARS.length)?PLUS_CARS:[
-        {id:"l4s",name:"L4 Style",line:"L4",rrc:2540000,bfs:2235200,sub:100000},
-        {id:"l4e",name:"L4 Elegant",line:"L4",rrc:2690000,bfs:2313400,sub:100000},
-        {id:"l6e",name:"L6 Elegant",line:"L6",rrc:2890000,bfs:2456500,sub:150000},
-        {id:"l6u",name:"L6 Ultra",line:"L6",rrc:3040000,bfs:2584000,sub:150000}
-      ];
-      const plusId=typeof kmStr==="function"?kmStr("plusTrim","l4s"):"l4s";
-      const plus=plusList.find(x=>x.id===plusId)||plusList[0];
-      const plusPrice=plus.rrc;
-      const plusDown=Math.max(0, Math.min(plusPrice, down));
-      const plusPct=plusPrice>0?Math.round(plusDown*1000/plusPrice)/10:0;
-      const plusGroup=plus.line==="L6"?"plusL6":"plusL4";
-      const plusCredit=Math.max(0, plusPrice-plusDown+extras);
-      const plusBanks=(typeof KM_BANKS!=="undefined"?KM_BANKS:[]).map(b=>{
-        const look=typeof kmBankRate==="function"?kmBankRate(b.id, plusGroup, months, plusPct):{rate:0, term:months, capped:false};
-        const term=look.term||months;
-        const pay=calcPay(plusPrice+extras, plusDown, term, look.rate);
-        return Object.assign({}, b, {rate:look.rate, term, capped:!!look.capped, pay, over:pay*term-plusCredit});
-      });
-      const plusTi=useTi?(typeof FLEET_TI==="number"?FLEET_TI:50000):0;
-      const plusFleetPrice=Math.max(0, plus.bfs-plusTi-(plus.sub||0));
-      const plusDownShow=Math.max(0, Math.min(plusFleetPrice, down));
-      const plusExtra=200000;
-      const plusDownCar=Math.max(0, plusDownShow-plusExtra);
-      const plusFleetCredit=Math.max(0, plusFleetPrice-plusDownCar+finDelta);
-      const plusTerm=Math.min(Math.max(1, months), 84);
-      const plusRate=19.2;
-      const plusPay=calcPay(plusFleetPrice+finDelta, plusDownCar, plusTerm, plusRate);
-      const plusOver=plusPay*plusTerm-plusFleetCredit;
-      const plusOpts=plusList.map(x=>`<option value="${x.id}"${x.id===plus.id?" selected":""}>${escape(x.name)} · РРЦ ${rub(x.rrc)}</option>`).join("");
-      const plusCol=`<div class="pay-col plus km-pay">
-            <p class="eyebrow">TENET PLUS</p>
-            <select id="plusTrim">${plusOpts}</select>
-            <p class="eyebrow" style="margin-top:8px">Директ</p>
-            <p class="calc-note">РРЦ ${rub(plusPrice)} · ПВ ${rub(plusDown)} · ${plusPct}% · тело ${rub(plusCredit)}</p>
-            ${kmPayRows(plusBanks,"pay","over")}
-            <p class="calc-note">Без скидок выбранной машины. Кредит = РРЦ − ПВ + Д/О ${rub(addons)} + каско ${rub(pack)} + комиссия. ИП 1938/И.</p>
-            <p class="eyebrow" style="margin-top:10px">Флит · Совкомбанк 19,2%</p>
-            <div class="bank-row"><span><b>Совкомбанк</b><br/><small>${plusRate}% · ${plusTerm} мес.${plusTerm!==months?" · считаем "+plusTerm+" мес.":""} · переплата ~${rub(Math.round(plusOver))}</small></span><span class="pay">${rub(Math.round(plusPay))} ₽</span></div>
-            <div class="bank-row"><span>BFS − субсидия${plusTi?" − трейд-ин":""}</span><span class="pay">${rub(plusFleetPrice)}</span></div>
-            <div class="bank-row"><span>Тело кредита</span><span class="pay">${rub(plusFleetCredit)}</span></div>
-            <p class="calc-note">Панго нет. BFS ${rub(plus.bfs)} − субсидия ${rub(plus.sub)}${plusTi?" − трейд-ин "+rub(plusTi):""}. ПВ ${rub(plusDownShow)} · из них ${rub(Math.min(plusExtra, plusDownShow))} на каско и Д/О.</p>
-          </div>`;
       return banner("Калькулятор","КМ и платёж · база "+TERMS_DATE,"TENET")+`
-        <p class="lead">${pShow?"Стандарт, "+(showSub?"флит":"МПТ")+", TENET PLUS и PANGO.":(useLoan&&showSplit?"Стандарт, "+(showFleet?"флит":showSub?"субсидия бренда":"МПТ")+" и TENET PLUS.":"Сначала комплектация. Кредит и СЖ открываются галочкой «Кредит».")}</p>
-        <div class="km-stage${pShow?" km-5":useLoan&&showSplit?" km-4":""}">
+        <p class="lead">${pShow?"Три расчёта рядом: стандартный кредит, "+(showSub?"флит с субсидией бренда":"МПТ")+" и спеццена PANGO.":"Сначала комплектация. Кредит и СЖ открываются галочкой «Кредит»."}</p>
+        <div class="km-stage${pShow?" km-4":useLoan&&showSplit?" km-3":""}">
         <div class="km-chips">${kmChipGroups(m.id)}</div>
-        <div class="km-layout${pShow?" km-5":useLoan&&showSplit?" km-4":""}">
+        <div class="km-layout${pShow?" km-4":useLoan&&showSplit?" km-3":""}">
           <div class="card km-disc">
             <p class="eyebrow">Калькулятор КМ · ${escape(m.name)}</p>
             <label class="field" style="max-width:none;margin-top:8px"><span>РРЦ, ₽ · из условий ${TERMS_DATE}</span><input id="kmRrc" inputmode="numeric" value="${rrc}" /></label>
@@ -3001,22 +2971,21 @@ async function pingTelegram(body){
           <p class="calc-note">${rub(down)} ₽ · ${downPct}% от цены авто${(showMpt||showSub||showFleet)?` · ${showFleet?"флит":showSub?"субс. бренда":"МПТ"}: ${rub(priceMpt)} − ПВ в авто ${rub(downMptCar)} = тело ${rub(creditMpt)}`:""}</p>
         </div><div class="km-pays">
           <div class="pay-col std km-pay">
-            <p class="eyebrow">Стандартный кредит</p>
+            <p class="eyebrow">${isPlus?"Директ":"Стандартный кредит"}</p>
             <p class="calc-note">ПВ ${rub(down)} · тело ${rub(credit)}</p>
             ${kmPayRows(banks,"pay","over")}
-            <p class="calc-note">Ставки TENET ФИНАНС, ИП 1890/И. Кредит = авто ${rub(price)} − ПВ + Д/О ${rub(addons)} + каско ${rub(pack)} + комиссия банка.</p>
+            <p class="calc-note">${isPlus?"Ставки TENET PLUS, ИП 1938/И.":"Ставки TENET ФИНАНС, ИП 1890/И."} Кредит = авто ${rub(price)} − ПВ + Д/О ${rub(addons)} + каско ${rub(pack)} + комиссия банка.</p>
           </div>
           <div class="pay-col ${showSub?"sub":"mpt"} km-pay">
-            <p class="eyebrow">${showFleet?"Флит · Совкомбанк 19,2%":showSub?"Флит · субсидия бренда":"Гос. программа · МПТ · Совкомбанк 19,2%"}</p>
+            <p class="eyebrow">${showFleet||isPlus?"Флит · Совкомбанк 19,2%":showSub?"Флит · субсидия бренда":"Гос. программа · МПТ · Совкомбанк 19,2%"}</p>
             ${kmPayRows(banksMpt,"payMpt","overMpt")}
             <div class="bank-row"><span>Тело кредита</span><span class="pay">${rub(creditMpt)}</span></div>
             <details class="calc-more">
               <summary>Подробности расчёта</summary>
-              <p class="calc-note">${showFleet?"Не МПТ: без −10%. Субсидия бренда "+rub(subAmt)+". Совкомбанк 19,2%. ПВ "+rub(downMptShow)+" · из них "+rub(Math.min(MPT_EXTRA, downMptShow))+" на каско и Д/О.":showSub?"Машина не проходит под МПТ. Это не стандартный кредит: цена флита минус субсидия бренда (AQ), Совкомбанк 19,2%.":"ПВ "+rub(downMptShow)+" · из них "+rub(Math.min(MPT_EXTRA, downMptShow))+" на каско и Д/О."}</p>
+              <p class="calc-note">${showFleet?"Не МПТ: без −10%. Субсидия бренда "+rub(subAmt)+". Совкомбанк 19,2%. ПВ "+rub(downMptShow)+" · из них "+rub(Math.min(MPT_EXTRA, downMptShow))+" на каско и Д/О.":showSub?(isPlus?"Флит: цена BFS минус субсидия бренда. Совкомбанк 19,2%. Панго нет.":"Машина не проходит под МПТ. Это не стандартный кредит: цена флита минус субсидия бренда (AQ), Совкомбанк 19,2%."):"ПВ "+rub(downMptShow)+" · из них "+rub(Math.min(MPT_EXTRA, downMptShow))+" на каско и Д/О."}</p>
               ${mptBreak}
             </details>
           </div>
-          ${plusCol}
           ${pShow?`<div class="pay-col pango km-pay">
             <p class="eyebrow">Спеццена · PANGO</p>
             <p class="eyebrow" style="margin-top:8px">17,4% без комиссий</p>
@@ -3038,7 +3007,7 @@ async function pingTelegram(body){
             ${useLoan?`<div class="card">
               <p class="eyebrow">Кредит · ${escape(m.name)}</p>
               <p class="calc-note">ПВ от цены авто ${rub(price)} ₽, без Д/О и каско. В кредит входят авто − ПВ, Д/О, каско расширенное и комиссия банка.${pickMpt?" Выбран VIN с меткой МПТ.":""}</p>
-              ${showMpt||showSub||showFleet?`<p class="eyebrow" style="margin-top:16px">${showFleet?"Флит · Совкомбанк 19,2%":showSub?"Флит · субсидия бренда":"Гос. программа · МПТ · Совкомбанк 19,2%"}</p>
+              ${showMpt||showSub||showFleet?`<p class="eyebrow" style="margin-top:16px">${showFleet||isPlus?"Флит · Совкомбанк 19,2%":showSub?"Флит · субсидия бренда":"Гос. программа · МПТ · Совкомбанк 19,2%"}</p>
               ${kmPayRows(banksMpt,"payMpt","overMpt")}
               <div class="bank-row"><span>Тело кредита</span><span class="pay">${rub(creditMpt)}</span></div>
               <details class="calc-more"><summary>Подробности расчёта</summary>
@@ -3046,7 +3015,7 @@ async function pingTelegram(body){
               ${mptBreak}</details>`
               :`<p class="eyebrow" style="margin-top:16px">Платёж в месяц</p>
               ${kmPayRows(banks,"pay","over")}`}
-              <p class="calc-note">${showMpt?"МПТ. ":showSub?"Субсидия бренда. ":showFleet?"Флит. ":""}Ставки TENET ФИНАНС, ИП 1890/И. Кредит = авто ${rub(price)} − ПВ + Д/О ${rub(addons)} + каско ${rub(pack)} + комиссия банка.</p>
+              <p class="calc-note">${showMpt?"МПТ. ":showSub?"Субсидия бренда. ":showFleet?"Флит. ":""}${isPlus?"Ставки TENET PLUS, ИП 1938/И.":"Ставки TENET ФИНАНС, ИП 1890/И."} Кредит = авто ${rub(price)} − ПВ + Д/О ${rub(addons)} + каско ${rub(pack)} + комиссия банка.</p>
             </div>`:`<div class="card"><p class="eyebrow">Кредит</p><p class="lead" style="max-width:none">Включите галочку «Кредит», чтобы открыть расчёт платежа${hasMpt?" и сравнение с МПТ":canSub?" и сравнение с субсидией бренда":""}.</p></div>`}
             ${kmSideList(m, price, downPct, months, extras, {useTi, spec, useDcTi, dcTi, useDcCr, dcCr, downMode, down, finDelta, useLoan})}
           </div>`}
@@ -5731,7 +5700,7 @@ async function confirmCloud(rec){
         }
         view="calc"; render();
       });
-      ["kmRrc","kmInv","kmUseTi","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","cDownMode","cDown","cDownPct","cMonths","plusTrim","kmUseLoan","kmUseCr","kmSpec","kmUseDcTi","kmUseDcCr","kmDcTi","kmDcCr","kmDo","kmPack","kmCasco","kmFleetSub"].forEach(id=>{
+      ["kmRrc","kmInv","kmUseTi","kmFleetDisc","kmFleetMpt","cDownMode","cDown","cDownPct","cMonths","kmUseLoan","kmUseCr","kmSpec","kmUseDcTi","kmUseDcCr","kmDcTi","kmDcCr","kmDo","kmPack","kmCasco","kmFleetSub"].forEach(id=>{
         const el=document.getElementById(id);
         if(el) el.addEventListener("change", ()=>{ view="calc"; render(); });
       });
