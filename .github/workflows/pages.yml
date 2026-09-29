@@ -144,5 +144,14 @@ jobs:
             echo "index already synced"
           else
             git commit -m "sync patched duty index"
-            git push || echo "git push failed"
+            # rebuild-stock usually pushes stock.json while this job runs; rebase onto it instead of failing.
+            # Drop other build byproducts (already deployed) so the rebase has a clean tree.
+            git reset --hard HEAD
+            ok=0
+            for i in 1 2 3 4 5; do
+              if git pull --rebase origin main && git push origin HEAD:main; then ok=1; break; fi
+              git rebase --abort 2>/dev/null || true
+              echo "push retry $i"; sleep 5
+            done
+            [ "$ok" = 1 ] || echo "git push failed"
           fi
