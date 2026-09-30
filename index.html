@@ -667,6 +667,9 @@ input,textarea{width:100%;background:#fff;border:1px solid var(--border);color:v
 .mpt-break .bank-row:last-child{border-bottom:0}
 .mpt-break .bank-row > span:first-child{color:var(--muted,#6d5a3e);flex:0 1 42%;min-width:7em;padding-right:8px;line-height:1.35}
 .mpt-break .bank-row .pay,.mpt-break .bank-row > span:last-child{font-weight:700;text-align:right;font-variant-numeric:tabular-nums;flex:1 1 58%;min-width:0;overflow-wrap:anywhere;word-break:break-word;line-height:1.35}
+.mpt-break .bank-row.client{background:#efe4cf;border-radius:8px;padding:10px;margin:6px 0;border-bottom:0}
+.mpt-break .bank-row.client > span:first-child,.mpt-break .bank-row.client .pay{font-weight:800;color:#1c1408}
+.bank-row.key > span:first-child,.bank-row.key .pay{font-weight:800}
 @media (max-width:720px){
   .mpt-break .bank-row{flex-direction:column;align-items:stretch;gap:2px;padding:8px 0}
   .mpt-break .bank-row > span:first-child{flex:none;max-width:none;min-width:0;padding-right:0;font-size:11px;letter-spacing:.06em;text-transform:uppercase}
@@ -2271,6 +2274,10 @@ async function pingTelegram(body){
       const b=fleetPaid(q);
       return `<div class="bank-row"><span>Тело на момент сделки</span><span class="pay">${rub(b.deal)}</span></div>`;
     }
+    function fleetKeyRow(q){
+      const key=Math.max(0, Math.round((q&&q.price)||0)+Math.round((q&&q.doCasco)||0));
+      return `<div class="bank-row key"><span>Под ключ</span><span class="pay">${rub(key)}</span></div>`;
+    }
     function fleetSubBreak(q, o){
       o=o||{};
       const rows=[];
@@ -2279,7 +2286,7 @@ async function pingTelegram(body){
       if(o.rrc!=null) rows.push(`<div class="bank-row"><span>РРЦ</span><span class="pay">${rub(o.rrc)}</span></div>`);
       rows.push(`<div class="bank-row"><span>${o.trade?"Флит + трейд-ин":"Флит"}</span><span class="pay">${rub(q.base)}</span></div>`);
       if(q.sub) rows.push(`<div class="bank-row"><span>Субсидия бренда</span><span class="pay">− ${rub(q.sub)}</span></div>`);
-      rows.push(`<div class="bank-row"><span>Цена для кредита</span><span class="pay">${rub(q.price)}</span></div>`);
+      rows.push(`<div class="bank-row client"><span>Цена для клиента</span><span class="pay">${rub(q.price)}</span></div>`);
       rows.push(`<div class="bank-row"><span>Первый взнос</span><span class="pay">${rub(q.pv)}</span></div>`);
       rows.push(`<div class="bank-row"><span>из них каско и Д/О</span><span class="pay">${rub(q.pvExtras)}</span></div>`);
       rows.push(`<div class="bank-row"><span>ПВ в авто</span><span class="pay">${rub(q.pvCar)}</span></div>`);
@@ -2288,6 +2295,7 @@ async function pingTelegram(body){
       if(q.earlyOver) rows.push(`<div class="bank-row"><span>Сверх 25% в программу не входит</span><span class="pay">${rub(q.earlyOver)}</span></div>`);
       rows.push(`<div class="bank-row"><span>Тело с учётом всех денег клиента</span><span class="pay">${rub(fleetPaid(q).after)}</span></div>`);
       rows.push(fleetBodyRows(q));
+      rows.push(fleetKeyRow(q));
       return `<div class="mpt-break">${rows.join("")}</div>`;
     }
     function fleetSubNote(q){
@@ -2409,6 +2417,7 @@ async function pingTelegram(body){
             ${fleetBodyTop(q)}
             ${fleetPayRows(banksMpt,"payMpt","overMpt",months)}
             ${fleetBodyRows(q)}
+            ${fleetKeyRow(q)}
             <details class="calc-more">
               <summary>Подробности расчёта</summary>
               <p class="calc-note">${fleetSubNote(q)}</p>
@@ -3103,6 +3112,7 @@ async function pingTelegram(body){
             ${typeof fleetBodyTop==="function"?fleetBodyTop(qFleet):""}
             ${kmPayRows(banksMpt,"payMpt","overMpt")}
             ${typeof fleetBodyRows==="function"?fleetBodyRows(qFleet):`<div class="bank-row"><span>Тело кредита</span><span class="pay">${rub(creditMpt)}</span></div>`}
+            ${typeof fleetKeyRow==="function"?fleetKeyRow(qFleet):""}
             <details class="calc-more">
               <summary>Подробности расчёта</summary>
               <p class="calc-note">${typeof fleetSubNote==="function"?fleetSubNote(qFleet):""}</p>
@@ -3135,6 +3145,7 @@ async function pingTelegram(body){
               ${typeof fleetBodyTop==="function"?fleetBodyTop(qFleet):""}
               ${kmPayRows(banksMpt,"payMpt","overMpt")}
               ${typeof fleetBodyRows==="function"?fleetBodyRows(qFleet):`<div class="bank-row"><span>Тело кредита</span><span class="pay">${rub(creditMpt)}</span></div>`}
+              ${typeof fleetKeyRow==="function"?fleetKeyRow(qFleet):""}
               <details class="calc-more"><summary>Подробности расчёта</summary>
               <p class="calc-note">${typeof fleetSubNote==="function"?fleetSubNote(qFleet):""}</p>
               ${mptBreak}</details>`
