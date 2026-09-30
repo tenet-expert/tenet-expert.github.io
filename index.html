@@ -2881,7 +2881,6 @@ async function pingTelegram(body){
       if(_pgTrim && !useLoan) pack=150000;
       const extras=(useLoan||_pgTrim)?(addons+(pack||0)+fee):0;
       const finDelta=(addons-70000)+((useLoan||_pgTrim)?((pack||0)-150000):0);
-      const finDelta=(addons-70000)+((useLoan||_pgTrim)?((pack||0)-150000):0);
       const months=kmVal("cMonths", 60);
       const _down=kmDownRead(price, fresh);
       const downMode=_down.downMode;
