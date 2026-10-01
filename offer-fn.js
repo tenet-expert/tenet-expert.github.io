@@ -1,4 +1,5 @@
     let offerTab = "home";
+    let offerDocCurrent = null;
     function offerVal(id, def){
       const el=document.getElementById(id);
       if(!el) return def;
@@ -41,16 +42,19 @@
       return `<div class="down-mode" style="margin:0 0 14px">${tabs.map(([id,l])=>`<button type="button" class="chip ${offerTab===id?"on":""}" data-offer-tab="${id}">${l}</button>`).join("")}</div>`;
     }
     function offerHome(){
-      const cards=[["new","Н","КП Новый а/м","Прайс, скидки, каско, кредит / МПТ и PDF"],["service","С","КП Сервис","ТО, сезон, гарантия и пакеты ДЦ"],["lease","Л","КП Лизинг","Компания, флит / BFS, аванс и срок"]];
-      return banner("Коммерческое предложение","TENET · Отдел продаж","КП")+`\n        <p class="lead">Три шаблона. Новый а/м тянет полный лист из прайса и считает условия как калькулятор.</p>\n        ${offerNav()}\n        <div class="hub-grid offer-grid">${cards.map(([id,mark,title,lead])=>`<button class="card hub-card" data-offer-tab="${id}" type="button"><span class="hub-mark">${mark}</span><div class="txt"><h3>${title}</h3><p>${lead}</p></div></button>`).join("")}</div>`;
+      const cards=[["new","Н","КП Новый а/м","Прайс, скидки, каско, кредит и PDF"],["service","С","КП Сервис","Пакет, состав и PDF"],["lease","Л","КП Лизинг","Компания, флит, аванс и PDF"]];
+      return banner("Коммерческое предложение","TENET · Отдел продаж","КП")+`
+        <p class="lead">Слева условия, справа бланк. Клиенту уходит PDF: его скачивают и пересылают.</p>
+        ${offerNav()}
+        <div class="hub-grid offer-grid">${cards.map(([id,mark,title,lead])=>`<button class="card hub-card" data-offer-tab="${id}" type="button"><span class="hub-mark">${mark}</span><div class="txt"><h3>${title}</h3><p>${lead}</p></div></button>`).join("")}</div>`;
     }
     function offerDeal(){
       const models=typeof KM_MODELS!=="undefined"?KM_MODELS:[];
       const mid=offerVal("ofModel", models[0]?models[0].id:"t7a");
       const m=models.find(x=>x.id===mid)||models[0]||{id:"t7a",name:"TENET",rrc:0,ti:0,cr:0};
       const prevModel=offerVal("ofPrevModel", mid);
-      const client=offerVal("ofClient","Уважаемый клиент");
-      const color=offerVal("ofColor","на выбор");
+      const client=offerVal("ofClient","");
+      const color=offerVal("ofColor","");
       let price=offerNum("ofPrice", m.rrc)||m.rrc;
       if(prevModel!==mid) price=m.rrc;
       const useTi=offerOn("ofTi");
@@ -73,7 +77,13 @@
       let down=offerNum("ofDown", Math.round(price*0.2));
       const tiAmt=useTi?(m.ti||0):0;
       const crAmt=useCr?(m.cr||0):0;
-      const discount=tiAmt+spec+dcTi+dcCr+crAmt;
+      const discs=[];
+      if(tiAmt) discs.push(["Трейд-ин импортёра", tiAmt]);
+      if(useCr && crAmt) discs.push([m.id==="t7p"?"Выгодный кредит":"Программа кредита", crAmt]);
+      if(spec) discs.push(["Спецпредложение", spec]);
+      if(dcTi) discs.push(["Скидка ДЦ за трейд-ин", dcTi]);
+      if(dcCr) discs.push(["Скидка ДЦ за кредит", dcCr]);
+      const discount=discs.reduce((s,x)=>s+x[1],0);
       const carPrice=Math.max(0, price-discount);
       if(downMode==="pct") down=Math.round(carPrice*Math.max(0,downPct)/100);
       else downPct=carPrice>0?Math.round(down*1000/carPrice)/10:0;
@@ -84,57 +94,408 @@
       const clientPay=carPrice+addons+(useLoan?0:casco);
       const valid=offerVal("ofValid","7 дней");
       const packEq=typeof offerPack==="function"?offerPack(m.id):null;
-      const equip=typeof offerPackText==="function"?offerPackText(packEq):"";
       const rateGroup=typeof kmRateGroup==="function"?kmRateGroup(m):"t4l_t7";
       const banks=(useLoan && typeof KM_BANKS!=="undefined"?KM_BANKS:[]).map(b=>{
         const look=typeof kmBankRate==="function"?kmBankRate(b.id, rateGroup, months, downPct):{rate:19.2, term:months};
         const term=look.term||months;
         const pay=typeof calcPay==="function"?calcPay(carPrice+extras, down, term, look.rate):0;
-        return {name:b.name, rate:look.rate, term, pay:Math.round(pay), over:Math.round(pay*term-credit)};
+        return {name:b.name, rate:look.rate, term, pay:Math.round(pay)};
       });
-      let mptTxt="";
-      if(useLoan && /^t7(a|p)/.test(m.id)){
-        const f=typeof fleetOf==="function"?fleetOf(m.id):null;
-        const mptTidy=f&&f.tidy?f.tidy:(f&&f.rrc?f.rrc:carPrice);
-        const tiMpt=useTi?(typeof FLEET_TI==="number"?FLEET_TI:50000):0;
-        const priceMpt=Math.round(Math.max(0, mptTidy-tiMpt)*0.9);
-        const extraMpt=200000;
-        const downMptShow=Math.max(0, Math.min(priceMpt, down));
-        const downMptCar=Math.max(0, downMptShow-extraMpt);
-        const creditMpt=Math.max(0, priceMpt-downMptCar);
-        const mptTerm=Math.min(months, 84);
-        const payMpt=typeof calcPay==="function"?Math.round(calcPay(priceMpt, downMptCar, mptTerm, 19.2)):0;
-        mptTxt="Госпрограмма МПТ · Совкомбанк 19,2%\nФлит: "+rub(mptTidy)+" ₽"+(tiMpt?" · трейд-ин "+rub(tiMpt)+" ₽":"")+"\nЦена с МПТ −10%: "+rub(priceMpt)+" ₽\nПервый взнос: "+rub(downMptShow)+" ₽\nПВ в авто: "+rub(downMptCar)+" ₽\nТело: "+rub(creditMpt)+" ₽\nПлатёж: "+(payMpt?rub(payMpt)+" ₽ / мес. · "+mptTerm+" мес.":"—");
+      return {m, mid, models, client, color, price, useTi, useLoan, showDealCr, useCr, spec, useDcTi, useDcCr, dcDef, dcTi, dcCr, addons, casco, pack, months, downMode, downPct, down, carPrice, clientPay, credit, fee, valid, packEq, banks, discs, discount};
+    }
+    function offerDash(v){ const s=String(v||"").trim(); return s||"—"; }
+    function offerPreview(doc){
+      const meta=(doc.meta||[]).map(([k,v])=>`<div class="op-line"><span>${escape(k)}</span><b>${escape(offerDash(v))}</b></div>`).join("");
+      const rows=(doc.rows||[]).map(([k,v])=>`<div class="op-line"><span>${escape(k)}</span><b>${escape(v)}</b></div>`).join("");
+      const total=doc.total?`<div class="op-total"><span>${escape(doc.total[0])}</span><b>${escape(doc.total[1])}</b></div>`:"";
+      const sections=(doc.sections||[]).map(sec=>{
+        const pairs=(sec.pairs||[]).map(([k,v])=>`<div class="op-pair"><b>${escape(k)}</b><span>${escape(v)}</span></div>`).join("");
+        const lines=(sec.lines||[]).map(t=>`<p>${escape(t)}</p>`).join("");
+        const groups=(sec.groups||[]).map(([t,items])=>`<p class="op-g">${escape(t)}</p><ul>${(items||[]).map(it=>`<li>${escape(it)}</li>`).join("")}</ul>`).join("");
+        return `<section><h3>${escape(sec.title||"")}</h3>${pairs}${lines}${groups}</section>`;
+      }).join("");
+      return `<article class="op-doc"><p class="op-brand">ООО «ЭКСПЕРТ АВТО САМАРА» · TENET · +7 927 724 92 77</p><p class="op-kicker">${escape(doc.kicker||"")}</p><h2>${escape(doc.title||"Коммерческое предложение")}</h2><p class="op-head">${escape(doc.headline||"")}</p>${meta}${rows}${total}${sections}<p class="op-foot">${escape(doc.note||"")}</p></article>`;
+    }
+    function offerPlain(doc){
+      const lines=[doc.title||"Коммерческое предложение","ООО «ЭКСПЕРТ АВТО САМАРА» · TENET",""];
+      if(doc.headline) lines.push(doc.headline,"");
+      (doc.meta||[]).forEach(([k,v])=>lines.push(k+": "+offerDash(v)));
+      lines.push("");
+      (doc.rows||[]).forEach(([k,v])=>lines.push(k+": "+v));
+      if(doc.total) lines.push(doc.total[0]+": "+doc.total[1]);
+      (doc.sections||[]).forEach(sec=>{
+        lines.push("",sec.title||"");
+        (sec.pairs||[]).forEach(([k,v])=>lines.push(k+": "+v));
+        (sec.lines||[]).forEach(t=>lines.push(t));
+        (sec.groups||[]).forEach(([t,items])=>{ lines.push(t); (items||[]).forEach(it=>lines.push("• "+it)); });
+      });
+      lines.push("",doc.note||"");
+      return lines.join("\n");
+    }
+    function offerActions(){
+      return `<div class="who-line" style="margin-top:12px"><button type="button" class="btn ivory" data-offer-pdf>Скачать PDF</button><button type="button" class="btn ghost" data-offer-copy="ofPlain">Текст в мессенджер</button></div>`;
+    }
+    function offerScreen(title, formHtml, doc){
+      offerDocCurrent=doc;
+      return banner(title,"Коммерческое предложение","КП")+`
+        ${offerNav()}
+        <div class="km-layout">
+          <div class="card">${formHtml}</div>
+          <div class="card">
+            <p class="eyebrow">Бланк PDF</p>
+            ${offerPreview(doc)}
+            ${offerActions()}
+            <pre id="ofPlain" class="offer-plain">${escape(offerPlain(doc))}</pre>
+          </div>
+        </div>`;
+    }
+    function offerDocNew(d){
+      const rows=[["РРЦ", rub(d.price)+" ₽"]];
+      d.discs.forEach(([name,amt])=>rows.push([name, "− "+rub(amt)+" ₽"]));
+      rows.push(["Автомобиль", rub(d.carPrice)+" ₽"]);
+      if(d.addons) rows.push(["Дополнительное оборудование", rub(d.addons)+" ₽"]);
+      if(d.useLoan) rows.push(["Каско расширенное / пакет СЖ", rub(d.pack)+" ₽"]);
+      else if(d.casco) rows.push(["КАСКО", rub(d.casco)+" ₽"]);
+      const sections=[];
+      if(d.useLoan){
+        sections.push({title:"Кредит", pairs:[
+          ["Первый взнос", rub(d.down)+" ₽ ("+d.downPct+"%)"],
+          ["Срок", d.months+" мес."],
+          ["Тело кредита", rub(d.credit)+" ₽"],
+          ["Комиссия банка", rub(d.fee)+" ₽"]
+        ], lines:(d.banks||[]).map(b=>b.name+": "+b.rate+"% · "+b.term+" мес. · "+rub(b.pay)+" ₽ / мес.")});
       }
-      const discLines=[];
-      if(tiAmt) discLines.push("Трейд-ин импортёра: − "+rub(tiAmt)+" ₽");
-      if(useCr && crAmt) discLines.push((m.id==="t7p"?"Выгодный кредит":"Программа кредита")+": − "+rub(crAmt)+" ₽");
-      if(spec) discLines.push("Спецпредложение: − "+rub(spec)+" ₽");
-      if(dcTi) discLines.push("Скидка ДЦ за трейд-ин: − "+rub(dcTi)+" ₽");
-      if(dcCr) discLines.push("Скидка ДЦ за кредит: − "+rub(dcCr)+" ₽");
-      const bankLines=banks.map(b=>"• "+b.name+": "+b.rate+"% · "+b.term+" мес. · "+rub(b.pay)+" ₽ / мес.").join("\n");
-      const text="Коммерческое предложение · новый автомобиль\nООО «ЭКСПЕРТ АВТО САМАРА» · TENET\n\nКлиент: "+client+"\nАвтомобиль: "+m.name+"\nЦвет: "+color+"\n\nРРЦ: "+rub(price)+" ₽\n"+(discLines.length?discLines.join("\n")+"\n":"")+"Итого за автомобиль: "+rub(carPrice)+" ₽\nДополнительное оборудование: "+(addons?rub(addons)+" ₽":"по согласованию")+"\n"+(useLoan?"Каско расширенное / пакет СЖ: "+rub(pack)+" ₽":(casco?"КАСКО: "+rub(casco)+" ₽":"КАСКО: не включено"))+"\nИтого клиенту: "+rub(clientPay)+" ₽\n"+(useLoan?"Первый взнос: "+rub(down)+" ₽ ("+downPct+"%)\nСрок: "+months+" мес.\nТело кредита: "+rub(credit)+" ₽\nКомиссия банка: "+rub(fee)+" ₽\nПлатежи:\n"+(bankLines||"—")+(mptTxt?"\n\n"+mptTxt:""):"Оплата: без кредита.")+"\n\nПредложение действует "+valid+".\nНе оферта. Итоговые условия — в договоре салона.\nМенеджер: "+offerMgr()+"\n"+equip;
-      return {m, mid, models, client, color, price, useTi, useLoan, showDealCr, useCr, spec, useDcTi, useDcCr, dcDef, dcTi, dcCr, addons, casco, pack, months, downMode, downPct, down, carPrice, clientPay, credit, fee, extras, valid, packEq, text, banks, mptTxt, discount};
+      if(d.packEq && d.packEq.specs) sections.push({title:"Характеристики", pairs:d.packEq.specs});
+      if(d.packEq && d.packEq.groups) sections.push({title:"Оснащение", groups:d.packEq.groups});
+      const src=(d.packEq&&d.packEq.src)||"официальный прайс";
+      return {
+        kicker:"Новый автомобиль",
+        title:"Коммерческое предложение",
+        headline:d.m.name,
+        file:"КП "+d.m.name+" "+d.client,
+        meta:[["Клиент", d.client],["Цвет", d.color],["Менеджер", offerMgr()]],
+        rows:rows,
+        total:["Итого клиенту", rub(d.clientPay)+" ₽"],
+        sections:sections,
+        note:"Источник оснащения: "+src+". Не оферта. Итоговые условия — в договоре салона. Действует "+d.valid+"."
+      };
+    }
+    function offerField(label, inner){
+      return `<label class="field" style="max-width:none"><span>${label}</span>${inner}</label>`;
     }
     function offerNew(){
       const d=offerDeal();
-      const banksHtml=d.useLoan && d.banks.length?`<div class="offer-banks">${d.banks.map(b=>`<div class="bank-row"><span><b>${escape(b.name)}</b><br/><small>${b.rate}% · ${b.term} мес.</small></span><span class="pay">${rub(b.pay)} ₽</span></div>`).join("")}</div>`:"";
-      return banner("КП Новый а/м","Коммерческое предложение","КП")+`\n        ${offerNav()}\n        <div class="km-layout">\n          <div class="card">\n            <p class="eyebrow">Данные и условия</p>\n            <input type="hidden" id="ofPrevModel" value="${escape(d.mid)}" />\n            <label class="field" style="max-width:none"><span>Клиент</span><input id="ofClient" value="${escape(d.client)}" /></label>\n            <label class="field" style="max-width:none"><span>Комплектация</span><select id="ofModel">${d.models.map(x=>`<option value="${x.id}" ${x.id===d.mid?"selected":""}>${escape(x.name)} · ${rub(x.rrc)}</option>`).join("")}</select></label>\n            <label class="field" style="max-width:none"><span>Цвет</span><input id="ofColor" value="${escape(d.color)}" /></label>\n            <label class="field" style="max-width:none"><span>РРЦ, ₽</span><input id="ofPrice" inputmode="numeric" value="${d.price}" /></label>\n            <label class="check-row"><input id="ofTi" type="checkbox" ${d.useTi?"checked":""} /> <span>Трейд-ин ${d.m.ti?rub(d.m.ti):"нет в базе"}</span></label>\n            <label class="check-row"><input id="ofLoan" type="checkbox" ${d.useLoan?"checked":""} /> <span>Кредит</span></label>\n            ${d.showDealCr?`<label class="check-row"><input id="ofCr" type="checkbox" ${d.useCr?"checked":""} /> <span>${d.m.id==="t7p"?"Выгодный кредит":"Программа кредита"} · ${rub(d.m.cr||0)}</span></label>`:""}\n            <label class="field" style="max-width:none"><span>Спецпредложение, ₽</span><input id="ofSpec" inputmode="numeric" value="${d.spec}" /></label>\n            ${d.useTi?`<label class="check-row"><input id="ofDcTi" type="checkbox" ${d.useDcTi?"checked":""} /> <span>Скидка ДЦ за трейд-ин</span></label>`:""}\n            ${d.useTi&&d.useDcTi?`<label class="field" style="max-width:none"><span>Скидка ДЦ за трейд-ин, ₽</span><input id="ofDcTiAmt" inputmode="numeric" value="${d.dcTi||d.dcDef}" /></label>`:""}\n            ${d.useLoan?`<label class="check-row"><input id="ofDcCr" type="checkbox" ${d.useDcCr?"checked":""} /> <span>Скидка ДЦ за кредит</span></label>`:""}\n            ${d.useLoan&&d.useDcCr?`<label class="field" style="max-width:none"><span>Скидка ДЦ за кредит, ₽</span><input id="ofDcCrAmt" inputmode="numeric" value="${d.dcCr||d.dcDef}" /></label>`:""}\n            <label class="field" style="max-width:none"><span>Д/О, ₽</span><input id="ofDo" inputmode="numeric" value="${d.addons}" /></label>\n            ${d.useLoan?`<label class="field" style="max-width:none"><span>Каско расширенное / СЖ, ₽</span><input id="ofPack" inputmode="numeric" value="${d.pack}" /></label>`:`<label class="field" style="max-width:none"><span>КАСКО, ₽</span><input id="ofCasco" inputmode="numeric" value="${d.casco}" /></label>`}\n            ${d.useLoan?`<p class="eyebrow" style="margin-top:12px">Первый взнос</p><div class="down-mode"><button type="button" class="chip ${d.downMode==="sum"?"on":""}" data-offer-down="sum">Сумма, ₽</button><button type="button" class="chip ${d.downMode!=="sum"?"on":""}" data-offer-down="pct">Проценты</button></div><input type="hidden" id="ofDownMode" value="${d.downMode==="sum"?"sum":"pct"}" />${d.downMode==="sum"?`<label class="field" style="max-width:none"><span>Первый взнос, ₽</span><input id="ofDown" inputmode="numeric" value="${d.down}" /></label>`:`<label class="field" style="max-width:none"><span>Первый взнос, %</span><input id="ofDownPct" inputmode="decimal" value="${d.downPct}" /></label>`}<label class="field" style="max-width:none"><span>Срок, мес.</span><input id="ofMonths" inputmode="numeric" value="${d.months}" /></label>`:""}\n            <label class="field" style="max-width:none"><span>Срок действия</span><input id="ofValid" value="${escape(d.valid)}" /></label>\n          </div>\n          <div class="card">\n            <p class="eyebrow">Текст КП</p>\n            <pre id="ofTextNew" class="offer-sheet">${escape(d.text)}</pre>\n            <p class="calc-note">Авто ${rub(d.carPrice)} ₽${d.discount?` · скидка ${rub(d.discount)} ₽`:""}${d.useLoan?` · тело ${rub(d.credit)} ₽`:""}.</p>\n            ${banksHtml}\n            ${d.mptTxt?`<div class="note-box" style="margin-top:12px"><p class="eyebrow">МПТ</p><pre class="offer-sheet" style="max-height:none;margin:0">${escape(d.mptTxt)}</pre></div>`:""}\n            <div class="who-line" style="margin-top:12px"><button type="button" class="btn ivory" data-offer-copy="ofTextNew">Скопировать</button><button type="button" class="btn ghost" data-offer-pdf>PDF / печать</button></div>\n          </div>\n        </div>\n        <div class="card offer-equip-card" id="ofEquipCard"><p class="eyebrow">Лист оснащения</p><h3 style="margin:0 0 10px">${escape(d.m.name)}</h3>${typeof offerPackHtml==="function"?offerPackHtml(d.packEq):""}</div>\n        <div id="ofPrint" class="offer-print">${offerPrintHtml(d)}</div>`;
+      const doc=offerDocNew(d);
+      const form=`
+        <p class="eyebrow">Клиент</p>
+        <input type="hidden" id="ofPrevModel" value="${escape(d.mid)}" />
+        ${offerField("Клиент", `<input id="ofClient" value="${escape(d.client)}" placeholder="ФИО" />`)}
+        ${d.client?"":`<p class="calc-note">Клиент пустой. В PDF будет прочерк, пока не впишете имя.</p>`}
+        <p class="eyebrow">Автомобиль</p>
+        ${offerField("Комплектация", `<select id="ofModel">${d.models.map(x=>`<option value="${x.id}" ${x.id===d.mid?"selected":""}>${escape(x.name)} · ${rub(x.rrc)}</option>`).join("")}</select>`)}
+        ${offerField("Цвет", `<input id="ofColor" value="${escape(d.color)}" placeholder="не указан" />`)}
+        ${offerField("РРЦ, ₽", `<input id="ofPrice" inputmode="numeric" value="${d.price}" />`)}
+        <p class="eyebrow">Скидки</p>
+        <label class="check-row"><input id="ofTi" type="checkbox" ${d.useTi?"checked":""} /> <span>Трейд-ин ${d.m.ti?rub(d.m.ti):"нет в базе"}</span></label>
+        <label class="check-row"><input id="ofLoan" type="checkbox" ${d.useLoan?"checked":""} /> <span>Кредит</span></label>
+        ${d.showDealCr?`<label class="check-row"><input id="ofCr" type="checkbox" ${d.useCr?"checked":""} /> <span>${d.m.id==="t7p"?"Выгодный кредит":"Программа кредита"} · ${rub(d.m.cr||0)}</span></label>`:""}
+        ${offerField("Спецпредложение, ₽", `<input id="ofSpec" inputmode="numeric" value="${d.spec}" />`)}
+        ${d.useTi?`<label class="check-row"><input id="ofDcTi" type="checkbox" ${d.useDcTi?"checked":""} /> <span>Скидка ДЦ за трейд-ин</span></label>`:""}
+        ${d.useTi&&d.useDcTi?offerField("Скидка ДЦ за трейд-ин, ₽", `<input id="ofDcTiAmt" inputmode="numeric" value="${d.dcTi||d.dcDef}" />`):""}
+        ${d.useLoan?`<label class="check-row"><input id="ofDcCr" type="checkbox" ${d.useDcCr?"checked":""} /> <span>Скидка ДЦ за кредит</span></label>`:""}
+        ${d.useLoan&&d.useDcCr?offerField("Скидка ДЦ за кредит, ₽", `<input id="ofDcCrAmt" inputmode="numeric" value="${d.dcCr||d.dcDef}" />`):""}
+        ${offerField("Д/О, ₽", `<input id="ofDo" inputmode="numeric" value="${d.addons}" />`)}
+        ${d.useLoan?offerField("Каско расширенное / СЖ, ₽", `<input id="ofPack" inputmode="numeric" value="${d.pack}" />`):offerField("КАСКО, ₽", `<input id="ofCasco" inputmode="numeric" value="${d.casco}" />`)}
+        ${d.useLoan?`<p class="eyebrow">Кредит</p><div class="down-mode"><button type="button" class="chip ${d.downMode==="sum"?"on":""}" data-offer-down="sum">Сумма, ₽</button><button type="button" class="chip ${d.downMode!=="sum"?"on":""}" data-offer-down="pct">Проценты</button></div><input type="hidden" id="ofDownMode" value="${d.downMode==="sum"?"sum":"pct"}" />${d.downMode==="sum"?offerField("Первый взнос, ₽", `<input id="ofDown" inputmode="numeric" value="${d.down}" />`):offerField("Первый взнос, %", `<input id="ofDownPct" inputmode="decimal" value="${d.downPct}" />`)}${offerField("Срок, мес.", `<input id="ofMonths" inputmode="numeric" value="${d.months}" />`)}`:""}
+        ${offerField("Срок действия", `<input id="ofValid" value="${escape(d.valid)}" />`)}`;
+      return offerScreen("КП Новый а/м", form, doc);
     }
-    function offerPrintHtml(d){
-      const spec=(d.packEq&&d.packEq.specs||[]).map(([k,v])=>`<tr><td>${escape(k)}</td><td>${escape(v)}</td></tr>`).join("");
-      const eq=(d.packEq&&d.packEq.groups||[]).map(([title,items])=>`<h3>${escape(title)}</h3><ul>${items.map(it=>`<li>${escape(it)}</li>`).join("")}</ul>`).join("");
-      const banks=(d.banks||[]).map(b=>`<tr><td>${escape(b.name)}</td><td>${b.rate}%</td><td>${b.term} мес.</td><td>${rub(b.pay)} ₽</td></tr>`).join("");
-      return `<div class="offer-print-inner"><p class="offer-print-brand">ООО «ЭКСПЕРТ АВТО САМАРА» · TENET</p><h1>Коммерческое предложение</h1><p>Новый автомобиль · ${escape(d.m.name)} · цвет ${escape(d.color)}</p><p>Клиент: ${escape(d.client)} · менеджер: ${escape(offerMgr())}</p><table><tr><td>РРЦ</td><td>${rub(d.price)} ₽</td></tr>${d.discount?`<tr><td>Скидки</td><td>− ${rub(d.discount)} ₽</td></tr>`:""}<tr><td>Автомобиль</td><td>${rub(d.carPrice)} ₽</td></tr>${d.addons?`<tr><td>Д/О</td><td>${rub(d.addons)} ₽</td></tr>`:""}${d.useLoan?`<tr><td>Каско / СЖ</td><td>${rub(d.pack)} ₽</td></tr>`:(d.casco?`<tr><td>КАСКО</td><td>${rub(d.casco)} ₽</td></tr>`:"")}<tr><td>Итого клиенту</td><td><b>${rub(d.clientPay)} ₽</b></td></tr></table>${d.useLoan?`<h2>Кредит</h2><p>ПВ ${rub(d.down)} ₽ (${d.downPct}%) · срок ${d.months} мес. · тело ${rub(d.credit)} ₽</p><table><thead><tr><th>Банк</th><th>Ставка</th><th>Срок</th><th>Платёж</th></tr></thead><tbody>${banks}</tbody></table>${d.mptTxt?`<h2>МПТ</h2><pre>${escape(d.mptTxt)}</pre>`:""}`:""}<h2>Технические характеристики</h2><table>${spec}</table><h2>Оснащение</h2>${eq}<p class="offer-print-note">Источник: ${escape((d.packEq&&d.packEq.src)||"официальный прайс")}. Не оферта. Действует ${escape(d.valid)}.</p></div>`;
+    function offerWrap(ctx, text, maxW){
+      const words=String(text||"").split(/\s+/).filter(Boolean);
+      const lines=[];
+      let cur="";
+      words.forEach(w=>{
+        const t=cur?cur+" "+w:w;
+        if(ctx.measureText(t).width>maxW && cur){ lines.push(cur); cur=w; }
+        else cur=t;
+      });
+      if(cur) lines.push(cur);
+      if(!lines.length) lines.push("");
+      const out=[];
+      lines.forEach(line=>{
+        if(ctx.measureText(line).width<=maxW){ out.push(line); return; }
+        let buf="";
+        for(const ch of line){
+          const t=buf+ch;
+          if(ctx.measureText(t).width>maxW && buf){ out.push(buf); buf=ch; }
+          else buf=t;
+        }
+        if(buf) out.push(buf);
+      });
+      return out;
+    }
+    function offerPaint(doc){
+      const W=1240, H=1754, pad=56;
+      const pages=[];
+      let c, ctx, y;
+      function font(w, size){ ctx.font=w+" "+size+"px Inter, Arial, sans-serif"; }
+      function newPage(){
+        c=document.createElement("canvas");
+        c.width=W; c.height=H;
+        ctx=c.getContext("2d");
+        ctx.fillStyle="#f6f3ec";
+        ctx.fillRect(0,0,W,H);
+        ctx.fillStyle="#c81e2b";
+        ctx.fillRect(0,0,W,14);
+        font("800", 22);
+        ctx.fillStyle="#161618";
+        ctx.fillText("ЭКСПЕРТ АВТО САМАРА", pad, 58);
+        font("700", 13);
+        ctx.fillStyle="#8a6840";
+        ctx.fillText("TENET  ·  ОТДЕЛ ПРОДАЖ  ·  +7 927 724 92 77", pad, 82);
+        ctx.strokeStyle="#eadfcf";
+        ctx.beginPath();
+        ctx.moveTo(pad, 98);
+        ctx.lineTo(W-pad, 98);
+        ctx.stroke();
+        font("500", 12);
+        ctx.fillStyle="#9a9186";
+        ctx.fillText("Не оферта · ООО «ЭКСПЕРТ АВТО САМАРА»", pad, H-36);
+        y=124;
+        pages.push(c);
+      }
+      function need(h){ if(y+h>H-64) newPage(); }
+      newPage();
+      need(70);
+      font("700", 12);
+      ctx.fillStyle="#c81e2b";
+      ctx.fillText(String(doc.kicker||"").toUpperCase(), pad, y);
+      y+=28;
+      font("800", 30);
+      ctx.fillStyle="#161618";
+      ctx.fillText(doc.title||"Коммерческое предложение", pad, y);
+      y+=26;
+      font("600", 16);
+      offerWrap(ctx, doc.headline||"", W-pad*2).forEach(line=>{
+        need(24);
+        font("600", 16);
+        ctx.fillStyle="#3d3832";
+        ctx.fillText(line, pad, y);
+        y+=24;
+      });
+      y+=8;
+      (doc.meta||[]).forEach(([k,v])=>{
+        const val=offerDash(v);
+        font("700", 15);
+        const max=W-pad*2-220;
+        if(ctx.measureText(val).width<=max){
+          need(26);
+          font("500", 15);
+          ctx.fillStyle="#7a7166";
+          ctx.fillText(k, pad, y);
+          ctx.textAlign="right";
+          font("700", 15);
+          ctx.fillStyle="#161618";
+          ctx.fillText(val, W-pad, y);
+          ctx.textAlign="left";
+          y+=26;
+        }else{
+          need(22);
+          font("700", 14);
+          ctx.fillStyle="#7a7166";
+          ctx.fillText(k, pad, y);
+          y+=20;
+          font("600", 15);
+          offerWrap(ctx, val, W-pad*2).forEach(part=>{
+            need(22);
+            font("600", 15);
+            ctx.fillStyle="#161618";
+            ctx.fillText(part, pad, y);
+            y+=22;
+          });
+        }
+      });
+      y+=8;
+      (doc.rows||[]).forEach(([k,v])=>{
+        need(32);
+        ctx.strokeStyle="#eadfcf";
+        ctx.beginPath();
+        ctx.moveTo(pad, y+10);
+        ctx.lineTo(W-pad, y+10);
+        ctx.stroke();
+        font("500", 15);
+        ctx.fillStyle="#3d3832";
+        ctx.fillText(k, pad, y);
+        ctx.textAlign="right";
+        font("700", 15);
+        ctx.fillText(String(v), W-pad, y);
+        ctx.textAlign="left";
+        y+=32;
+      });
+      if(doc.total){
+        need(56);
+        ctx.fillStyle="#efe4cf";
+        ctx.fillRect(pad, y-22, W-pad*2, 44);
+        font("700", 16);
+        ctx.fillStyle="#161618";
+        ctx.fillText(doc.total[0], pad+14, y+6);
+        ctx.textAlign="right";
+        font("800", 20);
+        ctx.fillText(doc.total[1], W-pad-14, y+6);
+        ctx.textAlign="left";
+        y+=48;
+      }
+      (doc.sections||[]).forEach(sec=>{
+        need(36);
+        y+=10;
+        font("800", 13);
+        ctx.fillStyle="#8a6840";
+        ctx.fillText(String(sec.title||"").toUpperCase(), pad, y);
+        y+=22;
+        (sec.pairs||[]).forEach(([k,v])=>{
+          need(22);
+          font("700", 14);
+          ctx.fillStyle="#161618";
+          ctx.fillText(String(k), pad, y);
+          y+=20;
+          font("500", 14);
+          offerWrap(ctx, String(v), W-pad*2).forEach(part=>{
+            need(20);
+            font("500", 14);
+            ctx.fillStyle="#3d3832";
+            ctx.fillText(part, pad, y);
+            y+=20;
+          });
+          y+=4;
+        });
+        (sec.lines||[]).forEach(line=>{
+          font("500", 15);
+          offerWrap(ctx, line, W-pad*2).forEach(part=>{
+            need(22);
+            font("500", 15);
+            ctx.fillStyle="#161618";
+            ctx.fillText(part, pad, y);
+            y+=22;
+          });
+        });
+        (sec.groups||[]).forEach(([title, items])=>{
+          need(24);
+          font("700", 15);
+          ctx.fillStyle="#161618";
+          ctx.fillText(title, pad, y);
+          y+=22;
+          (items||[]).forEach(it=>{
+            font("500", 14);
+            offerWrap(ctx, "• "+it, W-pad*2-8).forEach(part=>{
+              need(20);
+              font("500", 14);
+              ctx.fillStyle="#3d3832";
+              ctx.fillText(part, pad+8, y);
+              y+=20;
+            });
+          });
+          y+=6;
+        });
+      });
+      if(doc.note){
+        y+=8;
+        font("500", 13);
+        offerWrap(ctx, doc.note, W-pad*2).forEach(part=>{
+          need(20);
+          font("500", 13);
+          ctx.fillStyle="#7a7166";
+          ctx.fillText(part, pad, y);
+          y+=20;
+        });
+      }
+      pages.forEach((pg,i)=>{
+        const x=pg.getContext("2d");
+        x.fillStyle="#f6f3ec";
+        x.fillRect(W-pad-90, H-54, 90, 26);
+        x.fillStyle="#9a9186";
+        x.font="500 12px Inter, Arial, sans-serif";
+        x.textAlign="right";
+        x.fillText((i+1)+" / "+pages.length, W-pad, H-36);
+        x.textAlign="left";
+      });
+      return pages;
+    }
+    function offerJpeg(canvas){
+      const bin=atob(canvas.toDataURL("image/jpeg", 0.86).split(",")[1]);
+      const u=new Uint8Array(bin.length);
+      for(let i=0;i<bin.length;i++) u[i]=bin.charCodeAt(i);
+      return u;
+    }
+    function offerPdfBytes(images){
+      const enc=new TextEncoder();
+      const chunks=[];
+      let len=0;
+      function add(x){
+        if(typeof x==="string") x=enc.encode(x);
+        chunks.push(x);
+        len+=x.length;
+      }
+      const offsets=[0];
+      function objStart(){
+        offsets.push(len);
+        add((offsets.length-1)+" 0 obj\n");
+      }
+      function objEnd(){ add("\nendobj\n"); }
+      add("%PDF-1.4\n");
+      const n=images.length;
+      objStart();
+      add("<< /Type /Catalog /Pages 2 0 R >>");
+      objEnd();
+      objStart();
+      const kids=[];
+      for(let i=0;i<n;i++) kids.push((3+i*3)+" 0 R");
+      add("<< /Type /Pages /Count "+n+" /Kids ["+kids.join(" ")+"] >>");
+      objEnd();
+      images.forEach(im=>{
+        const contentId=offsets.length+1;
+        const imageId=offsets.length+2;
+        objStart();
+        add("<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595.28 841.89] /Contents "+contentId+" 0 R /Resources << /XObject << /Im0 "+imageId+" 0 R >> >> >>");
+        objEnd();
+        const content="q 595.28 0 0 841.89 0 0 cm /Im0 Do Q\n";
+        objStart();
+        add("<< /Length "+content.length+" >>\nstream\n"+content+"endstream");
+        objEnd();
+        objStart();
+        add("<< /Type /XObject /Subtype /Image /Width "+im.w+" /Height "+im.h+" /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length "+im.jpeg.length+" >>\nstream\n");
+        add(im.jpeg);
+        add("\nendstream");
+        objEnd();
+      });
+      const start=len;
+      const size=offsets.length;
+      let xref="xref\n0 "+size+"\n0000000000 65535 f \n";
+      for(let i=1;i<size;i++) xref+=String(offsets[i]).padStart(10,"0")+" 00000 n \n";
+      add(xref);
+      add("trailer\n<< /Size "+size+" /Root 1 0 R >>\nstartxref\n"+start+"\n%%EOF");
+      const out=new Uint8Array(len);
+      let o=0;
+      chunks.forEach(ch=>{ out.set(ch, o); o+=ch.length; });
+      return out;
+    }
+    function offerFileName(doc){
+      const raw=String((doc&&doc.file)||"КП").replace(/[\\/:*?"<>|]+/g," ").replace(/\s+/g," ").trim().slice(0,80);
+      return (raw||"КП")+".pdf";
     }
     function offerPdf(){
-      const src=document.getElementById("ofPrint");
-      if(!src) return;
-      const w=window.open("","offerpdf","width=900,height=1200");
-      if(!w){ window.print(); return; }
-      w.document.write('<!doctype html><html lang="ru"><head><meta charset="utf-8"><title>КП TENET</title><style>@page{size:A4;margin:14mm}body{margin:0;font:13px/1.45 Inter,system-ui,sans-serif;color:#111}h1{font-size:22px;margin:0 0 6px}h2{font-size:15px;margin:18px 0 8px;text-transform:uppercase}table{width:100%;border-collapse:collapse;margin:0 0 12px}td,th{border-bottom:1px solid #ddd;padding:6px 8px;text-align:left}ul{margin:0 0 10px;padding:0 0 0 18px}pre{white-space:pre-wrap;font:12px/1.4 ui-monospace,Menlo,monospace}.offer-print-brand{letter-spacing:.16em;text-transform:uppercase;font-size:11px;color:#c81e2b;font-weight:700}.offer-print-note{color:#666;font-size:12px;margin-top:18px}</style></head><body>'+src.innerHTML+'</body></html>');
-      w.document.close();
-      setTimeout(function(){ try{ w.focus(); w.print(); }catch(e){} }, 250);
+      const doc=offerDocCurrent;
+      if(!doc || typeof document==="undefined") return;
+      const pages=offerPaint(doc).map(c=>({w:c.width,h:c.height,jpeg:offerJpeg(c)}));
+      const bytes=offerPdfBytes(pages);
+      const blob=new Blob([bytes], {type:"application/pdf"});
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement("a");
+      a.href=url;
+      a.download=offerFileName(doc);
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(()=>URL.revokeObjectURL(url), 8000);
     }
     function offerSvcPacks(){
       return [
@@ -145,17 +506,12 @@
         {id:"tyre",name:"Шиномонтаж + хранение",price:8900,note:"Сезонная смена и склад ДЦ",items:[["Шиномонтаж","4 колеса, балансировка"],["Хранение","сезон на складе"],["Запись","у сервис-менеджера"]]}
       ];
     }
-    function offerPrintDoc(d){
-      const rows=(d.rows||[]).map(([k,v])=>`<tr><td>${k}</td><td>${v}</td></tr>`).join("");
-      const total=d.total?`<tr><td>${d.totalLabel||"Итого"}</td><td><b>${d.total}</b></td></tr>`:"";
-      return `<div class="offer-print-inner"><p class="offer-print-brand">ООО «ЭКСПЕРТ АВТО САМАРА» · TENET</p><h1>Коммерческое предложение</h1><p>${d.lead||""}</p><p>${d.who||""}</p><table>${rows}${total}</table>${d.extra||""}<p class="offer-print-note">${d.note||"Не оферта. Итоговые условия — в договоре салона."}</p></div>`;
-    }
     function offerService(){
       const models=typeof KM_MODELS!=="undefined"?KM_MODELS:[];
       const packs=offerSvcPacks();
       const mid=offerVal("osModel", models[0]?models[0].id:"t7a");
       const m=models.find(x=>x.id===mid)||models[0]||{id:"t7a",name:"TENET"};
-      const client=offerVal("osClient","Уважаемый клиент");
+      const client=offerVal("osClient","");
       const vin=offerVal("osVin","");
       const packId=offerVal("osPack", packs[0].id);
       const prevPack=offerVal("osPrevPack", packId);
@@ -164,65 +520,34 @@
       if(prevPack!==packId) price=pack.price;
       const valid=offerVal("osValid","7 дней");
       const note=prevPack!==packId?pack.note:offerVal("osNote", pack.note);
-      const itemLines=pack.items.map(p=>"• "+p[0]+" — "+p[1]).join(`
-`);
-      const text=`Коммерческое предложение · сервис
-ООО «ЭКСПЕРТ АВТО САМАРА» · TENET
-
-Клиент: ${client}
-Автомобиль: ${m.name}${vin?`
-VIN: ${vin}`:""}
-
-Пакет: ${pack.name}
-Стоимость: ${rub(price)} ₽
-${note}
-
-Состав:
-${itemLines}
-
-Предложение действует ${valid}.
-Не оферта. Итоговые условия — в заказ-наряде сервиса.
-Менеджер: ${offerMgr()}`;
-      const packHtml=`<p class="eyebrow">Лист оснащения</p><h3 style="margin:0 0 10px">${escape(pack.name)}</h3>`+pack.items.map(([k,v])=>`<p class="offer-eq-h">${escape(k)}</p><ul class="offer-eq"><li>${escape(v)}</li></ul>`).join("")+`<p class="calc-note">${escape(note)}</p>`;
-      const print=offerPrintDoc({
-        lead:"Сервис · "+escape(m.name)+" · "+escape(pack.name),
-        who:"Клиент: "+escape(client)+" · менеджер: "+escape(offerMgr()),
-        rows:[["Автомобиль",escape(m.name)],["VIN",escape(vin||"—")],["Пакет",escape(pack.name)],["Срок действия",escape(valid)]],
-        totalLabel:"Стоимость пакета",
-        total:rub(price)+" ₽",
-        extra:"<h2>Состав</h2><ul>"+pack.items.map(([k,v])=>"<li><b>"+escape(k)+".</b> "+escape(v)+"</li>").join("")+"</ul>",
-        note:"Не оферта. Итоговые условия — в заказ-наряде сервиса. Действует "+escape(valid)+"."
-      });
-      return banner("КП Сервис","Коммерческое предложение","КП")+`
-        ${offerNav()}
-        <div class="km-layout">
-          <div class="card">
-            <p class="eyebrow">Данные и условия</p>
-            <input type="hidden" id="osPrevPack" value="${escape(packId)}" />
-            <label class="field" style="max-width:none"><span>Клиент</span><input id="osClient" value="${escape(client)}" /></label>
-            <label class="field" style="max-width:none"><span>Комплектация</span>
-              <select id="osModel">${models.map(x=>`<option value="${x.id}" ${x.id===mid?"selected":""}>${escape(x.name)}</option>`).join("")}</select>
-            </label>
-            <label class="field" style="max-width:none"><span>VIN</span><input id="osVin" value="${escape(vin)}" /></label>
-            <label class="field" style="max-width:none"><span>Пакет</span>
-              <select id="osPack">${packs.map(p=>`<option value="${p.id}" ${p.id===packId?"selected":""}>${escape(p.name)} · ${rub(p.price)}</option>`).join("")}</select>
-            </label>
-            <label class="field" style="max-width:none"><span>Стоимость, ₽</span><input id="osPrice" inputmode="numeric" value="${price}" /></label>
-            <label class="field" style="max-width:none"><span>Срок действия</span><input id="osValid" value="${escape(valid)}" /></label>
-            <label class="field" style="max-width:none"><span>Примечание</span><input id="osNote" value="${escape(note)}" /></label>
-          </div>
-          <div class="card">
-            <p class="eyebrow">Текст КП</p>
-            <pre id="ofTextSvc" class="offer-sheet">${escape(text)}</pre>
-            <p class="calc-note">${escape(pack.name)} · ${rub(price)} ₽.</p>
-            <div class="who-line" style="margin-top:12px">
-              <button type="button" class="btn ivory" data-offer-copy="ofTextSvc">Скопировать</button>
-              <button type="button" class="btn ghost" data-offer-pdf>PDF / печать</button>
-            </div>
-          </div>
-        </div>
-        <div class="card offer-equip-card">${packHtml}</div>
-        <div id="ofPrint" class="offer-print">${print}</div>`;
+      const doc={
+        kicker:"Сервис",
+        title:"Коммерческое предложение",
+        headline:pack.name,
+        file:"КП сервис "+(m.name||"")+" "+client,
+        meta:[["Клиент", client],["Автомобиль", m.name],["VIN", vin],["Менеджер", offerMgr()]],
+        rows:[["Пакет", pack.name],["Примечание", note||"—"],["Срок действия", valid]],
+        total:["Стоимость пакета", rub(price)+" ₽"],
+        sections:[
+          {title:"Состав", pairs:pack.items},
+          {title:"Перед отправкой", lines:["Сумма — ориентир ДЦ. Сверьте её с прайсом сервиса, это не заказ-наряд."]}
+        ],
+        note:"Не оферта. Итоговые условия — в заказ-наряде сервиса. Действует "+valid+"."
+      };
+      const form=`
+        <p class="eyebrow">Клиент</p>
+        <input type="hidden" id="osPrevPack" value="${escape(packId)}" />
+        ${offerField("Клиент", `<input id="osClient" value="${escape(client)}" placeholder="ФИО" />`)}
+        ${client?"":`<p class="calc-note">Клиент пустой. В PDF будет прочерк.</p>`}
+        <p class="eyebrow">Автомобиль и пакет</p>
+        ${offerField("Комплектация", `<select id="osModel">${models.map(x=>`<option value="${x.id}" ${x.id===mid?"selected":""}>${escape(x.name)}</option>`).join("")}</select>`)}
+        ${offerField("VIN", `<input id="osVin" value="${escape(vin)}" placeholder="необязательно" />`)}
+        ${offerField("Пакет", `<select id="osPack">${packs.map(p=>`<option value="${p.id}" ${p.id===packId?"selected":""}>${escape(p.name)} · ${rub(p.price)}</option>`).join("")}</select>`)}
+        ${offerField("Стоимость, ₽", `<input id="osPrice" inputmode="numeric" value="${price}" />`)}
+        <p class="calc-note">Цены пакетов — ориентир. Перед PDF сверьте сумму с прайсом сервиса.</p>
+        ${offerField("Срок действия", `<input id="osValid" value="${escape(valid)}" />`)}
+        ${offerField("Примечание", `<input id="osNote" value="${escape(note)}" />`)}`;
+      return offerScreen("КП Сервис", form, doc);
     }
     function offerLease(){
       const models=typeof KM_MODELS!=="undefined"?KM_MODELS:[];
@@ -231,9 +556,9 @@ ${itemLines}
       const options=fleetIds.length?fleetIds.map(id=>({id,name:(fset[id]&&fset[id].name)||id,rrc:(fset[id]&&(fset[id].rrc||fset[id].tidy))||0})):models;
       const fid=offerVal("olModel", options[0]?options[0].id:(models[0]?models[0].id:"t7a"));
       const m=models.find(x=>x.id===fid)||options.find(x=>x.id===fid)||{id:fid,name:"TENET",rrc:0};
-      const f=fset[fid]||{name:m.name,rrc:m.rrc||0,tidy:m.rrc||0,an:0};
+      const f=fset[fid]||{name:m.name,rrc:m.rrc||0,tidy:m.rrc||0};
       const prev=offerVal("olPrevModel", fid);
-      const company=offerVal("olCo","ООО «Компания»");
+      const company=offerVal("olCo","");
       const inn=offerVal("olInn","");
       const months=(typeof offerNum==="function"?offerNum("olMonths", 36):Number(offerVal("olMonths","36")))||36;
       const advPct=(typeof offerNum==="function"?offerNum("olAdv", 20):Number(offerVal("olAdv","20")))||20;
@@ -244,74 +569,44 @@ ${itemLines}
       const adv=Math.round(price*advPct/100);
       const body=Math.max(0, price-adv);
       const partners="Каркаде, Т-Лизинг, Европлан, Сберлизинг, Газпромбанк Лизинг, Совкомбанк Лизинг";
-      const text=`Коммерческое предложение · лизинг
-ООО «ЭКСПЕРТ АВТО САМАРА» · TENET · BFS Совкомбанк лизинг
-
-Лизингополучатель: ${company}${inn?`
-ИНН: ${inn}`:""}
-Автомобиль: ${f.name||m.name}
-РРЦ: ${rub(f.rrc||m.rrc||price)} ₽
-Цена AP / флит: ${rub(price)} ₽
-
-Аванс: ${advPct}% · ${rub(adv)} ₽
-Срок: ${months} мес.
-Остаток к финансированию: ${rub(body)} ₽
-${f.an?`Авансовый платёж BFS (ориентир): ${rub(f.an)} ₽
-`:""}
-Партнёры BFS: ${partners}.
-График и удорожание считает лизинговая компания.
-
-Предложение действует ${valid}.
-Не оферта. Итоговые условия — в договоре лизинга.
-Менеджер: ${offerMgr()}`;
-      const packHtml=`<p class="eyebrow">Лист оснащения</p><h3 style="margin:0 0 10px">${escape(f.name||m.name)}</h3>
-        <ul class="offer-eq">
-          <li><b>РРЦ.</b> ${rub(f.rrc||m.rrc||price)} ₽</li>
-          <li><b>Цена AP / флит.</b> ${rub(price)} ₽</li>
-          <li><b>Аванс.</b> ${advPct}% · ${rub(adv)} ₽</li>
-          <li><b>К финансированию.</b> ${rub(body)} ₽ · ${months} мес.</li>
-          ${f.an?`<li><b>Ориентир платежа BFS.</b> ${rub(f.an)} ₽</li>`:""}
-        </ul>
-        <p class="offer-eq-h">Партнёры</p>
-        <ul class="offer-eq"><li>${escape(partners)}</li></ul>
-        <p class="calc-note">График и удорожание считает лизинговая компания.</p>`;
-      const print=offerPrintDoc({
-        lead:"Лизинг · "+escape(f.name||m.name)+" · BFS",
-        who:"Лизингополучатель: "+escape(company)+(inn?" · ИНН "+escape(inn):"")+" · менеджер: "+escape(offerMgr()),
-        rows:[["Автомобиль",escape(f.name||m.name)],["РРЦ",rub(f.rrc||m.rrc||price)+" ₽"],["Цена AP / флит",rub(price)+" ₽"],["Аванс",advPct+"% · "+rub(adv)+" ₽"],["Срок",months+" мес."],["К финансированию",rub(body)+" ₽"],["Срок действия",escape(valid)]],
-        totalLabel:"Цена AP / флит",
-        total:rub(price)+" ₽",
-        extra:"<h2>Партнёры BFS</h2><p>"+escape(partners)+"</p>",
-        note:"Не оферта. График считает лизинговая компания. Действует "+escape(valid)+"."
-      });
-      return banner("КП Лизинг","Коммерческое предложение","КП")+`
-        ${offerNav()}
-        <div class="km-layout">
-          <div class="card">
-            <p class="eyebrow">Данные и условия</p>
-            <input type="hidden" id="olPrevModel" value="${escape(fid)}" />
-            <label class="field" style="max-width:none"><span>Компания</span><input id="olCo" value="${escape(company)}" /></label>
-            <label class="field" style="max-width:none"><span>ИНН</span><input id="olInn" value="${escape(inn)}" /></label>
-            <label class="field" style="max-width:none"><span>Комплектация</span>
-              <select id="olModel">${options.map(x=>`<option value="${x.id}" ${x.id===fid?"selected":""}>${escape(x.name)}${x.rrc?" · "+rub(x.rrc):""}</option>`).join("")}</select>
-            </label>
-            <label class="field" style="max-width:none"><span>Цена флит, ₽</span><input id="olPrice" inputmode="numeric" value="${price}" /></label>
-            <label class="field" style="max-width:none"><span>Аванс, %</span><input id="olAdv" inputmode="numeric" value="${advPct}" /></label>
-            <label class="field" style="max-width:none"><span>Срок, мес.</span><input id="olMonths" inputmode="numeric" value="${months}" /></label>
-            <label class="field" style="max-width:none"><span>Срок действия</span><input id="olValid" value="${escape(valid)}" /></label>
-          </div>
-          <div class="card">
-            <p class="eyebrow">Текст КП</p>
-            <pre id="ofTextLease" class="offer-sheet">${escape(text)}</pre>
-            <p class="calc-note">Аванс ${rub(adv)} ₽ · к финансированию ${rub(body)} ₽.</p>
-            <div class="who-line" style="margin-top:12px">
-              <button type="button" class="btn ivory" data-offer-copy="ofTextLease">Скопировать</button>
-              <button type="button" class="btn ghost" data-offer-pdf>PDF / печать</button>
-            </div>
-          </div>
-        </div>
-        <div class="card offer-equip-card">${packHtml}</div>
-        <div id="ofPrint" class="offer-print">${print}</div>`;
+      const doc={
+        kicker:"Лизинг",
+        title:"Коммерческое предложение",
+        headline:f.name||m.name,
+        file:"КП лизинг "+(f.name||m.name||"")+" "+company,
+        meta:[["Лизингополучатель", company],["ИНН", inn],["Менеджер", offerMgr()]],
+        rows:[
+          ["РРЦ", rub(f.rrc||m.rrc||price)+" ₽"],
+          ["Цена AP / флит", rub(price)+" ₽"],
+          ["Аванс", advPct+"% · "+rub(adv)+" ₽"],
+          ["Срок", months+" мес."],
+          ["К финансированию", rub(body)+" ₽"],
+          ["Срок действия", valid]
+        ],
+        total:["Цена AP / флит", rub(price)+" ₽"],
+        sections:[{
+          title:"Как читать",
+          lines:[
+            "График и удорожание считает лизинговая компания. Здесь нет платежа и нет графика.",
+            "Партнёры BFS: "+partners+"."
+          ]
+        }],
+        note:"Не оферта. Итоговые условия — в договоре лизинга. Действует "+valid+"."
+      };
+      const form=`
+        <p class="eyebrow">Компания</p>
+        <input type="hidden" id="olPrevModel" value="${escape(fid)}" />
+        ${offerField("Компания", `<input id="olCo" value="${escape(company)}" placeholder="ООО" />`)}
+        ${company?"":`<p class="calc-note">Компания пустая. В PDF будет прочерк.</p>`}
+        ${offerField("ИНН", `<input id="olInn" value="${escape(inn)}" placeholder="необязательно" />`)}
+        <p class="eyebrow">Автомобиль</p>
+        ${offerField("Комплектация", `<select id="olModel">${options.map(x=>`<option value="${x.id}" ${x.id===fid?"selected":""}>${escape(x.name)}${x.rrc?" · "+rub(x.rrc):""}</option>`).join("")}</select>`)}
+        ${offerField("Цена флит, ₽", `<input id="olPrice" inputmode="numeric" value="${price}" />`)}
+        ${offerField("Аванс, %", `<input id="olAdv" inputmode="numeric" value="${advPct}" />`)}
+        ${offerField("Срок, мес.", `<input id="olMonths" inputmode="numeric" value="${months}" />`)}
+        ${offerField("Срок действия", `<input id="olValid" value="${escape(valid)}" />`)}
+        <p class="calc-note">Платёж не считаем: график делает лизинговая компания.</p>`;
+      return offerScreen("КП Лизинг", form, doc);
     }
 
     function offer(){
@@ -323,7 +618,13 @@ ${f.an?`Авансовый платёж BFS (ориентир): ${rub(f.an)} ₽
     }
     function offerBind(){
       document.querySelectorAll("[data-offer-tab]").forEach(b=>b.onclick=()=>{ offerTab=b.dataset.offerTab||"home"; view="offer"; render(); });
-      document.querySelectorAll("[data-offer-copy]").forEach(b=>b.onclick=()=>{ offerCopy(b.dataset.offerCopy); b.textContent="Скопировано"; setTimeout(()=>{ b.textContent="Скопировать"; }, 1200); });
+      document.querySelectorAll("[data-offer-copy]").forEach(b=>b.onclick=()=>{
+        offerCopy(b.dataset.offerCopy);
+        const prev=b.getAttribute("data-label")||b.textContent;
+        b.setAttribute("data-label", prev);
+        b.textContent="Скопировано";
+        setTimeout(()=>{ b.textContent=b.getAttribute("data-label")||"Текст в мессенджер"; }, 1200);
+      });
       document.querySelectorAll("[data-offer-pdf]").forEach(b=>b.onclick=()=>offerPdf());
       document.querySelectorAll("[data-offer-down]").forEach(b=>b.onclick=()=>{ const hid=document.getElementById("ofDownMode"); if(hid) hid.value=b.dataset.offerDown||"pct"; view="offer"; render(); });
       ["ofClient","ofModel","ofColor","ofPrice","ofSpec","ofDo","ofPack","ofCasco","ofDown","ofDownPct","ofMonths","ofValid","ofTi","ofLoan","ofCr","ofDcTi","ofDcCr","ofDcTiAmt","ofDcCrAmt","osClient","osModel","osCar","osVin","osPack","osPrice","osNote","osValid","olCo","olInn","olModel","olPrice","olAdv","olMonths","olValid"].forEach(id=>{ const el=document.getElementById(id); if(el) el.addEventListener("change", ()=>{ view="offer"; render(); }); });

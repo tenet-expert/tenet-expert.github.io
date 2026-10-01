@@ -87,7 +87,7 @@ for p in (Path("index.html"), Path("_site/index.html")):
     if fn and "function offerDeal(" in fn:
         html2, n = re.subn(
             r"(?:    const OFFER_SPEC = \{[\s\S]*?\n    function offerPackHtml[\s\S]*?\n    \}\n)?(?:    function offerSpecOf\([\s\S]*?\n    function offerPackHtml[\s\S]*?\n    \}\n)?    let offerTab = \"home\";[\s\S]*?    function offerBind\(\)\{[\s\S]*?\n    \}\n",
-            fn.rstrip() + "\n",
+            lambda _m: fn.rstrip() + "\n",
             html,
             count=1,
         )
