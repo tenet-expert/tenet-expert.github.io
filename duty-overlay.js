@@ -36,8 +36,8 @@
     const p=typeof dutyCount==="function"?dutyCount(d):{on:0,tot:0};
     const pct=p.tot?Math.round(p.on*100/p.tot):0;
     const cars=(typeof DUTY_CARS!=="undefined")?DUTY_CARS:[
-      {id:"t8",title:"Т8 4WD"},{id:"t82",title:"Т8 2WD"},{id:"t4l",title:"TENET T4L"},
-      {id:"a8",title:"Arrizo 8"},{id:"t7",title:"TENET T7"},{id:"t9",title:"Т9"}
+      {id:"t4l",title:"T4L"},{id:"t7",title:"T7"},{id:"t82",title:"Т8 2WD"},
+      {id:"t8",title:"Т8 4WD"},{id:"t9",title:"Т9"},{id:"a8",title:"Arrizo 8"}
     ];
     const W=1240, H=1754;
     const c=document.createElement("canvas");
