@@ -251,9 +251,9 @@ input,textarea{width:100%;background:#fff;border:1px solid var(--border);color:v
 .hub-card[data-go="tune"]::before{background-image:url("hub/tune.jpg?v=1");background-position:50% 62%;background-size:cover;}
 .tune-tabs{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0;}
 .tune-scroll{overflow-x:auto;margin-top:8px;}
-.tune-table{width:100%;border-collapse:collapse;font-size:13px;min-width:560px;}
-.tune-table th,.tune-table td{padding:8px 10px;border-bottom:1px solid var(--border);text-align:right;vertical-align:top;font-variant-numeric:tabular-nums;}
-.tune-table th:first-child,.tune-table td:first-child{text-align:left;font-variant-numeric:normal;}
+.tune-table{width:100%;border-collapse:collapse;font-size:13px;min-width:720px;}
+.tune-table th,.tune-table td{padding:8px 10px;border-bottom:1px solid var(--border);text-align:right;vertical-align:top;font-variant-numeric:tabular-nums;white-space:nowrap;}
+.tune-table th:first-child,.tune-table td:first-child{text-align:left;font-variant-numeric:normal;white-space:normal;min-width:220px;}
 .tune-table th{font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);font-weight:700;}
 .tune-table tr.grp td{background:#f6f1e8;font-weight:800;text-align:left;color:#161618;}
 .tune-note{color:var(--muted);font-size:13px;line-height:1.45;margin:8px 0 0;}
@@ -4909,7 +4909,7 @@ async function pingTelegram(body){
     }
 
     let tuneTab = "do";
-    const TUNE_COLS = ["Tiggo 7 Pro","Tiggo 8 Pro","Arrizo","TENET T9"];
+    const TUNE_COLS = ["Tiggo 7 Pro","Tiggo 8 Pro","Arrizo","Tiggo 9"];
     const TUNE_DO = [
       ["Защита",[
         ["Защита картера, КПП, приводного ремня",20600,null,null,null],
@@ -4984,26 +4984,32 @@ async function pingTelegram(body){
     function tuneDoHtml(){
       const head="<tr><th>Позиция</th>"+TUNE_COLS.map(c=>"<th>"+escape(c)+"</th>").join("")+"</tr>";
       const body=TUNE_DO.map(([g,rows])=>{
-        const title=`<tr class="grp"><td colspan="5">${escape(g)}</td></tr>`;
+        const title=`<tr class="grp"><td colspan="${TUNE_COLS.length+1}">${escape(g)}</td></tr>`;
         const lines=rows.map(r=>{
           const cells=r.slice(1).map(n=>"<td>"+tuneMoney(n)+"</td>").join("");
           return "<tr><td>"+escape(r[0])+"</td>"+cells+"</tr>";
         }).join("");
         return title+lines;
       }).join("");
-      return `<div class="card"><p class="eyebrow">Прайс тюнинг</p><h3 style="margin:4px 0 8px">Дополнительное оборудование</h3><p class="tune-note">Суммы как в файле. Прочерк — этой позиции нет у модели.</p><div class="tune-scroll"><table class="tune-table">${head}${body}</table></div></div>`;
+      return `<div class="card"><p class="eyebrow">Прайс тюнинг</p><h3 style="margin:4px 0 8px">Дополнительное оборудование</h3><p class="tune-note">Суммы как в файле. Столбец Tiggo 9 — это Tenet T9 из прайса. Прочерк — этой позиции нет у модели.</p><div class="tune-scroll"><table class="tune-table">${head}${body}</table></div></div>`;
     }
     function tuneRubberHtml(key){
       const pack=TUNE_RUBBER[key];
-      const head="<tr><th>Шина</th><th>1 шт</th><th>Комплект</th><th>"+escape(pack.stock)+"</th></tr>";
-      const body=pack.groups.map(([g,rows])=>{
+      const titles={chery:"Зимняя резина Chery / TENET",exeed:"Зимняя резина EXEED",solaris:"Зимняя резина Solaris"};
+      const head="<tr><th>Позиция</th><th>1 шт</th><th>Комплект</th><th>"+escape(pack.stock)+"</th></tr>";
+      const groups=pack.groups.concat([["Шиномонтаж", pack.mount.map(([s,n])=>["Комплексный "+s,n,null,"—"])]]);
+      const body=groups.map(([g,rows])=>{
         const title=`<tr class="grp"><td colspan="4">${escape(g)}</td></tr>`;
-        const lines=rows.map(r=>"<tr><td>"+escape(r[0])+"</td><td>"+tuneMoney(r[1])+"</td><td>"+tuneMoney(r[2])+"</td><td>"+escape(String(r[3]))+"</td></tr>").join("");
+        const lines=rows.map(r=>{
+          const one=typeof r[1]==="number"?tuneMoney(r[1]):escape(String(r[1]==null?"—":r[1]));
+          const set=typeof r[2]==="number"?tuneMoney(r[2]):"—";
+          const stock=escape(String(r[3]==null?"—":r[3]));
+          return "<tr><td>"+escape(r[0])+"</td><td>"+one+"</td><td>"+set+"</td><td>"+stock+"</td></tr>";
+        }).join("");
         return title+lines;
       }).join("");
-      const mount=pack.mount.map(([s,n])=>escape(s)+" — "+tuneMoney(n)).join(" · ");
       const notes=(pack.notes||[]).map(t=>"<p class=\"tune-note\">"+escape(t)+"</p>").join("");
-      return `<div class="card"><p class="eyebrow">Резина Чери</p><div class="tune-scroll"><table class="tune-table">${head}${body}</table></div><p class="tune-note">Шиномонтаж комплексный: ${mount}.</p>${notes}</div>`;
+      return `<div class="card"><p class="eyebrow">Резина</p><h3 style="margin:4px 0 8px">${escape(titles[key]||"Резина")}</h3><p class="tune-note">Суммы как в файле. Прочерк — в файле цены нет.</p><div class="tune-scroll"><table class="tune-table">${head}${body}</table></div>${notes}</div>`;
     }
     function tune(){
       if(needAuth()) return login();
