@@ -171,7 +171,9 @@ if tc.exists():
     extra = tc.read_text()
     if not extra.endswith("\n"):
         extra += "\n"
-    a = html.find("    function terms(){")
+    a = html.find("    const TERMS_DATE = ")
+    if a < 0:
+        a = html.find("    function terms(){")
     b = html.find("    function stock(){")
     if a >= 0 and b > a:
         html = html[:a] + extra + html[b:]
