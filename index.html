@@ -4957,27 +4957,6 @@ async function pingTelegram(body){
           ["T4 R18",[["Goodride 215/55 R18 99H XL FrostExtreme SW606 TL, шип.",12500,50000,"1"]]],
           ["Arrizo R17",[["Pirelli Formula 215/50R17 95T XL Ice TL, шип.",11100,44400,"1"]]]
         ]
-      },
-      exeed:{
-        stock:"В наличии, к-т",
-        mount:[["R17, R18, R19",6300],["R20",8600]],
-        notes:["Последнее изменение в файле: 26.09.","В файле без цены: LingLong Leao 265/45R21 104T Winter Defender Ice I-15 SUV TL.","Hankook iON i*cept SUV IW01A 255/45 R21 106V XL."],
-        groups:[
-          ["R19 Esteo MX",[["Ikon Tyres 225/55 R19 103T XL Character Ice 8 SUV TL, шип.",21000,84000,"1"],["Tracmax 235/50 R19 103T XL X-Privilo S500 TL, шип.",15500,62000,"1"],["Sailun RoadX 235/50 R19 103T XL RXFrost WH12 TL, шип.",14500,58000,"2"]]],
-          ["R20 Esteo MX",[["Tracmax 245/45R20 103T XL X-Privilo S500 TL, шип.",16000,64000,"1"],["Tracmax 245/45R20 103V XL X-Privilo S360 TL, липучка",14000,56000,"1"]]],
-          ["R20 RX / VX",[["Leao Winter Defender Ice I-15 SUV 245/50 R20 102T, липучка",14000,56000,"1"]]],
-          ["R20 Exlantix",[["Hankook 255/50R20 105T Winter I*cept X RW10 TL, липучка",21500,86000,"1"],["Leao 255/50R20 109H Winter Defender Ice I-15 SUV TL, липучка",14000,56000,"1"]]],
-          ["R21 Exlantix ET8",[["Hankook iON i*cept SUV IW01A 255/45 R21 106V XL, липучка",37000,148000,"1"],["Maxxis SP5 SUV Premitra Ice 255/45 R21 106T, липучка",29500,118000,"1"]]],
-          ["R21 Esteo V27",[["Yokohama 265/45 R21 104Q iceGuard Studless G075 TL, липучка",27000,108000,"1"],["LingLong Leao 265/45R21 104T Winter Defender Ice I-15 SUV TL, липучка",16000,64000,"1"]]]
-        ]
-      },
-      solaris:{
-        stock:"В наличии",
-        mount:[["R15, R16",5300]],
-        notes:["Последнее изменение в файле: 08.12. По R16 HC и R17 в файле цены нет."],
-        groups:[
-          ["R15 Solaris",[["Pirelli Formula 185/65R15 88T Ice TL, шип.",6880,27520,"2"]]]
-        ]
       }
     };
     function tuneMoney(n){ return n==null? "—" : rub(n)+" ₽"; }
@@ -4995,7 +4974,7 @@ async function pingTelegram(body){
     }
     function tuneRubberHtml(key){
       const pack=TUNE_RUBBER[key];
-      const titles={chery:"Зимняя резина Chery / TENET",exeed:"Зимняя резина EXEED",solaris:"Зимняя резина Solaris"};
+      const titles={chery:"Зимняя резина Chery / TENET"};
       const head="<tr><th>Позиция</th><th>1 шт</th><th>Комплект</th><th>"+escape(pack.stock)+"</th></tr>";
       const groups=pack.groups.concat([["Шиномонтаж", pack.mount.map(([s,n])=>["Комплексный "+s,n,null,"—"])]]);
       const body=groups.map(([g,rows])=>{
@@ -5013,7 +4992,8 @@ async function pingTelegram(body){
     }
     function tune(){
       if(needAuth()) return login();
-      const tabs=[["do","Тюнинг"],["chery","Резина Chery / TENET"],["exeed","Резина EXEED"],["solaris","Резина Solaris"]];
+      if(tuneTab!=="do" && tuneTab!=="chery") tuneTab="chery";
+      const tabs=[["do","Тюнинг"],["chery","Резина"]];
       const bar=tabs.map(([id,l])=>`<button type="button" class="btn ${tuneTab===id?"ivory":"ghost"}" data-tune="${id}">${l}</button>`).join("");
       const body=tuneTab==="do"?tuneDoHtml():tuneRubberHtml(tuneTab);
       return banner("Тюнинг и резина","Прайс тюнинг и файл «Резина Чери»","TENET")+`
