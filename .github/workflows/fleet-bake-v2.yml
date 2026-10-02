@@ -1,0 +1,92 @@
+name: fleet-bake-v2
+on:
+  push:
+    paths:
+      - '.github/workflows/fleet-bake-v2.yml'
+  workflow_dispatch:
+jobs:
+  bake:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fix prepare_site splice + rebake index
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          from pathlib import Path
+          p = Path("prepare_site_b.py")
+          t = p.read_text(encoding="utf-8")
+          old = """    a = html.find(\"    function terms(){\")\n    b = html.find(\"    function stock(){\")"""
+          new = """    a = html.find(\"    const TERMS_DATE = \")\n    if a < 0:\n        a = html.find(\"    function terms(){\")\n    b = html.find(\"    function stock(){\")"""
+          if old not in t:
+              raise SystemExit("prepare_site_b anchors not found")
+          p.write_text(t.replace(old, new, 1), encoding="utf-8")
+          print("prepare_site_b.py splice fixed")
+          PY
+          python3 <<'PY'
+          from pathlib import Path
+          p = Path("patch_pango.py")
+          if p.exists():
+            t = p.read_text(encoding="utf-8")
+            old = """      t4lp:{cash:2250000,ti:2200000},\n      t7p:{cash:2550000,ti:2450000},"""
+            new = """      t4lp:{cash:2250000,ti:2200000},\n      t7a:{cash:2450000,ti:2350000},\n      t7p:{cash:2550000,ti:2450000},"""
+            if "t7a:{cash:2450000" not in t and old in t:
+              p.write_text(t.replace(old, new, 1), encoding="utf-8")
+              print("patch_pango t7a added")
+            else:
+              print("patch_pango skip", "t7a" in t)
+          PY
+          cat terms-calc-data.js terms-calc-loan.js terms-mpt.js terms-fleet.js terms-calc-ui-a.js terms-calc-ui-b.js > terms-calc-fn.js
+          python3 <<'PY'
+          from pathlib import Path
+          import re
+          fn = Path("terms-calc-fn.js").read_text(encoding="utf-8")
+          if not fn.endswith("\n"):
+            fn += "\n"
+          assert 'TERMS_DATE = "02.10.2026"' in fn
+          assert "t7a:{cash:2450000" in fn
+          assert "Active 2WD" in fn
+          assert "sub:150000" in re.search(r"ta8p:\{[^}]+\}", fn).group(0)
+          html = Path("index.html").read_text(encoding="utf-8")
+          a = html.find("    const TERMS_DATE = ")
+          b = html.find("    function stock(){")
+          if a < 0 or b <= a:
+            raise SystemExit(f"bad anchors {a} {b}")
+          Path("index.html").write_text(html[:a] + fn + html[b:], encoding="utf-8")
+          out = Path("index.html").read_text(encoding="utf-8")
+          assert out.count('const TERMS_DATE') == 1, out.count('const TERMS_DATE')
+          assert out.count('const FLEET_BFS') == 1
+          assert out.count('const PANGO_FIX') == 1
+          assert 'TERMS_DATE = "02.10.2026"' in out
+          assert "t7a:{cash:2450000" in out
+          assert "sub:150000" in re.search(r"ta8p:\{[^}]+\}", out).group(0)
+          print("index clean bake ok", Path("index.html").stat().st_size)
+          PY
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add prepare_site_b.py patch_pango.py terms-calc-fn.js index.html
+          if git diff --staged --quiet; then echo nothing; exit 0; fi
+          git commit -m "bake: single TERMS block (ta8p sub 150k, PANGO t7a, date 02.10); fix prepare_site splice"
+          for i in 1 2 3 4 5 6 7 8; do
+            if git pull --rebase origin main && git push origin HEAD:main; then exit 0; fi
+            git rebase --abort 2>/dev/null || true
+            sleep 5
+          done
+          exit 1
+      - name: Self-delete workflow
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin main
+          git checkout main
+          git reset --hard origin/main
+          rm -f .github/workflows/fleet-bake-v2.yml
+          git add -A .github/workflows/fleet-bake-v2.yml
+          if git diff --staged --quiet; then exit 0; fi
+          git commit -m "cleanup: remove fleet-bake-v2 workflow"
+          git push origin HEAD:main || true
