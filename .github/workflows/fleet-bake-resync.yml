@@ -1,0 +1,65 @@
+name: fleet-bake-resync
+on:
+  push:
+    paths:
+      - '.github/workflows/fleet-bake-resync.yml'
+  workflow_dispatch:
+jobs:
+  bake:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Rebuild terms-calc-fn and splice into index
+        run: |
+          set -euo pipefail
+          cat terms-calc-data.js terms-calc-loan.js terms-mpt.js terms-fleet.js terms-calc-ui-a.js terms-calc-ui-b.js > terms-calc-fn.js
+          python3 <<'PY'
+          from pathlib import Path
+          import re
+          fn = Path("terms-calc-fn.js").read_text(encoding="utf-8")
+          assert 'TERMS_DATE = "02.10.2026"' in fn, "bad date in fn"
+          assert "t7a:{cash:2450000" in fn, "missing t7a pango"
+          assert "Active 2WD" in fn, "missing Active 2WD inv"
+          ta8 = re.search(r"ta8p:\{[^}]+\}", fn)
+          assert ta8 and "sub:150000" in ta8.group(0), "ta8p sub not 150000"
+          html = Path("index.html").read_text(encoding="utf-8")
+          a = html.find("    function terms(){")
+          b = html.find("    function stock(){")
+          if a < 0 or b <= a:
+              raise SystemExit(f"anchors missing {a} {b}")
+          extra = fn if fn.endswith("\n") else fn + "\n"
+          Path("index.html").write_text(html[:a] + extra + html[b:], encoding="utf-8")
+          print("index spliced", len(extra))
+          PY
+          grep -n 'TERMS_DATE\|t7a:{cash\|ta8p:{' terms-calc-fn.js | head -20
+      - name: Commit bake
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add terms-calc-fn.js index.html
+          if git diff --staged --quiet; then
+            echo "nothing to commit"
+          else
+            git commit -m "bake: sync index/terms-calc-fn (ta8p sub 150k, PANGO t7a, TERMS_DATE 02.10.2026)"
+            for i in 1 2 3 4 5; do
+              if git pull --rebase origin main && git push origin HEAD:main; then exit 0; fi
+              git rebase --abort 2>/dev/null || true
+              sleep 4
+            done
+            exit 1
+          fi
+      - name: Self-delete workflow
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin main
+          git checkout main
+          git reset --hard origin/main
+          rm -f .github/workflows/fleet-bake-resync.yml
+          git add -A .github/workflows/fleet-bake-resync.yml
+          if git diff --staged --quiet; then echo "wf already gone"; exit 0; fi
+          git commit -m "cleanup: remove fleet-bake-resync workflow"
+          git push origin HEAD:main || true
