@@ -945,6 +945,11 @@ input,textarea{width:100%;background:#fff;border:1px solid var(--border);color:v
 .km-line.tone-a{background:#f4efe6;border:1px solid #e3d5c2;border-left:3px solid #c4a574}
 .km-line.tone-b{background:#e8eef3;border:1px solid #d0dbe3;border-left:3px solid #7f97ab}
 .km-line.tone-c{background:#fbf6ee;border:1px solid #ead4b0;border-left:3px solid #c28b2a}
+.km-line.tone-test{background:#f6f3fb;border:1px solid #cbb6dc;border-left:3px solid #6a3d86}
+.km-slot.s-test{position:relative;z-index:3}
+.km-slot.s-test .km-grid{grid-template-columns:1fr 1fr}
+.km-slot.s-test .stock-h{color:#5b2d7a}
+.km-slot.s-test .chip{cursor:pointer;position:relative;z-index:1}
 .km-pair > .km-line .stock-h,.km-slot > .km-line .stock-h{margin:2px 2px 8px}
 @media(min-width:1100px){
   .km-board{display:grid;grid-template-columns:minmax(460px,1.2fr) minmax(210px,.72fr) minmax(300px,.95fr);gap:10px 12px;align-items:start}
@@ -952,15 +957,20 @@ input,textarea{width:100%;background:#fff;border:1px solid var(--border);color:v
   .km-brand.tenet{grid-column:1;grid-row:1;color:#8a6840}
   .km-brand.plus{grid-column:2;grid-row:1;color:#8a5a10}
   .km-brand.chery{grid-column:3;grid-row:1;color:#3e5870}
-  .km-slot.s-t4{grid-column:1;grid-row:2}
-  .km-slot.s-plus{grid-column:2;grid-row:2 / span 2}
-  .km-slot.s-t7{grid-column:1;grid-row:3}
-  .km-slot.s-c7{grid-column:3;grid-row:3}
-  .km-slot.s-t8{grid-column:1 / -1;grid-row:4}
-  .km-slot.s-t9{grid-column:1;grid-row:5}
-  .km-slot.s-c9{grid-column:3;grid-row:5}
-  .km-slot.s-a8{grid-column:1;grid-row:6}
-  .km-slot.s-ca{grid-column:3;grid-row:6}
+  .km-slot.s-test{grid-column:1 / -1;grid-row:2;position:relative;z-index:3}
+  .km-slot.s-t4{grid-column:1;grid-row:3}
+  .km-slot.s-plus{grid-column:2;grid-row:3 / span 2}
+  .km-slot.s-t7{grid-column:1;grid-row:4}
+  .km-slot.s-c7{grid-column:3;grid-row:4}
+  .km-slot.s-t8{grid-column:1 / -1;grid-row:5}
+  .km-slot.s-t9{grid-column:1;grid-row:6}
+  .km-slot.s-c9{grid-column:3;grid-row:6}
+  .km-slot.s-a8{grid-column:1;grid-row:7}
+  .km-slot.s-ca{grid-column:3;grid-row:7}
+  .km-slot.s-test .km-grid{grid-template-columns:1fr 1fr}
+  .km-line.tone-test{background:#f6f3fb;border:1px solid #cbb6dc;border-left:3px solid #6a3d86}
+  .km-slot.s-test .stock-h{color:#5b2d7a}
+  .km-slot.s-test .chip{cursor:pointer;position:relative;z-index:1}
   .km-slot.s-plus .km-pair{grid-template-columns:1fr}
   .km-slot.s-plus .km-grid{grid-template-columns:1fr}
   .km-pair.is-2{grid-template-columns:1fr 1fr;align-items:start}
@@ -2785,6 +2795,7 @@ async function pingTelegram(body){
       const line=(g,tone)=>groups[g]&&groups[g].length?`<div class="km-line tone-${tone}"><p class="stock-h">${escape(g)}</p><div class="km-grid">${groups[g].map(x=>`<button type="button" class="chip ${x.id===active?"on":""}" data-km-id="${x.id}">${escape(x.name)}<small>${x.brand} · РРЦ ${rub(x.rrc)}</small></button>`).join("")}</div></div>`:"";
       const slot=(cls,html)=>html?`<div class="km-slot ${cls}">${html}</div>`:"";
       return `<div class="km-board"><span class="km-brand tenet">TENET</span><span class="km-brand plus">TENET PLUS</span><span class="km-brand chery">CHERY</span>`
+        +slot("s-test",`<div class="km-line tone-test"><p class="stock-h">Тесты в продаже · только PANGO</p><div class="km-grid">${TEST_SALE.map(x=>`<button type="button" class="chip ${x.id===active?"on":""}" data-km-id="${x.id}">${escape(x.short)}<small>фикс ${rub(x.fix)} · только PANGO</small></button>`).join("")}</div></div>`)
         +slot("s-t4",`<div class="km-pair is-2">${line("T4","a")}${line("T4L","a")}</div>`)
         +slot("s-t7",line("T7","a"))
         +slot("s-c7",line("Tiggo 7 L","b"))
@@ -2794,7 +2805,6 @@ async function pingTelegram(body){
         +slot("s-c9",line("Tiggo 9","b"))
         +slot("s-a8",line("TENET A8","a"))
         +slot("s-ca",line("Arrizo 8","b"))
-        +`<div class="km-line tone-c"><p class="stock-h">Тесты в продаже · только PANGO</p><div class="km-grid">${TEST_SALE.map(x=>`<button type="button" class="chip ${x.id===active?"on":""}" data-km-id="${x.id}">${escape(x.short)}<small>фикс ${rub(x.fix)}</small></button>`).join("")}</div></div>`
         +`</div>`;
     }
     function kmPrioRecRows(cur, carPrice, downPct, months, extras, deal){
@@ -2975,6 +2985,8 @@ async function pingTelegram(body){
         </div></div>`;
     }
     function calcKm(){
+      const testHit=typeof testSaleOf==="function"?testSaleOf(kmId):null;
+      if(testHit) return calcTestSale(testHit);
       const kmOff={t9p:1,a8a:1,a8u:1};
       if(typeof kmId!=="string" || !KM_MODELS.some(x=>x.id===kmId && !kmOff[x.id])) kmId=(KM_MODELS.find(x=>!kmOff[x.id])||KM_MODELS[0]).id;
       if(typeof kmVin!=="string") kmVin="";
@@ -7118,7 +7130,7 @@ async function confirmCloud(rec){
       document.querySelectorAll("[data-prio-go]").forEach(b=>b.onclick=()=>{ kmVin=b.dataset.prioGo||""; const car=(typeof STOCK!=="undefined"?STOCK:[]).find(x=>x.vin===kmVin); if(car && typeof kmIdFromCar==="function"){ const nid=kmIdFromCar(car); if(nid){ kmId=nid; kmShown=""; } } calcMode="km"; view="calc"; render(); });
       document.querySelectorAll("[data-mpt-day]").forEach(b=>b.onclick=()=>{ mptDay=b.dataset.mptDay||""; view="terms"; render(); });
       document.querySelectorAll("[data-mpt-month]").forEach(b=>b.onclick=()=>{ mptMonth=Number(b.dataset.mptMonth)||3; view="terms"; render(); });
-      document.querySelectorAll("[data-km-id]").forEach(b=>b.onclick=()=>{ kmId=b.dataset.kmId; kmShown=""; kmVin=""; view="calc"; render(); });
+      document.querySelectorAll("[data-km-id]").forEach(b=>b.onclick=(e)=>{ e.preventDefault(); e.stopPropagation(); kmId=b.dataset.kmId; kmShown=""; kmVin=""; view="calc"; render(); });
       const kmToOffer=document.getElementById("kmToOffer");
       if(kmToOffer) kmToOffer.onclick=()=>{ if(typeof offerFromCalc==="function") offerFromCalc(); };
       document.querySelectorAll("[data-down-mode]").forEach(b=>b.onclick=()=>{

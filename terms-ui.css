@@ -194,15 +194,20 @@
   .km-brand.tenet{grid-column:1;grid-row:1;color:#8a6840}
   .km-brand.plus{grid-column:2;grid-row:1;color:#8a5a10}
   .km-brand.chery{grid-column:3;grid-row:1;color:#3e5870}
-  .km-slot.s-t4{grid-column:1;grid-row:2}
-  .km-slot.s-plus{grid-column:2;grid-row:2 / span 2}
-  .km-slot.s-t7{grid-column:1;grid-row:3}
-  .km-slot.s-c7{grid-column:3;grid-row:3}
-  .km-slot.s-t8{grid-column:1 / -1;grid-row:4}
-  .km-slot.s-t9{grid-column:1;grid-row:5}
-  .km-slot.s-c9{grid-column:3;grid-row:5}
-  .km-slot.s-a8{grid-column:1;grid-row:6}
-  .km-slot.s-ca{grid-column:3;grid-row:6}
+  .km-slot.s-test{grid-column:1 / -1;grid-row:2;position:relative;z-index:3}
+  .km-slot.s-t4{grid-column:1;grid-row:3}
+  .km-slot.s-plus{grid-column:2;grid-row:3 / span 2}
+  .km-slot.s-t7{grid-column:1;grid-row:4}
+  .km-slot.s-c7{grid-column:3;grid-row:4}
+  .km-slot.s-t8{grid-column:1 / -1;grid-row:5}
+  .km-slot.s-t9{grid-column:1;grid-row:6}
+  .km-slot.s-c9{grid-column:3;grid-row:6}
+  .km-slot.s-a8{grid-column:1;grid-row:7}
+  .km-slot.s-ca{grid-column:3;grid-row:7}
+  .km-slot.s-test .km-grid{grid-template-columns:1fr 1fr}
+  .km-line.tone-test{background:#f6f3fb;border:1px solid #cbb6dc;border-left:3px solid #6a3d86}
+  .km-slot.s-test .stock-h{color:#5b2d7a}
+  .km-slot.s-test .chip{cursor:pointer;position:relative;z-index:1}
   .km-slot.s-plus .km-pair{grid-template-columns:1fr}
   .km-slot.s-plus .km-grid{grid-template-columns:1fr}
   .km-pair.is-2{grid-template-columns:1fr 1fr;align-items:start}

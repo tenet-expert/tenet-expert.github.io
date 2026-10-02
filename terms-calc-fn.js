@@ -878,6 +878,8 @@
       return kmDcCrAt(p, Number(hi)*1000, Math.ceil);
     }
     function calcKm(){
+      const testHit=typeof testSaleOf==="function"?testSaleOf(kmId):null;
+      if(testHit) return calcTestSale(testHit);
       if(typeof kmId!=="string" || !KM_MODELS.some(x=>x.id===kmId)) kmId=KM_MODELS[0].id;
       if(typeof kmVin!=="string") kmVin="";
       const m=KM_MODELS.find(x=>x.id===kmId)||KM_MODELS[0];
