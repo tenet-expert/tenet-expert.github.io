@@ -1,0 +1,55 @@
+name: fleet-specs-patch
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Patch
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          from pathlib import Path
+          import urllib.request
+          p = Path("terms-fleet.js")
+          t = p.read_text(encoding="utf-8")
+          old = 'ta8p:{name:"A8 Prime 1.6",rrc:2999000,dealer:2874000,an:400000,client:2639120,prem:294860,km:16279,tidy:2599000,sub:0,do:70000,casco:80000}'
+          new = 'ta8p:{name:"A8 Prime 1.6",rrc:2999000,dealer:2874000,an:400000,client:2639120,prem:294860,km:16279,tidy:2599000,sub:150000,do:70000,casco:80000}'
+          if old not in t:
+              raise SystemExit("ta8p old missing")
+          p.write_text(t.replace(old, new, 1), encoding="utf-8")
+          print("fleet", p.stat().st_size)
+          url = "https://raw.githubusercontent.com/sanchesefn/tenet-expert/main/terms-calc-data.js"
+          data = urllib.request.urlopen(url, timeout=60).read()
+          text = data.decode("utf-8")
+          if "t7a:{cash:2450000" not in text or "Active 2WD" not in text:
+              raise SystemExit("mirror terms-calc-data.js missing T7 Active")
+          Path("terms-calc-data.js").write_bytes(data)
+          print("data", len(data))
+          PY
+          node --check terms-fleet.js
+          node --check terms-calc-data.js
+          grep -q 'sub:150000,do:70000,casco:80000' terms-fleet.js
+          grep -q 't7a:{cash:2450000' terms-calc-data.js
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add terms-fleet.js terms-calc-data.js
+          git commit -m "флит/спецы: ta8p sub 150000; PANGO/TERMS_INV T7 Active 2WD; TERMS_DATE 02.10.2026"
+          git push origin HEAD:main
+      - name: Cleanup
+        if: always()
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git pull --rebase origin main || true
+          if [ -f .github/workflows/fleet-specs-patch.yml ]; then
+            git rm -f .github/workflows/fleet-specs-patch.yml
+            git commit -m "cleanup: remove fleet-specs-patch workflow" || exit 0
+            git push origin HEAD:main || true
+          fi
