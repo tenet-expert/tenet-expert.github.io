@@ -236,7 +236,7 @@
           const downShow=Math.max(0, Math.min(priceSub, down));
           const downCar=Math.max(0, downShow-200000);
           const subTerm=Math.min(Math.max(1, term), 84);
-          paySub=typeof calcPay==="function"?calcPay(priceSub+finDelta, downCar, subTerm, 19.2):0;
+          paySub=typeof calcPay==="function"?calcPay(priceSub+finDelta, downCar, subTerm, typeof fleetRateOf==="function"?fleetRateOf(mm):19.2):0;
         }
         return {c, mm, price:sale, pay, paySub, priceSub, crAmt, d:Math.abs(sale-price0)+Math.abs(pay-refPay)};
       }).sort((a,b)=>a.d-b.d).slice(0,4);

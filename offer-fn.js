@@ -262,11 +262,11 @@
       const months=Math.max(1, Math.round(Number(d.months)||60));
       const down=Math.max(0, Math.round(Number(d.down)||0));
       const have=(d.service && d.ownVal)?Math.max(0, Math.round(d.ownVal)):down;
-      const q=typeof fleetSubQuote==="function"?fleetSubQuote(base, sub, have, f.do||70000, f.casco||80000, months, true):null;
+      const q=typeof fleetSubQuote==="function"?fleetSubQuote(base, sub, have, f.do||70000, f.casco||80000, months, true, typeof fleetRateOf==="function"?fleetRateOf(d.m):19.2):null;
       const gov=Math.max(0, base-sub-ti);
       const lines=[
         "Цена по госпрограмме с учётом субсидии и трейд-ин "+rub(gov)+" ₽",
-        "Ставка 19,2%, Совкомбанк",
+        "Ставка "+String((q&&q.rate)||19.2).replace(".",",")+"%, Совкомбанк",
         "ПВ и субсидия не больше 49%"+(q?" · взнос до "+rub(q.maxPv)+" ₽":"")
       ];
       if(have) lines.push("Досрочно "+rub(have)+" ₽ — короче срок, платёж тот же");

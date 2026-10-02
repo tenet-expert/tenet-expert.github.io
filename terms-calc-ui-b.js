@@ -115,7 +115,7 @@
       const tiMpt=useTi?(typeof FLEET_TI==="number"?FLEET_TI:100000):0;
       const fleetBase=Math.max(0, mptTidy-tiMpt);
       const subAmt=(showSub && fMpt && fMpt.sub)||0;
-      const qFleet=typeof fleetSubQuote==="function"?fleetSubQuote(fleetBase, subAmt, down, addons, pack||0, months, !!(showSub && subAmt)):{price:fleetBase, pv:down, pvCar:down, credit:Math.max(0,fleetBase-down), term:Math.min(months,84), termAfter:Math.min(months,84), rate:19.2, pay:0, over:0, doCasco:(addons||0)+(pack||0), pvExtras:0, extrasCredit:0, early:0, earlyOver:0, limited:false, sub:subAmt, base:fleetBase, cap49:0, earlyCap:0};
+      const qFleet=typeof fleetSubQuote==="function"?fleetSubQuote(fleetBase, subAmt, down, addons, pack||0, months, !!(showSub && subAmt), fleetRateOf(m)):{price:fleetBase, pv:down, pvCar:down, credit:Math.max(0,fleetBase-down), term:Math.min(months,84), termAfter:Math.min(months,84), rate:fleetRateOf(m), pay:0, over:0, doCasco:(addons||0)+(pack||0), pvExtras:0, extrasCredit:0, early:0, earlyOver:0, limited:false, sub:subAmt, base:fleetBase, cap49:0, earlyCap:0};
       const priceMpt=qFleet.price;
       const downMptShow=qFleet.pv;
       const downMptCar=qFleet.pvCar;
@@ -207,7 +207,7 @@
           const altTidy=(fAlt&&fAlt.tidy)||alt.rrc;
           const altTi=useTi?(typeof FLEET_TI==="number"?FLEET_TI:100000):0;
           const altBase=Math.max(0, altTidy-altTi);
-          const altQ=typeof fleetSubQuote==="function"?fleetSubQuote(altBase, altSub, altDown, addons, pack||0, months, altSub>0):null;
+          const altQ=typeof fleetSubQuote==="function"?fleetSubQuote(altBase, altSub, altDown, addons, pack||0, months, altSub>0, fleetRateOf(alt)):null;
           const altFleetPrice=altQ?altQ.price:Math.max(0, altBase-altSub);
           const altFleetCredit=altQ?altQ.credit:Math.max(0, altFleetPrice-altDown);
           const altTerm=altQ?altQ.termAfter:Math.min(Math.max(1, months), 84);
@@ -293,7 +293,7 @@
             ${plusAltDirect}
           </div>
           <div class="pay-col ${showSub?"sub":"mpt"} km-pay">
-            <p class="eyebrow">${showFleet||isPlus?"Флит · Совкомбанк 19,2%":showSub?"Флит · субсидия бренда":"Флит · Совкомбанк 19,2%"}</p>
+            <p class="eyebrow">${showFleet||isPlus?"Флит · Совкомбанк "+fleetRateTxt(qFleet.rate)+"%":showSub?"Флит · субсидия бренда":"Флит · Совкомбанк "+fleetRateTxt(qFleet.rate)+"%"}</p>
             ${typeof fleetBodyTop==="function"?fleetBodyTop(qFleet):""}
             ${kmPayRows(banksMpt,"payMpt","overMpt")}
             ${typeof fleetBodyRows==="function"?fleetBodyRows(qFleet):`<div class="bank-row"><span>Тело кредита</span><span class="pay">${rub(creditMpt)}</span></div>`}
@@ -326,7 +326,7 @@
             ${useLoan?`<div class="card">
               <p class="eyebrow">Кредит · ${escape(m.name)}</p>
               <p class="calc-note">ПВ от цены авто ${rub(price)} ₽, без Д/О и каско. В кредит входят авто − ПВ, Д/О, каско расширенное и комиссия банка.</p>
-              ${showMpt||showSub||showFleet?`<p class="eyebrow" style="margin-top:16px">${showFleet||isPlus?"Флит · Совкомбанк 19,2%":showSub?"Флит · субсидия бренда":"Флит · Совкомбанк 19,2%"}</p>
+              ${showMpt||showSub||showFleet?`<p class="eyebrow" style="margin-top:16px">${showFleet||isPlus?"Флит · Совкомбанк "+fleetRateTxt(qFleet.rate)+"%":showSub?"Флит · субсидия бренда":"Флит · Совкомбанк "+fleetRateTxt(qFleet.rate)+"%"}</p>
               ${typeof fleetBodyTop==="function"?fleetBodyTop(qFleet):""}
               ${kmPayRows(banksMpt,"payMpt","overMpt")}
               ${typeof fleetBodyRows==="function"?fleetBodyRows(qFleet):`<div class="bank-row"><span>Тело кредита</span><span class="pay">${rub(creditMpt)}</span></div>`}

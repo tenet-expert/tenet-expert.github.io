@@ -44,7 +44,18 @@
       const months=Math.ceil(n-1e-6);
       return months<1?1:months;
     }
-    function fleetSubQuote(base, sub, down, doAmt, cascoAmt, months, limitPv){
+    function fleetRateOf(m){
+      const id=String(m&&m.id||"");
+      const stock=String(m&&(m.stock||m.model)||"");
+      const brand=String(m&&m.brand||"");
+      if(brand==="CHERY"||stock==="t9"||stock==="a8"||stock==="t7l"||id==="t9p"||id==="t9u"||id==="a8a"||id==="a8p"||id==="a8u"||id==="t7l") return 22.9;
+      return 19.2;
+    }
+    function fleetRateTxt(n){
+      const x=Number(n);
+      return String(Number.isFinite(x)&&x>0?x:19.2).replace(".",",");
+    }
+    function fleetSubQuote(base, sub, down, doAmt, cascoAmt, months, limitPv, rateIn){
       base=Math.max(0, Math.round(Number(base)||0));
       sub=Math.max(0, Math.min(base, Math.round(Number(sub)||0)));
       const price=Math.max(0, base-sub);
@@ -66,7 +77,8 @@
       const extrasCredit=Math.max(0, doCasco-pvExtras);
       const credit=Math.max(0, price-pvCar+extrasCredit);
       const term=Math.min(Math.max(1, Math.round(Number(months)||84)), 84);
-      const rate=19.2;
+      const given=Number(rateIn);
+      const rate=Number.isFinite(given)&&given>0?given:19.2;
       const pay=typeof calcPay==="function"?calcPay(credit+pvCar, pvCar, term, rate):0;
       let termAfter=term;
       if(early>0){
@@ -182,7 +194,7 @@
       const addons=typeof kmVal==="function"?kmVal("kmDo", 70000):70000;
       const pack=typeof kmVal==="function"?kmVal("kmPack", 150000):150000;
       const finDelta=(addons-70000)+(pack-150000);
-      const q=fleetSubQuote(base, subAmt, down, addons, pack, months, isSub);
+      const q=fleetSubQuote(base, subAmt, down, addons, pack, months, isSub, fleetRateOf(m));
       const creditMpt=q.credit;
       const banksMpt=[{id:"sovcom", name:"Совкомбанк", rate:q.rate, term:q.termAfter, capped:!q.early && q.term!==months, termNote:q.early?(q.termAfter+" мес. вместо "+q.term+" · досрочное не меняет платёж"):"", payMpt:q.pay, overMpt:q.over}];
       const priceReg=Math.max(0, (m&&m.rrc?m.rrc:f.rrc)-(useTi&&m&&m.ti?m.ti:0));
@@ -232,7 +244,7 @@
             ${regBreak}
           </div>`;
       const altCol=`<div class="pay-col sub km-pay">
-            <p class="eyebrow">${isSub?"Флит · субсидия бренда":"Флит · Совкомбанк 19,2%"}</p>
+            <p class="eyebrow">${isSub?"Флит · субсидия бренда":"Флит · Совкомбанк "+fleetRateTxt(q.rate)+"%"}</p>
             ${fleetBodyTop(q)}
             ${fleetPayRows(banksMpt,"payMpt","overMpt",months)}
             ${fleetBodyRows(q)}
@@ -304,14 +316,14 @@
       const subCut=f.sub||0;
       const fleetBox=fleetCreditBox(price, m, f, useFleet, useTi, useSub?"sub":"fleet");
       return banner("Калькулятор","Флит · BFS Совкомбанк лизинг","TENET")+`
-        <p class="lead">${fleetBox.pangoCol?"Три расчёта рядом: директ, "+(useSub?"флит с субсидией бренда":"флит")+" и спеццена PANGO.":(useSub?"Скидки флита, директ и справа флит с субсидией бренда.":"Скидки флита, директ и флит Совкомбанк 19,2%.")}</p>
+        <p class="lead">${fleetBox.pangoCol?"Три расчёта рядом: директ, "+(useSub?"флит с субсидией бренда":"флит")+" и спеццена PANGO.":(useSub?"Скидки флита, директ и справа флит с субсидией бренда.":"Скидки флита, директ и флит Совкомбанк "+fleetRateTxt(fleetRateOf(m))+"%.")}</p>
         <div class="km-stage${fleetBox?(fleetBox.pangoCol?" km-4":" km-3"):""}">
         <div class="km-chips">${kmChipGroups(m.id)}</div>
         <div class="km-layout${fleetBox?(fleetBox.pangoCol?" km-4":" km-3"):""}">
           <div class="card km-disc">
             <p class="eyebrow">BFS Совкомбанк лизинг · ${escape(f.name)}</p>
             ${car?`<p class="calc-note">${escape(car.vin)} · ${escape(car.color||"")} · ${escape(car.trim||"")}${carIsCorp(car)?" · корп":""}</p>`:""}
-            <div class="note-box">Сбер / Альфа / Т-Банк на этот VIN нельзя. По центру — директ той же комплектации. Справа — ${useSub?"флит с субсидией бренда":"флит Совкомбанк 19,2%"}.</div>
+            <div class="note-box">Сбер / Альфа / Т-Банк на этот VIN нельзя. По центру — директ той же комплектации. Справа — ${useSub?"флит с субсидией бренда":"флит Совкомбанк "+fleetRateTxt(fleetRateOf(m))+"%"}.</div>
             <label class="check-row"><input id="kmFleetDisc" type="checkbox" ${useFleet?"checked":""} /> <span>Флит скидка ${rub(fleetCut)} · макс. выгода ${rub(f.an)}</span></label>
             <label class="check-row"><input id="kmUseTi" type="checkbox" ${useTi?"checked":""} /> <span>Трейд-ин ${rub(FLEET_TI)}</span></label>
             ${!useMpt&&canSub?`<label class="check-row"><input id="kmFleetSub" type="checkbox" ${useSub?"checked":""} /> <span>Субсидия бренда ${rub(subCut)}</span></label>`:""}

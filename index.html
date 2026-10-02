@@ -2302,7 +2302,18 @@ async function pingTelegram(body){
       const months=Math.ceil(n-1e-6);
       return months<1?1:months;
     }
-    function fleetSubQuote(base, sub, down, doAmt, cascoAmt, months, limitPv){
+    function fleetRateOf(m){
+      const id=String(m&&m.id||"");
+      const stock=String(m&&(m.stock||m.model)||"");
+      const brand=String(m&&m.brand||"");
+      if(brand==="CHERY"||stock==="t9"||stock==="a8"||stock==="t7l"||id==="t9p"||id==="t9u"||id==="a8a"||id==="a8p"||id==="a8u"||id==="t7l") return 22.9;
+      return 19.2;
+    }
+    function fleetRateTxt(n){
+      const x=Number(n);
+      return String(Number.isFinite(x)&&x>0?x:19.2).replace(".",",");
+    }
+    function fleetSubQuote(base, sub, down, doAmt, cascoAmt, months, limitPv, rateIn){
       base=Math.max(0, Math.round(Number(base)||0));
       sub=Math.max(0, Math.min(base, Math.round(Number(sub)||0)));
       const price=Math.max(0, base-sub);
@@ -2324,7 +2335,8 @@ async function pingTelegram(body){
       const extrasCredit=Math.max(0, doCasco-pvExtras);
       const credit=Math.max(0, price-pvCar+extrasCredit);
       const term=Math.min(Math.max(1, Math.round(Number(months)||84)), 84);
-      const rate=19.2;
+      const given=Number(rateIn);
+      const rate=Number.isFinite(given)&&given>0?given:19.2;
       const pay=typeof calcPay==="function"?calcPay(credit+pvCar, pvCar, term, rate):0;
       let termAfter=term;
       if(early>0){
@@ -2440,7 +2452,7 @@ async function pingTelegram(body){
       const addons=typeof kmVal==="function"?kmVal("kmDo", 70000):70000;
       const pack=typeof kmVal==="function"?kmVal("kmPack", 150000):150000;
       const finDelta=(addons-70000)+(pack-150000);
-      const q=fleetSubQuote(base, subAmt, down, addons, pack, months, isSub);
+      const q=fleetSubQuote(base, subAmt, down, addons, pack, months, isSub, fleetRateOf(m));
       const creditMpt=q.credit;
       const banksMpt=[{id:"sovcom", name:"Совкомбанк", rate:q.rate, term:q.termAfter, capped:!q.early && q.term!==months, termNote:q.early?(q.termAfter+" мес. вместо "+q.term+" · досрочное не меняет платёж"):"", payMpt:q.pay, overMpt:q.over}];
       const priceReg=Math.max(0, (m&&m.rrc?m.rrc:f.rrc)-(useTi&&m&&m.ti?m.ti:0));
@@ -2490,7 +2502,7 @@ async function pingTelegram(body){
             ${regBreak}
           </div>`;
       const altCol=`<div class="pay-col sub km-pay">
-            <p class="eyebrow">${isSub?"Флит · субсидия бренда":"Флит · Совкомбанк 19,2%"}</p>
+            <p class="eyebrow">${isSub?"Флит · субсидия бренда":"Флит · Совкомбанк "+fleetRateTxt(q.rate)+"%"}</p>
             ${fleetBodyTop(q)}
             ${fleetPayRows(banksMpt,"payMpt","overMpt",months)}
             ${fleetBodyRows(q)}
@@ -2562,14 +2574,14 @@ async function pingTelegram(body){
       const subCut=f.sub||0;
       const fleetBox=fleetCreditBox(price, m, f, useFleet, useTi, useSub?"sub":"fleet");
       return banner("Калькулятор","Флит · BFS Совкомбанк лизинг","TENET")+`
-        <p class="lead">${fleetBox.pangoCol?"Три расчёта рядом: директ, "+(useSub?"флит с субсидией бренда":"флит")+" и спеццена PANGO.":(useSub?"Скидки флита, директ и справа флит с субсидией бренда.":"Скидки флита, директ и флит Совкомбанк 19,2%.")}</p>
+        <p class="lead">${fleetBox.pangoCol?"Три расчёта рядом: директ, "+(useSub?"флит с субсидией бренда":"флит")+" и спеццена PANGO.":(useSub?"Скидки флита, директ и справа флит с субсидией бренда.":"Скидки флита, директ и флит Совкомбанк "+fleetRateTxt(fleetRateOf(m))+"%.")}</p>
         <div class="km-stage${fleetBox?(fleetBox.pangoCol?" km-4":" km-3"):""}">
         <div class="km-chips">${kmChipGroups(m.id)}</div>
         <div class="km-layout${fleetBox?(fleetBox.pangoCol?" km-4":" km-3"):""}">
           <div class="card km-disc">
             <p class="eyebrow">BFS Совкомбанк лизинг · ${escape(f.name)}</p>
             ${car?`<p class="calc-note">${escape(car.vin)} · ${escape(car.color||"")} · ${escape(car.trim||"")}${carIsCorp(car)?" · корп":""}</p>`:""}
-            <div class="note-box">Сбер / Альфа / Т-Банк на этот VIN нельзя. По центру — директ той же комплектации. Справа — ${useSub?"флит с субсидией бренда":"флит Совкомбанк 19,2%"}.</div>
+            <div class="note-box">Сбер / Альфа / Т-Банк на этот VIN нельзя. По центру — директ той же комплектации. Справа — ${useSub?"флит с субсидией бренда":"флит Совкомбанк "+fleetRateTxt(fleetRateOf(m))+"%"}.</div>
             <label class="check-row"><input id="kmFleetDisc" type="checkbox" ${useFleet?"checked":""} /> <span>Флит скидка ${rub(fleetCut)} · макс. выгода ${rub(f.an)}</span></label>
             <label class="check-row"><input id="kmUseTi" type="checkbox" ${useTi?"checked":""} /> <span>Трейд-ин ${rub(FLEET_TI)}</span></label>
             ${!useMpt&&canSub?`<label class="check-row"><input id="kmFleetSub" type="checkbox" ${useSub?"checked":""} /> <span>Субсидия бренда ${rub(subCut)}</span></label>`:""}
@@ -2843,7 +2855,7 @@ async function pingTelegram(body){
           const downShow=Math.max(0, Math.min(priceSub, down));
           const downCar=Math.max(0, downShow-200000);
           const subTerm=Math.min(Math.max(1, term), 84);
-          paySub=typeof calcPay==="function"?calcPay(priceSub+finDelta, downCar, subTerm, 19.2):0;
+          paySub=typeof calcPay==="function"?calcPay(priceSub+finDelta, downCar, subTerm, typeof fleetRateOf==="function"?fleetRateOf(mm):19.2):0;
         }
         return {c, mm, price:sale, pay, paySub, priceSub, crAmt, d:Math.abs(sale-price0)+Math.abs(pay-refPay)};
       }).sort((a,b)=>a.d-b.d).slice(0,4);
@@ -3077,7 +3089,7 @@ async function pingTelegram(body){
       const tiMpt=useTi?(typeof FLEET_TI==="number"?FLEET_TI:100000):0;
       const fleetBase=Math.max(0, mptTidy-tiMpt);
       const subAmt=(showSub && fMpt && fMpt.sub)||0;
-      const qFleet=typeof fleetSubQuote==="function"?fleetSubQuote(fleetBase, subAmt, down, addons, pack||0, months, !!(showSub && subAmt)):{price:fleetBase, pv:down, pvCar:down, credit:Math.max(0,fleetBase-down), term:Math.min(months,84), termAfter:Math.min(months,84), rate:19.2, pay:0, over:0, doCasco:(addons||0)+(pack||0), pvExtras:0, extrasCredit:0, early:0, earlyOver:0, limited:false, sub:subAmt, base:fleetBase, cap49:0, earlyCap:0};
+      const qFleet=typeof fleetSubQuote==="function"?fleetSubQuote(fleetBase, subAmt, down, addons, pack||0, months, !!(showSub && subAmt), fleetRateOf(m)):{price:fleetBase, pv:down, pvCar:down, credit:Math.max(0,fleetBase-down), term:Math.min(months,84), termAfter:Math.min(months,84), rate:fleetRateOf(m), pay:0, over:0, doCasco:(addons||0)+(pack||0), pvExtras:0, extrasCredit:0, early:0, earlyOver:0, limited:false, sub:subAmt, base:fleetBase, cap49:0, earlyCap:0};
       const priceMpt=qFleet.price;
       const downMptShow=qFleet.pv;
       const downMptCar=qFleet.pvCar;
@@ -3169,7 +3181,7 @@ async function pingTelegram(body){
           const altTidy=(fAlt&&fAlt.tidy)||alt.rrc;
           const altTi=useTi?(typeof FLEET_TI==="number"?FLEET_TI:100000):0;
           const altBase=Math.max(0, altTidy-altTi);
-          const altQ=typeof fleetSubQuote==="function"?fleetSubQuote(altBase, altSub, altDown, addons, pack||0, months, altSub>0):null;
+          const altQ=typeof fleetSubQuote==="function"?fleetSubQuote(altBase, altSub, altDown, addons, pack||0, months, altSub>0, fleetRateOf(alt)):null;
           const altFleetPrice=altQ?altQ.price:Math.max(0, altBase-altSub);
           const altFleetCredit=altQ?altQ.credit:Math.max(0, altFleetPrice-altDown);
           const altTerm=altQ?altQ.termAfter:Math.min(Math.max(1, months), 84);
@@ -3255,7 +3267,7 @@ async function pingTelegram(body){
             ${plusAltDirect}
           </div>
           <div class="pay-col ${showSub?"sub":"mpt"} km-pay">
-            <p class="eyebrow">${showFleet||isPlus?"Флит · Совкомбанк 19,2%":showSub?"Флит · субсидия бренда":"Флит · Совкомбанк 19,2%"}</p>
+            <p class="eyebrow">${showFleet||isPlus?"Флит · Совкомбанк "+fleetRateTxt(qFleet.rate)+"%":showSub?"Флит · субсидия бренда":"Флит · Совкомбанк "+fleetRateTxt(qFleet.rate)+"%"}</p>
             ${typeof fleetBodyTop==="function"?fleetBodyTop(qFleet):""}
             ${kmPayRows(banksMpt,"payMpt","overMpt")}
             ${typeof fleetBodyRows==="function"?fleetBodyRows(qFleet):`<div class="bank-row"><span>Тело кредита</span><span class="pay">${rub(creditMpt)}</span></div>`}
@@ -3288,7 +3300,7 @@ async function pingTelegram(body){
             ${useLoan?`<div class="card">
               <p class="eyebrow">Кредит · ${escape(m.name)}</p>
               <p class="calc-note">ПВ от цены авто ${rub(price)} ₽, без Д/О и каско. В кредит входят авто − ПВ, Д/О, каско расширенное и комиссия банка.</p>
-              ${showMpt||showSub||showFleet?`<p class="eyebrow" style="margin-top:16px">${showFleet||isPlus?"Флит · Совкомбанк 19,2%":showSub?"Флит · субсидия бренда":"Флит · Совкомбанк 19,2%"}</p>
+              ${showMpt||showSub||showFleet?`<p class="eyebrow" style="margin-top:16px">${showFleet||isPlus?"Флит · Совкомбанк "+fleetRateTxt(qFleet.rate)+"%":showSub?"Флит · субсидия бренда":"Флит · Совкомбанк "+fleetRateTxt(qFleet.rate)+"%"}</p>
               ${typeof fleetBodyTop==="function"?fleetBodyTop(qFleet):""}
               ${kmPayRows(banksMpt,"payMpt","overMpt")}
               ${typeof fleetBodyRows==="function"?fleetBodyRows(qFleet):`<div class="bank-row"><span>Тело кредита</span><span class="pay">${rub(creditMpt)}</span></div>`}
@@ -3896,11 +3908,11 @@ async function pingTelegram(body){
       const months=Math.max(1, Math.round(Number(d.months)||60));
       const down=Math.max(0, Math.round(Number(d.down)||0));
       const have=(d.service && d.ownVal)?Math.max(0, Math.round(d.ownVal)):down;
-      const q=typeof fleetSubQuote==="function"?fleetSubQuote(base, sub, have, f.do||70000, f.casco||80000, months, true):null;
+      const q=typeof fleetSubQuote==="function"?fleetSubQuote(base, sub, have, f.do||70000, f.casco||80000, months, true, typeof fleetRateOf==="function"?fleetRateOf(d.m):19.2):null;
       const gov=Math.max(0, base-sub-ti);
       const lines=[
         "Цена по госпрограмме с учётом субсидии и трейд-ин "+rub(gov)+" ₽",
-        "Ставка 19,2%, Совкомбанк",
+        "Ставка "+String((q&&q.rate)||19.2).replace(".",",")+"%, Совкомбанк",
         "ПВ и субсидия не больше 49%"+(q?" · взнос до "+rub(q.maxPv)+" ₽":"")
       ];
       if(have) lines.push("Досрочно "+rub(have)+" ₽ — короче срок, платёж тот же");
