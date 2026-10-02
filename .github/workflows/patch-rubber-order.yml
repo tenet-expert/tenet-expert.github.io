@@ -1,0 +1,47 @@
+name: patch-rubber-order
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "patch_tune_rubber.py"
+      - ".github/workflows/patch-rubber-order.yml"
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch T9 R19 note from Drive
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          from pathlib import Path
+          OLD = '["T9 R19",[["235/55 R19",15750,63000,"0 · под заказ"]]]'
+          NEW = '["T9 R19",[["235/55 R19",15750,63000,"0 · под заказ 3 раб дня"]]]'
+          OLD2 = '["235/55 R19",15750,63000,"0 · под заказ"]'
+          NEW2 = '["235/55 R19",15750,63000,"0 · под заказ 3 раб дня"]'
+          path = Path("index.html")
+          t = path.read_text(encoding="utf-8")
+          if NEW in t or NEW2 in t:
+              print("already updated")
+          elif OLD in t:
+              path.write_text(t.replace(OLD, NEW, 1), encoding="utf-8")
+              print("patched via OLD")
+          elif OLD2 in t:
+              path.write_text(t.replace(OLD2, NEW2, 1), encoding="utf-8")
+              print("patched via OLD2")
+          else:
+              raise SystemExit("T9 R19 order string not found in index.html")
+          PY
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          if git diff --staged --quiet; then
+            echo "no changes"
+            exit 0
+          fi
+          git commit -m "резина: T9 R19 под заказ 3 раб дня (Drive Резина Чери)"
+          git push
