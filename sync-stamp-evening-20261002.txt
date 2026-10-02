@@ -1,0 +1,6 @@
+склад-logicstars-17 evening 02.10.2026 Europe/Samara
+LOGIN_OK TENET 16/86/5 + CHERY 1/2 → stock 105 (±0 vs noon)
+reserved:4 manual; corp:5; demos:0; PISEC∩stock empty
+bron bez VIN ≥02.10: 73
+part1 restore commit: 5ae48946fbfb390397271588229e1736a316db8c
+stock.json / part1 / part2 content unchanged vs noon (105 cars, reserved:4)
