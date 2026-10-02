@@ -257,6 +257,8 @@ input,textarea{width:100%;background:#fff;border:1px solid var(--border);color:v
 .tune-table th{font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);font-weight:700;}
 .tune-table tr.grp td{background:#f6f1e8;font-weight:800;text-align:left;color:#161618;}
 .tune-note{color:var(--muted);font-size:13px;line-height:1.45;margin:8px 0 0;}
+.tune-table.test-sale th:nth-child(7),.tune-table.test-sale td:nth-child(7){color:#5b2d7a;font-weight:800;}
+.tune-table.test-sale td:last-child{white-space:nowrap;}
 .epts-steps{display:grid;gap:10px;margin-top:22px;}
 .epts-step{border:1px solid var(--border);background:var(--surface);border-radius:var(--radius);padding:16px 16px 18px;box-shadow:var(--shadow);text-align:left;}
 .epts-step.is-wait{opacity:.55;}
@@ -1830,6 +1832,13 @@ async function pingTelegram(body){
     const PANGO_RATE_B = 14.4;
     const PANGO_NSS = 0.0089;
     function pangoOf(id){ return (typeof PANGO_FIX!=="undefined" && PANGO_FIX[id]) || null; }
+    const TEST_SALE = [
+      {id:"tst8", short:"Tiggo 8 Pro Max", model:"CHERY Tiggo 8 Pro Max", vin:"LVTDD24B5RD409189", rrc:3885000, tune:212000, year:2024, km:3700, fix:2750000},
+      {id:"tst4", short:"Tiggo 4", model:"CHERY Tiggo 4", vin:"LVVDB21B8RC106478", rrc:2395000, tune:164200, year:2024, km:4983, fix:2150000},
+      {id:"tst9", short:"Tiggo 9", model:"CHERY Tiggo 9", vin:"LVTDD24B9RG094198", rrc:4640000, tune:220000, year:2024, km:3853, fix:3500000},
+      {id:"tsa8", short:"Arrizo 8", model:"CHERY Arrizo 8", vin:"LVVDC21B2RD562966", rrc:3260000, tune:230000, year:2024, km:4970, fix:2300000}
+    ];
+    function testSaleOf(id){ return (typeof TEST_SALE!=="undefined" && TEST_SALE.find(x=>x.id===id)) || null; }
     const TERMS_PRIO = [
       {model:"T4",vin:"EDEED31B1SE053704",trim:"Prime 4WD",year:"2025",color:"Белый",extra:"Сидоров",pay:500,bonus:1000,sold:true,seller:"Сидоров"},
       {model:"T7",vin:"EDXFB32B4TE041659",trim:"Active",year:"2026",color:"Чёрный",extra:"Елчин",pay:500,bonus:1000,sold:true,seller:"Елчин"},
@@ -2785,6 +2794,7 @@ async function pingTelegram(body){
         +slot("s-c9",line("Tiggo 9","b"))
         +slot("s-a8",line("TENET A8","a"))
         +slot("s-ca",line("Arrizo 8","b"))
+        +`<div class="km-line tone-c"><p class="stock-h">Тесты в продаже · только PANGO</p><div class="km-grid">${TEST_SALE.map(x=>`<button type="button" class="chip ${x.id===active?"on":""}" data-km-id="${x.id}">${escape(x.short)}<small>фикс ${rub(x.fix)}</small></button>`).join("")}</div></div>`
         +`</div>`;
     }
     function kmPrioRecRows(cur, carPrice, downPct, months, extras, deal){
@@ -2898,7 +2908,75 @@ async function pingTelegram(body){
       if(km0<=Number(hi)*1000+50) return 0;
       return kmDcCrAt(p, Number(hi)*1000, Math.ceil);
     }
+    function calcTestSale(car){
+      const fresh=(typeof kmShown==="undefined")||kmShown!==car.id;
+      kmShown=car.id;
+      if(typeof kmVin!=="string") kmVin="";
+      const months=Math.max(1, kmVal("cMonths", 60));
+      const read=kmDownRead(car.fix, fresh);
+      const down=read.down;
+      const downPct=read.downPct;
+      const pFix=car.fix;
+      const pDown=Math.max(0, Math.min(pFix, down));
+      const pBundle=typeof PANGO_BUNDLE==="number"?PANGO_BUNDLE:150000;
+      const pRateA=typeof PANGO_RATE_A==="number"?PANGO_RATE_A:17.4;
+      const pRateB=typeof PANGO_RATE_B==="number"?PANGO_RATE_B:14.4;
+      const pNssRate=typeof PANGO_NSS==="number"?PANGO_NSS:0.0089;
+      const pYears=months/12;
+      const pYearsLabel=Math.abs(pYears-Math.round(pYears))<0.05?String(Math.round(pYears)):pYears.toFixed(1);
+      const yNum=Number(pYearsLabel);
+      const pYearsWord=(yNum===1)?"год":(yNum>1&&yNum<5&&Math.abs(yNum-Math.round(yNum))<0.05?"года":"лет");
+      const pBase=Math.max(0, pFix-pDown)+pBundle;
+      const pNss=Math.round(pBase*pNssRate*pYears);
+      const pCreditB=pBase+pNss;
+      const pPayA=calcPay(pBase+pDown, pDown, months, pRateA);
+      const pPayB=calcPay(pCreditB+pDown, pDown, months, pRateB);
+      const pOverA=pPayA*months-pBase;
+      const pOverB=pPayB*months-pCreditB;
+      return banner("Калькулятор","Тест · только PANGO","CHERY")+`
+        <p class="lead">Эта машина продаётся только по PANGO. Цена фикс, скидки директа и флита не применяются.</p>
+        <div class="km-stage">
+        <div class="km-chips">${kmChipGroups(car.id)}</div>
+        <div class="km-layout">
+          <div class="card km-disc">
+            <p class="eyebrow">Тест в продаже · ${escape(car.model)}</p>
+            <p class="calc-note" style="margin-top:8px">VIN ${escape(car.vin)} · ${car.year} · пробег ${rub(car.km)} км</p>
+            <div class="bank-row"><span>Цена розница</span><span class="pay">${rub(car.rrc)} ₽</span></div>
+            <div class="bank-row"><span>Тюнинг уже в машине</span><span class="pay">${rub(car.tune)} ₽</span></div>
+            <div class="note-box" style="margin-top:14px">
+              <p class="eyebrow" style="margin:0 0 6px">Цена фикс · продажа на Авито</p>
+              <div class="calc-out">${rub(pFix)} ₽</div>
+              <p class="calc-note">Сумма не меняется. Тюнинг в неё не плюсуется.</p>
+            </div>
+            <label class="field" style="max-width:none;margin-top:12px"><span>Первый взнос, ₽</span><input id="cDown" inputmode="numeric" value="${pDown}" /></label>
+            <label class="field" style="max-width:none"><span>Срок, мес.</span><input id="cMonths" inputmode="numeric" value="${months}" /></label>
+            <input type="hidden" id="cDownMode" value="sum" />
+            <p class="calc-note">${rub(pDown)} ₽ · ${downPct}% от цены фикс</p>
+          </div>
+          <div class="km-right">
+            <div class="pay-col pango km-pay">
+              <p class="eyebrow">Только PANGO</p>
+              <p class="eyebrow" style="margin-top:8px">17,4% без комиссий</p>
+              <div class="bank-row pay-top"><span><b>Платёж</b><br/><small>${pRateA}% · ${months} мес. · переплата ~${rub(Math.round(pOverA))}</small></span><span class="pay">${rub(Math.round(pPayA))} ₽</span></div>
+              <div class="bank-row"><span>Тело кредита</span><span class="pay">${rub(pBase)}</span></div>
+              <p class="eyebrow" style="margin-top:8px">14,4% · НСС в теле</p>
+              <div class="bank-row pay-top"><span><b>Платёж</b><br/><small>${pRateB}% · ${months} мес. · переплата ~${rub(Math.round(pOverB))}</small></span><span class="pay">${rub(Math.round(pPayB))} ₽</span></div>
+              <div class="bank-row"><span>Тело с НСС</span><span class="pay">${rub(pCreditB)}</span></div>
+              <details class="calc-more">
+                <summary>Подробности расчёта</summary>
+                <p class="calc-note">Цена фикс ${rub(pFix)}. Каско + GAP + ДМС ${rub(pBundle)} всегда в кредите. Директ и флит для этой машины закрыты.</p>
+                <div class="bank-row"><span>Цена авто</span><span class="pay">${rub(pFix)}</span></div>
+                <div class="bank-row"><span>Первый взнос</span><span class="pay">${rub(pDown)}</span></div>
+                <div class="bank-row"><span>Каско + GAP + ДМС</span><span class="pay">${rub(pBundle)}</span></div>
+                <div class="bank-row"><span>НСС 0,89% × ${pYearsLabel} ${pYearsWord}</span><span class="pay">${rub(pNss)}</span></div>
+              </details>
+            </div>
+          </div>
+        </div></div>`;
+    }
     function calcKm(){
+      const testHit=testSaleOf(kmId);
+      if(testHit) return calcTestSale(testHit);
       const kmOff={t9p:1,a8a:1,a8u:1};
       if(typeof kmId!=="string" || !KM_MODELS.some(x=>x.id===kmId && !kmOff[x.id])) kmId=(KM_MODELS.find(x=>!kmOff[x.id])||KM_MODELS[0]).id;
       if(typeof kmVin!=="string") kmVin="";
@@ -3399,6 +3477,19 @@ async function pingTelegram(body){
         </div>
       </article>`;
     }
+    function stockTestHtml(){
+      const rows=TEST_SALE.map(c=>`<tr>
+        <td><b>${escape(c.model)}</b></td>
+        <td>${escape(c.vin)}</td>
+        <td>${rub(c.rrc)} ₽</td>
+        <td>${rub(c.tune)} ₽</td>
+        <td>${c.year}</td>
+        <td>${rub(c.km)} км</td>
+        <td>${rub(c.fix)} ₽</td>
+        <td><button type="button" class="chip" data-km-id="${c.id}">В калькулятор</button></td>
+      </tr>`).join("");
+      return `<div class="card"><p class="eyebrow">Тесты в продаже</p><h3 style="margin:4px 0 8px">Цена фикс</h3><p class="tune-note">Как в таблице отдела. Продажа на Авито, только через PANGO. Скидки директа и флита не действуют, тюнинг уже в машине.</p><div class="tune-scroll"><table class="tune-table test-sale"><thead><tr><th>Модель</th><th>VIN</th><th>Цена розница</th><th>Сумма тюнинга</th><th>Год</th><th>Пробег</th><th>Цена фикс</th><th></th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
+    }
     function stock(){
       if(needAuth()) return login();
       if(typeof stockSort!=="string") stockSort="trim";
@@ -3423,7 +3514,8 @@ async function pingTelegram(body){
         const arrow=on?(stockSortDir<0?" ↓":" ↑"):"";
         return `<button type="button" class="chip ${on?"on":""}" data-stock-sort="${k}">${lab}${arrow}</button>`;
       }).join("");
-      const body = list.length
+      const testOn=stockStatus==="test";
+      const body = testOn ? stockTestHtml() : list.length
         ? `<div class="st-board">`+ids.map(id=>{
             const titles={t4:["TENET","T4"],t4l:["TENET","T4L"],t7:["TENET","T7"],t8:["TENET","T8"],tt9:["TENET","T9"],t9:["CHERY","Tiggo 9"],t7l:["CHERY","Tiggo 7 L"],ta8:["TENET","A8"],a8:["CHERY","Arrizo 8"]};
             const known=titles[id];
@@ -3471,16 +3563,17 @@ async function pingTelegram(body){
           }).join("")+`</div>`
         : `<div class="card" style="margin-top:12px"><p>По этому фильтру машин нет.</p></div>`;
       return banner("Склад", `Logicstars · ${meta.updated}`, "TENET")+`
-        <p class="lead">Сначала модель, внутри — комплектация. Сортировка меняет порядок машин и групп.</p>
+        <p class="lead">${testOn?"Четыре теста. Цена в последней колонке фиксированная, продажа только через PANGO.":"Сначала модель, внутри — комплектация. Сортировка меняет порядок машин и групп."}</p>
         <div class="study-pick st-filters">
           <button class="chip ${stockStatus==="all"?"on":""}" data-stock-st="all">Все · ${scoped.length}</button>
           <button class="chip ${stockStatus==="in"?"on":""}" data-stock-st="in">В наличии · ${nIn}</button>
           <button class="chip ${stockStatus==="way"?"on":""}" data-stock-st="way">В пути · ${nWay}</button>
+          <button class="chip ${stockStatus==="test"?"on":""}" data-stock-st="test">Тесты в продаже · ${TEST_SALE.length}</button>
         </div>
-        <div class="study-pick st-filters st-sorts">
+        ${testOn?"":`<div class="study-pick st-filters st-sorts">
           <span class="st-sort-lab">Сортировка</span>
           ${sortBtns}
-        </div>
+        </div>`}
         ${body}`;
     }
     function offerSpecOf(id){
