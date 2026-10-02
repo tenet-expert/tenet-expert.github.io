@@ -2425,16 +2425,6 @@ async function pingTelegram(body){
     function fleetOf(id){
       return FLEET_BFS[id] || FLEET_BFS.t9u;
     }
-    function fleetPayRows(list, payKey, overKey, months){
-      return list.map(b=>{
-        const yearsWant=Math.round(months/12);
-        const yearsHave=Math.round(b.term/12);
-        const note=b.termNote?b.termNote:(b.capped?`нет ${yearsWant} ${yearsWant===1?"года":"лет"} · считаем ${b.term} мес. (${yearsHave} ${yearsHave===1?"год":yearsHave<5?"года":"лет"})`: `${b.term} мес.`);
-        const pay=Math.round(b[payKey]||0);
-        const over=Math.round(b[overKey]||0);
-        return `<div class="bank-row"><span><b>${escape(b.name)}</b><br/><small>${b.rate}% · ${note} · переплата ~${rub(over)}</small></span><span class="pay">${rub(pay)} ₽</span></div>`;
-      }).join("");
-    }
     function fleetCreditBox(price, m, f, useFleet, useTi, mode){
       const isSub=mode==="sub";
       const base=Math.max(0, Math.round((useFleet?(f.tidy||f.rrc):(f.rrc||0))-(useTi?FLEET_TI:0)));
@@ -2710,7 +2700,7 @@ async function pingTelegram(body){
     }
     function kmStockCars(m){
       const list=typeof STOCK!=="undefined"?STOCK:[];
-      return list.filter(c=>c.model===m.stock && kmTrimFit(m,c));
+      return list.filter(c=>!(typeof stockIsDemo==="function"?stockIsDemo(c):c.demo) && c.model===m.stock && kmTrimFit(m,c));
     }
     function terms(){
       if(needAuth()) return login();
@@ -6905,7 +6895,7 @@ async function confirmCloud(rec){
         }
         view="calc"; render();
       });
-      ["kmRrc","kmInv","kmUseTi","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","cDownMode","cDown","cDownPct","cMonths","kmUseLoan","kmUseCr","kmSpec","kmUseDcTi","kmUseDcCr","kmDcTi","kmDcCr","kmDo","kmPack","kmCasco","kmAltId","kmFleetSub"].forEach(id=>{
+      ["kmRrc","kmInv","kmUseTi","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","cDownMode","cDown","cDownPct","cMonths","kmUseLoan","kmUseCr","kmSpec","kmUseDcTi","kmUseDcCr","kmDcTi","kmDcCr","kmDo","kmPack","kmCasco","kmAltId","kmFleetSub"].forEach(id=>{
         const el=document.getElementById(id);
         if(el) el.addEventListener("change", ()=>{ view="calc"; render(); });
       });
