@@ -32,7 +32,7 @@ CSS = """
 JS = r'''
     const BOARD_OCT = "1QJ0Wng-oItBWPDw03PKZ-hTAteaYOvUQVOm-6pautVc";
     const BOARD_SEP = "1PvC2EbyeIIewE2PFPKYOI7dxZAEbGAAiwy6jtxLM5kg";
-    const BOARD_ROSTER = ["Ахмадуллин","Велиджанов","Демьянов","Лавров","Сидоров","Спицын","Тальков","Павлова","Извеков"];
+    const BOARD_ROSTER = ["Ахмадуллин","Велиджанов","Демьянов","Лавров","Сидоров","Спицын","Тальков"];
     let boardTimer = 0;
     let boardMode = "day";
     let boardCache = null;
@@ -117,19 +117,20 @@ JS = r'''
       });
       return out;
     }
+    function boardAdd(p, r){
+      if(r.visit||r.call||r.web) p.traffic++;
+      p.visit+=r.visit; p.call+=r.call; p.web+=r.web; p.meet+=r.meet; p.service+=r.service;
+      p.td+=r.td; p.contract+=r.contract; p.issue+=r.issue;
+    }
     function boardRank(rows){
-      const blank=()=>({name:"",traffic:0,visit:0,call:0,web:0,meet:0,service:0,td:0,contract:0,issue:0});
+      const blank=()=>({name:"",traffic:0,visit:0,call:0,web:0,meet:0,service:0,td:0,contract:0,issue:0,other:false});
       const map={};
       BOARD_ROSTER.forEach(n=>{ const p=blank(); p.name=n; map[n]=p; });
-      rows.forEach(r=>{
-        if(!map[r.who]){ const p=blank(); p.name=r.who; map[r.who]=p; }
-        const p=map[r.who];
-        if(r.visit||r.call||r.web) p.traffic++;
-        p.visit+=r.visit; p.call+=r.call; p.web+=r.web; p.meet+=r.meet; p.service+=r.service;
-        p.td+=r.td; p.contract+=r.contract; p.issue+=r.issue;
-      });
+      const other=blank(); other.name="Другие"; other.other=true;
+      rows.forEach(r=>boardAdd(map[r.who]||other, r));
       const list=Object.keys(map).map(k=>map[k]);
       list.sort((a,b)=>b.issue-a.issue || b.contract-a.contract || b.td-a.td || b.visit-a.visit || b.traffic-a.traffic || a.name.localeCompare(b.name,"ru"));
+      list.push(other);
       const sum=list.reduce((s,p)=>({
         traffic:s.traffic+p.traffic, visit:s.visit+p.visit, td:s.td+p.td, contract:s.contract+p.contract, issue:s.issue+p.issue
       }), {traffic:0,visit:0,td:0,contract:0,issue:0});
@@ -139,7 +140,7 @@ JS = r'''
       const rank=boardRank(rows);
       const sum=rank.sum;
       return `<div class="card" style="margin-top:12px"><p class="eyebrow">${escape(eyebrow)}</p><h3 style="margin:4px 0 8px">${escape(title)} · ${sum.issue} выдач · ${sum.contract} контрактов · ${sum.td} тест-драйвов · ${sum.traffic} первичных</h3><div class="tune-scroll"><table class="lb-table"><thead><tr><th>#</th><th>Менеджер</th><th>Трафик</th><th>Визит</th><th>Звонок</th><th>Интернет</th><th>Встреча</th><th>ТД</th><th>Контракт</th><th>Выдача</th></tr></thead><tbody>`+
-        rank.list.map((p,i)=>`<tr class="lb-row"><td class="lb-place">${i+1}</td><td><b>${escape(p.name)}</b></td><td>${p.traffic}</td><td>${p.visit}</td><td>${p.call}</td><td>${p.web}</td><td>${p.meet}</td><td>${p.td}</td><td>${p.contract}</td><td>${p.issue}</td></tr>`).join("")+
+        rank.list.map((p,i)=>`<tr class="lb-row${p.other?" other":""}"><td class="lb-place">${p.other?"—":i+1}</td><td><b>${escape(p.name)}</b></td><td>${p.traffic}</td><td>${p.visit}</td><td>${p.call}</td><td>${p.web}</td><td>${p.meet}</td><td>${p.td}</td><td>${p.contract}</td><td>${p.issue}</td></tr>`).join("")+
         `</tbody></table></div></div>`;
     }
     function boardKind(r){
@@ -154,19 +155,31 @@ JS = r'''
       if(r.service) bits.push("сервис");
       return bits.join(" · ")||"запись";
     }
-    function boardTape(rows){
-      return `<div class="card" style="margin-top:12px"><p class="eyebrow">Сегодня</p><h3 style="margin:4px 0 8px">Лента</h3><div class="lb-feed">`+
-        (rows.length?rows.slice().reverse().map(r=>`<div class="lb-hit"><div><b>${escape(r.client||"Без имени")} · ${escape(r.model||"—")}</b><small>${escape(r.who)} · ${escape(boardKind(r))}${r.note?" · "+escape(r.note):""}</small></div><small>${escape(String(r.when||"").slice(11,16))}</small></div>`).join(""):`<p class="lead">За сегодня записей пока нет.</p>`)+
+    function boardDayKey(shift){
+      const d=new Date();
+      d.setHours(12,0,0,0);
+      d.setDate(d.getDate()+shift);
+      const dd=d.getDate(), mo=d.getMonth()+1;
+      return (dd<10?"0":"")+dd+"."+(mo<10?"0":"")+mo;
+    }
+    function boardSlice(cache, key){
+      const src=key.slice(3)==="09"?(cache.sep||[]):(cache.oct||[]);
+      return src.filter(r=>String(r.when||"").indexOf(key)===0);
+    }
+    function boardTape(rows, title){
+      return `<div class="card" style="margin-top:12px"><p class="eyebrow">${escape(title)}</p><h3 style="margin:4px 0 8px">Лента</h3><div class="lb-feed">`+
+        (rows.length?rows.slice().reverse().map(r=>`<div class="lb-hit"><div><b>${escape(r.client||"Без имени")} · ${escape(r.model||"—")}</b><small>${escape(r.who)} · ${escape(boardKind(r))}${r.note?" · "+escape(r.note):""}</small></div><small>${escape(String(r.when||"").slice(11,16))}</small></div>`).join(""):`<p class="lead">Записей пока нет.</p>`)+
         `</div></div>`;
     }
     function boardHtml(cache){
-      const today=new Date();
-      const key=(today.getDate()<10?"0":"")+today.getDate()+"."+((today.getMonth()+1)<10?"0":"")+(today.getMonth()+1);
       const note=`<p class="tune-note">Обновлено ${escape(cache.stamp)}. Рейтинг: выдача, затем контракт, тест-драйв, визит, трафик.</p>`;
-      if(boardMode==="prev") return note+boardTable(cache.sep, "Сентябрь", "Сентябрь");
+      if(boardMode==="prev") return note+boardTable(cache.sep, "Предыдущий месяц", "Сентябрь");
       if(boardMode==="month") return note+boardTable(cache.oct, "Месяц", "Октябрь");
-      const dayRows=(cache.oct||[]).filter(r=>String(r.when||"").indexOf(key)===0);
-      return note+boardTable(dayRows, "Сегодня", key)+boardTape(dayRows);
+      const yest=boardMode==="yday";
+      const key=boardDayKey(yest?-1:0);
+      const rows=boardSlice(cache, key);
+      const label=yest?"Вчера":"Сегодня";
+      return note+boardTable(rows, label, key)+boardTape(rows, label);
     }
     async function boardLoad(){
       const root=document.getElementById("boardRoot");
@@ -189,7 +202,7 @@ JS = r'''
       }
     }
     function boardChips(){
-      const items=[["day","Сегодня"],["month","Месяц"],["prev","Сентябрь"]];
+      const items=[["day","Сегодня"],["yday","Вчера"],["month","Месяц"],["prev","Предыдущий месяц"]];
       return `<div class="study-pick st-filters">`+items.map(([id,lab])=>`<button type="button" class="chip ${boardMode===id?"on":""}" data-board-mode="${id}">${lab}</button>`).join("")+`</div>`;
     }
     function board(){
@@ -207,7 +220,7 @@ JS = r'''
         boardLoad();
       }, 40);
       return banner("Leaderboard","Трафик · онлайн","TENET")+`
-        <p class="lead">Сегодня и месяц — из «Трафик октябрь». Сентябрь — из «Трафик сентябрь».</p>
+        <p class="lead">Сегодня, вчера и месяц — из «Трафик октябрь». Предыдущий месяц — из «Трафик сентябрь».</p>
         ${boardChips()}
         <div id="boardRoot"><div class="card"><p>Загружаю таблицу…</p></div></div>`;
     }
@@ -221,6 +234,15 @@ def apply(path: Path):
     if ".prio-fill{" not in html:
         html = html.replace("</style>", CSS + "</style>", 1)
         print("css", path)
+    if 'data-go="board"]::before' not in html and "</style>" in html:
+        html = html.replace(
+            "</style>",
+            '.hub-card[data-go="board"]::before{background-image:url("hub/board.jpg?v=1");background-position:50% 42%;background-size:cover;}\n</style>',
+            1,
+        )
+        print("board preview", path)
+    if ".lb-row.other" not in html and "</style>" in html:
+        html = html.replace("</style>", ".lb-row.other{background:#fbf7f1}\n.lb-row.other td{color:#6d6458}\n</style>", 1)
     card = '["board","L","Leaderboard","Трафик, контракты и выдача отдела"]'
     if '["board","L","Leaderboard"' not in html:
         for needle in (
@@ -240,7 +262,7 @@ def apply(path: Path):
         else:
             html = html.replace(anchor, JS + anchor, 1)
             print("fn", path)
-    elif "const BOARD_SEP" not in html:
+    elif "const BOARD_SEP" not in html or 'data-board-mode="yday"' not in html:
         a = html.find("    const BOARD_SHEET")
         if a < 0:
             a = html.find("    const BOARD_OCT")
