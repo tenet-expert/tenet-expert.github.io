@@ -91,11 +91,12 @@ JS = r'''
       });
       return out;
     }
-    function boardHtml(rows, stamp){
+    function boardRank(rows){
+      const blank=()=>({name:"",traffic:0,visit:0,call:0,web:0,meet:0,service:0,td:0,contract:0,issue:0});
       const map={};
-      BOARD_ROSTER.forEach(n=>{ map[n]={name:n,traffic:0,visit:0,call:0,web:0,meet:0,service:0,td:0,contract:0,issue:0}; });
+      BOARD_ROSTER.forEach(n=>{ const p=blank(); p.name=n; map[n]=p; });
       rows.forEach(r=>{
-        if(!map[r.who]) map[r.who]={name:r.who,traffic:0,visit:0,call:0,web:0,meet:0,service:0,td:0,contract:0,issue:0};
+        if(!map[r.who]){ const p=blank(); p.name=r.who; map[r.who]=p; }
         const p=map[r.who];
         if(r.visit||r.call||r.web) p.traffic++;
         p.visit+=r.visit; p.call+=r.call; p.web+=r.web; p.meet+=r.meet; p.service+=r.service;
@@ -106,18 +107,19 @@ JS = r'''
       const sum=list.reduce((s,p)=>({
         traffic:s.traffic+p.traffic, visit:s.visit+p.visit, td:s.td+p.td, contract:s.contract+p.contract, issue:s.issue+p.issue
       }), {traffic:0,visit:0,td:0,contract:0,issue:0});
-      const head=`<div class="card"><p class="eyebrow">Октябрь · файл «Трафик октябрь»</p><h3 style="margin:4px 0 8px">Отдел · ${sum.issue} выдач · ${sum.contract} контрактов · ${sum.td} тест-драйвов · ${sum.traffic} первичных</h3><p class="tune-note">Обновлено ${escape(stamp)}. Рейтинг: выдача, затем контракт, тест-драйв, визит, трафик. Телефоны не показываем.</p><div class="tune-scroll"><table class="lb-table"><thead><tr><th>#</th><th>Менеджер</th><th>Трафик</th><th>Визит</th><th>Звонок</th><th>Интернет</th><th>Встреча</th><th>ТД</th><th>Контракт</th><th>Выдача</th></tr></thead><tbody>`+
-        list.map((p,i)=>`<tr class="lb-row"><td class="lb-place">${i+1}</td><td><b>${escape(p.name)}</b></td><td>${p.traffic}</td><td>${p.visit}</td><td>${p.call}</td><td>${p.web}</td><td>${p.meet}</td><td>${p.td}</td><td>${p.contract}</td><td>${p.issue}</td></tr>`).join("")+
+      return {list, sum};
+    }
+    function boardTable(rows, eyebrow, title){
+      const rank=boardRank(rows);
+      const sum=rank.sum;
+      return `<div class="card" style="margin-top:12px"><p class="eyebrow">${escape(eyebrow)}</p><h3 style="margin:4px 0 8px">${escape(title)} · ${sum.issue} выдач · ${sum.contract} контрактов · ${sum.td} тест-драйвов · ${sum.traffic} первичных</h3><div class="tune-scroll"><table class="lb-table"><thead><tr><th>#</th><th>Менеджер</th><th>Трафик</th><th>Визит</th><th>Звонок</th><th>Интернет</th><th>Встреча</th><th>ТД</th><th>Контракт</th><th>Выдача</th></tr></thead><tbody>`+
+        rank.list.map((p,i)=>`<tr class="lb-row"><td class="lb-place">${i+1}</td><td><b>${escape(p.name)}</b></td><td>${p.traffic}</td><td>${p.visit}</td><td>${p.call}</td><td>${p.web}</td><td>${p.meet}</td><td>${p.td}</td><td>${p.contract}</td><td>${p.issue}</td></tr>`).join("")+
         `</tbody></table></div></div>`;
+    }
+    function boardHtml(rows, stamp){
       const today=new Date();
       const key=(today.getDate()<10?"0":"")+today.getDate()+"."+((today.getMonth()+1)<10?"0":"")+(today.getMonth()+1);
-      let feed=rows.filter(r=>String(r.when||"").indexOf(key)===0);
-      let feedTitle="Сегодня";
-      if(!feed.length && rows.length){
-        const last=String(rows[rows.length-1].when||"").slice(0,5);
-        feed=rows.filter(r=>String(r.when||"").indexOf(last)===0);
-        feedTitle="Последний день с записями · "+last;
-      }
+      const dayRows=rows.filter(r=>String(r.when||"").indexOf(key)===0);
       const kind=r=>{
         const bits=[];
         if(r.issue) bits.push("выдача");
@@ -130,10 +132,11 @@ JS = r'''
         if(r.service) bits.push("сервис");
         return bits.join(" · ")||"запись";
       };
-      const tape=`<div class="card" style="margin-top:12px"><p class="eyebrow">${escape(feedTitle)}</p><h3 style="margin:4px 0 8px">Живая лента</h3><div class="lb-feed">`+
-        (feed.length?feed.slice().reverse().map(r=>`<div class="lb-hit"><div><b>${escape(r.client||"Без имени")} · ${escape(r.model||"—")}</b><small>${escape(r.who)} · ${escape(kind(r))}${r.note?" · "+escape(r.note):""}</small></div><small>${escape(String(r.when||"").slice(11,16))}</small></div>`).join(""):`<p class="lead">Записей пока нет.</p>`)+
+      const note=`<p class="tune-note">Обновлено ${escape(stamp)}. Сверху сегодня, ниже весь октябрь. Рейтинг: выдача, затем контракт, тест-драйв, визит, трафик.</p>`;
+      const tape=`<div class="card" style="margin-top:12px"><p class="eyebrow">Сегодня</p><h3 style="margin:4px 0 8px">Лента</h3><div class="lb-feed">`+
+        (dayRows.length?dayRows.slice().reverse().map(r=>`<div class="lb-hit"><div><b>${escape(r.client||"Без имени")} · ${escape(r.model||"—")}</b><small>${escape(r.who)} · ${escape(kind(r))}${r.note?" · "+escape(r.note):""}</small></div><small>${escape(String(r.when||"").slice(11,16))}</small></div>`).join(""):`<p class="lead">За сегодня записей пока нет.</p>`)+
         `</div></div>`;
-      return head+tape;
+      return note+boardTable(dayRows, "Сегодня", key)+tape+boardTable(rows, "Месяц", "Октябрь");
     }
     async function boardLoad(){
       const root=document.getElementById("boardRoot");
@@ -156,7 +159,7 @@ JS = r'''
       boardTimer=setInterval(()=>{ if(view==="board") boardLoad(); }, 60000);
       setTimeout(boardLoad, 40);
       return banner("Leaderboard","Трафик октябрь · онлайн","TENET")+`
-        <p class="lead">Вся работа отдела из файла «Трафик октябрь». Цифры подтягиваются сами, раз в минуту.</p>
+        <p class="lead">Сверху рейтинг за сегодня, ниже за октябрь. Цифры из файла «Трафик октябрь», обновляются раз в минуту.</p>
         <div id="boardRoot"><div class="card"><p>Загружаю таблицу…</p></div></div>`;
     }
 '''
