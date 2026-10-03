@@ -166,6 +166,26 @@
         </div>
       </article>`;
     }
+    const TEST_SALE = [
+      {id:"tst8", short:"Tiggo 8 Pro Max", model:"CHERY Tiggo 8 Pro Max", vin:"LVTDD24B5RD409189", rrc:3885000, tune:212000, year:2024, km:3700, fix:2750000},
+      {id:"tst4", short:"Tiggo 4", model:"CHERY Tiggo 4", vin:"LVVDB21B8RC106478", rrc:2395000, tune:164200, year:2024, km:4983, fix:2150000},
+      {id:"tst9", short:"Tiggo 9", model:"CHERY Tiggo 9", vin:"LVTDD24B9RG094198", rrc:4640000, tune:220000, year:2024, km:3853, fix:3500000},
+      {id:"tsa8", short:"Arrizo 8", model:"CHERY Arrizo 8", vin:"LVVDC21B2RD562966", rrc:3260000, tune:230000, year:2024, km:4970, fix:2300000}
+    ];
+    function testSaleOf(id){ return (typeof TEST_SALE!=="undefined" && TEST_SALE.find(x=>x.id===id)) || null; }
+    function stockTestHtml(){
+      const rows=(typeof TEST_SALE!=="undefined"?TEST_SALE:[]).map(c=>`<tr>
+        <td><b>${escape(c.model)}</b></td>
+        <td>${escape(c.vin)}</td>
+        <td>${rub(c.rrc)} ₽</td>
+        <td>${rub(c.tune)} ₽</td>
+        <td>${c.year}</td>
+        <td>${rub(c.km)} км</td>
+        <td>${rub(c.fix)} ₽</td>
+        <td><button type="button" class="chip" data-km-id="${c.id}">В калькулятор</button></td>
+      </tr>`).join("");
+      return `<div class="card"><p class="eyebrow">Тесты в продаже</p><h3 style="margin:4px 0 8px">Цена фикс</h3><p class="tune-note">Как в таблице отдела. Продажа на Авито, только через PANGO. Скидки директа и флита не действуют, тюнинг уже в машине.</p><div class="tune-scroll"><table class="tune-table test-sale"><thead><tr><th>Модель</th><th>VIN</th><th>Цена розница</th><th>Сумма тюнинга</th><th>Год</th><th>Пробег</th><th>Цена фикс</th><th></th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
+    }
     function stock(){
       if(needAuth()) return login();
       if(typeof stockSort!=="string") stockSort="trim";
@@ -190,7 +210,8 @@
         const arrow=on?(stockSortDir<0?" ↓":" ↑"):"";
         return `<button type="button" class="chip ${on?"on":""}" data-stock-sort="${k}">${lab}${arrow}</button>`;
       }).join("");
-      const body = list.length
+      const testOn=stockStatus==="test";
+      const body = testOn ? stockTestHtml() : list.length
         ? `<div class="st-board">`+ids.map(id=>{
             const titles={t4:["TENET","T4"],t4l:["TENET","T4L"],t7:["TENET","T7"],t8:["TENET","T8"],tt9:["TENET","T9"],t9:["CHERY","Tiggo 9"],t7l:["CHERY","Tiggo 7 L"],ta8:["TENET","A8"],a8:["CHERY","Arrizo 8"]};
             const known=titles[id];
@@ -238,15 +259,16 @@
           }).join("")+`</div>`
         : `<div class="card" style="margin-top:12px"><p>По этому фильтру машин нет.</p></div>`;
       return banner("Склад", `Logicstars · ${meta.updated}`, "TENET")+`
-        <p class="lead">Сначала модель, внутри — комплектация. Сортировка меняет порядок машин и групп.</p>
+        <p class="lead">${testOn?"Четыре теста. Цена в последней колонке фиксированная, продажа только через PANGO.":"Сначала модель, внутри — комплектация. Сортировка меняет порядок машин и групп."}</p>
         <div class="study-pick st-filters">
           <button class="chip ${stockStatus==="all"?"on":""}" data-stock-st="all">Все · ${scoped.length}</button>
           <button class="chip ${stockStatus==="in"?"on":""}" data-stock-st="in">В наличии · ${nIn}</button>
           <button class="chip ${stockStatus==="way"?"on":""}" data-stock-st="way">В пути · ${nWay}</button>
+          <button class="chip ${stockStatus==="test"?"on":""}" data-stock-st="test">Тесты в продаже · ${(typeof TEST_SALE!=="undefined"?TEST_SALE.length:0)}</button>
         </div>
-        <div class="study-pick st-filters st-sorts">
+        ${testOn?"":`<div class="study-pick st-filters st-sorts">
           <span class="st-sort-lab">Сортировка</span>
           ${sortBtns}
-        </div>
+        </div>`}
         ${body}`;
     }

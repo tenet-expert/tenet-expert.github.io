@@ -195,6 +195,13 @@ if sf.exists():
         print("stock fn spliced", len(extra))
     else:
         print("stock/docs anchors not found", a, b)
+    if "function stockRrc(" not in html:
+        anchor = html.find("    function stock(){")
+        if anchor >= 0:
+            html = html[:anchor] + extra + html[anchor:]
+            print("stock fn forced before stock()")
+        else:
+            print("stock fn still missing")
 
 BIND_IDS = '["kmRrc","kmInv","kmUseTi","kmUseLoan","kmUseCr","kmSpec","kmUseDcTi","kmUseDcCr","kmDcTi","kmDcCr","kmDo","kmPack","kmCasco","cDown","cDownPct","cDownMode","cMonths"]'
 NEW_BIND = '''      document.querySelectorAll("[data-calc-mode]").forEach(b=>b.onclick=()=>{ calcMode=b.dataset.calcMode; view="calc"; render(); });
