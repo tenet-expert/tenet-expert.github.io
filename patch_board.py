@@ -27,6 +27,27 @@ CSS = """
 .lb-hit b{display:block}
 .lb-hit small{color:#6d6458}
 @media(max-width:700px){.prio-people{grid-template-columns:1fr}}
+
+.lb-phone{display:none}
+.lb-sum{margin:0 0 8px;color:#6d6458;font-size:13px}
+.lb-card h3{margin:2px 0 4px}
+@media(max-width:720px){
+  .lb-desk{display:none}
+  .lb-phone{display:block}
+  .lb-modes{overflow:visible;flex-wrap:wrap;padding-bottom:0}
+  .lb-card{margin-top:8px;padding:10px 10px 6px}
+  .lb-card h3{font-size:18px;line-height:1.15}
+  .lb-sum{font-size:12px;line-height:1.3;margin:0 0 4px}
+  .lb-line{display:grid;grid-template-columns:14px minmax(0,1fr) auto;gap:6px;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);font-size:13px}
+  .lb-line b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px;font-weight:750}
+  .lb-nums{display:grid;grid-template-columns:repeat(8,16px);text-align:right;font-variant-numeric:tabular-nums;font-size:12px;font-style:normal}
+  .lb-nums i{font-style:normal}
+  .lb-nums i:last-child{font-weight:800}
+  .lb-key{border-bottom:0;padding-bottom:0;color:#6d6458}
+  .lb-key .lb-nums{font-size:8px;letter-spacing:-.03em;font-weight:700;text-transform:uppercase}
+  .lb-line.other b,.lb-line.other .lb-nums{color:#6d6458}
+  .lb-hit{padding:8px 10px}
+}
 """
 
 JS = r'''
@@ -136,12 +157,16 @@ JS = r'''
       }), {traffic:0,visit:0,td:0,contract:0,issue:0});
       return {list, sum};
     }
+    function boardLine(p, i){
+      const nums=[p.traffic,p.visit,p.call,p.web,p.meet,p.td,p.contract,p.issue].map(n=>`<i>${n}</i>`).join("");
+      return `<div class="lb-line${p.other?" other":""}"><span class="lb-place">${p.other?"—":i+1}</span><b>${escape(p.name)}</b><span class="lb-nums">${nums}</span></div>`;
+    }
     function boardTable(rows, eyebrow, title){
       const rank=boardRank(rows);
       const sum=rank.sum;
-      return `<div class="card" style="margin-top:12px"><p class="eyebrow">${escape(eyebrow)}</p><h3 style="margin:4px 0 8px">${escape(title)} · ${sum.issue} выдач · ${sum.contract} контрактов · ${sum.td} тест-драйвов · ${sum.traffic} первичных</h3><div class="tune-scroll"><table class="lb-table"><thead><tr><th>#</th><th>Менеджер</th><th>Трафик</th><th>Визит</th><th>Звонок</th><th>Интернет</th><th>Встреча</th><th>ТД</th><th>Контракт</th><th>Выдача</th></tr></thead><tbody>`+
-        rank.list.map((p,i)=>`<tr class="lb-row${p.other?" other":""}"><td class="lb-place">${p.other?"—":i+1}</td><td><b>${escape(p.name)}</b></td><td>${p.traffic}</td><td>${p.visit}</td><td>${p.call}</td><td>${p.web}</td><td>${p.meet}</td><td>${p.td}</td><td>${p.contract}</td><td>${p.issue}</td></tr>`).join("")+
-        `</tbody></table></div></div>`;
+      const body=rank.list.map((p,i)=>`<tr class="lb-row${p.other?" other":""}"><td class="lb-place">${p.other?"—":i+1}</td><td><b>${escape(p.name)}</b></td><td>${p.traffic}</td><td>${p.visit}</td><td>${p.call}</td><td>${p.web}</td><td>${p.meet}</td><td>${p.td}</td><td>${p.contract}</td><td>${p.issue}</td></tr>`).join("");
+      const phone=rank.list.map((p,i)=>boardLine(p,i)).join("");
+      return `<div class="card lb-card"><p class="eyebrow">${escape(eyebrow)}</p><h3>${escape(title)}</h3><p class="lb-sum">${sum.issue} выдач · ${sum.contract} контрактов · ${sum.td} тест-драйвов · ${sum.traffic} первичных</p><div class="lb-desk tune-scroll"><table class="lb-table"><thead><tr><th>#</th><th>Менеджер</th><th>Трафик</th><th>Визит</th><th>Звонок</th><th>Интернет</th><th>Встреча</th><th>ТД</th><th>Контракт</th><th>Выдача</th></tr></thead><tbody>${body}</tbody></table></div><div class="lb-phone"><div class="lb-line lb-key"><span></span><span></span><span class="lb-nums"><i>Тр</i><i>Виз</i><i>Зв</i><i>Ин</i><i>Вс</i><i>ТД</i><i>К</i><i>Выд</i></span></div>${phone}</div></div>`;
     }
     function boardKind(r){
       const bits=[];
@@ -203,7 +228,7 @@ JS = r'''
     }
     function boardChips(){
       const items=[["day","Сегодня"],["yday","Вчера"],["month","Месяц"],["prev","Предыдущий месяц"]];
-      return `<div class="study-pick st-filters">`+items.map(([id,lab])=>`<button type="button" class="chip ${boardMode===id?"on":""}" data-board-mode="${id}">${lab}</button>`).join("")+`</div>`;
+      return `<div class="study-pick st-filters lb-modes">`+items.map(([id,lab])=>`<button type="button" class="chip ${boardMode===id?"on":""}" data-board-mode="${id}">${lab}</button>`).join("")+`</div>`;
     }
     function board(){
       if(needAuth()) return login();
@@ -241,6 +266,23 @@ def apply(path: Path):
             1,
         )
         print("board preview", path)
+    if ".lb-phone{display:none}" not in html and "</style>" in html:
+        html = html.replace("</style>", """.lb-phone{display:none}
+@media(max-width:720px){
+  .lb-desk{display:none}
+  .lb-phone{display:block}
+  .lb-modes{overflow:visible;flex-wrap:wrap}
+  .lb-card{padding:10px 10px 6px}
+  .lb-card h3{font-size:18px}
+  .lb-line{display:grid;grid-template-columns:14px minmax(0,1fr) auto;gap:6px;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);font-size:13px}
+  .lb-line b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .lb-nums{display:grid;grid-template-columns:repeat(8,16px);text-align:right;font-variant-numeric:tabular-nums;font-size:12px}
+  .lb-nums i{font-style:normal}
+  .lb-nums i:last-child{font-weight:800}
+  .lb-key .lb-nums{font-size:8px;font-weight:700}
+}
+</style>""", 1)
+        print("board phone", path)
     if ".lb-row.other" not in html and "</style>" in html:
         html = html.replace("</style>", ".lb-row.other{background:#fbf7f1}\n.lb-row.other td{color:#6d6458}\n</style>", 1)
     card = '["board","L","Leaderboard","Трафик, контракты и выдача отдела"]'
@@ -262,7 +304,7 @@ def apply(path: Path):
         else:
             html = html.replace(anchor, JS + anchor, 1)
             print("fn", path)
-    elif "const BOARD_SEP" not in html or 'data-board-mode="yday"' not in html:
+    elif "const BOARD_SEP" not in html or 'data-board-mode="yday"' not in html or "function boardLine" not in html:
         a = html.find("    const BOARD_SHEET")
         if a < 0:
             a = html.find("    const BOARD_OCT")
