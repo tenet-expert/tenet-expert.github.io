@@ -15,14 +15,35 @@
       }).join("");
     }
     function prioList(){
+      const goal=2, teamGoal=12;
+      const roster=["Ахмадуллин","Велиджанов","Демьянов","Елчин","Лавров","Новиков","Сидоров","Спицын","Тальков","Павлова","Извеков"];
       const soldBy={};
+      roster.forEach(n=>{ soldBy[n]=0; });
       TERMS_PRIO.forEach(r=>{
         if(r.sold && r.seller) soldBy[r.seller]=(soldBy[r.seller]||0)+1;
       });
-      return `<ol class="prio-list">`+TERMS_PRIO.map((r,i)=>{
+      const people=Object.keys(soldBy).map(name=>({name, n:soldBy[name]}));
+      people.sort((a,b)=>b.n-a.n || a.name.localeCompare(b.name,"ru"));
+      const team=people.reduce((s,p)=>s+p.n,0);
+      const pct=max=>Math.max(0, Math.min(100, Math.round(max)));
+      const teamLeft=Math.max(0, teamGoal-team);
+      const teamBar=`<div class="prio-scale team${team>=teamGoal?" won":""}">
+        <div class="row"><b>Команда</b><span>${team} из ${teamGoal}${team>=teamGoal?" · победа":" · ещё "+teamLeft}</span></div>
+        <div class="prio-track"><div class="prio-fill" style="width:${pct(team*100/teamGoal)}%"></div></div>
+      </div>`;
+      const peopleBars=`<div class="prio-people">`+people.map(p=>{
+        const left=Math.max(0, goal-p.n);
+        const won=p.n>=goal;
+        return `<div class="prio-scale${won?" won":""}">
+          <div class="row"><b>${escape(p.name)}</b><span>${won?"личная победа":p.n+" из "+goal+" · ещё "+left}</span></div>
+          <div class="prio-track"><div class="prio-fill" style="width:${pct(p.n*100/goal)}%"></div></div>
+        </div>`;
+      }).join("")+`</div>`;
+      const scales=`<div class="prio-scales">${teamBar}${peopleBars}</div>`;
+      return scales+`<ol class="prio-list">`+TERMS_PRIO.map((r,i)=>{
         const sold=!!r.sold;
         const n=r.seller?soldBy[r.seller]||0:0;
-        const mark=sold&&r.seller?`<span class="sold-mark">Продано · ${escape(r.seller)} <i>${n>=2?"2":"1"}</i></span>`:"";
+        const mark=sold&&r.seller?`<span class="sold-mark">Продано · ${escape(r.seller)} <i>${n}</i></span>`:"";
         const extra=r.extra?` · ${escape(r.extra)}`:"";
         return `<li class="prio-item${sold?" sold":""}">
           <div class="prio-top"><b>${i+1}. ${escape(r.model)} · ${escape(r.trim)}</b>${mark}</div>
@@ -117,7 +138,7 @@
         `</div>`+
         (typeof stockTestHtml==="function"?stockTestHtml():"")+
         `<h2>Приоритет · ${TERMS_PRIO.length} авто</h2>`+
-        `<p class="lead">Личный план 2 · командный план 12. Всего 14. Порядок как в файле.</p>`+
+        `<p class="lead">Личная победа — 2 машины. Командная — 12. Шкала показывает, сколько уже есть и сколько осталось.</p>`+
         prioList()+
         `<p class="lead">Доплата за 4WD на T7 — 205 000 ₽. Мотор T7 везде 1.6T 150.</p>`+
         `<div class="who-line"><button class="btn ivory" data-go="calc">В калькулятор</button><button class="btn ghost" data-go="docs">Документы</button></div>`+
