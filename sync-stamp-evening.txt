@@ -1,1 +1,1 @@
-evening-2026-10-02 logicstars-17 LOGIN_OK stock=105 reserved=4 stamp=02.10.2026
+evening-2026-10-03 склад-logicstars-17 Europe/Moscow LOGIN_OK stock=105 reserved=5
