@@ -1753,51 +1753,77 @@ async function pingTelegram(body){
       render();
     }
 
-    const BOARD_SHEET = "1QJ0Wng-oItBWPDw03PKZ-hTAteaYOvUQVOm-6pautVc";
+    const BOARD_OCT = "1QJ0Wng-oItBWPDw03PKZ-hTAteaYOvUQVOm-6pautVc";
+    const BOARD_SEP = "1PvC2EbyeIIewE2PFPKYOI7dxZAEbGAAiwy6jtxLM5kg";
     const BOARD_ROSTER = ["Ахмадуллин","Велиджанов","Демьянов","Лавров","Сидоров","Спицын","Тальков","Павлова","Извеков"];
     let boardTimer = 0;
+    let boardMode = "day";
+    let boardCache = null;
     function boardSurname(name){
       const s=String(name||"").trim();
       return s?s.split(/\s+/)[0]:"";
     }
-    function boardDays(){
-      const now=new Date();
-      let last=31;
-      if(now.getFullYear()===2026 && now.getMonth()===9) last=now.getDate();
-      else if(now.getFullYear()<2026 || (now.getFullYear()===2026 && now.getMonth()<9)) last=0;
+    function boardDays(mm, last){
       const out=[];
-      for(let d=1; d<=last; d++) out.push((d<10?"0":"")+d+".10");
+      for(let d=1; d<=last; d++) out.push((d<10?"0":"")+d+"."+mm);
       return out;
     }
-    function boardFetch(sheet){
-      return new Promise((resolve, reject)=>{
-        const cb="boardCb_"+sheet.replace(/\W/g,"_");
+    function boardOctLast(){
+      const now=new Date();
+      if(now.getFullYear()===2026 && now.getMonth()===9) return now.getDate();
+      if(now.getFullYear()>2026 || (now.getFullYear()===2026 && now.getMonth()>9)) return 31;
+      return 0;
+    }
+    function boardWhen(cell){
+      if(!cell) return "";
+      if(Object.prototype.toString.call(cell.v)==="[object Date]") return String(cell.f||"");
+      const f=String(cell.f||"");
+      if(/^\d{1,2}\.\d{1,2}\.\d{4}/.test(f)) return f;
+      const s=cell.v==null?"":String(cell.v);
+      if(/^\d{1,2}\.\d{1,2}\.\d{4}/.test(s)) return s;
+      const n=Number(cell.v);
+      if(n>20000 && n<80000){
+        const d=new Date(Math.round((n-25569)*86400000));
+        const p=x=>x<10?"0"+x:String(x);
+        return p(d.getUTCDate())+"."+p(d.getUTCMonth()+1)+"."+d.getUTCFullYear()+" "+p(d.getUTCHours())+":"+p(d.getUTCMinutes());
+      }
+      return "";
+    }
+    function boardFetch(fileId, sheet){
+      return new Promise(resolve=>{
+        const cb="boardCb_"+String(fileId).slice(0,4)+"_"+sheet.replace(/\W/g,"_");
         const s=document.createElement("script");
-        const timer=setTimeout(()=>{ cleanup(); reject(new Error(sheet)); }, 12000);
+        const timer=setTimeout(()=>{ cleanup(); resolve({table:{rows:[]}}); }, 15000);
         function cleanup(){
           clearTimeout(timer);
           try{ delete window[cb]; }catch(e){}
           if(s.parentNode) s.parentNode.removeChild(s);
         }
-        window[cb]=function(res){ cleanup(); resolve(res||{}); };
-        s.onerror=()=>{ cleanup(); reject(new Error(sheet)); };
-        s.src="https://docs.google.com/spreadsheets/d/"+BOARD_SHEET+"/gviz/tq?tqx=out:json;responseHandler:"+cb+"&sheet="+encodeURIComponent(sheet)+"&t="+Date.now();
+        window[cb]=function(res){ cleanup(); resolve(res||{table:{rows:[]}}); };
+        s.onerror=()=>{ cleanup(); resolve({table:{rows:[]}}); };
+        s.src="https://docs.google.com/spreadsheets/d/"+fileId+"/gviz/tq?tqx=out:json;responseHandler:"+cb+"&sheet="+encodeURIComponent(sheet)+"&t="+Date.now();
         document.head.appendChild(s);
       });
+    }
+    async function boardFetchAll(fileId, days){
+      const packs=[];
+      for(let i=0;i<days.length;i+=6){
+        const part=await Promise.all(days.slice(i,i+6).map(sheet=>boardFetch(fileId, sheet)));
+        part.forEach(p=>packs.push(p));
+      }
+      return packs;
     }
     function boardRows(res){
       const rows=((res||{}).table||{}).rows||[];
       const out=[];
       rows.forEach(row=>{
         const c=row && row.c || [];
-        const t=c[0]||{};
-        const isDate=Object.prototype.toString.call(t.v)==="[object Date]" || /^\d{2}\.\d{2}\.\d{4}/.test(String(t.f||""));
-        if(!isDate) return;
+        const when=boardWhen(c[0]);
+        if(!/^\d{2}\.\d{2}\.\d{4}/.test(when)) return;
         const text=i=>{
           const cell=c[i]||{};
           if(cell.f!=null && cell.f!=="") return String(cell.f);
           if(cell.v==null) return "";
-          if(Object.prototype.toString.call(cell.v)==="[object Date]") return String(cell.f||"");
           return String(cell.v);
         };
         const flag=i=>{
@@ -1807,7 +1833,7 @@ async function pingTelegram(body){
         const who=boardSurname(text(3));
         if(!who) return;
         out.push({
-          when:text(0), who, client:text(1), model:text(4),
+          when, who, client:text(1), model:text(4),
           visit:flag(5), call:flag(6), web:flag(7), meet:flag(8), service:flag(9),
           td:flag(10), contract:flag(11), issue:flag(12), note:text(13)
         });
@@ -1839,50 +1865,73 @@ async function pingTelegram(body){
         rank.list.map((p,i)=>`<tr class="lb-row"><td class="lb-place">${i+1}</td><td><b>${escape(p.name)}</b></td><td>${p.traffic}</td><td>${p.visit}</td><td>${p.call}</td><td>${p.web}</td><td>${p.meet}</td><td>${p.td}</td><td>${p.contract}</td><td>${p.issue}</td></tr>`).join("")+
         `</tbody></table></div></div>`;
     }
-    function boardHtml(rows, stamp){
+    function boardKind(r){
+      const bits=[];
+      if(r.issue) bits.push("выдача");
+      if(r.contract) bits.push("контракт");
+      if(r.td) bits.push("тест-драйв");
+      if(r.visit) bits.push("визит");
+      if(r.call) bits.push("звонок");
+      if(r.web) bits.push("интернет");
+      if(r.meet) bits.push("встреча");
+      if(r.service) bits.push("сервис");
+      return bits.join(" · ")||"запись";
+    }
+    function boardTape(rows){
+      return `<div class="card" style="margin-top:12px"><p class="eyebrow">Сегодня</p><h3 style="margin:4px 0 8px">Лента</h3><div class="lb-feed">`+
+        (rows.length?rows.slice().reverse().map(r=>`<div class="lb-hit"><div><b>${escape(r.client||"Без имени")} · ${escape(r.model||"—")}</b><small>${escape(r.who)} · ${escape(boardKind(r))}${r.note?" · "+escape(r.note):""}</small></div><small>${escape(String(r.when||"").slice(11,16))}</small></div>`).join(""):`<p class="lead">За сегодня записей пока нет.</p>`)+
+        `</div></div>`;
+    }
+    function boardHtml(cache){
       const today=new Date();
       const key=(today.getDate()<10?"0":"")+today.getDate()+"."+((today.getMonth()+1)<10?"0":"")+(today.getMonth()+1);
-      const dayRows=rows.filter(r=>String(r.when||"").indexOf(key)===0);
-      const kind=r=>{
-        const bits=[];
-        if(r.issue) bits.push("выдача");
-        if(r.contract) bits.push("контракт");
-        if(r.td) bits.push("тест-драйв");
-        if(r.visit) bits.push("визит");
-        if(r.call) bits.push("звонок");
-        if(r.web) bits.push("интернет");
-        if(r.meet) bits.push("встреча");
-        if(r.service) bits.push("сервис");
-        return bits.join(" · ")||"запись";
-      };
-      const note=`<p class="tune-note">Обновлено ${escape(stamp)}. Сверху сегодня, ниже весь октябрь. Рейтинг: выдача, затем контракт, тест-драйв, визит, трафик.</p>`;
-      const tape=`<div class="card" style="margin-top:12px"><p class="eyebrow">Сегодня</p><h3 style="margin:4px 0 8px">Лента</h3><div class="lb-feed">`+
-        (dayRows.length?dayRows.slice().reverse().map(r=>`<div class="lb-hit"><div><b>${escape(r.client||"Без имени")} · ${escape(r.model||"—")}</b><small>${escape(r.who)} · ${escape(kind(r))}${r.note?" · "+escape(r.note):""}</small></div><small>${escape(String(r.when||"").slice(11,16))}</small></div>`).join(""):`<p class="lead">За сегодня записей пока нет.</p>`)+
-        `</div></div>`;
-      return note+boardTable(dayRows, "Сегодня", key)+tape+boardTable(rows, "Месяц", "Октябрь");
+      const note=`<p class="tune-note">Обновлено ${escape(cache.stamp)}. Рейтинг: выдача, затем контракт, тест-драйв, визит, трафик.</p>`;
+      if(boardMode==="prev") return note+boardTable(cache.sep, "Сентябрь", "Сентябрь");
+      if(boardMode==="month") return note+boardTable(cache.oct, "Месяц", "Октябрь");
+      const dayRows=(cache.oct||[]).filter(r=>String(r.when||"").indexOf(key)===0);
+      return note+boardTable(dayRows, "Сегодня", key)+boardTape(dayRows);
     }
     async function boardLoad(){
       const root=document.getElementById("boardRoot");
       if(!root || view!=="board") return;
       try{
-        const days=boardDays();
-        const packs=await Promise.all(days.map(boardFetch));
-        const rows=[];
-        packs.forEach(p=>boardRows(p).forEach(r=>rows.push(r)));
-        const stamp=new Date().toLocaleString("ru-RU",{hour:"2-digit",minute:"2-digit",day:"2-digit",month:"2-digit"});
-        root.innerHTML=boardHtml(rows, stamp);
+        if(!boardCache){
+          root.innerHTML=`<div class="card"><p>Загружаю трафик…</p></div>`;
+          const octPacks=await boardFetchAll(BOARD_OCT, boardDays("10", boardOctLast()));
+          const sepPacks=await boardFetchAll(BOARD_SEP, boardDays("09", 30));
+          const oct=[], sep=[];
+          octPacks.forEach(p=>boardRows(p).forEach(r=>oct.push(r)));
+          sepPacks.forEach(p=>boardRows(p).forEach(r=>sep.push(r)));
+          boardCache={oct, sep, stamp:new Date().toLocaleString("ru-RU",{hour:"2-digit",minute:"2-digit",day:"2-digit",month:"2-digit"})};
+        }
+        root.innerHTML=boardHtml(boardCache);
       }catch(err){
-        root.innerHTML=`<div class="card"><p>Не удалось прочитать «Трафик октябрь». ${escape(err&&err.message||"")}</p><button class="btn ivory" data-go="board" type="button">Ещё раз</button></div>`;
-        document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{ view=b.dataset.go; state.section=view; try{save();}catch(e){} render(); });
+        root.innerHTML=`<div class="card"><p>Не удалось прочитать трафик. ${escape(err&&err.message||"")}</p><button class="btn ivory" type="button" id="boardRetry">Ещё раз</button></div>`;
+        const b=document.getElementById("boardRetry");
+        if(b) b.onclick=()=>{ boardCache=null; boardLoad(); };
       }
+    }
+    function boardChips(){
+      const items=[["day","Сегодня"],["month","Месяц"],["prev","Сентябрь"]];
+      return `<div class="study-pick st-filters">`+items.map(([id,lab])=>`<button type="button" class="chip ${boardMode===id?"on":""}" data-board-mode="${id}">${lab}</button>`).join("")+`</div>`;
     }
     function board(){
       if(needAuth()) return login();
       clearInterval(boardTimer);
-      boardTimer=setInterval(()=>{ if(view==="board") boardLoad(); }, 60000);
-      setTimeout(boardLoad, 40);
-      return banner("Leaderboard","Трафик октябрь · онлайн","TENET")+`
-        <p class="lead">Сверху рейтинг за сегодня, ниже за октябрь. Цифры из файла «Трафик октябрь», обновляются раз в минуту.</p>
+      boardTimer=setInterval(()=>{ if(view==="board"){ boardCache=null; boardLoad(); } }, 60000);
+      setTimeout(()=>{
+        document.querySelectorAll("[data-board-mode]").forEach(b=>{
+          b.onclick=()=>{
+            boardMode=b.dataset.boardMode||"day";
+            document.querySelectorAll("[data-board-mode]").forEach(x=>x.classList.toggle("on", x===b));
+            boardLoad();
+          };
+        });
+        boardLoad();
+      }, 40);
+      return banner("Leaderboard","Трафик · онлайн","TENET")+`
+        <p class="lead">Сегодня и месяц — из «Трафик октябрь». Сентябрь — из «Трафик сентябрь».</p>
+        ${boardChips()}
         <div id="boardRoot"><div class="card"><p>Загружаю таблицу…</p></div></div>`;
     }
     function render(){
