@@ -115,8 +115,7 @@
         `<section><h2>Спец инвойс</h2>`+
         `<div class="terms-cards">`+TERMS_INV.map(r=>termCard(r.model+" · "+r.trim, escape(r.price), "")).join("")+`</div></section>`+
         `</div>`+
-        `<h2>МПТ / субсидия TENET</h2>`+
-        `<div class="terms-cards">`+TERMS_MPT.map(g=>`<article class="term-card"><b>${escape(g.line)}</b>`+g.rows.map(r=>`<small>${escape(r[0])} · <b>${escape(r[1])}</b></small>`).join("")+`</article>`).join("")+`</div>`+
+        (typeof stockTestHtml==="function"?stockTestHtml():"")+
         `<h2>Приоритет · ${TERMS_PRIO.length} авто</h2>`+
         `<p class="lead">Личный план 2 · командный план 12. Всего 14. Порядок как в файле.</p>`+
         prioList()+
