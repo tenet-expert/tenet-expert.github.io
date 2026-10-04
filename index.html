@@ -1035,6 +1035,9 @@ input,textarea{width:100%;background:#fff;border:1px solid var(--border);color:v
 .lb-sheet{width:1480px;background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px 14px 12px}
 .lb-rep-h{margin:14px 0 6px;font-size:12px;font-weight:750;letter-spacing:.04em;text-transform:uppercase;color:#6d6458}
 .lb-rep tr.sum td{font-weight:800;border-top:2px solid #1c1a17}
+.lb-bad{color:#c62828;font-weight:800}
+.lb-mid{color:#b8860b;font-weight:800}
+.lb-ok{color:#2e7d32;font-weight:800}
 .lb-fold{display:none}
 .lb-fold.open{display:block}
 .lb-fold-btn{cursor:pointer}
@@ -2136,27 +2139,37 @@ async function pingTelegram(body){
         return s;
       }, boardBlank());
       total.name="Итого";
-      const planN=rank.list.filter(p=>!p.other).length*BOARD_PLAN;
+      const oct=boardMode==="month";
+      const planN=oct?11:rank.list.filter(p=>!p.other).length*BOARD_PLAN;
+      const planOf=p=>oct?0:(rank.list.some(n=>!n.other&&n.name===p.name)?BOARD_PLAN:0);
       const ch=p=>p.visit+p.call+p.web;
+      const mark=(num,den,kind)=>{
+        const text=boardPct(num, den);
+        if(text==="–") return text;
+        const v=100*num/den;
+        const cls=kind==="td"?(v<70?"lb-bad":""):(v<10?"lb-bad":v<15?"lb-mid":"lb-ok");
+        return cls?`<span class="${cls}">${text}</span>`:text;
+      };
       const mainHead=["Менеджер","План","Факт","% плана","Контракты","Расторж.","Действ.","Выдачи+К","Прогноз","Прогноз %","Трафик","% трафика","% визитов","% зв+инт","Конв. в контракт","Конв. в выдачу","Визиты","Контракт с визита","Конв. визита"];
       const rowMain=(p, plan)=>{
         const pace=boardPace(p.issue, plan);
         const prim=ch(p), tPrim=ch(total);
-        return `<tr class="${p.name==="Итого"?"sum":""}"><td>${escape(p.name)}</td><td>${plan||"–"}</td><td>${p.issue}</td><td>${boardPct(p.issue, plan)}</td><td>${p.contract}</td><td>–</td><td>–</td><td>–</td><td>${pace.n}</td><td>${pace.p}</td><td>${prim}</td><td>${boardPct(prim, tPrim)}</td><td>${boardPct(p.visit, total.visit)}</td><td>${boardPct(p.call+p.web, total.call+total.web)}</td><td>${boardPct(p.contract, prim)}</td><td>${boardPct(p.issue, prim)}</td><td>${p.visit}</td><td>${p.visitContract}</td><td>${boardPct(p.visitContract, p.visit)}</td></tr>`;
+        return `<tr class="${p.name==="Итого"?"sum":""}"><td>${escape(p.name)}</td><td>${plan||"–"}</td><td>${p.issue}</td><td>${boardPct(p.issue, plan)}</td><td>${p.contract}</td><td>–</td><td>–</td><td>–</td><td>${pace.n}</td><td>${pace.p}</td><td>${prim}</td><td>${boardPct(prim, tPrim)}</td><td>${boardPct(p.visit, total.visit)}</td><td>${boardPct(p.call+p.web, total.call+total.web)}</td><td>${mark(p.contract, prim, "conv")}</td><td>${boardPct(p.issue, prim)}</td><td>${p.visit}</td><td>${p.visitContract}</td><td>${boardPct(p.visitContract, p.visit)}</td></tr>`;
       };
       const tdHead=["Менеджер","План","Факт","Визиты перв.+втор","%"];
-      const rowTd=p=>`<tr class="${p.name==="Итого"?"sum":""}"><td>${escape(p.name)}</td><td>70%</td><td>${p.td}</td><td>${p.visit+p.meet}</td><td>${boardPct(p.td, p.visit+p.meet)}</td></tr>`;
+      const rowTd=p=>`<tr class="${p.name==="Итого"?"sum":""}"><td>${escape(p.name)}</td><td>70%</td><td>${p.td}</td><td>${p.visit+p.meet}</td><td>${mark(p.td, p.visit+p.meet, "td")}</td></tr>`;
       const chHead=["Менеджер","Звонки","Визит со звонка","% в визит","Контракт со звонка","% в контракт","Интернет","Визит с инт.","% в визит","Контракт с инт.","% в контракт"];
-      const rowCh=p=>`<tr class="${p.name==="Итого"?"sum":""}"><td>${escape(p.name)}</td><td>${p.call}</td><td>${p.callVisit}</td><td>${boardPct(p.callVisit, p.call)}</td><td>${p.callContract}</td><td>${boardPct(p.callContract, p.call)}</td><td>${p.web}</td><td>${p.webVisit}</td><td>${boardPct(p.webVisit, p.web)}</td><td>${p.webContract}</td><td>${boardPct(p.webContract, p.web)}</td></tr>`;
+      const rowCh=p=>`<tr class="${p.name==="Итого"?"sum":""}"><td>${escape(p.name)}</td><td>${p.call}</td><td>${p.callVisit}</td><td>${boardPct(p.callVisit, p.call)}</td><td>${p.callContract}</td><td>${mark(p.callContract, p.call, "conv")}</td><td>${p.web}</td><td>${p.webVisit}</td><td>${boardPct(p.webVisit, p.web)}</td><td>${p.webContract}</td><td>${mark(p.webContract, p.web, "conv")}</td></tr>`;
       const all=people.concat([total]);
+      const planNote=oct?"План октября — 11 выдач на отдел.":`План выдач — ${BOARD_PLAN} на менеджера.`;
       return `<p class="eyebrow" style="margin:0 0 4px">${escape(per.sub)}</p><h2 style="margin:0 0 8px">${escape(per.title)}</h2>
         <p class="lb-rep-h">Выдачи и трафик</p>
-        <table class="lb-rep"><thead><tr>${mainHead.map(h=>`<th>${h}</th>`).join("")}</tr></thead><tbody>${people.map(p=>rowMain(p, rank.list.some(n=>!n.other&&n.name===p.name)?BOARD_PLAN:0)).join("")}${rowMain(total, planN)}</tbody></table>
+        <table class="lb-rep"><thead><tr>${mainHead.map(h=>`<th>${h}</th>`).join("")}</tr></thead><tbody>${people.map(p=>rowMain(p, planOf(p))).join("")}${rowMain(total, planN)}</tbody></table>
         <p class="lb-rep-h">Тест-драйвы</p>
         <table class="lb-rep lb-rep-sm"><thead><tr>${tdHead.map(h=>`<th>${h}</th>`).join("")}</tr></thead><tbody>${all.map(rowTd).join("")}</tbody></table>
         <p class="lb-rep-h">Звонки и интернет</p>
         <table class="lb-rep"><thead><tr>${chHead.map(h=>`<th>${h}</th>`).join("")}</tr></thead><tbody>${all.map(rowCh).join("")}</tbody></table>
-        <p class="lb-rep-note">Как в «ОП CHERY». План выдач — ${BOARD_PLAN} на менеджера. Трафик — визиты + звонки + интернет. Конв. в контракт и в выдачу — к трафику. Конв. визита — контракт с визита к первичным визитам. ТД % — к первичным визитам и вторичным встречам, план 70%. Расторжения, действующие контракты и «выдачи+контракты» в журнале трафика не ведутся. Обновлено ${escape((boardCache&&boardCache.stamp)||"")}</p>`;
+        <p class="lb-rep-note">Как в «ОП CHERY». ${planNote} Трафик — визиты + звонки + интернет. Конв. в контракт: меньше 10% красным, меньше 15% жёлтым, иначе зелёным. ТД ниже 70% — красным. Расторжения, действующие контракты и «выдачи+контракты» в журнале трафика не ведутся. Обновлено ${escape((boardCache&&boardCache.stamp)||"")}</p>`;
     }
     function boardBindFolds(root){
       if(!root) return;
