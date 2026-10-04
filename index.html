@@ -1913,14 +1913,14 @@ async function pingTelegram(body){
     function boardLine(p){
       const n=[p.traffic,p.visit,p.call,p.web,p.meet,p.td,p.contract,p.issue];
       const c=(v,g)=>`<i class="g${g}">${v}</i>`;
-      return `<div class="lb-line${p.other?" other":""}"><b>${escape(p.name)}</b>${c(n[0],1)}<s></s>${c(n[1],2)}${c(n[2],2)}${c(n[3],2)}<s></s>${c(n[4],3)}${c(n[5],3)}<s></s>${c(n[6],4)}${c(n[7],4)}</div>`;
+      return `<div class="lb-line${p.other?" other":""}"><b>${escape(p.name)}</b>${c(n[0],1)}<s></s>${c(n[2],2)}${c(n[1],2)}${c(n[3],2)}<s></s>${c(n[4],3)}${c(n[5],3)}<s></s>${c(n[6],4)}${c(n[7],4)}</div>`;
     }
     function boardTable(rows, eyebrow, title){
       const rank=boardRank(rows);
       const sum=rank.sum;
       const body=rank.list.map((p,i)=>`<tr class="lb-row${p.other?" other":""}"><td class="lb-place">${p.other?"—":i+1}</td><td><b>${escape(p.name)}</b></td><td>${p.traffic}</td><td>${p.visit}</td><td>${p.call}</td><td>${p.web}</td><td>${p.meet}</td><td>${p.td}</td><td>${p.contract}</td><td>${p.issue}</td></tr>`).join("");
       const phone=rank.list.map(p=>boardLine(p)).join("");
-      return `<div class="card lb-card"><p class="eyebrow">${escape(eyebrow)}</p><h3>${escape(title)}</h3><p class="lb-sum">${sum.issue} выдач · ${sum.contract} контрактов · ${sum.td} тест-драйвов · ${sum.traffic} первичных</p><div class="lb-desk tune-scroll"><table class="lb-table"><thead><tr><th>#</th><th>Менеджер</th><th>Трафик</th><th>Визит</th><th>Звонок</th><th>Интернет</th><th>Встреча</th><th>ТД</th><th>Контракт</th><th>Выдача</th></tr></thead><tbody>${body}</tbody></table></div><div class="lb-phone" data-lb="groups"><div class="lb-key"><span></span><span class="g1">Тр</span><s></s><span class="g2">Виз</span><span class="g2">Зв</span><span class="g2">Инт</span><s></s><span class="g3">Вс</span><span class="g3">ТД</span><s></s><span class="g4">К</span><span class="g4">Вдч</span></div>${phone}</div></div>`;
+      return `<div class="card lb-card"><p class="eyebrow">${escape(eyebrow)}</p><h3>${escape(title)}</h3><p class="lb-sum">${sum.issue} выдач · ${sum.contract} контрактов · ${sum.td} тест-драйвов · ${sum.traffic} первичных</p><div class="lb-desk tune-scroll"><table class="lb-table"><thead><tr><th>#</th><th>Менеджер</th><th>Трафик</th><th>Визит</th><th>Звонок</th><th>Интернет</th><th>Встреча</th><th>ТД</th><th>Контракт</th><th>Выдача</th></tr></thead><tbody>${body}</tbody></table></div><div class="lb-phone" data-lb="groups"><div class="lb-key"><span></span><span class="g1">Тр</span><s></s><span class="g2">З</span><span class="g2">В</span><span class="g2">И</span><s></s><span class="g3">Вс</span><span class="g3">ТД</span><s></s><span class="g4">К</span><span class="g4">Вдч</span></div>${phone}</div></div>`;
     }
     function boardKind(r){
       const bits=[];
