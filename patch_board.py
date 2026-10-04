@@ -34,27 +34,31 @@ CSS = """
 .lb-hit{display:block}
 .lb-hit-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
 .lb-feed-label{margin:12px 0 0;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#6d6458;font-weight:700}
-.lb-scale{display:grid;grid-template-columns:repeat(var(--n,4),minmax(0,1fr));gap:3px;margin-top:8px}
-.lb-scale span{min-width:0;font-size:10px;line-height:1.15;text-align:center;color:#8a8175;padding-top:5px;border-top:3px solid #e4dfd4}
-.lb-scale span.on{color:#1c1a17;font-weight:700;border-top-color:#d9d0c2}
-.lb-scale span.now{border-top-color:#1c1a17}
-.lb-scale span:last-child.on.now{border-top-color:#2e7d32}
+.lb-scale{display:grid;grid-template-columns:repeat(var(--n,4),minmax(0,1fr));gap:4px;margin-top:8px}
+.lb-scale span{min-width:0;font-size:10px;line-height:1.15;text-align:center;color:#8a8175;background:#f3eadc;border-radius:7px;padding:6px 2px}
+.lb-scale span.on{color:#fff;font-weight:700}
+.lb-scale span.on.s0{background:#c4a574;color:#1c1a17}
+.lb-scale span.on.s1{background:#8a6840}
+.lb-scale span.on.s2{background:#5c4630}
+.lb-scale span.on.s3{background:#1c1a17}
+.lb-scale span.on.s4{background:#1c1a17}
+.lb-scale span:last-child.on.now{background:#2e7d32;color:#fff}
 @media(max-width:720px){
   .lb-desk{display:none}
   .lb-phone{display:block}
   .lb-modes{overflow:visible;flex-wrap:wrap;padding-bottom:0}
-  .lb-card{margin-top:8px;padding:12px 12px 8px}
+  .lb-card{margin-top:8px;padding:12px 10px 8px}
   .lb-card h3{font-size:18px;line-height:1.15}
   .lb-sum{font-size:12px;line-height:1.3;margin:0 0 8px}
-  .lb-key,.lb-nums{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));text-align:center;gap:2px}
-  .lb-key{color:#6d6458;font-size:10px;font-weight:700;letter-spacing:0;text-transform:uppercase}
-  .lb-line{display:block;padding:8px 0 6px;border-bottom:1px solid var(--border)}
-  .lb-who{display:flex;gap:8px;align-items:baseline;margin-bottom:2px}
-  .lb-who b{font-size:14px;font-weight:750}
-  .lb-nums{font-variant-numeric:tabular-nums;font-size:15px;font-weight:750}
+  .lb-key,.lb-line{display:grid;grid-template-columns:max-content minmax(0,1fr);column-gap:8px;align-items:center}
+  .lb-labs,.lb-nums{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));text-align:center;gap:1px}
+  .lb-key{color:#6d6458;font-size:9px;font-weight:700;letter-spacing:0;text-transform:uppercase;padding-bottom:2px}
+  .lb-line{padding:7px 0;border-bottom:1px solid var(--border)}
+  .lb-line>b{font-size:13px;font-weight:750;white-space:nowrap}
+  .lb-nums{font-variant-numeric:tabular-nums;font-size:14px;font-weight:750}
   .lb-nums i{font-style:normal}
   .lb-nums i:last-child{font-weight:800}
-  .lb-line.other .lb-who b,.lb-line.other .lb-nums{color:#6d6458}
+  .lb-line.other>b,.lb-line.other .lb-nums{color:#6d6458}
 }
 """
 
@@ -165,16 +169,16 @@ JS = r'''
       }), {traffic:0,visit:0,td:0,contract:0,issue:0});
       return {list, sum};
     }
-    function boardLine(p, i){
+    function boardLine(p){
       const nums=[p.traffic,p.visit,p.call,p.web,p.meet,p.td,p.contract,p.issue].map(n=>`<i>${n}</i>`).join("");
-      return `<div class="lb-line${p.other?" other":""}"><div class="lb-who"><span class="lb-place">${p.other?"—":i+1}</span><b>${escape(p.name)}</b></div><div class="lb-nums">${nums}</div></div>`;
+      return `<div class="lb-line${p.other?" other":""}"><b>${escape(p.name)}</b><div class="lb-nums">${nums}</div></div>`;
     }
     function boardTable(rows, eyebrow, title){
       const rank=boardRank(rows);
       const sum=rank.sum;
       const body=rank.list.map((p,i)=>`<tr class="lb-row${p.other?" other":""}"><td class="lb-place">${p.other?"—":i+1}</td><td><b>${escape(p.name)}</b></td><td>${p.traffic}</td><td>${p.visit}</td><td>${p.call}</td><td>${p.web}</td><td>${p.meet}</td><td>${p.td}</td><td>${p.contract}</td><td>${p.issue}</td></tr>`).join("");
-      const phone=rank.list.map((p,i)=>boardLine(p,i)).join("");
-      return `<div class="card lb-card"><p class="eyebrow">${escape(eyebrow)}</p><h3>${escape(title)}</h3><p class="lb-sum">${sum.issue} выдач · ${sum.contract} контрактов · ${sum.td} тест-драйвов · ${sum.traffic} первичных</p><div class="lb-desk tune-scroll"><table class="lb-table"><thead><tr><th>#</th><th>Менеджер</th><th>Трафик</th><th>Визит</th><th>Звонок</th><th>Интернет</th><th>Встреча</th><th>ТД</th><th>Контракт</th><th>Выдача</th></tr></thead><tbody>${body}</tbody></table></div><div class="lb-phone"><div class="lb-key"><span>Тр</span><span>Виз</span><span>Зв</span><span>Ин</span><span>Вс</span><span>ТД</span><span>К</span><span>Выд</span></div>${phone}</div></div>`;
+      const phone=rank.list.map(p=>boardLine(p)).join("");
+      return `<div class="card lb-card"><p class="eyebrow">${escape(eyebrow)}</p><h3>${escape(title)}</h3><p class="lb-sum">${sum.issue} выдач · ${sum.contract} контрактов · ${sum.td} тест-драйвов · ${sum.traffic} первичных</p><div class="lb-desk tune-scroll"><table class="lb-table"><thead><tr><th>#</th><th>Менеджер</th><th>Трафик</th><th>Визит</th><th>Звонок</th><th>Интернет</th><th>Встреча</th><th>ТД</th><th>Контракт</th><th>Выдача</th></tr></thead><tbody>${body}</tbody></table></div><div class="lb-phone"><div class="lb-key"><span></span><div class="lb-labs"><span>Тр</span><span>Виз</span><span>Зв</span><span>Ин</span><span>Вс</span><span>ТД</span><span>К</span><span>Выд</span></div></div>${phone}</div></div>`;
     }
     function boardKind(r){
       const bits=[];
@@ -212,7 +216,7 @@ JS = r'''
         labels=["Запись","ТД","Контракт","Выдача"];
         done=far?far:1;
       }
-      return `<div class="lb-scale" style="--n:${labels.length}">`+labels.map((lab,i)=>`<span class="${i<done?"on":""}${i===done-1?" now":""}">${lab}</span>`).join("")+`</div>`;
+      return `<div class="lb-scale" style="--n:${labels.length}">`+labels.map((lab,i)=>`<span class="${i<done?"on s"+i:""}${i===done-1?" now":""}">${lab}</span>`).join("")+`</div>`;
     }
     function boardHit(r){
       return `<div class="lb-hit"><div class="lb-hit-top"><div><b>${escape(r.client||"Без имени")} · ${escape(r.model||"—")}</b><small>${escape(r.who)} · ${escape(boardKind(r))}${r.note?" · "+escape(r.note):""}</small></div><small>${escape(String(r.when||"").slice(11,16))}</small></div>${boardScale(r)}</div>`;
@@ -334,7 +338,7 @@ def apply(path: Path):
         else:
             html = html.replace(anchor, JS + anchor, 1)
             print("fn", path)
-    elif "const BOARD_SEP" not in html or 'data-board-mode="yday"' not in html or "function boardScale" not in html:
+    elif "const BOARD_SEP" not in html or 'data-board-mode="yday"' not in html or "lb-labs" not in html:
         a = html.find("    const BOARD_SHEET")
         if a < 0:
             a = html.find("    const BOARD_OCT")
