@@ -1050,7 +1050,7 @@ input,textarea{width:100%;background:#fff;border:1px solid var(--border);color:v
   .lb-card{margin-top:8px;padding:12px 10px 8px}
   .lb-card h3{font-size:18px;line-height:1.15}
   .lb-sum{font-size:12px;line-height:1.3;margin:0 0 8px}
-  .lb-key,.lb-line{display:grid;grid-template-columns:104px minmax(0,1fr) 7px minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) 7px minmax(0,1fr) minmax(0,1fr) 7px minmax(0,1fr) minmax(0,1fr);column-gap:0;align-items:center}
+  .lb-key,.lb-line{display:grid;grid-template-columns:96px minmax(0,1fr) 6px minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) 6px minmax(0,1fr) minmax(0,1fr) minmax(0,.85fr) 6px minmax(0,1fr) minmax(0,.85fr) minmax(0,1fr);column-gap:0;align-items:center}
   .lb-key s,.lb-line s{display:block;height:16px;border-left:1px solid #cfc6b8;text-decoration:none}
   .lb-line>i,.lb-key>span:not(:first-child){padding:4px 0}
   .lb-line>i.g2,.lb-key>span.g2{background:#f7f1e6}
@@ -1808,6 +1808,7 @@ async function pingTelegram(body){
     const BOARD_OCT = "1QJ0Wng-oItBWPDw03PKZ-hTAteaYOvUQVOm-6pautVc";
     const BOARD_SEP = "1PvC2EbyeIIewE2PFPKYOI7dxZAEbGAAiwy6jtxLM5kg";
     const BOARD_ROSTER = ["Ахмадуллин","Велиджанов","Демьянов","Лавров","Сидоров","Спицын","Тальков"];
+    const BOARD_ROSTER_SEP = ["Ахмадуллин","Коропец","Демьянов","Лавров","Сидоров","Спицын","Тальков"];
     let boardTimer = 0;
     let boardMode = "day";
     let boardCache = null;
@@ -1897,10 +1898,14 @@ async function pingTelegram(body){
       p.visit+=r.visit; p.call+=r.call; p.web+=r.web; p.meet+=r.meet; p.service+=r.service;
       p.td+=r.td; p.contract+=r.contract; p.issue+=r.issue;
     }
-    function boardRank(rows){
+    function boardPct(num, den){
+      if(!den) return "–";
+      return String(Math.round(100*num/den));
+    }
+    function boardRank(rows, roster){
       const blank=()=>({name:"",traffic:0,visit:0,call:0,web:0,meet:0,service:0,td:0,contract:0,issue:0,other:false});
       const map={};
-      BOARD_ROSTER.forEach(n=>{ const p=blank(); p.name=n; map[n]=p; });
+      (roster||BOARD_ROSTER).forEach(n=>{ const p=blank(); p.name=n; map[n]=p; });
       const other=blank(); other.name="Другие"; other.other=true;
       rows.forEach(r=>boardAdd(map[r.who]||other, r));
       const list=Object.keys(map).map(k=>map[k]);
@@ -1914,14 +1919,16 @@ async function pingTelegram(body){
     function boardLine(p){
       const n=[p.traffic,p.visit,p.call,p.web,p.meet,p.td,p.contract,p.issue];
       const c=(v,g)=>`<i class="g${g}">${v}</i>`;
-      return `<div class="lb-line${p.other?" other":""}"><b>${escape(p.name)}</b>${c(n[0],1)}<s></s>${c(n[2],2)}${c(n[1],2)}${c(n[3],2)}<s></s>${c(n[4],3)}${c(n[5],3)}<s></s>${c(n[6],4)}${c(n[7],4)}</div>`;
+      const td=boardPct(p.td, p.visit+p.meet);
+      const kp=boardPct(p.contract, p.traffic);
+      return `<div class="lb-line${p.other?" other":""}"><b>${escape(p.name)}</b>${c(n[0],1)}<s></s>${c(n[2],2)}${c(n[1],2)}${c(n[3],2)}<s></s>${c(n[4],3)}${c(n[5],3)}${c(td,3)}<s></s>${c(n[6],4)}${c(kp,4)}${c(n[7],4)}</div>`;
     }
-    function boardTable(rows, eyebrow, title){
-      const rank=boardRank(rows);
+    function boardTable(rows, eyebrow, title, roster){
+      const rank=boardRank(rows, roster);
       const sum=rank.sum;
-      const body=rank.list.map((p,i)=>`<tr class="lb-row${p.other?" other":""}"><td class="lb-place">${p.other?"—":i+1}</td><td><b>${escape(p.name)}</b></td><td>${p.traffic}</td><td>${p.visit}</td><td>${p.call}</td><td>${p.web}</td><td>${p.meet}</td><td>${p.td}</td><td>${p.contract}</td><td>${p.issue}</td></tr>`).join("");
+      const body=rank.list.map((p,i)=>`<tr class="lb-row${p.other?" other":""}"><td class="lb-place">${p.other?"—":i+1}</td><td><b>${escape(p.name)}</b></td><td>${p.traffic}</td><td>${p.visit}</td><td>${p.call}</td><td>${p.web}</td><td>${p.meet}</td><td>${p.td}</td><td>${boardPct(p.td,p.visit+p.meet)}</td><td>${p.contract}</td><td>${boardPct(p.contract,p.traffic)}</td><td>${p.issue}</td></tr>`).join("");
       const phone=rank.list.map(p=>boardLine(p)).join("");
-      return `<div class="card lb-card"><p class="eyebrow">${escape(eyebrow)}</p><h3>${escape(title)}</h3><p class="lb-sum">${sum.issue} выдач · ${sum.contract} контрактов · ${sum.td} тест-драйвов · ${sum.traffic} первичных</p><div class="lb-desk tune-scroll"><table class="lb-table"><thead><tr><th>#</th><th>Менеджер</th><th>Трафик</th><th>Визит</th><th>Звонок</th><th>Интернет</th><th>Встреча</th><th>ТД</th><th>Контракт</th><th>Выдача</th></tr></thead><tbody>${body}</tbody></table></div><div class="lb-phone" data-lb="groups"><div class="lb-key"><span></span><span class="g1">Тр</span><s></s><span class="g2">З</span><span class="g2">В</span><span class="g2">И</span><s></s><span class="g3">Вс</span><span class="g3">ТД</span><s></s><span class="g4">К</span><span class="g4">Вдч</span></div>${phone}</div></div>`;
+      return `<div class="card lb-card"><p class="eyebrow">${escape(eyebrow)}</p><h3>${escape(title)}</h3><p class="lb-sum">${sum.issue} выдач · ${sum.contract} контрактов · ${sum.td} тест-драйвов · ${sum.traffic} первичных</p><div class="lb-desk tune-scroll"><table class="lb-table"><thead><tr><th>#</th><th>Менеджер</th><th>Трафик</th><th>Визит</th><th>Звонок</th><th>Интернет</th><th>Встреча</th><th>ТД</th><th>%</th><th>Контракт</th><th>%</th><th>Выдача</th></tr></thead><tbody>${body}</tbody></table></div><div class="lb-phone" data-lb="pct"><div class="lb-key"><span></span><span class="g1">Тр</span><s></s><span class="g2">З</span><span class="g2">В</span><span class="g2">И</span><s></s><span class="g3">Вс</span><span class="g3">ТД</span><span class="g3">%</span><s></s><span class="g4">К</span><span class="g4">%</span><span class="g4">Вдч</span></div>${phone}</div></div>`;
     }
     function boardKind(r){
       const bits=[];
@@ -1975,7 +1982,7 @@ async function pingTelegram(body){
     }
     function boardHtml(cache){
       const note=`<p class="tune-note">Обновлено ${escape(cache.stamp)}. Рейтинг: выдача, затем контракт, тест-драйв, визит, трафик.</p>`;
-      if(boardMode==="prev") return note+boardTable(cache.sep, "Предыдущий месяц", "Сентябрь");
+      if(boardMode==="prev") return note+boardTable(cache.sep, "Предыдущий месяц", "Сентябрь", BOARD_ROSTER_SEP);
       if(boardMode==="month") return note+boardTable(cache.oct, "Месяц", "Октябрь");
       const yest=boardMode==="yday";
       const key=boardDayKey(yest?-1:0);
