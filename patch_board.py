@@ -32,9 +32,21 @@ CSS = """
 .lb-rep-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:6;background:var(--bg);padding:6px 0 8px}
 .lb-rep-bar span{display:flex;gap:6px}
 .lb-zoom{overflow:auto;-webkit-overflow-scrolling:touch}
-.lb-sheet{width:980px;background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px 14px 12px}
+.lb-sheet{width:1480px;background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px 14px 12px}
+.lb-rep-h{margin:14px 0 6px;font-size:12px;font-weight:750;letter-spacing:.04em;text-transform:uppercase;color:#6d6458}
+.lb-rep tr.sum td{font-weight:800;border-top:2px solid #1c1a17}
+.lb-fold{display:none}
+.lb-fold.open{display:block}
+.lb-fold-btn{cursor:pointer}
+.lb-fold-btn>b::before{content:"▸ ";color:#8a6840}
+.lb-fold-btn.open>b::before{content:"▾ "}
+.lb-line.sub>b{font-weight:650}
+.lb-fold-empty{margin:0;padding:6px 0 8px 8px;color:#6d6458;font-size:12px}
+tr.lb-fold-row{display:none}
+tr.lb-fold-row.open{display:table-row}
 .lb-rep{width:100%;border-collapse:collapse;font-size:13px}
-.lb-rep th,.lb-rep td{border-bottom:1px solid #e4dfd4;padding:7px 5px;text-align:right;white-space:nowrap}
+.lb-rep th,.lb-rep td{border-bottom:1px solid #e4dfd4;padding:6px 4px;text-align:right;white-space:nowrap}
+.lb-rep th{white-space:normal;line-height:1.15;vertical-align:bottom}
 .lb-rep th:first-child,.lb-rep td:first-child{text-align:left}
 .lb-rep th{font-size:10px;letter-spacing:.03em;text-transform:uppercase;color:#6d6458;font-weight:700}
 .lb-rep tr.other td{color:#6d6458}
@@ -167,39 +179,77 @@ JS = r'''
       });
       return out;
     }
+    const BOARD_PLAN = 2;
+    function boardBlank(){
+      return {name:"",traffic:0,visit:0,call:0,web:0,meet:0,service:0,td:0,contract:0,issue:0,visitContract:0,callVisit:0,callContract:0,webVisit:0,webContract:0,other:false,people:[]};
+    }
     function boardAdd(p, r){
       if(r.visit||r.call||r.web) p.traffic++;
       p.visit+=r.visit; p.call+=r.call; p.web+=r.web; p.meet+=r.meet; p.service+=r.service;
       p.td+=r.td; p.contract+=r.contract; p.issue+=r.issue;
+      if(r.visit&&r.contract) p.visitContract++;
+      if(r.call&&r.visit) p.callVisit++;
+      if(r.call&&r.contract) p.callContract++;
+      if(r.web&&r.visit) p.webVisit++;
+      if(r.web&&r.contract) p.webContract++;
     }
     function boardPct(num, den){
       if(!den) return "–";
-      return String(Math.round(100*num/den));
+      const v=100*num/den;
+      const s=Math.abs(v-Math.round(v))<0.05?String(Math.round(v)):v.toFixed(1).replace(".",",");
+      return s+"%";
+    }
+    function boardCmp(a,b){
+      return b.issue-a.issue || b.contract-a.contract || b.td-a.td || b.visit-a.visit || b.traffic-a.traffic || a.name.localeCompare(b.name,"ru");
     }
     function boardRank(rows, roster){
-      const blank=()=>({name:"",traffic:0,visit:0,call:0,web:0,meet:0,service:0,td:0,contract:0,issue:0,other:false});
+      const blank=boardBlank;
       const map={};
       (roster||BOARD_ROSTER).forEach(n=>{ const p=blank(); p.name=n; map[n]=p; });
       const other=blank(); other.name="Другие"; other.other=true;
-      rows.forEach(r=>boardAdd(map[r.who]||other, r));
+      const extras={};
+      rows.forEach(r=>{
+        if(map[r.who]) boardAdd(map[r.who], r);
+        else {
+          if(!extras[r.who]){ extras[r.who]=blank(); extras[r.who].name=r.who; }
+          boardAdd(extras[r.who], r);
+          boardAdd(other, r);
+        }
+      });
+      other.people=Object.keys(extras).map(k=>extras[k]).sort(boardCmp);
       const list=Object.keys(map).map(k=>map[k]);
-      list.sort((a,b)=>b.issue-a.issue || b.contract-a.contract || b.td-a.td || b.visit-a.visit || b.traffic-a.traffic || a.name.localeCompare(b.name,"ru"));
+      list.sort(boardCmp);
       list.push(other);
       const sum=list.reduce((s,p)=>({
         traffic:s.traffic+p.traffic, visit:s.visit+p.visit, td:s.td+p.td, contract:s.contract+p.contract, issue:s.issue+p.issue
       }), {traffic:0,visit:0,td:0,contract:0,issue:0});
       return {list, sum};
     }
-    function boardLine(p){
+    function boardLine(p, sub){
       const n=[p.traffic,p.visit,p.call,p.web,p.meet,p.td,p.contract,p.issue];
       const c=(v,g)=>`<i class="g${g}">${v}</i>`;
-      return `<div class="lb-line${p.other?" other":""}"><b>${escape(p.name)}</b>${c(n[0],1)}<s></s>${c(n[2],2)}${c(n[1],2)}${c(n[3],2)}<s></s>${c(n[4],3)}${c(n[5],3)}<s></s>${c(n[6],4)}${c(n[7],4)}</div>`;
+      const cls=(p.other?" other lb-fold-btn":"")+(sub?" sub":"");
+      const attr=p.other?` data-lb-fold="phone"`:"";
+      return `<div class="lb-line${cls}"${attr}><b>${escape(p.name)}</b>${c(n[0],1)}<s></s>${c(n[2],2)}${c(n[1],2)}${c(n[3],2)}<s></s>${c(n[4],3)}${c(n[5],3)}<s></s>${c(n[6],4)}${c(n[7],4)}</div>`;
+    }
+    function boardDeskCells(p){
+      return `<td>${p.traffic}</td><td>${p.visit}</td><td>${p.call}</td><td>${p.web}</td><td>${p.meet}</td><td>${p.td}</td><td>${p.contract}</td><td>${p.issue}</td>`;
     }
     function boardTable(rows, eyebrow, title, roster){
       const rank=boardRank(rows, roster);
       const sum=rank.sum;
-      const body=rank.list.map((p,i)=>`<tr class="lb-row${p.other?" other":""}"><td class="lb-place">${p.other?"—":i+1}</td><td><b>${escape(p.name)}</b></td><td>${p.traffic}</td><td>${p.visit}</td><td>${p.call}</td><td>${p.web}</td><td>${p.meet}</td><td>${p.td}</td><td>${p.contract}</td><td>${p.issue}</td></tr>`).join("");
-      const phone=rank.list.map(p=>boardLine(p)).join("");
+      const body=rank.list.map((p,i)=>{
+        const main=`<tr class="lb-row${p.other?" other lb-fold-btn":""}"${p.other?` data-lb-fold="desk"`:""}><td class="lb-place">${p.other?"—":i+1}</td><td><b>${escape(p.name)}</b></td>${boardDeskCells(p)}</tr>`;
+        if(!p.other) return main;
+        const kids=(p.people||[]).map(x=>`<tr class="lb-row lb-fold-row" data-lb-panel="desk"><td></td><td><b>${escape(x.name)}</b></td>${boardDeskCells(x)}</tr>`).join("")
+          || `<tr class="lb-fold-row" data-lb-panel="desk"><td></td><td colspan="9">Нет других менеджеров</td></tr>`;
+        return main+kids;
+      }).join("");
+      const phone=rank.list.map(p=>{
+        if(!p.other) return boardLine(p);
+        const kids=(p.people||[]).map(x=>boardLine(x,true)).join("") || `<p class="lb-fold-empty">Нет других менеджеров</p>`;
+        return boardLine(p)+`<div class="lb-fold" data-lb-panel="phone">${kids}</div>`;
+      }).join("");
       return `<div class="card lb-card"><p class="eyebrow">${escape(eyebrow)}</p><h3>${escape(title)}</h3><p class="lb-sum">${sum.issue} выдач · ${sum.contract} контрактов · ${sum.td} тест-драйвов · ${sum.traffic} первичных</p><div class="lb-desk tune-scroll"><table class="lb-table"><thead><tr><th>#</th><th>Менеджер</th><th>Трафик</th><th>Визит</th><th>Звонок</th><th>Интернет</th><th>Встреча</th><th>ТД</th><th>Контракт</th><th>Выдача</th></tr></thead><tbody>${body}</tbody></table></div><div class="lb-phone" data-lb="groups"><div class="lb-key"><span></span><span class="g1">Тр</span><s></s><span class="g2">З</span><span class="g2">В</span><span class="g2">И</span><s></s><span class="g3">Вс</span><span class="g3">ТД</span><s></s><span class="g4">К</span><span class="g4">Вдч</span></div>${phone}</div></div>`;
     }
     function boardKind(r){
@@ -279,6 +329,7 @@ JS = r'''
         if(!boardCache) root.innerHTML=`<div class="card"><p>Загружаю трафик…</p></div>`;
         await boardEnsure();
         root.innerHTML=boardHtml(boardCache);
+        boardBindFolds(root);
       }catch(err){
         root.innerHTML=`<div class="card"><p>Не удалось прочитать трафик. ${escape(err&&err.message||"")}</p><button class="btn ivory" type="button" id="boardRetry">Ещё раз</button></div>`;
         const b=document.getElementById("boardRetry");
@@ -320,12 +371,60 @@ JS = r'''
       const key=boardDayKey(yest?-1:0);
       return {rows:boardSlice(cache, key), roster:BOARD_ROSTER, title:key, sub:yest?"Вчера":"Сегодня"};
     }
+    function boardPace(fact, plan){
+      if(boardMode!=="month" && boardMode!=="prev") return {n:"–", p:"–"};
+      let days, passed;
+      if(boardMode==="prev"){ days=30; passed=30; }
+      else {
+        const now=new Date();
+        days=new Date(now.getFullYear(), now.getMonth()+1, 0).getDate();
+        passed=Math.min(days, Math.max(1, now.getDate()));
+      }
+      const n=Math.round(fact*days/passed);
+      return {n:String(n), p:boardPct(n, plan)};
+    }
     function boardReportHtml(){
       const per=boardPeriod();
       const rank=boardRank(per.rows, per.roster);
-      const head=["Менеджер","Трафик","Звонок","Визит","Интернет","Встреча","ТД","ТД %","Контракт","К %","Выдача"];
-      const body=rank.list.map(p=>`<tr class="${p.other?"other":""}"><td>${escape(p.name)}</td><td>${p.traffic}</td><td>${p.call}</td><td>${p.visit}</td><td>${p.web}</td><td>${p.meet}</td><td>${p.td}</td><td>${boardPct(p.td, p.visit+p.meet)}</td><td>${p.contract}</td><td>${boardPct(p.contract, p.traffic)}</td><td>${p.issue}</td></tr>`).join("");
-      return `<p class="eyebrow" style="margin:0 0 4px">${escape(per.sub)}</p><h2 style="margin:0 0 10px">${escape(per.title)}</h2><table class="lb-rep"><thead><tr>${head.map(h=>`<th>${h}</th>`).join("")}</tr></thead><tbody>${body}</tbody></table><p class="lb-rep-note">ТД % — тест-драйвы к сумме первичных визитов и вторичных встреч. К % — контракты к трафику. Обновлено ${escape((boardCache&&boardCache.stamp)||"")}</p>`;
+      const bucket=rank.list.find(p=>p.other)||boardBlank();
+      const people=rank.list.filter(p=>!p.other).concat(bucket.people||[]).sort(boardCmp);
+      const total=people.reduce((s,p)=>{
+        ["traffic","visit","call","web","meet","td","contract","issue","visitContract","callVisit","callContract","webVisit","webContract"].forEach(k=>s[k]+=p[k]||0);
+        return s;
+      }, boardBlank());
+      total.name="Итого";
+      const planN=rank.list.filter(p=>!p.other).length*BOARD_PLAN;
+      const ch=p=>p.visit+p.call+p.web;
+      const mainHead=["Менеджер","План","Факт","% плана","Контракты","Расторж.","Действ.","Выдачи+К","Прогноз","Прогноз %","Трафик","% трафика","% визитов","% зв+инт","Конв. в контракт","Конв. в выдачу","Визиты","Контракт с визита","Конв. визита"];
+      const rowMain=(p, plan)=>{
+        const pace=boardPace(p.issue, plan);
+        const prim=ch(p), tPrim=ch(total);
+        return `<tr class="${p.name==="Итого"?"sum":""}"><td>${escape(p.name)}</td><td>${plan||"–"}</td><td>${p.issue}</td><td>${boardPct(p.issue, plan)}</td><td>${p.contract}</td><td>–</td><td>–</td><td>–</td><td>${pace.n}</td><td>${pace.p}</td><td>${prim}</td><td>${boardPct(prim, tPrim)}</td><td>${boardPct(p.visit, total.visit)}</td><td>${boardPct(p.call+p.web, total.call+total.web)}</td><td>${boardPct(p.contract, prim)}</td><td>${boardPct(p.issue, prim)}</td><td>${p.visit}</td><td>${p.visitContract}</td><td>${boardPct(p.visitContract, p.visit)}</td></tr>`;
+      };
+      const tdHead=["Менеджер","План","Факт","Визиты перв.+втор","%"];
+      const rowTd=p=>`<tr class="${p.name==="Итого"?"sum":""}"><td>${escape(p.name)}</td><td>70%</td><td>${p.td}</td><td>${p.visit+p.meet}</td><td>${boardPct(p.td, p.visit+p.meet)}</td></tr>`;
+      const chHead=["Менеджер","Звонки","Визит со звонка","% в визит","Контракт со звонка","% в контракт","Интернет","Визит с инт.","% в визит","Контракт с инт.","% в контракт"];
+      const rowCh=p=>`<tr class="${p.name==="Итого"?"sum":""}"><td>${escape(p.name)}</td><td>${p.call}</td><td>${p.callVisit}</td><td>${boardPct(p.callVisit, p.call)}</td><td>${p.callContract}</td><td>${boardPct(p.callContract, p.call)}</td><td>${p.web}</td><td>${p.webVisit}</td><td>${boardPct(p.webVisit, p.web)}</td><td>${p.webContract}</td><td>${boardPct(p.webContract, p.web)}</td></tr>`;
+      const all=people.concat([total]);
+      return `<p class="eyebrow" style="margin:0 0 4px">${escape(per.sub)}</p><h2 style="margin:0 0 8px">${escape(per.title)}</h2>
+        <p class="lb-rep-h">Выдачи и трафик</p>
+        <table class="lb-rep"><thead><tr>${mainHead.map(h=>`<th>${h}</th>`).join("")}</tr></thead><tbody>${people.map(p=>rowMain(p, rank.list.some(n=>!n.other&&n.name===p.name)?BOARD_PLAN:0)).join("")}${rowMain(total, planN)}</tbody></table>
+        <p class="lb-rep-h">Тест-драйвы</p>
+        <table class="lb-rep lb-rep-sm"><thead><tr>${tdHead.map(h=>`<th>${h}</th>`).join("")}</tr></thead><tbody>${all.map(rowTd).join("")}</tbody></table>
+        <p class="lb-rep-h">Звонки и интернет</p>
+        <table class="lb-rep"><thead><tr>${chHead.map(h=>`<th>${h}</th>`).join("")}</tr></thead><tbody>${all.map(rowCh).join("")}</tbody></table>
+        <p class="lb-rep-note">Как в «ОП CHERY». План выдач — ${BOARD_PLAN} на менеджера. Трафик — визиты + звонки + интернет. Конв. в контракт и в выдачу — к трафику. Конв. визита — контракт с визита к первичным визитам. ТД % — к первичным визитам и вторичным встречам, план 70%. Расторжения, действующие контракты и «выдачи+контракты» в журнале трафика не ведутся. Обновлено ${escape((boardCache&&boardCache.stamp)||"")}</p>`;
+    }
+    function boardBindFolds(root){
+      if(!root) return;
+      root.querySelectorAll("[data-lb-fold]").forEach(el=>{
+        el.onclick=()=>{
+          const id=el.getAttribute("data-lb-fold");
+          const open=!el.classList.contains("open");
+          root.querySelectorAll(`[data-lb-fold="${id}"]`).forEach(x=>x.classList.toggle("open", open));
+          root.querySelectorAll(`[data-lb-panel="${id}"]`).forEach(x=>x.classList.toggle("open", open));
+        };
+      });
     }
     function boardApplyZoom(){
       const sheet=document.getElementById("lbSheet");
