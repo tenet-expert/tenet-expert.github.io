@@ -304,13 +304,14 @@ JS = r'''
     }
     function boardHtml(cache){
       const note=`<p class="tune-note">Обновлено ${escape(cache.stamp)}. Рейтинг: выдача, затем контракт, тест-драйв, визит, трафик.</p>`;
-      if(boardMode==="prev") return note+boardTable(cache.sep, "Предыдущий месяц", "Сентябрь", BOARD_ROSTER_SEP);
-      if(boardMode==="month") return note+boardTable(cache.oct, "Месяц", "Октябрь");
+      const btn=`<div style="margin:12px 0"><button class="btn ivory" type="button" id="boardOpenReport">Расширенный отчёт</button></div>`;
+      if(boardMode==="prev") return note+boardTable(cache.sep, "Предыдущий месяц", "Сентябрь", BOARD_ROSTER_SEP)+btn;
+      if(boardMode==="month") return note+boardTable(cache.oct, "Месяц", "Октябрь")+btn;
       const yest=boardMode==="yday";
       const key=boardDayKey(yest?-1:0);
       const rows=boardSlice(cache, key);
       const label=yest?"Вчера":"Сегодня";
-      return note+boardTable(rows, label, key)+boardTape(rows, label);
+      return note+boardTable(rows, label, key)+btn+boardTape(rows, label);
     }
     async function boardEnsure(){
       if(boardCache) return boardCache;
@@ -330,6 +331,8 @@ JS = r'''
         await boardEnsure();
         root.innerHTML=boardHtml(boardCache);
         boardBindFolds(root);
+        const open=document.getElementById("boardOpenReport");
+        if(open) open.onclick=()=>{ view="boardrep"; state.section="boardrep"; try{save();}catch(e){} render(); };
       }catch(err){
         root.innerHTML=`<div class="card"><p>Не удалось прочитать трафик. ${escape(err&&err.message||"")}</p><button class="btn ivory" type="button" id="boardRetry">Ещё раз</button></div>`;
         const b=document.getElementById("boardRetry");
@@ -352,17 +355,15 @@ JS = r'''
             boardLoad();
           };
         });
-        const open=document.getElementById("boardOpenReport");
-        if(open) open.onclick=()=>{ view="boardrep"; state.section="boardrep"; try{save();}catch(e){} render(); };
         boardLoad();
       }, 40);
       return banner("Leaderboard","Трафик · онлайн","TENET")+`
         <p class="lead">Сегодня, вчера и месяц — из «Трафик октябрь». Предыдущий месяц — из «Трафик сентябрь».</p>
         ${boardChips()}
-        <div id="boardRoot"><div class="card"><p>Загружаю таблицу…</p></div></div>
-        <div style="margin-top:14px"><button class="btn ivory" type="button" id="boardOpenReport">Расширенный отчёт</button></div>`;
+        <div id="boardRoot"><div class="card"><p>Загружаю таблицу…</p></div></div>`;
     }
     let boardZoom = 1;
+    let boardZoomMin = 0.2;
     function boardPeriod(){
       const cache=boardCache||{oct:[],sep:[]};
       if(boardMode==="prev") return {rows:cache.sep||[], roster:BOARD_ROSTER_SEP, title:"Сентябрь", sub:"Предыдущий месяц"};
@@ -442,6 +443,7 @@ JS = r'''
       const availW=Math.max(280, box.clientWidth-4);
       const availH=Math.max(220, window.innerHeight-132);
       boardZoom=Math.min(availW/sheet.offsetWidth, availH/sheet.offsetHeight);
+      boardZoomMin=boardZoom;
       boardApplyZoom();
     }
     function boardrep(){
@@ -449,18 +451,18 @@ JS = r'''
       setTimeout(()=>{
         const back=document.getElementById("lbBack");
         if(back) back.onclick=()=>{ view="board"; state.section="board"; try{save();}catch(e){} render(); };
-        const fit=document.getElementById("lbFit");
-        const inn=document.getElementById("lbIn");
-        const out=document.getElementById("lbOut");
-        if(fit) fit.onclick=()=>boardFit();
-        if(inn) inn.onclick=()=>{ boardZoom=Math.min(2.6, boardZoom*1.25); boardApplyZoom(); };
-        if(out) out.onclick=()=>{ boardZoom=Math.max(0.18, boardZoom/1.25); boardApplyZoom(); };
         const box=document.getElementById("lbZoom");
         let pinch=null;
         const dist=ev=>{ const a=ev.touches[0], b=ev.touches[1]; return Math.hypot(a.clientX-b.clientX, a.clientY-b.clientY); };
+        const clamp=z=>Math.min(3, Math.max(boardZoomMin||0.2, z));
         if(box){
+          box.addEventListener("wheel", ev=>{
+            ev.preventDefault();
+            boardZoom=clamp(boardZoom*(ev.deltaY<0?1.12:1/1.12));
+            boardApplyZoom();
+          }, {passive:false});
           box.addEventListener("touchstart", ev=>{ if(ev.touches.length===2) pinch={d:dist(ev), z:boardZoom}; }, {passive:true});
-          box.addEventListener("touchmove", ev=>{ if(pinch && ev.touches.length===2){ boardZoom=Math.min(2.6, Math.max(0.18, pinch.z*dist(ev)/pinch.d)); boardApplyZoom(); } }, {passive:true});
+          box.addEventListener("touchmove", ev=>{ if(pinch && ev.touches.length===2){ boardZoom=clamp(pinch.z*dist(ev)/pinch.d); boardApplyZoom(); } }, {passive:true});
           box.addEventListener("touchend", ()=>{ pinch=null; });
         }
         const paint=()=>{ const sheet=document.getElementById("lbSheet"); if(sheet) sheet.innerHTML=boardReportHtml(); boardFit(); };
@@ -473,9 +475,8 @@ JS = r'''
       return `<div class="lb-rep-page">
         <div class="lb-rep-bar">
           <button class="btn ghost" type="button" id="lbBack">К рейтингу</button>
-          <span><button class="btn ghost" type="button" id="lbFit">Вместить</button><button class="btn ghost" type="button" id="lbOut">−</button><button class="btn ivory" type="button" id="lbIn">+</button></span>
         </div>
-        <p class="tune-note">Горизонтальный лист на одну страницу. Сначала мелко, увеличить — кнопками или двумя пальцами.</p>
+        <p class="tune-note">Лист на один экран. Приблизить — колёсиком или двумя пальцами, затем листать.</p>
         <div class="lb-zoom" id="lbZoom"><div id="lbSpace"><div class="lb-sheet" id="lbSheet"></div></div></div>
       </div>`;
     }
