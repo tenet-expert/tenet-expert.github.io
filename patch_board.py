@@ -48,6 +48,8 @@ CSS = """
 tr.lb-fold-row{display:none}
 tr.lb-fold-row.open{display:table-row}
 .lb-rep{width:100%;border-collapse:collapse;font-size:13px}
+.lb-rep.lb-rep-sm{width:auto}
+.lb-rep.lb-rep-sm th,.lb-rep.lb-rep-sm td{width:1%;padding-left:10px;padding-right:10px}
 .lb-rep th,.lb-rep td{border-bottom:1px solid #e4dfd4;padding:6px 4px;text-align:right;white-space:nowrap}
 .lb-rep th{white-space:normal;line-height:1.15;vertical-align:bottom}
 .lb-rep th:first-child,.lb-rep td:first-child{text-align:left}
@@ -182,7 +184,8 @@ JS = r'''
       });
       return out;
     }
-    const BOARD_PLAN = 2;
+    const BOARD_PLAN = 10;
+    const BOARD_PLAN_TEAM = 70;
     function boardBlank(){
       return {name:"",traffic:0,visit:0,call:0,web:0,meet:0,service:0,td:0,contract:0,issue:0,visitContract:0,callVisit:0,callContract:0,webVisit:0,webContract:0,other:false,people:[]};
     }
@@ -397,9 +400,8 @@ JS = r'''
         return s;
       }, boardBlank());
       total.name="Итого";
-      const oct=boardMode==="month";
-      const planN=oct?11:rank.list.filter(p=>!p.other).length*BOARD_PLAN;
-      const planOf=p=>oct?0:(rank.list.some(n=>!n.other&&n.name===p.name)?BOARD_PLAN:0);
+      const planN=BOARD_PLAN_TEAM;
+      const planOf=p=>rank.list.some(n=>!n.other&&n.name===p.name)?BOARD_PLAN:0;
       const ch=p=>p.visit+p.call+p.web;
       const mark=(num,den,kind)=>{
         const text=boardPct(num, den);
@@ -419,7 +421,7 @@ JS = r'''
       const chHead=["Менеджер","Звонки","Визит со звонка","% в визит","Контракт со звонка","% в контракт","Интернет","Визит с инт.","% в визит","Контракт с инт.","% в контракт"];
       const rowCh=p=>`<tr class="${p.name==="Итого"?"sum":""}"><td>${escape(p.name)}</td><td>${p.call}</td><td>${p.callVisit}</td><td>${boardPct(p.callVisit, p.call)}</td><td>${p.callContract}</td><td>${mark(p.callContract, p.call, "conv")}</td><td>${p.web}</td><td>${p.webVisit}</td><td>${boardPct(p.webVisit, p.web)}</td><td>${p.webContract}</td><td>${mark(p.webContract, p.web, "conv")}</td></tr>`;
       const all=people.concat([total]);
-      const planNote=oct?"План октября — 11 выдач на отдел.":`План выдач — ${BOARD_PLAN} на менеджера.`;
+      const planNote=`Личный план — ${BOARD_PLAN}, общий — ${BOARD_PLAN_TEAM}.`;
       return `<p class="eyebrow" style="margin:0 0 4px">${escape(per.sub)}</p><h2 style="margin:0 0 8px">${escape(per.title)}</h2>
         <p class="lb-rep-h">Выдачи и трафик</p>
         <table class="lb-rep"><thead><tr>${mainHead.map(h=>`<th>${h}</th>`).join("")}</tr></thead><tbody>${people.map(p=>rowMain(p, planOf(p))).join("")}${rowMain(total, planN)}</tbody></table>
