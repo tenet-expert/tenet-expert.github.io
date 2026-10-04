@@ -520,7 +520,7 @@ def apply(path: Path):
     if 'data-go="board"]::before' not in html and "</style>" in html:
         html = html.replace(
             "</style>",
-            '.hub-card[data-go="board"]::before{background-image:url("hub/board.jpg?v=1");background-position:50% 42%;background-size:cover;}\n</style>',
+            '.hub-card[data-go="board"]::before{background-image:url("hub/board.jpg?v=2");background-position:50% 62%;background-size:cover;}\n</style>',
             1,
         )
         print("board preview", path)
