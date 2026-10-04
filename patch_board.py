@@ -50,15 +50,14 @@ CSS = """
   .lb-card{margin-top:8px;padding:12px 10px 8px}
   .lb-card h3{font-size:18px;line-height:1.15}
   .lb-sum{font-size:12px;line-height:1.3;margin:0 0 8px}
-  .lb-key,.lb-line{display:grid;grid-template-columns:max-content minmax(0,1fr);column-gap:8px;align-items:center}
-  .lb-labs,.lb-nums{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));text-align:center;gap:1px}
-  .lb-key{color:#6d6458;font-size:9px;font-weight:700;letter-spacing:0;text-transform:uppercase;padding-bottom:2px}
-  .lb-line{padding:7px 0;border-bottom:1px solid var(--border)}
-  .lb-line>b{font-size:13px;font-weight:750;white-space:nowrap}
-  .lb-nums{font-variant-numeric:tabular-nums;font-size:14px;font-weight:750}
-  .lb-nums i{font-style:normal}
-  .lb-nums i:last-child{font-weight:800}
-  .lb-line.other>b,.lb-line.other .lb-nums{color:#6d6458}
+  .lb-key,.lb-line{display:grid;grid-template-columns:112px repeat(8,minmax(0,1fr));column-gap:2px;align-items:center}
+  .lb-key{color:#6d6458;font-size:9px;font-weight:700;letter-spacing:0;text-transform:uppercase;padding-bottom:2px;text-align:center}
+  .lb-key>span:first-child{text-align:left}
+  .lb-line{padding:7px 0;border-bottom:1px solid var(--border);text-align:center;font-variant-numeric:tabular-nums;font-size:14px;font-weight:750}
+  .lb-line>b{font-size:13px;font-weight:750;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .lb-line>i{font-style:normal}
+  .lb-line>i:last-child{font-weight:800}
+  .lb-line.other>b,.lb-line.other>i{color:#6d6458}
 }
 """
 
@@ -171,14 +170,14 @@ JS = r'''
     }
     function boardLine(p){
       const nums=[p.traffic,p.visit,p.call,p.web,p.meet,p.td,p.contract,p.issue].map(n=>`<i>${n}</i>`).join("");
-      return `<div class="lb-line${p.other?" other":""}"><b>${escape(p.name)}</b><div class="lb-nums">${nums}</div></div>`;
+      return `<div class="lb-line${p.other?" other":""}"><b>${escape(p.name)}</b>${nums}</div>`;
     }
     function boardTable(rows, eyebrow, title){
       const rank=boardRank(rows);
       const sum=rank.sum;
       const body=rank.list.map((p,i)=>`<tr class="lb-row${p.other?" other":""}"><td class="lb-place">${p.other?"—":i+1}</td><td><b>${escape(p.name)}</b></td><td>${p.traffic}</td><td>${p.visit}</td><td>${p.call}</td><td>${p.web}</td><td>${p.meet}</td><td>${p.td}</td><td>${p.contract}</td><td>${p.issue}</td></tr>`).join("");
       const phone=rank.list.map(p=>boardLine(p)).join("");
-      return `<div class="card lb-card"><p class="eyebrow">${escape(eyebrow)}</p><h3>${escape(title)}</h3><p class="lb-sum">${sum.issue} выдач · ${sum.contract} контрактов · ${sum.td} тест-драйвов · ${sum.traffic} первичных</p><div class="lb-desk tune-scroll"><table class="lb-table"><thead><tr><th>#</th><th>Менеджер</th><th>Трафик</th><th>Визит</th><th>Звонок</th><th>Интернет</th><th>Встреча</th><th>ТД</th><th>Контракт</th><th>Выдача</th></tr></thead><tbody>${body}</tbody></table></div><div class="lb-phone"><div class="lb-key"><span></span><div class="lb-labs"><span>Тр</span><span>Виз</span><span>Зв</span><span>Ин</span><span>Вс</span><span>ТД</span><span>К</span><span>Выд</span></div></div>${phone}</div></div>`;
+      return `<div class="card lb-card"><p class="eyebrow">${escape(eyebrow)}</p><h3>${escape(title)}</h3><p class="lb-sum">${sum.issue} выдач · ${sum.contract} контрактов · ${sum.td} тест-драйвов · ${sum.traffic} первичных</p><div class="lb-desk tune-scroll"><table class="lb-table"><thead><tr><th>#</th><th>Менеджер</th><th>Трафик</th><th>Визит</th><th>Звонок</th><th>Интернет</th><th>Встреча</th><th>ТД</th><th>Контракт</th><th>Выдача</th></tr></thead><tbody>${body}</tbody></table></div><div class="lb-phone" data-lb="cols"><div class="lb-key"><span></span><span>Тр</span><span>Виз</span><span>Зв</span><span>Ин</span><span>Вс</span><span>ТД</span><span>К</span><span>Выд</span></div>${phone}</div></div>`;
     }
     function boardKind(r){
       const bits=[];
@@ -338,7 +337,7 @@ def apply(path: Path):
         else:
             html = html.replace(anchor, JS + anchor, 1)
             print("fn", path)
-    elif "const BOARD_SEP" not in html or 'data-board-mode="yday"' not in html or "lb-labs" not in html:
+    elif "const BOARD_SEP" not in html or 'data-board-mode="yday"' not in html or 'data-lb="cols"' not in html:
         a = html.find("    const BOARD_SHEET")
         if a < 0:
             a = html.find("    const BOARD_OCT")
