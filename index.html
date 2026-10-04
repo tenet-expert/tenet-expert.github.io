@@ -545,6 +545,7 @@ input,textarea{width:100%;background:#fff;border:1px solid var(--border);color:v
 }
 /* st-look */
 .st-filters{display:flex;flex-wrap:wrap;gap:8px}
+.st-vin-search{width:100%;margin:10px 0 2px;padding:11px 12px;border:1px solid var(--border);border-radius:12px;background:#fff;font:600 15px/1.2 ui-monospace,Menlo,monospace;letter-spacing:.06em;text-transform:uppercase}
 .st-board{display:flex;flex-direction:column;gap:10px;margin-top:12px}
 .st-acc{border:1px solid #eadfcf;border-radius:16px;background:#fff;box-shadow:0 10px 28px rgba(70,50,20,.05);overflow:hidden}
 .st-acc>summary,.st-trim>summary{list-style:none;cursor:pointer}
@@ -1451,6 +1452,7 @@ tr.lb-fold-row.open{display:table-row}
     let qDeadline = 0;
     let stockFilter = "all";
     let stockStatus = "all";
+    let stockVin = "";
     let stockSort = "trim";
     let stockSortDir = 1;
     let stockOpen = {};
@@ -7611,6 +7613,14 @@ async function confirmCloud(rec){
       document.querySelectorAll("[data-tune]").forEach(b=>b.onclick=()=>{ tuneTab=b.dataset.tune||"do"; view="tune"; render(); });
       document.querySelectorAll("[data-stock]").forEach(b=>b.onclick=()=>{ stockFilter=b.dataset.stock; render(); });
       document.querySelectorAll("[data-stock-st]").forEach(b=>b.onclick=()=>{ stockStatus=b.dataset.stockSt; render(); });
+      const stockVinBox=document.getElementById("stockVin");
+      if(stockVinBox) stockVinBox.oninput=()=>{
+        const pos=stockVinBox.selectionStart;
+        stockVin=stockVinBox.value;
+        render();
+        const again=document.getElementById("stockVin");
+        if(again){ again.focus(); const n=Math.min(pos==null?again.value.length:pos, again.value.length); try{ again.setSelectionRange(n,n); }catch(e){} }
+      };
       document.querySelectorAll("[data-stock-sort]").forEach(b=>b.onclick=()=>{
         const key=b.dataset.stockSort;
         if(stockSort===key) stockSortDir=stockSortDir===1?-1:1;

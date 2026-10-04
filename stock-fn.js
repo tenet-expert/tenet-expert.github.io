@@ -173,8 +173,14 @@
       {id:"tsa8", short:"Arrizo 8", model:"CHERY Arrizo 8", vin:"LVVDC21B2RD562966", rrc:3260000, tune:230000, year:2024, km:4970, fix:2300000}
     ];
     function testSaleOf(id){ return (typeof TEST_SALE!=="undefined" && TEST_SALE.find(x=>x.id===id)) || null; }
+    function stockVinNorm(s){
+      return String(s||"").toUpperCase().replace(/[^A-Z0-9]/g,"");
+    }
     function stockTestHtml(){
-      const rows=(typeof TEST_SALE!=="undefined"?TEST_SALE:[]).map(c=>`<tr>
+      const q=stockVinNorm(typeof stockVin==="string"?stockVin:"");
+      const cars=(typeof TEST_SALE!=="undefined"?TEST_SALE:[]).filter(c=>!q || stockVinNorm(c.vin).indexOf(q)>=0);
+      if(!cars.length) return "";
+      const rows=cars.map(c=>`<tr>
         <td><b>${escape(c.model)}</b></td>
         <td>${escape(c.vin)}</td>
         <td>${rub(c.rrc)} ₽</td>
@@ -193,7 +199,9 @@
       if(typeof stockOpen!=="object" || !stockOpen) stockOpen={};
       const meta=typeof STOCK_META==="object"?STOCK_META:{updated:"11.09.2026"};
       const sale=(typeof STOCK!=="undefined"?STOCK:[]);
+      const q=stockVinNorm(typeof stockVin==="string"?stockVin:"");
       const list=sale.filter(x=>{
+        if(q) return stockVinNorm(x.vin).indexOf(q)>=0;
         if(stockFilter!=="all" && x.model!==stockFilter) return false;
         if(stockStatus!=="all" && x.status!==stockStatus) return false;
         return true;
@@ -210,8 +218,8 @@
         const arrow=on?(stockSortDir<0?" ↓":" ↑"):"";
         return `<button type="button" class="chip ${on?"on":""}" data-stock-sort="${k}">${lab}${arrow}</button>`;
       }).join("");
-      const testOn=stockStatus==="test";
-      const body = testOn ? stockTestHtml() : list.length
+      const testOn=stockStatus==="test" && !q;
+      const stockBody = testOn ? stockTestHtml() : list.length
         ? `<div class="st-board">`+ids.map(id=>{
             const titles={t4:["TENET","T4"],t4l:["TENET","T4L"],t7:["TENET","T7"],t8:["TENET","T8"],tt9:["TENET","T9"],t9:["CHERY","Tiggo 9"],t7l:["CHERY","Tiggo 7 L"],ta8:["TENET","A8"],a8:["CHERY","Arrizo 8"]};
             const known=titles[id];
@@ -233,13 +241,13 @@
               const color=((rows.slice().sort(stockCmp)[0])||{}).color;
               if(color) bits.unshift(color);
             }
-            const opened = stockOpened("m:"+id, stockFilter===id || ids.length===1);
+            const opened = stockOpened("m:"+id, !!q || stockFilter===id || ids.length===1);
             const groups=stockTrimGroups(rows);
             const trims=groups.map(g=>{
               const prices=g.rows.map(stockRrc).filter(Boolean);
               const from=prices.length?Math.min.apply(null,prices):0;
               const tkey="t:"+id+"|"+g.trim;
-              const tOpen=stockOpened(tkey, groups.length===1);
+              const tOpen=stockOpened(tkey, !!q || groups.length===1);
               return `<details class="st-trim" data-acc="${escape(tkey)}" ${tOpen?"open":""}>
                 <summary>
                   <b>${escape(g.trim)}</b>
@@ -257,9 +265,13 @@
               <div class="st-trims">${trims}</div>
             </details>`;
           }).join("")+`</div>`
-        : `<div class="card" style="margin-top:12px"><p>По этому фильтру машин нет.</p></div>`;
+        : "";
+      const tests = q ? stockTestHtml() : "";
+      const body = (stockBody || tests) ? (testOn ? stockBody : stockBody+tests) : `<div class="card" style="margin-top:12px"><p>${q?"VIN не найден.":"По этому фильтру машин нет."}</p></div>`;
+      const typed=escape(typeof stockVin==="string"?stockVin:"");
       return banner("Склад", `Logicstars · ${meta.updated}`, "TENET")+`
-        <p class="lead">${testOn?"Четыре теста. Цена в последней колонке фиксированная, продажа только через PANGO.":"Сначала модель, внутри — комплектация. Сортировка меняет порядок машин и групп."}</p>
+        <p class="lead">${q?"Поиск по VIN по складу и тестам. Хвост номера тоже подходит.":(testOn?"Четыре теста. Цена в последней колонке фиксированная, продажа только через PANGO.":"Сначала модель, внутри — комплектация. Сортировка меняет порядок машин и групп.")}</p>
+        <input id="stockVin" class="st-vin-search" type="search" inputmode="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Поиск по VIN" value="${typed}">
         <div class="study-pick st-filters">
           <button class="chip ${stockStatus==="all"?"on":""}" data-stock-st="all">Все · ${scoped.length}</button>
           <button class="chip ${stockStatus==="in"?"on":""}" data-stock-st="in">В наличии · ${nIn}</button>
