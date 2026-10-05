@@ -1,29 +1,32 @@
 #!/usr/bin/env python3
-"""Keep T9 R19 tire note in sync with Drive «Резина Чери.xlsx»: под заказ 3 раб дня."""
+"""Keep TUNE_RUBBER tire texts in sync with Drive «Резина Чери.xlsx» (лист Chery)."""
 from pathlib import Path
 
-OLD = '["T9 R19",[["235/55 R19",15750,63000,"0 · под заказ"]]]'
-NEW = '["T9 R19",[["235/55 R19",15750,63000,"0 · под заказ 3 раб дня"]]]'
-OLD2 = '["235/55 R19",15750,63000,"0 · под заказ"]'
-NEW2 = '["235/55 R19",15750,63000,"0 · под заказ 3 раб дня"]'
+# (old, new) pairs; each applied once, idempotent.
+PAIRS = [
+    ('["235/55 R19",15750,63000,"0 · под заказ"]',
+     '["235/55 R19",15750,63000,"0 · под заказ 3 раб дня"]'),
+    ('["Royal Black Royalstud II 235/50 R19 103T шип",15500,62000,"1"]',
+     '["Royal Black Royalstud II 235/50 R19 103T, шип.",15500,62000,"1"]'),
+]
 
 def patch(path: Path) -> bool:
     if not path.exists():
         return False
     t = path.read_text(encoding="utf-8")
-    if NEW in t or NEW2 in t:
-        print(path, "already has 3 раб дня")
-        return False
-    if OLD in t:
-        t = t.replace(OLD, NEW, 1)
-    elif OLD2 in t:
-        t = t.replace(OLD2, NEW2, 1)
-    else:
-        print(path, "T9 R19 order note not found")
-        return False
-    path.write_text(t, encoding="utf-8")
-    print(path, "patched")
-    return True
+    orig = t
+    for old, new in PAIRS:
+        if new in t:
+            print(path, "already:", new[:50])
+        elif old in t:
+            t = t.replace(old, new, 1)
+            print(path, "patched:", new[:50])
+        else:
+            print(path, "not found:", old[:50])
+    if t != orig:
+        path.write_text(t, encoding="utf-8")
+        return True
+    return False
 
 def main():
     changed = False
