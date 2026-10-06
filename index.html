@@ -439,11 +439,14 @@ input,textarea{width:100%;background:#fff;border:1px solid var(--border);color:v
 .prio-list{list-style:none;margin:8px 0 22px;padding:0;border:1px solid var(--border);border-radius:12px;background:#fff;box-shadow:var(--shadow);overflow:hidden}
 .prio-item{padding:12px 14px;border-bottom:1px solid var(--border)}
 .prio-item:last-child{border-bottom:0}
-.prio-item.sold{background:#efe6d6}
+.prio-item.sold{background:#e8f5e9}
+.prio-item.hold{background:#fff3e0}
 .prio-top{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
 .prio-meta,.prio-pay{color:var(--muted);font-size:13px;margin-top:4px}
-.prio-item.sold .prio-meta,.prio-item.sold .prio-pay{color:#6d5a3e}
-.sold-mark{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:#6d4c41}
+.prio-item.sold .prio-meta,.prio-item.sold .prio-pay{color:#1b5e20}
+.prio-item.hold .prio-meta,.prio-item.hold .prio-pay{color:#8a5a12}
+.sold-mark{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:#2e7d32}
+.hold-mark{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:#e65100}
 .sold-mark i{display:inline-flex;min-width:20px;height:20px;padding:0 5px;border-radius:999px;background:#8d6e63;color:#fff;align-items:center;justify-content:center;font-style:normal;font-size:12px}
 .mpt-cal{margin:8px 0 22px;padding:14px;border:1px solid var(--border);border-radius:12px;background:#fff;box-shadow:var(--shadow);max-width:560px}
 .mpt-legend{display:flex;gap:10px;align-items:center;font-size:13px;color:var(--muted);margin-bottom:8px}
@@ -2382,19 +2385,19 @@ async function pingTelegram(body){
     const PANGO_NSS = 0.0089;
     function pangoOf(id){ return (typeof PANGO_FIX!=="undefined" && PANGO_FIX[id]) || null; }
     const TERMS_PRIO = [
-      {model:"T4",vin:"EDEED31B1SE053704",trim:"Prime 4WD",year:"2025",color:"Белый",extra:"Сидоров",pay:500,bonus:1000,sold:true,seller:"Сидоров"},
-      {model:"T7",vin:"EDXFB32B4TE041659",trim:"Active",year:"2026",color:"Чёрный",extra:"Елчин",pay:500,bonus:1000,sold:true,seller:"Елчин"},
-      {model:"T7",vin:"EDXFB32B2TE041658",trim:"Active",year:"2026",color:"Чёрный",extra:"",pay:500,bonus:1000},
-      {model:"T7",vin:"EDXFB32B7TE062327",trim:"Active",year:"2026",color:"Чёрный",extra:"Антихром",pay:500,bonus:1000},
-      {model:"T8",vin:"EDXGD34B1TE022143",trim:"Prime 4WD",year:"2026",color:"Светло-серый",extra:"",pay:500,bonus:2000},
-      {model:"T8",vin:"EDXGD34B6TE031162",trim:"Prime 4WD",year:"2026",color:"Чёрный",extra:"",pay:500,bonus:2000},
-      {model:"T8",vin:"EDXGD34B3TE031815",trim:"Ultra 4WD",year:"2026",color:"Белый",extra:"",pay:500,bonus:2000},
-      {model:"Tiggo 9",vin:"EDEDD24B2SG003755",trim:"Ultra",year:"2025",color:"Светло-серый",extra:"",pay:500,bonus:3000},
-      {model:"Tiggo 9",vin:"EDEDD24B3SG003926",trim:"Ultra",year:"2025",color:"Матовый",extra:"Лавров",pay:500,bonus:3000,sold:true,seller:"Лавров"},
-      {model:"Tiggo 9",vin:"EDEDD24B1SG002595",trim:"Ultra",year:"2025",color:"Чёрный",extra:"Новиков",pay:500,bonus:0,sold:true,seller:"Новиков"},
-      {model:"Arrizo 8",vin:"LVVDC21B7SD594110",trim:"Prime",year:"2025",color:"Белый",extra:"",pay:500,bonus:3000},
-      {model:"Arrizo 8",vin:"LVVDC21B0SD594112",trim:"Prime",year:"2025",color:"Белый",extra:"Павлова",pay:500,bonus:0,sold:true,seller:"Павлова"},
-      {model:"Arrizo 8",vin:"LVVDC21B2SDJ34062",trim:"Prime",year:"2025",color:"Чёрный",extra:"Павлова",pay:500,bonus:0,sold:true,seller:"Павлова"},
+      {model:"T7",vin:"EDXFB32B2TE041658",trim:"Актив",year:"2026",color:"Чёрный",extra:"",pay:500,bonus:1000},
+      {model:"T7",vin:"EDXFB32B7TE062327",trim:"Актив",year:"2026",color:"Чёрный",extra:"Антихром",pay:500,bonus:1000},
+      {model:"Tiggo 7 L",vin:"EDEDB21B7SD723791",trim:"Актив",year:"2025",color:"Серебристый",extra:"",pay:500,bonus:1000},
+      {model:"T8",vin:"EDXGD34B1TE022143",trim:"Прайм 7 мест 4WD",year:"2026",color:"Светло-серый",extra:"",pay:500,bonus:2000,sold:true,seller:"Спицын"},
+      {model:"T8",vin:"EDXGD34B0TE082608",trim:"Прайм 7 мест 4WD",year:"2026",color:"Тёмно-зелёный",extra:"",pay:500,bonus:2000,sold:true,seller:"Лавров"},
+      {model:"T8",vin:"EDXGD34B6TE031162",trim:"Прайм 7 мест 4WD",year:"2026",color:"Чёрный",extra:"",pay:500,bonus:2000},
+      {model:"T8",vin:"EDXGD34B3TE031815",trim:"Ультра 7 мест 4WD",year:"2026",color:"Белый",extra:"",pay:500,bonus:2000},
+      {model:"T8",vin:"EDXGB32B3TE076049",trim:"Актив 5 мест 2WD",year:"2026",color:"Белый",extra:"",pay:500,bonus:2000},
+      {model:"T8",vin:"EDXGD34BXTE081949",trim:"Прайм 7 мест 4WD",year:"2026",color:"Светло-серый",extra:"",pay:500,bonus:2000},
+      {model:"T8",vin:"EDXGD34B5TE082040",trim:"Прайм 7 мест 4WD",year:"2026",color:"Светло-серый",extra:"",pay:500,bonus:2000},
+      {model:"T8",vin:"EDXGD34B2TE057953",trim:"Ультра 7 мест 4WD",year:"2026",color:"Тёмно-зелёный",extra:"",pay:500,bonus:2000},
+      {model:"Tiggo 9",vin:"EDEDD24B2SG003755",trim:"Ультра 4WD",year:"2025",color:"Светло-серый",extra:"",pay:500,bonus:3000,reserved:true,seller:"Спицын"},
+      {model:"Arrizo 8",vin:"LVVDC21B7SD594110",trim:"Прайм",year:"2025",color:"Белый",extra:"",pay:500,bonus:3000,reserved:true,seller:"Демьянов"},
       {model:"8 Pro Max",vin:"LVTDD24B5RD409189",trim:"Ultimate",year:"2024",color:"Белый",extra:"ТЕСТ // 2850",pay:500,bonus:10000}
     ];
     const KM_MODELS = [
@@ -2424,7 +2427,7 @@ async function pingTelegram(body){
       {id:"l6e",brand:"TENET PLUS",name:"L6 Elegant",stock:"pl6",rrc:2890000,dealer:2745500,ti:100000,tiBack:70000,cr:0,crBack:0,bonus:0.022,vat:1.22,fee:0.01,kmMin:0,kmMax:50,prioMin:0,prioMax:50},
       {id:"l6u",brand:"TENET PLUS",name:"L6 Ultra",stock:"pl6",rrc:3040000,dealer:2888000,ti:100000,tiBack:70000,cr:0,crBack:0,bonus:0.022,vat:1.22,fee:0.01,kmMin:0,kmMax:50,prioMin:0,prioMax:50}
     ];
-    const PRIO_VINS = new Set(["EDEED31B1SE053704", "EDXFB32B4TE041659", "EDXFB32B2TE041658", "EDXFB32B7TE062327", "EDXGD34B1TE022143", "EDXGD34B6TE031162", "EDXGD34B3TE031815", "EDEDD24B2SG003755", "EDEDD24B3SG003926", "EDEDD24B1SG002595", "LVVDC21B7SD594110", "LVVDC21B0SD594112", "LVVDC21B2SDJ34062", "LVTDD24B5RD409189"]);
+    const PRIO_VINS = new Set(["EDXFB32B2TE041658","EDXFB32B7TE062327","EDEDB21B7SD723791","EDXGD34B1TE022143","EDXGD34B0TE082608","EDXGD34B6TE031162","EDXGD34B3TE031815","EDXGB32B3TE076049","EDXGD34BXTE081949","EDXGD34B5TE082040","EDXGD34B2TE057953","EDEDD24B2SG003755","LVVDC21B7SD594110","LVTDD24B5RD409189"]);
     const KM_DC_DEF = 100000;
     const KM_BANKS = [
       {id:"sber", name:"Сбер"},
@@ -3190,10 +3193,11 @@ async function pingTelegram(body){
       const scales=`<div class="prio-scales">${teamBar}${peopleBars}</div>`;
       return scales+`<ol class="prio-list">`+TERMS_PRIO.map((r,i)=>{
         const sold=!!r.sold;
+        const hold=!sold && !!r.reserved;
         const n=r.seller?soldBy[r.seller]||0:0;
-        const mark=sold&&r.seller?`<span class="sold-mark">Продано · ${escape(r.seller)} <i>${n}</i></span>`:"";
+        const mark=sold&&r.seller?`<span class="sold-mark">Продано · ${escape(r.seller)} <i>${n}</i></span>`:(hold&&r.seller?`<span class="hold-mark">Бронь · ${escape(r.seller)}</span>`:"");
         const extra=r.extra?` · ${escape(r.extra)}`:"";
-        return `<li class="prio-item${sold?" sold":""}">
+        return `<li class="prio-item${sold?" sold":hold?" hold":""}">
           <div class="prio-top"><b>${i+1}. ${escape(r.model)} · ${escape(r.trim)}</b>${mark}</div>
           <div class="prio-meta">${escape(r.vin)} · ${escape(r.color)} · ${escape(r.year)}${extra}</div>
           <div class="prio-pay">${r.pay?rub(r.pay):"—"} / ${r.bonus?rub(r.bonus):"—"}</div>
@@ -3285,7 +3289,7 @@ async function pingTelegram(body){
         `<div class="terms-cards">`+TERMS_INV.map(r=>termCard(r.model+" · "+r.trim, escape(r.price), "")).join("")+`</div></section>`+
         `</div>`+
         (typeof stockTestHtml==="function"?stockTestHtml():"")+
-        `<h2>Приоритет · ${TERMS_PRIO.length} авто</h2>`+
+        `<h2>Приоритет · октябрь · ${TERMS_PRIO.length} авто</h2>`+
         `<p class="lead">Личная победа — 2 машины. Командная — 12. Шкала показывает, сколько уже есть и сколько осталось.</p>`+
         prioList()+
         `<p class="lead">Доплата за 4WD на T7 — 205 000 ₽. Мотор T7 везде 1.6T 150.</p>`+

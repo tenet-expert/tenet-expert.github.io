@@ -42,10 +42,11 @@
       const scales=`<div class="prio-scales">${teamBar}${peopleBars}</div>`;
       return scales+`<ol class="prio-list">`+TERMS_PRIO.map((r,i)=>{
         const sold=!!r.sold;
+        const hold=!sold && !!r.reserved;
         const n=r.seller?soldBy[r.seller]||0:0;
-        const mark=sold&&r.seller?`<span class="sold-mark">Продано · ${escape(r.seller)} <i>${n}</i></span>`:"";
+        const mark=sold&&r.seller?`<span class="sold-mark">Продано · ${escape(r.seller)} <i>${n}</i></span>`:(hold&&r.seller?`<span class="hold-mark">Бронь · ${escape(r.seller)}</span>`:"");
         const extra=r.extra?` · ${escape(r.extra)}`:"";
-        return `<li class="prio-item${sold?" sold":""}">
+        return `<li class="prio-item${sold?" sold":hold?" hold":""}">
           <div class="prio-top"><b>${i+1}. ${escape(r.model)} · ${escape(r.trim)}</b>${mark}</div>
           <div class="prio-meta">${escape(r.vin)} · ${escape(r.color)} · ${escape(r.year)}${extra}</div>
           <div class="prio-pay">${r.pay?rub(r.pay):"—"} / ${r.bonus?rub(r.bonus):"—"}</div>
@@ -137,7 +138,7 @@
         `<div class="terms-cards">`+TERMS_INV.map(r=>termCard(r.model+" · "+r.trim, escape(r.price), "")).join("")+`</div></section>`+
         `</div>`+
         (typeof stockTestHtml==="function"?stockTestHtml():"")+
-        `<h2>Приоритет · ${TERMS_PRIO.length} авто</h2>`+
+        `<h2>Приоритет · октябрь · ${TERMS_PRIO.length} авто</h2>`+
         `<p class="lead">Личная победа — 2 машины. Командная — 12. Шкала показывает, сколько уже есть и сколько осталось.</p>`+
         prioList()+
         `<p class="lead">Доплата за 4WD на T7 — 205 000 ₽. Мотор T7 везде 1.6T 150.</p>`+
