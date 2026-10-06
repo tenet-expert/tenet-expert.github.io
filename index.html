@@ -2064,7 +2064,7 @@ async function pingTelegram(body){
       return `<div class="lb-scale" style="--n:${labels.length}">`+labels.map((lab,i)=>`<span class="${i<done?"on s"+i:""}${i===done-1?" now":""}">${lab}</span>`).join("")+`</div>`;
     }
     function boardHit(r){
-      return `<div class="lb-hit"><div class="lb-hit-top"><div><b>${escape(r.client||"Без имени")} · ${escape(r.model||"—")}</b><small>${escape(r.who)} · ${escape(boardKind(r))}${r.note?" · "+escape(r.note):""}</small></div><small>${escape(String(r.when||"").slice(11,16))}</small></div>${boardScale(r)}</div>`;
+      return `<div class="lb-hit"><div class="lb-hit-top"><div><b>${escape(r.who||"—")} · ${escape(r.model||"—")}</b><small>${escape(r.client||"Без имени")} · ${escape(boardKind(r))}${r.note?" · "+escape(r.note):""}</small></div><small>${escape(String(r.when||"").slice(11,16))}</small></div>${boardScale(r)}</div>`;
     }
     function boardTape(rows, title){
       const byTime=(a,b)=>String(b.when||"").localeCompare(String(a.when||""));
