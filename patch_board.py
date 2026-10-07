@@ -194,7 +194,7 @@ JS = r'''
     const BOARD_PLAN = 10;
     const BOARD_PLAN_TEAM = 70;
     function boardBlank(){
-      return {name:"",traffic:0,visit:0,call:0,web:0,meet:0,service:0,td:0,contract:0,issue:0,visitContract:0,callVisit:0,callContract:0,webVisit:0,webContract:0,other:false,people:[]};
+      return {name:"",traffic:0,visit:0,call:0,web:0,meet:0,service:0,td:0,contract:0,issue:0,visitContract:0,callVisit:0,callContract:0,webVisit:0,webContract:0,cancel:0,ecredit:0,other:false,people:[]};
     }
     function boardAdd(p, r){
       if(r.visit||r.call||r.web) p.traffic++;
@@ -238,6 +238,52 @@ JS = r'''
       }), {traffic:0,visit:0,td:0,contract:0,issue:0});
       return {list, sum};
     }
+    const BOARD_SEP_FIXED = [
+      {name:"Ахмадуллин",visit:12,call:2,web:8,td:4,issue:9,cancel:1,callVisit:2,webVisit:1,service:3,ecredit:1},
+      {name:"Коропец",visit:13,call:9,web:15,td:12,issue:3,cancel:0,callVisit:0,webVisit:3,service:5,ecredit:6},
+      {name:"Демьянов",visit:15,call:19,web:23,td:13,issue:5,cancel:1,callVisit:2,webVisit:1,service:6,ecredit:2},
+      {name:"Лавров",visit:12,call:11,web:7,td:15,issue:9,cancel:1,callVisit:1,webVisit:4,service:6,ecredit:2},
+      {name:"Сидоров",visit:8,call:10,web:23,td:13,issue:4,cancel:0,callVisit:4,webVisit:0,service:6,ecredit:4},
+      {name:"Спицын",visit:8,call:12,web:3,td:12,issue:5,cancel:0,callVisit:0,webVisit:0,service:3,ecredit:3},
+      {name:"Тальков",visit:29,call:17,web:25,td:22,issue:3,cancel:1,callVisit:3,webVisit:2,service:14,ecredit:17}
+    ];
+    const BOARD_SEP_OTHER = [
+      {name:"Павлова",visit:4,call:4,issue:4},
+      {name:"Извеков",visit:8,call:15,td:8,issue:3,cancel:1},
+      {name:"Леонтьев",visit:2,web:7,td:3},
+      {name:"Елчин",visit:1,web:1,td:2,cancel:1},
+      {name:"Клименко",td:2},
+      {name:"Бикулов",visit:1},
+      {name:"Без менеджера",web:1}
+    ];
+    function boardSepPerson(o){
+      const p=boardBlank();
+      Object.assign(p, o);
+      p.traffic=(p.visit||0)+(p.call||0)+(p.web||0);
+      p.contract=(p.issue||0)+(p.cancel||0);
+      return p;
+    }
+    function boardSepRank(){
+      const list=BOARD_SEP_FIXED.map(boardSepPerson).sort(boardCmp);
+      const people=BOARD_SEP_OTHER.map(boardSepPerson).sort(boardCmp);
+      const other=boardBlank();
+      other.name="Другие"; other.other=true; other.people=people;
+      people.forEach(x=>{
+        ["traffic","visit","call","web","meet","td","contract","issue","cancel","service","ecredit","callVisit","webVisit"].forEach(k=>{ other[k]=(other[k]||0)+(x[k]||0); });
+      });
+      list.push(other);
+      const sum=list.reduce((s,p)=>{
+        ["traffic","visit","call","web","td","contract","issue","cancel","service","ecredit"].forEach(k=>s[k]+=p[k]||0);
+        return s;
+      }, boardBlank());
+      return {list, sum};
+    }
+    function boardSepExtra(rank){
+      const rows=rank.list.filter(p=>!p.other);
+      const other=rank.list.find(p=>p.other)||boardBlank();
+      const tr=p=>`<tr><td><b>${escape(p.name)}</b></td><td>${p.callVisit||0}</td><td>${p.webVisit||0}</td><td>${p.service||0}</td><td>${p.ecredit||0}</td><td>${p.cancel||0}</td></tr>`;
+      return `<div class="card lb-card" style="margin-top:12px"><p class="eyebrow">Воронка сентября</p><h3>Визиты с трафика, оценка, e-credit</h3><p class="lb-sum">${rank.sum.service} оценок б/у · ${rank.sum.ecredit} e-credit · ${rank.sum.cancel} расторжений уже внутри контрактов</p><div class="tune-scroll"><table class="lb-mini"><thead><tr><th>Менеджер</th><th>Визит со звонка</th><th>Визит с интернета</th><th>Оценка б/у</th><th>E-credit</th><th>Расторжения</th></tr></thead><tbody>${rows.map(tr).join("")}<tr><td><b>Другие</b></td><td>0</td><td>0</td><td>0</td><td>0</td><td>${other.cancel||0}</td></tr></tbody></table></div></div>`;
+    }
     function boardLine(p, sub){
       const n=[p.traffic,p.visit,p.call,p.web,p.meet,p.td,p.contract,p.issue];
       const c=(v,g)=>`<i class="g${g}">${v}</i>`;
@@ -248,8 +294,8 @@ JS = r'''
     function boardDeskCells(p){
       return `<td>${p.traffic}</td><td>${p.visit}</td><td>${p.call}</td><td>${p.web}</td><td>${p.meet}</td><td>${p.td}</td><td>${p.contract}</td><td>${p.issue}</td>`;
     }
-    function boardTable(rows, eyebrow, title, roster){
-      const rank=boardRank(rows, roster);
+    function boardTable(rows, eyebrow, title, roster, ready){
+      const rank=ready||boardRank(rows, roster);
       const sum=rank.sum;
       const body=rank.list.map((p,i)=>{
         const main=`<tr class="lb-row${p.other?" other lb-fold-btn":""}"${p.other?` data-lb-fold="desk"`:""}><td class="lb-place">${p.other?"—":i+1}</td><td><b>${escape(p.name)}</b></td>${boardDeskCells(p)}</tr>`;
@@ -318,7 +364,10 @@ JS = r'''
     function boardHtml(cache){
       const note=`<p class="tune-note">Обновлено ${escape(cache.stamp)}. Рейтинг: выдача, затем контракт, тест-драйв, визит, трафик.</p>`;
       const btn=`<div style="margin:12px 0"><button class="btn ivory" type="button" id="boardOpenReport">Расширенный отчёт</button></div>`;
-      if(boardMode==="prev") return note+boardTable(cache.sep, "Предыдущий месяц", "Сентябрь", BOARD_ROSTER_SEP)+btn;
+      if(boardMode==="prev"){
+        const rank=boardSepRank();
+        return note+boardTable([], "Предыдущий месяц", "Сентябрь", BOARD_ROSTER_SEP, rank)+btn+boardSepExtra(rank);
+      }
       if(boardMode==="month") return note+boardTable(cache.oct, "Месяц", "Октябрь")+btn;
       const yest=boardMode==="yday";
       const key=boardDayKey(yest?-1:0);
@@ -329,11 +378,9 @@ JS = r'''
     async function boardEnsure(){
       if(boardCache) return boardCache;
       const octPacks=await boardFetchAll(BOARD_OCT, boardDays("10", boardOctLast()));
-      const sepPacks=await boardFetchAll(BOARD_SEP, boardDays("09", 30));
-      const oct=[], sep=[];
+      const oct=[];
       octPacks.forEach(p=>boardRows(p).forEach(r=>oct.push(r)));
-      sepPacks.forEach(p=>boardRows(p).forEach(r=>sep.push(r)));
-      boardCache={oct, sep, stamp:new Date().toLocaleString("ru-RU",{hour:"2-digit",minute:"2-digit",day:"2-digit",month:"2-digit"})};
+      boardCache={oct, sep:[], stamp:new Date().toLocaleString("ru-RU",{hour:"2-digit",minute:"2-digit",day:"2-digit",month:"2-digit"})};
       return boardCache;
     }
     async function boardLoad(){
@@ -371,7 +418,7 @@ JS = r'''
         boardLoad();
       }, 40);
       return banner("Leaderboard","Трафик · онлайн","TENET")+`
-        <p class="lead">Сегодня, вчера и месяц — из «Трафик октябрь». Предыдущий месяц — из «Трафик сентябрь».</p>
+        <p class="lead">Сегодня, вчера и месяц — из «Трафик октябрь». Сентябрь собран из журналов 1С: первичные звонки, визиты, интернет и тест-драйвы, выдачи и расторжения. Расторжение прибавлено к контракту.</p>
         ${boardChips()}
         <div id="boardRoot"><div class="card"><p>Загружаю таблицу…</p></div></div>`;
     }
@@ -399,11 +446,11 @@ JS = r'''
     }
     function boardReportHtml(){
       const per=boardPeriod();
-      const rank=boardRank(per.rows, per.roster);
+      const rank=boardMode==="prev"?boardSepRank():boardRank(per.rows, per.roster);
       const bucket=rank.list.find(p=>p.other)||boardBlank();
       const people=rank.list.filter(p=>!p.other).concat(bucket.people||[]).sort(boardCmp);
       const total=people.reduce((s,p)=>{
-        ["traffic","visit","call","web","meet","td","contract","issue","visitContract","callVisit","callContract","webVisit","webContract"].forEach(k=>s[k]+=p[k]||0);
+        ["traffic","visit","call","web","meet","td","contract","issue","visitContract","callVisit","callContract","webVisit","webContract","cancel","service","ecredit"].forEach(k=>s[k]+=p[k]||0);
         return s;
       }, boardBlank());
       total.name="Итого";
@@ -417,11 +464,12 @@ JS = r'''
         const cls=kind==="td"?(v<70?"lb-bad":""):(v<10?"lb-bad":v<15?"lb-mid":"lb-ok");
         return cls?`<span class="${cls}">${text}</span>`:text;
       };
-      const mainHead=["Менеджер","План","Факт","% плана","Контракты","Расторж.","Действ.","Выдачи+К","Прогноз","Прогноз %","Трафик","% трафика","% визитов","% зв+инт","Конв. в контракт","Конв. в выдачу","Визиты","Контракт с визита","Конв. визита"];
+      const sep=boardMode==="prev";
+      const mainHead=["Менеджер","План","Факт","% плана","Контракты","Расторж.","Действ.","Выдачи+К","Прогноз","Прогноз %","Трафик","% трафика","% визитов","% зв+инт","Конв. в контракт","Конв. в выдачу","Визиты","Контракт с визита","Конв. визита"].concat(sep?["Оценка б/у","E-credit"]:[]);
       const rowMain=(p, plan)=>{
         const pace=boardPace(p.issue, plan);
         const prim=ch(p), tPrim=ch(total);
-        return `<tr class="${p.name==="Итого"?"sum":""}"><td>${escape(p.name)}</td><td>${plan||"–"}</td><td>${p.issue}</td><td>${boardPct(p.issue, plan)}</td><td>${p.contract}</td><td>–</td><td>–</td><td>–</td><td>${pace.n}</td><td>${pace.p}</td><td>${prim}</td><td>${boardPct(prim, tPrim)}</td><td>${boardPct(p.visit, total.visit)}</td><td>${boardPct(p.call+p.web, total.call+total.web)}</td><td>${mark(p.contract, prim, "conv")}</td><td>${boardPct(p.issue, prim)}</td><td>${p.visit}</td><td>${p.visitContract}</td><td>${boardPct(p.visitContract, p.visit)}</td></tr>`;
+        return `<tr class="${p.name==="Итого"?"sum":""}"><td>${escape(p.name)}</td><td>${plan||"–"}</td><td>${p.issue}</td><td>${boardPct(p.issue, plan)}</td><td>${p.contract}</td><td>${sep?(p.cancel||0):"–"}</td><td>–</td><td>–</td><td>${pace.n}</td><td>${pace.p}</td><td>${prim}</td><td>${boardPct(prim, tPrim)}</td><td>${boardPct(p.visit, total.visit)}</td><td>${boardPct(p.call+p.web, total.call+total.web)}</td><td>${mark(p.contract, prim, "conv")}</td><td>${boardPct(p.issue, prim)}</td><td>${p.visit}</td><td>${p.visitContract}</td><td>${boardPct(p.visitContract, p.visit)}</td>${sep?`<td>${p.service||0}</td><td>${p.ecredit||0}</td>`:""}</tr>`;
       };
       const tdHead=["Менеджер","План","Факт","Визиты перв.+втор","%"];
       const rowTd=p=>`<tr class="${p.name==="Итого"?"sum":""}"><td>${escape(p.name)}</td><td>70%</td><td>${p.td}</td><td>${p.visit+p.meet}</td><td>${mark(p.td, p.visit+p.meet, "td")}</td></tr>`;
@@ -441,7 +489,7 @@ JS = r'''
             <section class="lb-block d"><p class="lb-rep-h">Интернет в визит</p><table class="lb-rep">${thead(webHead)}<tbody>${all.map(rowWeb).join("")}</tbody></table></section>
           </div>
         </div>
-        <p class="lb-rep-note">Как в «ОП CHERY». ${planNote} Трафик — визиты + звонки + интернет. Конв. в контракт: меньше 10% красным, меньше 15% жёлтым, иначе зелёным. ТД ниже 70% — красным. Расторжения, действующие контракты и «выдачи+контракты» в журнале трафика не ведутся. Обновлено ${escape((boardCache&&boardCache.stamp)||"")}</p>`;
+        <p class="lb-rep-note">Как в «ОП CHERY». ${planNote} Трафик — визиты + звонки + интернет. Конв. в контракт: меньше 10% красным, меньше 15% жёлтым, иначе зелёным. ТД ниже 70% — красным. ${sep?"Сентябрь: контракт = выдача + расторжение. Визит со звонка и с интернета, оценка б/у и e-credit — из воронки, только менеджеры лидерборда.":"Расторжения в журнале октября не ведутся."} Обновлено ${escape((boardCache&&boardCache.stamp)||"")}</p>`;
     }
     function boardBindFolds(root){
       if(!root) return;
@@ -541,6 +589,13 @@ def apply(path: Path):
 }
 </style>""", 1)
         print("board phone", path)
+    if ".lb-mini{" not in html and "</style>" in html:
+        html = html.replace("</style>", """.lb-mini{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}
+.lb-mini th,.lb-mini td{padding:6px 8px;border-bottom:1px solid var(--border);text-align:right;font-variant-numeric:tabular-nums}
+.lb-mini th:first-child,.lb-mini td:first-child{text-align:left}
+.lb-mini th{font-size:11px;color:var(--muted);font-weight:700}
+</style>""", 1)
+        print("lb-mini", path)
     if ".lb-row.other" not in html and "</style>" in html:
         html = html.replace("</style>", ".lb-row.other{background:#fbf7f1}\n.lb-row.other td{color:#6d6458}\n</style>", 1)
     card = '["board","L","Leaderboard","Трафик, контракты и выдача отдела"]'
@@ -562,7 +617,7 @@ def apply(path: Path):
         else:
             html = html.replace(anchor, JS + anchor, 1)
             print("fn", path)
-    elif "const BOARD_SEP" not in html or 'data-board-mode="yday"' not in html or "function boardrep" not in html:
+    elif "const BOARD_SEP_FIXED" not in html or "const BOARD_SEP" not in html or 'data-board-mode="yday"' not in html or "function boardrep" not in html:
         a = html.find("    const BOARD_SHEET")
         if a < 0:
             a = html.find("    const BOARD_OCT")
