@@ -478,7 +478,7 @@ JS = r'''
       };
       const tdBase=p=>(p.visit||0)+(p.callVisit||0)+(p.webVisit||0);
       const allHead=["Менеджер","Всего","ТД","% ТД","Контракт","Оценка","E-credit"];
-      const rowAll=p=>`<tr${trAttr(p)}><td>${who(p)}</td><td>${tdBase(p)}</td><td>${p.td||0}</td><td>${mark(p.td||0, tdBase(p), "td")}</td><td>${fromVisit(p)}</td><td>${p.service||0}</td><td>${p.ecredit||0}</td></tr>`;
+      const rowAll=p=>`<tr${trAttr(p)}><td>${who(p)}</td><td>${tdBase(p)}</td><td>${p.td||0}</td><td>${mark(p.td||0, tdBase(p), "td")}</td><td>${p.contract||0}</td><td>${p.service||0}</td><td>${p.ecredit||0}</td></tr>`;
       const visitHead=["Менеджер","Визит","Контракт с визита","Конв. с визита"];
       const rowVisit=p=>`<tr${trAttr(p)}><td>${who(p)}</td><td>${p.visit}</td><td>${fromVisit(p)}</td><td>${boardPct(fromVisit(p), p.visit)}</td></tr>`;
       const callHead=["Менеджер","Звонки","Визит со звонка","% в визит","Контракт со звонка","% в контракт"];
@@ -492,7 +492,7 @@ JS = r'''
         <div class="lb-blocks">
           <section class="lb-block a"><p class="lb-rep-h">Выдачи и трафик</p><table class="lb-rep">${thead(mainHead)}<tbody>${mains.map(p=>rowMain(p, planOf(p))).join("")}${kids.length?rowMain(bucket,0)+kids.map(p=>rowMain(p,0)).join(""):""}${rowMain(total, planN)}</tbody></table></section>
           <div class="lb-pair">
-            <section class="lb-block e"><p class="lb-rep-h">Контракт с визита</p><table class="lb-rep">${thead(visitHead)}<tbody>${shown.map(rowVisit).join("")}</tbody></table></section>
+            <section class="lb-block e"><p class="lb-rep-h">Визит первичный</p><table class="lb-rep">${thead(visitHead)}<tbody>${shown.map(rowVisit).join("")}</tbody></table></section>
             <section class="lb-block c"><p class="lb-rep-h">Звонки в контракт</p><table class="lb-rep">${thead(callHead)}<tbody>${shown.map(rowCall).join("")}</tbody></table></section>
             <section class="lb-block d"><p class="lb-rep-h">Интернет в контракт</p><table class="lb-rep">${thead(webHead)}<tbody>${shown.map(rowWeb).join("")}</tbody></table></section>
             <section class="lb-block f"><p class="lb-rep-h">Визит всего</p><table class="lb-rep">${thead(allHead)}<tbody>${shown.map(rowAll).join("")}</tbody></table></section>
