@@ -2346,8 +2346,8 @@ async function pingTelegram(body){
         return `<tr${trAttr(p)}><td>${who(p)}</td><td>${plan||"–"}</td><td>${p.issue}</td><td>${boardPct(p.issue, plan)}</td><td>${p.contract}</td><td>${sep?(p.cancel||0):"–"}</td>${paceCells}<td>${prim}</td><td>${boardPct(prim, tPrim)}</td><td>${boardPct(p.visit, total.visit)}</td><td>${boardPct(p.call+p.web, total.call+total.web)}</td><td>${mark(p.contract, prim, "conv")}</td><td>${boardPct(p.issue, prim)}</td></tr>`;
       };
       const tdBase=p=>(p.visit||0)+(p.callVisit||0)+(p.webVisit||0);
-      const allHead=["Менеджер","План ТД","Факт ТД","Перв.+зв+инт","% ТД","Визиты","Контракт","E-credit","Трейд-ин"];
-      const rowAll=p=>`<tr${trAttr(p)}><td>${who(p)}</td><td>70%</td><td>${p.td||0}</td><td>${tdBase(p)}</td><td>${mark(p.td||0, tdBase(p), "td")}</td><td>${(p.visit||0)+(p.meet||0)}</td><td>${fromVisit(p)}</td><td>${p.ecredit||0}</td><td>${p.service||0}</td></tr>`;
+      const allHead=["Менеджер","Всего","ТД","% ТД","Контракт","Оценка","E-credit"];
+      const rowAll=p=>`<tr${trAttr(p)}><td>${who(p)}</td><td>${tdBase(p)}</td><td>${p.td||0}</td><td>${mark(p.td||0, tdBase(p), "td")}</td><td>${fromVisit(p)}</td><td>${p.service||0}</td><td>${p.ecredit||0}</td></tr>`;
       const visitHead=["Менеджер","Визит","Контракт с визита","Конв. с визита"];
       const rowVisit=p=>`<tr${trAttr(p)}><td>${who(p)}</td><td>${p.visit}</td><td>${fromVisit(p)}</td><td>${boardPct(fromVisit(p), p.visit)}</td></tr>`;
       const callHead=["Менеджер","Звонки","Визит со звонка","% в визит","Контракт со звонка","% в контракт"];
