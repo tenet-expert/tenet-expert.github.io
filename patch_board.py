@@ -39,10 +39,12 @@ body:has(.lb-rep-page) .wrap{max-width:none;width:100%;padding:14px 16px 48px}
 .lb-block.a{background:#f7f4ee;border-color:#d9cbb6}
 .lb-block.a .lb-rep{table-layout:fixed;width:100%}
 .lb-block.a .lb-rep th:first-child,.lb-block.a .lb-rep td:first-child{width:11%}
-.lb-block.b{background:#f3f6f1;border-color:#c9d7c4;align-self:flex-start}
-.lb-pair{display:flex;gap:18px;align-items:flex-start}
-.lb-block.c{background:#f7f1e6;border-color:#e0cba8;flex:1}
-.lb-block.d{background:#eef3f6;border-color:#c5d4de;flex:1}
+.lb-block.b{background:#f3f6f1;border-color:#c9d7c4;flex:1;min-width:0}
+.lb-pair{display:flex;gap:12px;align-items:stretch}
+.lb-pair .lb-block{overflow-x:auto}
+.lb-block.c{background:#f7f1e6;border-color:#e0cba8;flex:1.15;min-width:0}
+.lb-block.d{background:#eef3f6;border-color:#c5d4de;flex:1.15;min-width:0}
+@media(max-width:900px){.lb-pair{flex-direction:column}}
 .lb-rep tr.sum td{font-weight:800;border-top:2px solid #1c1a17}
 .lb-bad{color:#c62828;font-weight:800}
 .lb-mid{color:#b8860b;font-weight:800}
@@ -483,8 +485,8 @@ JS = r'''
       return `<p class="eyebrow" style="margin:0 0 4px">${escape(per.sub)}</p><h2 style="margin:0 0 10px">${escape(per.title)}</h2>
         <div class="lb-blocks">
           <section class="lb-block a"><p class="lb-rep-h">Выдачи и трафик</p><table class="lb-rep">${thead(mainHead)}<tbody>${people.map(p=>rowMain(p, planOf(p))).join("")}${rowMain(total, planN)}</tbody></table></section>
-          <section class="lb-block b"><p class="lb-rep-h">Тест-драйвы</p><table class="lb-rep lb-rep-sm">${thead(tdHead)}<tbody>${all.map(rowTd).join("")}</tbody></table></section>
           <div class="lb-pair">
+            <section class="lb-block b"><p class="lb-rep-h">Тест-драйвы</p><table class="lb-rep">${thead(tdHead)}<tbody>${all.map(rowTd).join("")}</tbody></table></section>
             <section class="lb-block c"><p class="lb-rep-h">Звонки в визит</p><table class="lb-rep">${thead(callHead)}<tbody>${all.map(rowCall).join("")}</tbody></table></section>
             <section class="lb-block d"><p class="lb-rep-h">Интернет в визит</p><table class="lb-rep">${thead(webHead)}<tbody>${all.map(rowWeb).join("")}</tbody></table></section>
           </div>
