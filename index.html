@@ -652,6 +652,14 @@ input,textarea{width:100%;background:#fff;border:1px solid var(--border);color:v
 
 .pay-split{display:grid;grid-template-columns:1fr;gap:14px;margin-top:14px}
 @media (min-width:720px){.pay-split{grid-template-columns:1fr 1fr;align-items:start;gap:16px}}
+.km-contrast{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}
+.km-contrast .pay-side{min-width:0}
+.km-contrast .pay-side.prio{box-shadow:inset 3px 0 0 #c28b2a;padding-left:10px}
+.km-contrast .pay-side .eyebrow{margin:0 0 6px}
+@media(max-width:720px){
+  .km-contrast{grid-template-columns:1fr}
+  .km-contrast .pay-side.prio{box-shadow:inset 0 3px 0 #c28b2a;padding:10px 0 0}
+}
 .pay-col{border:1.5px solid #9bb0c7;border-radius:14px;padding:12px 14px;background:#f4f7fb;box-shadow:inset 4px 0 0 #1f4e79}
 .pay-col.std{border-color:#9bb0c7;background:#f4f7fb;box-shadow:inset 4px 0 0 #1f4e79}
 .pay-col.mpt{background:#eef6ee;border:1.5px solid #7fb084;border-style:solid;box-shadow:inset 4px 0 0 #2e7d32}
