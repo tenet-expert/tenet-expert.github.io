@@ -115,8 +115,8 @@
       const mptTidy=fMpt&&fMpt.tidy?fMpt.tidy:mptRrc;
       const tiMpt=useTi?(typeof FLEET_TI==="number"?FLEET_TI:100000):0;
       const fleetPin=(typeof FLEET_PIN!=="undefined" && FLEET_PIN[kmVin])||0;
-      const fleetBase=fleetPin?fleetPin:Math.max(0, mptTidy-tiMpt);
-      const subAmt=fleetPin?0:((showSub && fMpt && fMpt.sub)||0);
+      const fleetBase=fleetPin?Math.max(0, fleetPin-tiMpt):Math.max(0, mptTidy-tiMpt);
+      const subAmt=(showSub && fMpt && fMpt.sub)||0;
       const qFleet=typeof fleetSubQuote==="function"?fleetSubQuote(fleetBase, subAmt, down, addons, pack||0, months, !!(showSub && subAmt), fleetRateOf(m)):{price:fleetBase, pv:down, pvCar:down, credit:Math.max(0,fleetBase-down), term:Math.min(months,84), termAfter:Math.min(months,84), rate:fleetRateOf(m), pay:0, over:0, doCasco:(addons||0)+(pack||0), pvExtras:0, extrasCredit:0, early:0, earlyOver:0, limited:false, sub:subAmt, base:fleetBase, cap49:0, earlyCap:0};
       const priceMpt=qFleet.price;
       const downMptShow=qFleet.pv;
@@ -299,7 +299,7 @@
           </div>
           <div class="pay-col ${showSub?"sub":"mpt"} km-pay">
             <p class="eyebrow">${showFleet||isPlus?"Флит · Совкомбанк "+fleetRateTxt(qFleet.rate)+"%":showSub?"Флит · субсидия бренда":"Флит · Совкомбанк "+fleetRateTxt(qFleet.rate)+"%"}</p>
-            ${fleetPin?`<p class="calc-note">Флит сразу от ${rub(fleetPin)}. Трейд-ин и субсидия сверху не вычитаются.</p>`:""}
+            ${fleetPin?`<p class="calc-note">Флит сразу от ${rub(fleetPin)}${useTi?" · трейд-ин −"+rub(tiMpt):""}${subAmt?" · субсидия бренда −"+rub(subAmt):""}.</p>`:""}
             ${typeof fleetBodyTop==="function"?fleetBodyTop(qFleet):""}
             ${kmPayRows(banksMpt,"payMpt","overMpt")}
             ${typeof fleetBodyRows==="function"?fleetBodyRows(qFleet):`<div class="bank-row"><span>Тело кредита</span><span class="pay">${rub(creditMpt)}</span></div>`}

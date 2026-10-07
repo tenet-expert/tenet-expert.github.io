@@ -186,8 +186,9 @@
     function fleetCreditBox(price, m, f, useFleet, useTi, mode){
       const isSub=mode==="sub";
       const pin=(typeof FLEET_PIN!=="undefined" && typeof kmVin==="string" && FLEET_PIN[kmVin])||0;
-      const base=pin?pin:Math.max(0, Math.round((useFleet?(f.tidy||f.rrc):(f.rrc||0))-(useTi?FLEET_TI:0)));
-      const subAmt=pin?0:(isSub?Math.max(0, Math.round((f&&f.sub)||0)):0);
+      const tiCut=useTi?(typeof FLEET_TI==="number"?FLEET_TI:100000):0;
+      const base=pin?Math.max(0, pin-tiCut):Math.max(0, Math.round((useFleet?(f.tidy||f.rrc):(f.rrc||0))-tiCut));
+      const subAmt=isSub?Math.max(0, Math.round((f&&f.sub)||0)):0;
       const months=typeof kmVal==="function"?kmVal("cMonths", 84):84;
       const _down=typeof kmDownRead==="function"?kmDownRead(base, false, false):null;
       const downMode=_down?_down.downMode:(typeof kmStr==="function"?kmStr("cDownMode","sum"):"sum");
@@ -311,11 +312,15 @@
       const useMpt=false;
       const useSub=canSub && kmVal("kmFleetSub", true);
       const pin=(typeof FLEET_PIN!=="undefined" && FLEET_PIN[kmVin])||0;
-      if(pin){ price=pin; steps.push("флит сразу от "+rub(pin)); }
+      if(pin){
+        price=pin;
+        steps.push("флит сразу от "+rub(pin));
+        if(useTi){ price=Math.max(0, price-FLEET_TI); steps.push("трейд-ин −"+rub(FLEET_TI)); }
+      }
       else if(useFleet && useTi){ price=Math.max(0, f.tidy-FLEET_TI); steps.push("флит + трейд-ин"); }
       else if(useFleet){ price=f.tidy; steps.push("флит −"+rub(fleetCut)); }
       else if(useTi){ price=Math.max(0, f.rrc-FLEET_TI); steps.push("флит + трейд-ин"); }
-      if(!pin && useSub){ price=Math.max(0, price-(f.sub||0)); steps.push("субс. бренда −"+rub(f.sub||0)); }
+      if(useSub){ price=Math.max(0, price-(f.sub||0)); steps.push("субс. бренда −"+rub(f.sub||0)); }
       const mptCut=Math.round((useFleet?f.tidy:f.rrc)*(useTi?0.9:1)*0.1);
       const subCut=f.sub||0;
       const fleetBox=fleetCreditBox(price, m, f, useFleet, useTi, useSub?"sub":"fleet");
