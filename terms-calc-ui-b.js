@@ -256,7 +256,7 @@
               <div class="calc-out">${rub(Math.round(client))} ₽</div>
               <p class="calc-note">Авто ${rub(Math.round(carPrice))} + Д/О ${rub(Math.round(addons))}. Каско не входит.${discount?` Скидка ${rub(Math.round(discount))}.`:""}</p>
             </div>`}
-            ${_pg&&!pangoOnly?`<div class="note-box">${(typeof EXCL_FIX!=="undefined"&&EXCL_FIX[kmVin])?"Эксклюзив":"Спеццена"} ${rub(_pg.cash)} без трейд-ин · ${rub(_pg.ti)} с трейд-ин. ${(selected&&selected.invoice)?"Этот VIN по этой цене — блок PANGO.":"Блок PANGO — спеццена для сравнения."}</div>`:""}
+            ${_pg&&!pangoOnly?`<div class="note-box">${(typeof EXCL_FIX!=="undefined"&&EXCL_FIX[kmVin])?"СУПЕРСПЕЦ":"Спеццена"} ${rub(_pg.cash)} без трейд-ин · ${rub(_pg.ti)} с трейд-ин. ${(selected&&selected.invoice)?"Этот VIN по этой цене — блок PANGO.":"Блок PANGO — спеццена для сравнения."}</div>`:""}
             ${useLoan
               ?`<label class="field" style="max-width:none"><span>Каско расширенное, ₽</span><input id="kmPack" inputmode="numeric" value="${pack}" /></label>`
               :`<label class="field" style="max-width:none"><span>КАСКО, ₽</span><input id="kmCasco" inputmode="numeric" value="${casco}" /></label>`}

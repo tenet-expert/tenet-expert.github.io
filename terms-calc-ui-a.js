@@ -282,10 +282,10 @@
         const on=kmVin===c.vin;
         const st=c.status==="in"?"в наличии":"в пути";
         return `<button type="button" class="stock-car${prio?" prio":""}${rec?" rec":""}${(typeof carIsMpt==="function"?carIsMpt(c):c.mpt)?" mpt":""}${(typeof carIsCorp==="function"?carIsCorp(c):(c.corp||(typeof kmIsCorp==="function"&&kmIsCorp(c.vin))))?" corp":""}${c.demo?" demo":""}${c.invoice?" invoice":""}${on?" on":""}" data-km-vin="${escape(c.vin)}">
-          <b>${escape(c.color||"—")} · ${escape(c.trim||"")}${prio?" · приоритет":""}</b>
-          ${c.invoice?`<span class="mpt-tag inv-tag">Спец инвойс</span>`:""}${(typeof carIsCorp==="function"?carIsCorp(c):(c.corp||(typeof kmIsCorp==="function"&&kmIsCorp(c.vin))))?`<span class="mpt-tag corp-tag">Корп · лизинг</span>`:""}${c.demo?`<span class="mpt-tag demo-tag">ДЕМО</span>`:""}
+          <b>${escape(c.color||"—")} · ${escape(c.trim||"")}${prio?" · приоритет":""}${(typeof EXCL_FIX!=="undefined"&&EXCL_FIX[c.vin])?" · СУПЕРСПЕЦ":""}</b>
+          ${(typeof EXCL_FIX!=="undefined"&&EXCL_FIX[c.vin])?`<span class="mpt-tag super-tag">СУПЕРСПЕЦ</span>`:(c.invoice?`<span class="mpt-tag inv-tag">Спец инвойс</span>`:"")}${(typeof carIsCorp==="function"?carIsCorp(c):(c.corp||(typeof kmIsCorp==="function"&&kmIsCorp(c.vin))))?`<span class="mpt-tag corp-tag">Корп · лизинг</span>`:""}${c.demo?`<span class="mpt-tag demo-tag">ДЕМО</span>`:""}
           <span class="vin">${escape(c.vin)}</span>
-          <span class="stock-meta">${st}${c.invoice?" · спец инвойс":""}${(typeof carIsCorp==="function"?carIsCorp(c):c.corp)?" · корп":""}${c.demo?" · ДЕМО":""}${c.note?" · "+escape(c.note):""}</span>
+          <span class="stock-meta">${st}${(typeof EXCL_FIX!=="undefined"&&EXCL_FIX[c.vin])?" · СУПЕРСПЕЦ":(c.invoice?" · спец инвойс":"")}${(typeof carIsCorp==="function"?carIsCorp(c):c.corp)?" · корп":""}${c.demo?" · ДЕМО":""}${c.note?" · "+escape(c.note):""}</span>
         </button>`;
       };
       if(!cars.length && !recOther.length){

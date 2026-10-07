@@ -48,7 +48,9 @@
     function stockBadges(r){
       const bits=[];
       bits.push(`<span class="st ${r.status}">${(ST_LABEL&&ST_LABEL[r.status])||r.status}</span>`);
-      if(r.invoice) bits.push(`<span class="st inv">Спец инвойс</span>`);
+      const superSpec=typeof EXCL_FIX!=="undefined" && !!EXCL_FIX[r.vin];
+      if(superSpec) bits.push(`<span class="st super">СУПЕРСПЕЦ</span>`);
+      else if(r.invoice) bits.push(`<span class="st inv">Спец инвойс</span>`);
       else {
         if(typeof carIsMpt==="function"?carIsMpt(r):r.mpt) bits.push(`<span class="st mpt">МПТ</span>`);
         if(typeof carIsCorp==="function"?carIsCorp(r):(r.corp || (typeof CORP_VINS!=="undefined" && CORP_VINS.has(r.vin)))) bits.push(`<span class="st corp">Корпоративный</span>`);
@@ -155,9 +157,9 @@
       const tone=stockTone(r.color);
       return `<article class="st-row${tone?" "+tone:""}${reservedCls}${r.invoice?" is-invoice":""}">
         <div>
-          <b>${escape(r.name||"")}</b>
+          <b>${escape(r.name||"")}${(typeof EXCL_FIX!=="undefined"&&EXCL_FIX[r.vin])?" · СУПЕРСПЕЦ":""}</b>
           <small>${escape(meta)}</small>
-          <small class="st-vin">${escape(r.vin||"")}${typeof PANGO_ONLY!=="undefined"&&PANGO_ONLY[r.vin]?" · спеццена · сотрудник · 1 хоз ГИБДД · 500 км · только PANGO":""}${typeof EXCL_FIX!=="undefined"&&EXCL_FIX[r.vin]?" · эксклюзив "+Math.round(EXCL_FIX[r.vin].cash/1000)+" нал / "+Math.round(EXCL_FIX[r.vin].ti/1000)+" с ТИ":""}${typeof KM_FORK!=="undefined"&&KM_FORK[r.vin]?" · КМ 50 тыс. с трейд-ин · 100 без":""}${r.note?" · "+escape(r.note):""}</small>
+          <small class="st-vin">${escape(r.vin||"")}${typeof PANGO_ONLY!=="undefined"&&PANGO_ONLY[r.vin]?" · спеццена · сотрудник · 1 хоз ГИБДД · 500 км · только PANGO":""}${typeof EXCL_FIX!=="undefined"&&EXCL_FIX[r.vin]?" · СУПЕРСПЕЦ "+Math.round(EXCL_FIX[r.vin].cash/1000)+" нал / "+Math.round(EXCL_FIX[r.vin].ti/1000)+" с ТИ":""}${typeof KM_FORK!=="undefined"&&KM_FORK[r.vin]?" · КМ 50 тыс. с трейд-ин · 100 без":""}${r.note?" · "+escape(r.note):""}</small>
         </div>
         ${reservedBadge}
         <div class="st-side">
