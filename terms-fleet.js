@@ -33,6 +33,7 @@
       l6u:{name:"L6 Ultra",rrc:3040000,dealer:2888000,an:0,client:2584000,prem:0,km:0,tidy:2584000,sub:150000,do:70000,casco:80000}
     };
     const FLEET_TI = 100000;
+    const FLEET_PIN = {"EDXFB32B2TE041658":2333000,"EDXFB32B7TE062327":2333000};
     function fleetMonthsLeft(principal, payment, annual){
       if(!(principal>0)) return 0;
       const r=(Number(annual)||0)/100/12;
@@ -184,8 +185,9 @@
     }
     function fleetCreditBox(price, m, f, useFleet, useTi, mode){
       const isSub=mode==="sub";
-      const base=Math.max(0, Math.round((useFleet?(f.tidy||f.rrc):(f.rrc||0))-(useTi?FLEET_TI:0)));
-      const subAmt=isSub?Math.max(0, Math.round((f&&f.sub)||0)):0;
+      const pin=(typeof FLEET_PIN!=="undefined" && typeof kmVin==="string" && FLEET_PIN[kmVin])||0;
+      const base=pin?pin:Math.max(0, Math.round((useFleet?(f.tidy||f.rrc):(f.rrc||0))-(useTi?FLEET_TI:0)));
+      const subAmt=pin?0:(isSub?Math.max(0, Math.round((f&&f.sub)||0)):0);
       const months=typeof kmVal==="function"?kmVal("cMonths", 84):84;
       const _down=typeof kmDownRead==="function"?kmDownRead(base, false, false):null;
       const downMode=_down?_down.downMode:(typeof kmStr==="function"?kmStr("cDownMode","sum"):"sum");
@@ -308,10 +310,12 @@
       const canSub=typeof kmHasBrandSub==="function"?kmHasBrandSub(m):((f.sub||0)>0);
       const useMpt=false;
       const useSub=canSub && kmVal("kmFleetSub", true);
-      if(useFleet && useTi){ price=Math.max(0, f.tidy-FLEET_TI); steps.push("флит + трейд-ин"); }
+      const pin=(typeof FLEET_PIN!=="undefined" && FLEET_PIN[kmVin])||0;
+      if(pin){ price=pin; steps.push("флит сразу от "+rub(pin)); }
+      else if(useFleet && useTi){ price=Math.max(0, f.tidy-FLEET_TI); steps.push("флит + трейд-ин"); }
       else if(useFleet){ price=f.tidy; steps.push("флит −"+rub(fleetCut)); }
       else if(useTi){ price=Math.max(0, f.rrc-FLEET_TI); steps.push("флит + трейд-ин"); }
-      if(useSub){ price=Math.max(0, price-(f.sub||0)); steps.push("субс. бренда −"+rub(f.sub||0)); }
+      if(!pin && useSub){ price=Math.max(0, price-(f.sub||0)); steps.push("субс. бренда −"+rub(f.sub||0)); }
       const mptCut=Math.round((useFleet?f.tidy:f.rrc)*(useTi?0.9:1)*0.1);
       const subCut=f.sub||0;
       const fleetBox=fleetCreditBox(price, m, f, useFleet, useTi, useSub?"sub":"fleet");
