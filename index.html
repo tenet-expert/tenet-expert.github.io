@@ -2435,7 +2435,7 @@ async function pingTelegram(body){
         const w=new Date(y,mo,d).getDay();
         const work=workDay(d);
         const iso=isoOf(new Date(y,mo,d));
-        const weekHit=work && (w>=1 && w<=5) && (w===3 || Number((store.meet||{})[iso]||0)>0);
+        const weekHit=work && ((w>=1 && w<=5) && (w===3 || Number((store.meet||{})[iso]||0)>0) || d===6 || d===7);
         const monthHit=work && (d===15 || d>=20);
         const dots=work?`<span class="smop-dots"><i></i>${weekHit?`<i class="w"></i>`:""}${monthHit?`<i class="m"></i>`:""}</span>`:"";
         if(!work) cells.push(`<div class="smop-day off"><b>${d}</b></div>`);
@@ -2462,6 +2462,10 @@ async function pingTelegram(body){
             <p class="calc-note">${dm(mon)} – ${dm(sun)}</p>
             <div class="smop-task"><b>1. Собрание</b><p>Нажмите день: пусто — можно назначить, жёлтый — планируется, зелёный — проведено.</p><div class="smop-meets">${meetBtns}</div></div>
             <div class="smop-task${wd===3?" hit":""}"><div class="smop-line"><div><b>2. Отзывы и SSI</b><p>По средам. Эта неделя — ${wed.getDate()} ${months[wed.getMonth()]}.</p></div><button type="button" class="smop-tick${ssiOn?" on":""}" data-smop-tick="ssi" data-smop-key="${wedIso}">${ssiOn?"Да":"Нет"}</button></div></div>
+            ${(mon.getFullYear()===2026 && mon.getMonth()===9 && mon.getDate()===5)?[{n:3,d:6,key:"2026-10-06",title:"Подготовка к визиту РМ",note:"6 октября, вторник"},{n:4,d:7,key:"2026-10-07",title:"Визит РМ",note:"7 октября, среда"},{n:5,d:8,key:"2026-10-08",title:"Запись тайника",note:"8 октября, четверг · выходной по графику"}].map(x=>{
+              const on=!!((store.once||{})[x.key]);
+              return `<div class="smop-task${day===x.d?" hit":""}"><div class="smop-line"><div><b>${x.n}. ${x.title}${day===x.d?" · сегодня":""}</b><p>${x.note}</p></div><button type="button" class="smop-tick${on?" on":""}" data-smop-tick="once" data-smop-key="${x.key}">${on?"Да":"Нет"}</button></div></div>`;
+            }).join(""):""}
           </div>
           <div class="card">
             <p class="eyebrow">На месяц</p>
@@ -7989,6 +7993,7 @@ async function confirmCloud(rec){
         const key=b.dataset.smopKey;
         smopPatch(o=>{
           if(kind==="ssi"){ o.ssi=o.ssi||{}; o.ssi[key]=o.ssi[key]?0:1; return; }
+          if(kind==="once"){ o.once=o.once||{}; o.once[key]=o.once[key]?0:1; return; }
           if(kind==="sched"){ o.sched=o.sched||{}; o.sched[key]=o.sched[key]?0:1; return; }
           if(kind==="test"){ o.test=o.test||{}; o.test[key]=o.test[key]?0:1; return; }
           o.days=o.days||{};
