@@ -1177,6 +1177,8 @@ tr.lb-fold-row.open{display:table-row}
     const LOGIN_PINS = {"леонтьев": "1010", "спицын": "3759", "кокуркин": "8736", "якубовская": "6588", "сидоров": "4969", "лавров": "7472", "тальков": "9858", "ахмадуллин": "3597", "демьянов": "8942", "аншаков": "1488", "жукавина": "3275", "елчин": "9397", "коропец": "8925", "тест": "7894", "бикулов": "2282", "мясоедова": "6564", "хорошунов": "8529", "хорошунгв": "8944", "неськина": "4358", "извеков": "7993", "абубакиров": "2795", "назарян": "2877", "велиджанов": "2434"};
     const CLOUD_ID = "o6nq7rki";
     const CLOUD_KEY = "4fmBrr2H";
+    const SMOP_CLOUD_ID = "xu9rvggs";
+    const SMOP_CLOUD_KEY = "Smop3759rop";
     const RATE_SEED = [{"surname": "леонтьев", "display": "Леонтьев", "model": "t8", "exam": 1, "percent": 94, "status": "done"}, {"surname": "леонтьев", "display": "Леонтьев", "model": "t4l", "exam": 1, "percent": 86, "status": "done"}, {"surname": "леонтьев", "display": "Леонтьев", "model": "t7", "exam": 1, "percent": 79, "status": "done"}, {"surname": "леонтьев", "display": "Леонтьев", "model": "t9", "exam": 1, "percent": 100, "status": "done"}, {"surname": "леонтьев", "display": "Леонтьев", "model": "a8", "exam": 1, "percent": 97, "status": "done"}, {"surname": "извеков", "display": "Извеков", "model": "t8", "exam": 1, "percent": 97, "status": "done"}, {"surname": "коропец", "display": "Коропец", "model": "t4l", "exam": 1, "percent": 85, "status": "done"}, {"surname": "коропец", "display": "Коропец", "model": "a8", "exam": 1, "percent": 92, "status": "done"}, {"surname": "коропец", "display": "Коропец", "model": "t8", "exam": 1, "percent": 94, "status": "done"}, {"surname": "коропец", "display": "Коропец", "model": "t7", "exam": 1, "percent": 90, "status": "done"}, {"surname": "коропец", "display": "Коропец", "model": "t9", "exam": 1, "percent": 92, "status": "done"}, {"surname": "ахмадуллин", "display": "Ахмадуллин", "model": "t7", "exam": 1, "percent": 78, "status": "done"}, {"surname": "ахмадуллин", "display": "Ахмадуллин", "model": "t4l", "exam": 1, "percent": 89, "status": "done"}, {"surname": "ахмадуллин", "display": "Ахмадуллин", "model": "t9", "exam": 1, "percent": 95, "status": "done"}, {"surname": "сидоров", "display": "Сидоров", "model": "t4l", "exam": 1, "percent": 98, "status": "done"}, {"surname": "сидоров", "display": "Сидоров", "model": "t7", "exam": 1, "percent": 100, "status": "done"}, {"surname": "сидоров", "display": "Сидоров", "model": "t8", "exam": 1, "percent": 97, "status": "done"}, {"surname": "сидоров", "display": "Сидоров", "model": "t9", "exam": 1, "percent": 100, "status": "done"}, {"surname": "сидоров", "display": "Сидоров", "model": "a8", "exam": 1, "percent": 94, "status": "done"}, {"surname": "спицын", "display": "Спицын", "model": "t4l", "exam": 1, "percent": 96, "status": "done"}, {"surname": "спицын", "display": "Спицын", "model": "t7", "exam": 1, "percent": 98, "status": "done"}, {"surname": "спицын", "display": "Спицын", "model": "t8", "exam": 1, "percent": 97, "status": "done"}, {"surname": "лавров", "display": "Лавров", "model": "t4l", "exam": 1, "percent": 77, "ok": 36, "n": 47, "status": "done", "at": "2026-09-16T12:38:00.000Z", "attempts": 1}];
 
     const CATS = {
@@ -2386,14 +2388,108 @@ async function pingTelegram(body){
       const blob=norm((state.surname||"")+" "+(state.display||""));
       return blob.indexOf("спицын")>=0 || blob.indexOf("леонтьев")>=0;
     }
+    let smopCloudOk = null;
+    let smopWrites = 0;
+    let smopPulling = false;
+    let smopSyncing = Promise.resolve();
+    let smopPollOn = false;
     function smopLoad(){
       try{ return JSON.parse(localStorage.getItem("tenet-smop-v1")||"{}"); }catch(e){ return {}; }
     }
-    function smopPatch(fn){
-      const o=smopLoad();
-      fn(o);
+    function smopSave(o){
       try{ localStorage.setItem("tenet-smop-v1", JSON.stringify(o)); }catch(e){}
+    }
+    function smopHas(o){
+      return ["days","meet","ssi","sched","test","once"].some(k=>o && o[k] && Object.keys(o[k]).length);
+    }
+    function smopLeaf(remoteNode, beforeNode, afterNode){
+      const obj=v=>v && typeof v==="object" && !Array.isArray(v);
+      if(obj(afterNode) || obj(beforeNode)){
+        const out=obj(remoteNode)?Object.assign({}, remoteNode):{};
+        const keys=new Set(Object.keys(beforeNode||{}).concat(Object.keys(afterNode||{})));
+        keys.forEach(k=>{
+          const bv=beforeNode?beforeNode[k]:undefined;
+          const av=afterNode?afterNode[k]:undefined;
+          if(JSON.stringify(bv)===JSON.stringify(av)) return;
+          out[k]=(obj(av)||obj(bv))?smopLeaf(out[k], bv, av):av;
+        });
+        return out;
+      }
+      return afterNode;
+    }
+    async function smopPull(){
+      const r=await withTimeout(fetch("https://rentry.co/api/fetch/"+SMOP_CLOUD_ID,{
+        method:"POST",
+        headers:{"Content-Type":"application/x-www-form-urlencoded"},
+        body: cloudForm({edit_code: SMOP_CLOUD_KEY})
+      }), 8000);
+      if(!r || !r.ok) throw new Error("smop");
+      const data=await r.json();
+      const text=(data && data.content && data.content.text) || "{}";
+      const parsed=JSON.parse(text||"{}");
+      return parsed && typeof parsed==="object" ? parsed : {};
+    }
+    async function smopPush(o){
+      const r=await withTimeout(fetch("https://rentry.co/api/edit/"+SMOP_CLOUD_ID,{
+        method:"POST",
+        headers:{"Content-Type":"application/x-www-form-urlencoded"},
+        body: cloudForm({edit_code: SMOP_CLOUD_KEY, text: JSON.stringify(o)})
+      }), 8000);
+      if(!r || !r.ok) throw new Error("smop edit");
+      const out=await r.json().catch(()=>({status:"200"}));
+      if(String(out.status)!=="200") throw new Error("smop status");
+    }
+    async function smopCommit(before, after){
+      let remote={};
+      try{ remote=await smopPull(); }catch(e){ remote=smopLoad(); }
+      const merged=smopLeaf(remote, before, after);
+      merged.rev=Date.now();
+      await smopPush(merged);
+      smopSave(merged);
+      smopCloudOk=true;
+    }
+    function smopPatch(fn){
+      const before=smopLoad();
+      const after=JSON.parse(JSON.stringify(before));
+      fn(after);
+      smopSave(after);
       render();
+      smopWrites++;
+      smopSyncing=smopSyncing.then(async()=>{
+        try{ await smopCommit(before, after); }
+        catch(e){ smopCloudOk=false; }
+        smopWrites=Math.max(0, smopWrites-1);
+        if(view==="senior" && smopWrites===0) render();
+      }).catch(()=>{ smopWrites=Math.max(0, smopWrites-1); });
+    }
+    async function smopRefresh(){
+      if(view!=="senior" || smopWrites>0 || smopPulling) return;
+      smopPulling=true;
+      const stamp=smopWrites;
+      try{
+        const local=smopLoad();
+        const remote=await smopPull();
+        if(smopWrites!==stamp) return;
+        const was=smopCloudOk;
+        smopCloudOk=true;
+        if(!smopHas(remote) && smopHas(local)){
+          local.rev=Date.now();
+          await smopPush(local);
+          smopSave(local);
+          if(was!==true && view==="senior" && smopWrites===0) render();
+          return;
+        }
+        if((remote.rev||0)>=(local.rev||0) && JSON.stringify(remote)!==JSON.stringify(local)){
+          smopSave(remote);
+          if(view==="senior" && smopWrites===0) render();
+        } else if(was!==true && view==="senior" && smopWrites===0) render();
+      }catch(e){
+        const was=smopCloudOk;
+        smopCloudOk=false;
+        if(was!==false && view==="senior" && smopWrites===0) render();
+      }finally{
+        smopPulling=false;
+      }
     }
     function senior(){
       if(needAuth()) return login();
@@ -2411,6 +2507,8 @@ async function pingTelegram(body){
       const months=["января","февраля","марта","апреля","мая","июня","июля","августа","сентября","октября","ноября","декабря"];
       const isoOf=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
       const dayIso=isoOf(dt);
+      const ropHere=norm((state.surname||"")+" "+(state.display||"")).indexOf("леонтьев")>=0;
+      const cloudLine=smopCloudOk===false?"Облако не отвечает. Показаны последние отметки с этого телефона.":(smopCloudOk?(ropHere?"Онлайн: это отметки Спицына, обновляются сами.":"Онлайн: РОП видит эти отметки."):"Подключаюсь к облаку…");
       const store=smopLoad();
       const rec=(store.days||{})[dayIso]||{};
       const tick=(on,kind)=>`<button type="button" class="smop-tick${on?" on":""}" data-smop-tick="${kind}" data-smop-key="${dayIso}">${on?"Да":"Нет"}</button>`;
@@ -2450,7 +2548,7 @@ async function pingTelegram(body){
         else cells.push(`<button type="button" class="smop-day${d===today?" today":""}${d===day?" on":""}" data-smop-day="${d}"><b>${d}</b>${dots}</button>`);
       }
       return banner("СМОП","Старший менеджер отдела продаж", state.display)+`
-        <p class="lead">Октябрь по графику Спицына: пт, сб, пн, вт, ср. Выходные — четверг и воскресенье. Отметки сохраняются на этом телефоне.</p>
+        <p class="lead">Октябрь по графику Спицына: пт, сб, пн, вт, ср. Выходные — четверг и воскресенье. ${cloudLine}</p>
         <div class="card">
           <div class="smop-head"><p class="eyebrow" style="margin:0">Октябрь 2026</p><b>${day} октября, ${names[wd]}</b></div>
           <div class="smop-cal"><span class="smop-dow">Пн</span><span class="smop-dow">Вт</span><span class="smop-dow">Ср</span><span class="smop-dow">Чт</span><span class="smop-dow">Пт</span><span class="smop-dow">Сб</span><span class="smop-dow">Вс</span>${cells.join("")}</div>
@@ -8027,6 +8125,11 @@ async function confirmCloud(rec){
           o.meet[key]=(Number(o.meet[key]||0)+1)%4;
         });
       });
+      if(view==="senior") smopRefresh();
+      if(!smopPollOn){
+        smopPollOn=true;
+        setInterval(()=>{ if(view==="senior") smopRefresh(); }, 8000);
+      }
       document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{
         if(inExam() || (userRun() && !done)){ view="play"; if(!paper.length) resumeExam(userRun()); else render(); return; }
         goSection(b.dataset.go);
