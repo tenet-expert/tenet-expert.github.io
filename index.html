@@ -1102,6 +1102,7 @@ body:has(.lb-rep-page) .wrap{max-width:none;width:100%;padding:14px 16px 48px}
 .lb-pair .lb-block{overflow-x:auto}
 .lb-block.c{background:#f7f1e6;border-color:#e0cba8;flex:1.15;min-width:0}
 .lb-block.d{background:#eef3f6;border-color:#c5d4de;flex:1.15;min-width:0}
+.lb-block.e{background:#f6eef3;border-color:#dcc5d4;flex:0.95;min-width:0}
 @media(max-width:900px){.lb-pair{flex-direction:column}}
 .lb-rep tr.sum td{font-weight:800;border-top:2px solid #1c1a17}
 .lb-bad{color:#c62828;font-weight:800}
@@ -2332,16 +2333,18 @@ async function pingTelegram(body){
       const live=boardMode==="month";
       const who=p=>p.other?`<b>Другие</b>`:(p.kid?`<span class="lb-sub">${escape(p.name)}</span>`:escape(p.name));
       const trAttr=p=>p.other?` class="lb-fold-btn" data-lb-fold="rep"`:(p.kid?` class="lb-fold-row" data-lb-panel="rep"`:(p.name==="Итого"?` class="sum"`:""));
-      const mainHead=["Менеджер","План","Факт","% плана","Контракты","Расторж."].concat(live?["Действ.","Выдачи+К","Прогноз","Прогноз %"]:[]).concat(["Трафик","% трафика","% визитов","% зв+инт","Конв. в контракт","Конв. в выдачу","Визиты","Контракт с визита","Конв. с визита"]).concat(sep?["Оценка б/у","E-credit"]:[]);
+      const mainHead=["Менеджер","План","Факт","% плана","Контракты","Расторж."].concat(live?["Действ.","Выдачи+К","Прогноз","Прогноз %"]:[]).concat(["Трафик","% трафика","% визитов","% зв+инт","Конв. в контракт","Конв. в выдачу"]).concat(sep?["Оценка б/у","E-credit"]:[]);
       const fromVisit=p=>Math.max(0,(p.contract||0)-(p.callContract||0)-(p.webContract||0));
       const rowMain=(p, plan)=>{
         const pace=boardPace(p.issue, plan);
         const prim=ch(p), tPrim=ch(total);
         const paceCells=live?`<td>–</td><td>–</td><td>${pace.n}</td><td>${pace.p}</td>`:"";
-        return `<tr${trAttr(p)}><td>${who(p)}</td><td>${plan||"–"}</td><td>${p.issue}</td><td>${boardPct(p.issue, plan)}</td><td>${p.contract}</td><td>${sep?(p.cancel||0):"–"}</td>${paceCells}<td>${prim}</td><td>${boardPct(prim, tPrim)}</td><td>${boardPct(p.visit, total.visit)}</td><td>${boardPct(p.call+p.web, total.call+total.web)}</td><td>${mark(p.contract, prim, "conv")}</td><td>${boardPct(p.issue, prim)}</td><td>${p.visit}</td><td>${fromVisit(p)}</td><td>${boardPct(fromVisit(p), p.visit)}</td>${sep?`<td>${p.service||0}</td><td>${p.ecredit||0}</td>`:""}</tr>`;
+        return `<tr${trAttr(p)}><td>${who(p)}</td><td>${plan||"–"}</td><td>${p.issue}</td><td>${boardPct(p.issue, plan)}</td><td>${p.contract}</td><td>${sep?(p.cancel||0):"–"}</td>${paceCells}<td>${prim}</td><td>${boardPct(prim, tPrim)}</td><td>${boardPct(p.visit, total.visit)}</td><td>${boardPct(p.call+p.web, total.call+total.web)}</td><td>${mark(p.contract, prim, "conv")}</td><td>${boardPct(p.issue, prim)}</td>${sep?`<td>${p.service||0}</td><td>${p.ecredit||0}</td>`:""}</tr>`;
       };
       const tdHead=["Менеджер","План","Факт","Перв. + со звонка + с инт.","%"];
       const rowTd=p=>`<tr${trAttr(p)}><td>${who(p)}</td><td>70%</td><td>${p.td}</td><td>${p.visit+(p.callVisit||0)+(p.webVisit||0)}</td><td>${mark(p.td, p.visit+(p.callVisit||0)+(p.webVisit||0), "td")}</td></tr>`;
+      const visitHead=["Менеджер","Визит","Контракт с визита","Конв. с визита"];
+      const rowVisit=p=>`<tr${trAttr(p)}><td>${who(p)}</td><td>${p.visit}</td><td>${fromVisit(p)}</td><td>${boardPct(fromVisit(p), p.visit)}</td></tr>`;
       const callHead=["Менеджер","Звонки","Визит со звонка","% в визит","Контракт со звонка","% в контракт"];
       const webHead=["Менеджер","Интернет","Визит с инт.","% в визит","Контракт с инт.","% в контракт"];
       const rowCall=p=>`<tr${trAttr(p)}><td>${who(p)}</td><td>${p.call}</td><td>${p.callVisit}</td><td>${boardPct(p.callVisit, p.call)}</td><td>${p.callContract}</td><td>${mark(p.callContract, p.call, "conv")}</td></tr>`;
@@ -2354,6 +2357,7 @@ async function pingTelegram(body){
           <section class="lb-block a"><p class="lb-rep-h">Выдачи и трафик</p><table class="lb-rep">${thead(mainHead)}<tbody>${mains.map(p=>rowMain(p, planOf(p))).join("")}${kids.length?rowMain(bucket,0)+kids.map(p=>rowMain(p,0)).join(""):""}${rowMain(total, planN)}</tbody></table></section>
           <div class="lb-pair">
             <section class="lb-block b"><p class="lb-rep-h">Тест-драйвы</p><table class="lb-rep">${thead(tdHead)}<tbody>${shown.map(rowTd).join("")}</tbody></table></section>
+            <section class="lb-block e"><p class="lb-rep-h">Визит в контракт</p><table class="lb-rep">${thead(visitHead)}<tbody>${shown.map(rowVisit).join("")}</tbody></table></section>
             <section class="lb-block c"><p class="lb-rep-h">Звонки в визит</p><table class="lb-rep">${thead(callHead)}<tbody>${shown.map(rowCall).join("")}</tbody></table></section>
             <section class="lb-block d"><p class="lb-rep-h">Интернет в визит</p><table class="lb-rep">${thead(webHead)}<tbody>${shown.map(rowWeb).join("")}</tbody></table></section>
           </div>
