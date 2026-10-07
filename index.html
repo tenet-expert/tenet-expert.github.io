@@ -7816,7 +7816,7 @@ async function confirmCloud(rec){
       document.querySelectorAll("[data-prio-go]").forEach(b=>b.onclick=()=>{ kmVin=b.dataset.prioGo||""; const car=(typeof STOCK!=="undefined"?STOCK:[]).find(x=>x.vin===kmVin); if(car && typeof kmIdFromCar==="function"){ const nid=kmIdFromCar(car); if(nid){ kmId=nid; kmShown=""; } } calcMode="km"; view="calc"; render(); });
       document.querySelectorAll("[data-mpt-day]").forEach(b=>b.onclick=()=>{ mptDay=b.dataset.mptDay||""; view="terms"; render(); });
       document.querySelectorAll("[data-mpt-month]").forEach(b=>b.onclick=()=>{ mptMonth=Number(b.dataset.mptMonth)||3; view="terms"; render(); });
-      document.querySelectorAll("[data-km-id]").forEach(b=>b.onclick=(e)=>{ e.preventDefault(); e.stopPropagation(); kmId=b.dataset.kmId; kmShown=""; kmVin=""; kmVinQuery=""; kmVinMiss=""; view="calc"; render(); });
+      document.querySelectorAll("[data-km-id]").forEach(b=>b.onclick=(e)=>{ e.preventDefault(); e.stopPropagation(); kmId=b.dataset.kmId; kmShown=""; const test=typeof testSaleOf==="function"?testSaleOf(kmId):null; kmVin=test?test.vin:""; kmVinQuery=test?test.vin:""; kmVinMiss=""; view="calc"; render(); });
       const kmToOffer=document.getElementById("kmToOffer");
       if(kmToOffer) kmToOffer.onclick=()=>{ if(typeof offerFromCalc==="function") offerFromCalc(); };
       document.querySelectorAll("[data-down-mode]").forEach(b=>b.onclick=()=>{

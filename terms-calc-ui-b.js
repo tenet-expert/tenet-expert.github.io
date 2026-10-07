@@ -22,6 +22,72 @@
       if(km0<=Number(hi)*1000+50) return 0;
       return kmDcCrAt(p, Number(hi)*1000, Math.ceil);
     }
+    function calcTestSale(car){
+      const fresh=(typeof kmShown==="undefined")||kmShown!==car.id;
+      kmShown=car.id;
+      kmVin=car.vin;
+      const months=Math.max(1, kmVal("cMonths", 60));
+      const read=kmDownRead(car.fix, fresh);
+      const down=read.down;
+      const downPct=read.downPct;
+      const pFix=car.fix;
+      const pDown=Math.max(0, Math.min(pFix, down));
+      const pBundle=typeof PANGO_BUNDLE==="number"?PANGO_BUNDLE:150000;
+      const pRateA=typeof PANGO_RATE_A==="number"?PANGO_RATE_A:17.4;
+      const pRateB=typeof PANGO_RATE_B==="number"?PANGO_RATE_B:14.4;
+      const pNssRate=typeof PANGO_NSS==="number"?PANGO_NSS:0.0089;
+      const pYears=months/12;
+      const pYearsLabel=Math.abs(pYears-Math.round(pYears))<0.05?String(Math.round(pYears)):pYears.toFixed(1);
+      const yNum=Number(pYearsLabel);
+      const pYearsWord=(yNum===1)?"год":(yNum>1&&yNum<5&&Math.abs(yNum-Math.round(yNum))<0.05?"года":"лет");
+      const pBase=Math.max(0, pFix-pDown)+pBundle;
+      const pNss=Math.round(pBase*pNssRate*pYears);
+      const pCreditB=pBase+pNss;
+      const pPayA=calcPay(pBase+pDown, pDown, months, pRateA);
+      const pPayB=calcPay(pCreditB+pDown, pDown, months, pRateB);
+      const pOverA=pPayA*months-pBase;
+      const pOverB=pPayB*months-pCreditB;
+      return banner("Калькулятор","Тест · только PANGO","CHERY")+`
+        <p class="lead">Эта машина продаётся только по PANGO. Цена фикс, скидки директа и флита не применяются.</p>
+        <div class="km-stage">
+        <div class="km-chips">${kmChipGroups(car.id)}</div>
+        <div class="km-layout">
+          <div class="card km-disc">
+            <p class="eyebrow">Тест в продаже · ${escape(car.model)}</p>
+            <p class="calc-note" style="margin-top:8px">VIN ${escape(car.vin)} · ${car.year} · пробег ${rub(car.km)} км</p>
+            <div class="bank-row"><span>Цена розница</span><span class="pay">${rub(car.rrc)} ₽</span></div>
+            <div class="bank-row"><span>Тюнинг уже в машине</span><span class="pay">${rub(car.tune)} ₽</span></div>
+            <div class="note-box" style="margin-top:14px">
+              <p class="eyebrow" style="margin:0 0 6px">Цена фикс · продажа на Авито</p>
+              <div class="calc-out">${rub(pFix)} ₽</div>
+              <p class="calc-note">Сумма не меняется. Тюнинг в неё не плюсуется.</p>
+            </div>
+            <label class="field" style="max-width:none;margin-top:12px"><span>Первый взнос, ₽</span><input id="cDown" inputmode="numeric" value="${pDown}" /></label>
+            <label class="field" style="max-width:none"><span>Срок, мес.</span><input id="cMonths" inputmode="numeric" value="${months}" /></label>
+            <input type="hidden" id="cDownMode" value="sum" />
+            <p class="calc-note">${rub(pDown)} ₽ · ${downPct}% от цены фикс</p>
+          </div>
+          <div class="km-right">
+            <div class="pay-col pango km-pay">
+              <p class="eyebrow">Только PANGO</p>
+              <p class="eyebrow" style="margin-top:8px">17,4% без комиссий</p>
+              <div class="bank-row pay-top"><span><b>Платёж</b><br/><small>${pRateA}% · ${months} мес. · переплата ~${rub(Math.round(pOverA))}</small></span><span class="pay">${rub(Math.round(pPayA))} ₽</span></div>
+              <div class="bank-row"><span>Тело кредита</span><span class="pay">${rub(pBase)}</span></div>
+              <p class="eyebrow" style="margin-top:8px">14,4% · НСС в теле</p>
+              <div class="bank-row pay-top"><span><b>Платёж</b><br/><small>${pRateB}% · ${months} мес. · переплата ~${rub(Math.round(pOverB))}</small></span><span class="pay">${rub(Math.round(pPayB))} ₽</span></div>
+              <div class="bank-row"><span>Тело с НСС</span><span class="pay">${rub(pCreditB)}</span></div>
+              <details class="calc-more">
+                <summary>Подробности расчёта</summary>
+                <p class="calc-note">Цена фикс ${rub(pFix)}. Каско + GAP + ДМС ${rub(pBundle)} всегда в кредите. Директ и флит для этой машины закрыты.</p>
+                <div class="bank-row"><span>Цена авто</span><span class="pay">${rub(pFix)}</span></div>
+                <div class="bank-row"><span>Первый взнос</span><span class="pay">${rub(pDown)}</span></div>
+                <div class="bank-row"><span>Каско + GAP + ДМС</span><span class="pay">${rub(pBundle)}</span></div>
+                <div class="bank-row"><span>НСС 0,89% × ${pYearsLabel} ${pYearsWord}</span><span class="pay">${rub(pNss)}</span></div>
+              </details>
+            </div>
+          </div>
+        </div></div>`;
+    }
     function calcKm(){
       const testHit=typeof testSaleOf==="function"?testSaleOf(kmId):null;
       if(testHit) return calcTestSale(testHit);

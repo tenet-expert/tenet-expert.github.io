@@ -209,7 +209,10 @@
       });
       const line=(g,tone)=>groups[g]&&groups[g].length?`<div class="km-line tone-${tone}"><p class="stock-h">${escape(g)}</p><div class="km-grid">${groups[g].map(x=>`<button type="button" class="chip ${x.id===active?"on":""}" data-km-id="${x.id}">${escape(x.name)}<small>${x.brand} · РРЦ ${rub(x.rrc)}</small></button>`).join("")}</div></div>`:"";
       const slot=(cls,html)=>html?`<div class="km-slot ${cls}">${html}</div>`:"";
+      const tests=(typeof TEST_SALE!=="undefined"?TEST_SALE:[]);
+      const testSlot=tests.length?slot("s-test", `<div class="km-line tone-test"><p class="stock-h">Тесты в продаже · только PANGO</p><div class="km-grid">${tests.map(x=>`<button type="button" class="chip ${x.id===active?"on":""}" data-km-id="${x.id}">${escape(x.short)}<small>фикс ${rub(x.fix)}</small></button>`).join("")}</div></div>`):"";
       return `<div class="km-board"><span class="km-brand tenet">TENET</span><span class="km-brand plus">TENET PLUS</span><span class="km-brand chery">CHERY</span>`
+        +testSlot
         +slot("s-t4",`<div class="km-pair is-2">${line("T4","a")}${line("T4L","a")}</div>`)
         +slot("s-t7",line("T7","a"))
         +slot("s-c7",line("Tiggo 7 L","b"))
