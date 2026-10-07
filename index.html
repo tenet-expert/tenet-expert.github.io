@@ -1112,6 +1112,9 @@ body:has(.lb-rep-page) .wrap{max-width:none;width:100%;padding:14px 16px 48px}
 .lb-fold-btn{cursor:pointer}
 .lb-fold-btn>b::before{content:"▸ ";color:#8a6840}
 .lb-fold-btn.open>b::before{content:"▾ "}
+tr.lb-fold-btn td:first-child b::before{content:"▸ ";color:#8a6840}
+tr.lb-fold-btn.open td:first-child b::before{content:"▾ "}
+.lb-rep .lb-sub{padding-left:12px;color:#5e564c}
 .lb-line.sub>b{font-weight:650}
 .lb-fold-empty{margin:0;padding:6px 0 8px 8px;color:#6d6458;font-size:12px}
 tr.lb-fold-row{display:none}
@@ -2297,14 +2300,16 @@ async function pingTelegram(body){
       const per=boardPeriod();
       const rank=boardMode==="prev"?boardSepRank():boardRank(per.rows, per.roster);
       const bucket=rank.list.find(p=>p.other)||boardBlank();
-      const people=rank.list.filter(p=>!p.other).concat(bucket.people||[]).sort(boardCmp);
+      const mains=rank.list.filter(p=>!p.other);
+      const kids=bucket.people||[];
+      const people=mains.concat(kids);
       const total=people.reduce((s,p)=>{
         ["traffic","visit","call","web","meet","td","contract","issue","visitContract","callVisit","callContract","webVisit","webContract","cancel","service","ecredit"].forEach(k=>s[k]+=p[k]||0);
         return s;
       }, boardBlank());
       total.name="Итого";
       const planN=BOARD_PLAN_TEAM;
-      const planOf=p=>rank.list.some(n=>!n.other&&n.name===p.name)?BOARD_PLAN:0;
+      const planOf=p=>mains.some(n=>n.name===p.name)?BOARD_PLAN:0;
       const ch=p=>p.visit+p.call+p.web;
       const mark=(num,den,kind)=>{
         const text=boardPct(num, den);
@@ -2314,28 +2319,30 @@ async function pingTelegram(body){
         return cls?`<span class="${cls}">${text}</span>`:text;
       };
       const sep=boardMode==="prev";
+      const who=p=>p.other?`<b>Другие</b>`:(p.kid?`<span class="lb-sub">${escape(p.name)}</span>`:escape(p.name));
+      const trAttr=p=>p.other?` class="lb-fold-btn" data-lb-fold="rep"`:(p.kid?` class="lb-fold-row" data-lb-panel="rep"`:(p.name==="Итого"?` class="sum"`:""));
       const mainHead=["Менеджер","План","Факт","% плана","Контракты","Расторж.","Действ.","Выдачи+К","Прогноз","Прогноз %","Трафик","% трафика","% визитов","% зв+инт","Конв. в контракт","Конв. в выдачу","Визиты","Контракт с визита","Конв. визита"].concat(sep?["Оценка б/у","E-credit"]:[]);
       const rowMain=(p, plan)=>{
         const pace=boardPace(p.issue, plan);
         const prim=ch(p), tPrim=ch(total);
-        return `<tr class="${p.name==="Итого"?"sum":""}"><td>${escape(p.name)}</td><td>${plan||"–"}</td><td>${p.issue}</td><td>${boardPct(p.issue, plan)}</td><td>${p.contract}</td><td>${sep?(p.cancel||0):"–"}</td><td>–</td><td>–</td><td>${pace.n}</td><td>${pace.p}</td><td>${prim}</td><td>${boardPct(prim, tPrim)}</td><td>${boardPct(p.visit, total.visit)}</td><td>${boardPct(p.call+p.web, total.call+total.web)}</td><td>${mark(p.contract, prim, "conv")}</td><td>${boardPct(p.issue, prim)}</td><td>${p.visit}</td><td>${p.visitContract}</td><td>${boardPct(p.visitContract, p.visit)}</td>${sep?`<td>${p.service||0}</td><td>${p.ecredit||0}</td>`:""}</tr>`;
+        return `<tr${trAttr(p)}><td>${who(p)}</td><td>${plan||"–"}</td><td>${p.issue}</td><td>${boardPct(p.issue, plan)}</td><td>${p.contract}</td><td>${sep?(p.cancel||0):"–"}</td><td>–</td><td>–</td><td>${pace.n}</td><td>${pace.p}</td><td>${prim}</td><td>${boardPct(prim, tPrim)}</td><td>${boardPct(p.visit, total.visit)}</td><td>${boardPct(p.call+p.web, total.call+total.web)}</td><td>${mark(p.contract, prim, "conv")}</td><td>${boardPct(p.issue, prim)}</td><td>${p.visit}</td><td>${p.visitContract}</td><td>${boardPct(p.visitContract, p.visit)}</td>${sep?`<td>${p.service||0}</td><td>${p.ecredit||0}</td>`:""}</tr>`;
       };
       const tdHead=["Менеджер","План","Факт","Визиты перв.+втор","%"];
-      const rowTd=p=>`<tr class="${p.name==="Итого"?"sum":""}"><td>${escape(p.name)}</td><td>70%</td><td>${p.td}</td><td>${p.visit+p.meet}</td><td>${mark(p.td, p.visit+p.meet, "td")}</td></tr>`;
+      const rowTd=p=>`<tr${trAttr(p)}><td>${who(p)}</td><td>70%</td><td>${p.td}</td><td>${p.visit+p.meet}</td><td>${mark(p.td, p.visit+p.meet, "td")}</td></tr>`;
       const callHead=["Менеджер","Звонки","Визит со звонка","% в визит","Контракт со звонка","% в контракт"];
       const webHead=["Менеджер","Интернет","Визит с инт.","% в визит","Контракт с инт.","% в контракт"];
-      const rowCall=p=>`<tr class="${p.name==="Итого"?"sum":""}"><td>${escape(p.name)}</td><td>${p.call}</td><td>${p.callVisit}</td><td>${boardPct(p.callVisit, p.call)}</td><td>${p.callContract}</td><td>${mark(p.callContract, p.call, "conv")}</td></tr>`;
-      const rowWeb=p=>`<tr class="${p.name==="Итого"?"sum":""}"><td>${escape(p.name)}</td><td>${p.web}</td><td>${p.webVisit}</td><td>${boardPct(p.webVisit, p.web)}</td><td>${p.webContract}</td><td>${mark(p.webContract, p.web, "conv")}</td></tr>`;
-      const all=people.concat([total]);
+      const rowCall=p=>`<tr${trAttr(p)}><td>${who(p)}</td><td>${p.call}</td><td>${p.callVisit}</td><td>${boardPct(p.callVisit, p.call)}</td><td>${p.callContract}</td><td>${mark(p.callContract, p.call, "conv")}</td></tr>`;
+      const rowWeb=p=>`<tr${trAttr(p)}><td>${who(p)}</td><td>${p.web}</td><td>${p.webVisit}</td><td>${boardPct(p.webVisit, p.web)}</td><td>${p.webContract}</td><td>${mark(p.webContract, p.web, "conv")}</td></tr>`;
+      const shown=mains.concat(kids.length?[Object.assign(bucket,{other:true})]:[]).concat(kids.map(p=>Object.assign(p,{kid:true}))).concat([total]);
       const planNote=`Личный план — ${BOARD_PLAN}, общий — ${BOARD_PLAN_TEAM}.`;
       const thead=h=>`<thead><tr>${h.map(x=>`<th>${x}</th>`).join("")}</tr></thead>`;
       return `<p class="eyebrow" style="margin:0 0 4px">${escape(per.sub)}</p><h2 style="margin:0 0 10px">${escape(per.title)}</h2>
         <div class="lb-blocks">
-          <section class="lb-block a"><p class="lb-rep-h">Выдачи и трафик</p><table class="lb-rep">${thead(mainHead)}<tbody>${people.map(p=>rowMain(p, planOf(p))).join("")}${rowMain(total, planN)}</tbody></table></section>
+          <section class="lb-block a"><p class="lb-rep-h">Выдачи и трафик</p><table class="lb-rep">${thead(mainHead)}<tbody>${mains.map(p=>rowMain(p, planOf(p))).join("")}${kids.length?rowMain(bucket,0)+kids.map(p=>rowMain(p,0)).join(""):""}${rowMain(total, planN)}</tbody></table></section>
           <div class="lb-pair">
-            <section class="lb-block b"><p class="lb-rep-h">Тест-драйвы</p><table class="lb-rep">${thead(tdHead)}<tbody>${all.map(rowTd).join("")}</tbody></table></section>
-            <section class="lb-block c"><p class="lb-rep-h">Звонки в визит</p><table class="lb-rep">${thead(callHead)}<tbody>${all.map(rowCall).join("")}</tbody></table></section>
-            <section class="lb-block d"><p class="lb-rep-h">Интернет в визит</p><table class="lb-rep">${thead(webHead)}<tbody>${all.map(rowWeb).join("")}</tbody></table></section>
+            <section class="lb-block b"><p class="lb-rep-h">Тест-драйвы</p><table class="lb-rep">${thead(tdHead)}<tbody>${shown.map(rowTd).join("")}</tbody></table></section>
+            <section class="lb-block c"><p class="lb-rep-h">Звонки в визит</p><table class="lb-rep">${thead(callHead)}<tbody>${shown.map(rowCall).join("")}</tbody></table></section>
+            <section class="lb-block d"><p class="lb-rep-h">Интернет в визит</p><table class="lb-rep">${thead(webHead)}<tbody>${shown.map(rowWeb).join("")}</tbody></table></section>
           </div>
         </div>
         <p class="lb-rep-note">Как в «ОП CHERY». ${planNote} Трафик — визиты + звонки + интернет. Конв. в контракт: меньше 10% красным, меньше 15% жёлтым, иначе зелёным. ТД ниже 70% — красным. ${sep?"Сентябрь: контракт = выдача + расторжение. Визит со звонка и с интернета, оценка б/у и e-credit — из воронки, только менеджеры лидерборда.":"Расторжения в журнале октября не ведутся."} Обновлено ${escape((boardCache&&boardCache.stamp)||"")}</p>`;
