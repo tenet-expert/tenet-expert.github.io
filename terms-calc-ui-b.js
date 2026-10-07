@@ -250,7 +250,7 @@
             ${useLoan?`<label class="check-row"><input id="kmUseDcCr" type="checkbox" ${useDcCr?"checked":""} /> <span>Скидка от ДЦ за кредит${dcFit?` · до ${rub(dcFit)} в коридоре`:""}</span></label>`:""}
             ${useLoan&&useDcCr?`<label class="field" style="max-width:none"><span>Сумма скидки ДЦ за кредит, ₽ · коридор от ${lo} тыс.</span><input id="kmDcCr" inputmode="numeric" value="${dcCr}" /></label>`:""}`}
             <label class="field" style="max-width:none"><span>Д/О, ₽</span><input id="kmDo" inputmode="numeric" value="${addons}" /></label>
-            ${pangoOnly?`<div class="note-box" style="margin-top:14px"><p class="eyebrow" style="margin:0 0 6px">Цена PANGO</p><div class="calc-out">${rub(pFix)} ₽</div><p class="calc-note">${useTi?"С трейд-ин":"Без трейд-ин"}. Директ и флит не считаем.</p></div><div class="note-box">${escape(PANGO_ONLY[kmVin])}</div>`:`<div class="note-box" style="margin-top:14px">
+            ${pangoOnly?`<div class="note-box" style="margin-top:14px"><p class="eyebrow" style="margin:0 0 6px">Цена PANGO</p><div class="calc-out">${rub(pFix)} ₽</div><p class="calc-note">${_pg.cash===_pg.ti?"При любых условиях. Трейд-ин цену не меняет.":(useTi?"С трейд-ин.":"Без трейд-ин.")} Директ и флит не считаем.</p></div><div class="note-box">${escape(PANGO_ONLY[kmVin])}</div>`:`<div class="note-box" style="margin-top:14px">
               <p class="eyebrow" style="margin:0 0 6px">Итоговая цена для клиента</p>
               ${Math.round(rrc+addons)>Math.round(client)?`<div class="calc-out" style="text-decoration:line-through;opacity:.42;margin-bottom:2px">${rub(Math.round(rrc+addons))} ₽</div>`:""}
               <div class="calc-out">${rub(Math.round(client))} ₽</div>
@@ -321,7 +321,7 @@
             <div class="bank-row"><span>Тело с НСС</span><span class="pay">${rub(pCreditB)}</span></div>
             <details class="calc-more">
               <summary>Подробности расчёта</summary>
-              <p class="calc-note">${selected&&selected.invoice?"Этот VIN по спеццене.":"Если машина по спеццене."} Фикс ${useTi?"с трейд-ин":"без трейд-ин"} ${rub(pFix)}. Каско + GAP + ДМС ${rub(pBundle)} всегда в кредите.</p>
+              <p class="calc-note">${selected&&selected.invoice?"Этот VIN по спеццене.":"Если машина по спеццене."} ${_pg&&_pg.cash===_pg.ti?"Фикс "+rub(pFix)+" при любых условиях.":"Фикс "+(useTi?"с трейд-ин ":"без трейд-ин ")+rub(pFix)+"."} Каско + GAP + ДМС ${rub(pBundle)} всегда в кредите.</p>
               <div class="bank-row"><span>Цена авто</span><span class="pay">${rub(pFix)}</span></div>
               <div class="bank-row"><span>Первый взнос</span><span class="pay">${rub(pDownP)}</span></div>
               <div class="bank-row"><span>Каско + GAP + ДМС</span><span class="pay">${rub(pBundle)}</span></div>

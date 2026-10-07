@@ -54,7 +54,8 @@
     const EXCL_FIX = {
       "EDELB31B1TE103208":{cash:2100000,ti:2000000},
       "EDELB31BXTE095545":{cash:2200000,ti:2100000},
-      "EDELB31B3TE093989":{cash:2200000,ti:2100000}
+      "EDELB31B3TE093989":{cash:2200000,ti:2100000},
+      "EDXGD34B6TE031162":{cash:3000000,ti:3000000}
     };
     function pangoOf(id){
       const vin=typeof kmVin==="string"?String(kmVin).toUpperCase():"";
@@ -110,7 +111,7 @@
       "EDEFD32B1TE101190":{ti:50,cash:100},
       "EDEFD32B5TE102360":{ti:50,cash:100}
     };
-    const PANGO_ONLY = {"EDXGD34B6TE031162":"Спеццена. Привезён под сотрудника и поставлен на учёт, чтобы зафиксировать скидку. 1 хозяин по ГИБДД, пробег 500 км. Считаем только PANGO."};
+    const PANGO_ONLY = {"EDXGD34B6TE031162":"Спеццена. Привезён под сотрудника и поставлен на учёт, чтобы зафиксировать скидку. 1 хозяин по ГИБДД, пробег 500 км. Считаем только PANGO. Цена 3 000 000 при любых условиях, трейд-ин её не меняет."};
     function kmBand(vin, useTi, prio, m){
       const fork=KM_FORK[vin];
       if(fork){ const t=useTi?fork.ti:fork.cash; return {lo:t, hi:t, lock:true}; }
