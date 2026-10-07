@@ -485,7 +485,7 @@ JS = r'''
         const text=boardPct(num, den);
         if(text==="–") return text;
         const v=100*num/den;
-        const cls=kind==="td"?(v<70?"lb-bad":""):(v<10?"lb-bad":v<15?"lb-mid":"lb-ok");
+        const cls=kind==="td"?(v<70?"lb-bad":""):kind==="visit"?(v<20?"lb-bad":v<30?"lb-mid":"lb-ok"):kind==="callv"?(v<10?"lb-bad":v<15?"lb-mid":"lb-ok"):kind==="webv"?(v<5?"lb-bad":v<10?"lb-mid":"lb-ok"):(v<10?"lb-bad":v<15?"lb-mid":"lb-ok");
         return cls?`<span class="${cls}">${text}</span>`:text;
       };
       const sharePct=(num, den, p)=>{
@@ -518,14 +518,24 @@ JS = r'''
         return `<tr${trAttr(p)}><td>${who(p)}</td><td>${plan||"–"}</td><td>${p.issue}</td><td>${boardPct(p.issue, plan)}</td><td>${p.contract}</td><td>${sep?(p.cancel||0):"–"}</td>${paceCells}<td>${prim}</td><td>${sharePct(prim, tPrim, p)}</td><td>${sharePct(p.visit, total.visit, p)}</td><td>${sharePct(p.call+p.web, total.call+total.web, p)}</td><td>${convCell(p, x=>x.contract, ch, "conv")}</td><td>${convCell(p, x=>x.issue, ch)}</td></tr>`;
       };
       const tdBase=p=>(p.visit||0)+(p.callVisit||0)+(p.webVisit||0);
+      const ratioCell=(p, numFn, min)=>{
+        const one=x=>{
+          const n=numFn(x)||0, d=tdBase(x), text=boardPct(n, d);
+          if(text==="–") return String(n);
+          const pct=100*n/d<min?`<span class="lb-bad">${text}</span>`:text;
+          return `${n} ${pct}`;
+        };
+        if(p.name!=="Итого") return one(p);
+        return `<span class="lb-duo">${one(core)}<i>/</i>${one(total)}</span>`;
+      };
       const allHead=["Менеджер","Всего","ТД","% ТД","Контракт","% в контракт","Оценка","E-credit"];
-      const rowAll=p=>`<tr${trAttr(p)}><td>${who(p)}</td><td>${shareNum(tdBase(p), tdBase(total), p)}</td><td>${shareNum(p.td, total.td, p)}</td><td>${convCell(p, x=>x.td||0, tdBase, "td")}</td><td>${shareNum(p.contract, total.contract, p)}</td><td>${convCell(p, x=>x.contract||0, tdBase, "conv")}</td><td>${shareNum(p.service, total.service, p)}</td><td>${shareNum(p.ecredit, total.ecredit, p)}</td></tr>`;
+      const rowAll=p=>`<tr${trAttr(p)}><td>${who(p)}</td><td>${shareNum(tdBase(p), tdBase(total), p)}</td><td>${shareNum(p.td, total.td, p)}</td><td>${convCell(p, x=>x.td||0, tdBase, "td")}</td><td>${shareNum(p.contract, total.contract, p)}</td><td>${convCell(p, x=>x.contract||0, tdBase, "conv")}</td><td>${ratioCell(p, x=>x.service, 70)}</td><td>${ratioCell(p, x=>x.ecredit, 60)}</td></tr>`;
       const visitHead=["Менеджер","Визит","Контракт с визита","Конв. с визита"];
-      const rowVisit=p=>`<tr${trAttr(p)}><td>${who(p)}</td><td>${shareNum(p.visit, total.visit, p)}</td><td>${shareNum(fromVisit(p), fromVisit(total), p)}</td><td>${convCell(p, fromVisit, x=>x.visit)}</td></tr>`;
+      const rowVisit=p=>`<tr${trAttr(p)}><td>${who(p)}</td><td>${shareNum(p.visit, total.visit, p)}</td><td>${shareNum(fromVisit(p), fromVisit(total), p)}</td><td>${convCell(p, fromVisit, x=>x.visit, "visit")}</td></tr>`;
       const callHead=["Менеджер","Звонки","Визит со звонка","% в визит","Контракт со звонка","% в контракт"];
       const webHead=["Менеджер","Интернет","Визит с инт.","% в визит","Контракт с инт.","% в контракт"];
-      const rowCall=p=>`<tr${trAttr(p)}><td>${who(p)}</td><td>${shareNum(p.call, total.call, p)}</td><td>${shareNum(p.callVisit, total.callVisit, p)}</td><td>${convCell(p, x=>x.callVisit, x=>x.call)}</td><td>${shareNum(p.callContract, total.callContract, p)}</td><td>${convCell(p, x=>x.callContract, x=>x.call, "conv")}</td></tr>`;
-      const rowWeb=p=>`<tr${trAttr(p)}><td>${who(p)}</td><td>${shareNum(p.web, total.web, p)}</td><td>${shareNum(p.webVisit, total.webVisit, p)}</td><td>${convCell(p, x=>x.webVisit, x=>x.web)}</td><td>${shareNum(p.webContract, total.webContract, p)}</td><td>${convCell(p, x=>x.webContract, x=>x.web, "conv")}</td></tr>`;
+      const rowCall=p=>`<tr${trAttr(p)}><td>${who(p)}</td><td>${shareNum(p.call, total.call, p)}</td><td>${shareNum(p.callVisit, total.callVisit, p)}</td><td>${convCell(p, x=>x.callVisit, x=>x.call, "callv")}</td><td>${shareNum(p.callContract, total.callContract, p)}</td><td>${convCell(p, x=>x.callContract, x=>x.call, "conv")}</td></tr>`;
+      const rowWeb=p=>`<tr${trAttr(p)}><td>${who(p)}</td><td>${shareNum(p.web, total.web, p)}</td><td>${shareNum(p.webVisit, total.webVisit, p)}</td><td>${convCell(p, x=>x.webVisit, x=>x.web, "webv")}</td><td>${shareNum(p.webContract, total.webContract, p)}</td><td>${convCell(p, x=>x.webContract, x=>x.web, "conv")}</td></tr>`;
       const shown=mains.concat(kids.length?[Object.assign(bucket,{other:true})]:[]).concat(kids.map(p=>Object.assign(p,{kid:true}))).concat([total]);
       const planNote=boardMode==="prev"?`Личный план — 10. Ахмадуллин — 6 (отпуск), Спицын — 5. Общий — ${planN}.`:`Личный план — 10, Спицын — 5. Общий — ${planN}.`;
       const thead=h=>`<thead><tr>${h.map(x=>`<th>${x}</th>`).join("")}</tr></thead>`;
@@ -539,7 +549,7 @@ JS = r'''
             <section class="lb-block f"><p class="lb-rep-h">Визит всего</p><div class="lb-scroll"><table class="lb-rep">${thead(allHead)}<tbody>${shown.map(rowAll).join("")}</tbody></table></div></section>
           </div>
         </div>
-        <p class="lb-rep-note">Как в «ОП CHERY». ${planNote} Трафик — визиты + звонки + интернет. Конв. в контракт: меньше 10% красным, меньше 15% жёлтым, иначе зелёным. ТД ниже 70% — красным. Доля трафика, визитов и звонков с интернетом, а также объёмы в нижних блоках: меньше 10% или больше 20% — красным. В строке «Итого» конверсия: основной состав / весь отдел. ${sep?"Сентябрь: контракт = выдача + расторжение. Тест-драйв — только поездка с «движением клиента», без служебных, заправок и центра Hyundai. Повтор одного клиента и поездка мужа с женой считаются один раз. Визит со звонка и с интернета, оценка б/у и e-credit — из воронки, только менеджеры лидерборда.":"Расторжения в журнале октября не ведутся."} Обновлено ${escape((boardCache&&boardCache.stamp)||"")}</p>`;
+        <p class="lb-rep-note">Как в «ОП CHERY». ${planNote} Трафик — визиты + звонки + интернет. Конв. в контракт: меньше 10% красным, меньше 15% жёлтым, иначе зелёным. Конв. с визита: ниже 20% красным, до 30% жёлтым, от 30% зелёным. Звонок в визит: ниже 10 / до 15 / от 15. Интернет в визит: ниже 5 / до 10 / от 10. Оценка — от 70% визитов, e-credit — от 60%, иначе красным. ТД ниже 70% — красным. Доля трафика, визитов и звонков с интернетом, а также объёмы в нижних блоках: меньше 10% или больше 20% — красным. В строке «Итого» конверсия: основной состав / весь отдел. ${sep?"Сентябрь: контракт = выдача + расторжение. Тест-драйв — только поездка с «движением клиента», без служебных, заправок и центра Hyundai. Повтор одного клиента и поездка мужа с женой считаются один раз. Визит со звонка и с интернета, оценка б/у и e-credit — из воронки, только менеджеры лидерборда.":"Расторжения в журнале октября не ведутся."} Обновлено ${escape((boardCache&&boardCache.stamp)||"")}</p>`;
     }
     function boardBindFolds(root){
       if(!root) return;
