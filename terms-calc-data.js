@@ -58,7 +58,7 @@
       {model:"Tiggo 7 L",vin:"EDEDB21B7SD723791",trim:"Актив",year:"2025",color:"Серебристый",extra:"",pay:500,bonus:1000},
       {model:"T8",vin:"EDXGD34B1TE022143",trim:"Прайм 7 мест 4WD",year:"2026",color:"Светло-серый",extra:"",pay:500,bonus:2000,sold:true,seller:"Спицын"},
       {model:"T8",vin:"EDXGD34B0TE082608",trim:"Прайм 7 мест 4WD",year:"2026",color:"Тёмно-зелёный",extra:"",pay:500,bonus:2000,sold:true,seller:"Лавров"},
-      {model:"T8",vin:"EDXGD34B6TE031162",trim:"Прайм 7 мест 4WD",year:"2026",color:"Чёрный",extra:"",pay:500,bonus:2000},
+      {model:"T8",vin:"EDXGD34B6TE031162",trim:"Прайм 7 мест 4WD",year:"2026",color:"Чёрный",extra:"Спеццена · сотрудник · 1 хоз ГИБДД · 500 км · только PANGO",pay:500,bonus:2000},
       {model:"T8",vin:"EDXGD34B3TE031815",trim:"Ультра 7 мест 4WD",year:"2026",color:"Белый",extra:"",pay:500,bonus:2000},
       {model:"T8",vin:"EDXGB32B3TE076049",trim:"Актив 5 мест 2WD",year:"2026",color:"Белый",extra:"",pay:500,bonus:2000},
       {model:"T8",vin:"EDXGD34BXTE081949",trim:"Прайм 7 мест 4WD",year:"2026",color:"Светло-серый",extra:"",pay:500,bonus:2000},
@@ -96,6 +96,19 @@
       {id:"l6u",brand:"TENET PLUS",name:"L6 Ultra",stock:"pl6",rrc:3040000,dealer:2888000,ti:100000,tiBack:70000,cr:0,crBack:0,bonus:0.022,vat:1.22,fee:0.01,kmMin:0,kmMax:50,prioMin:0,prioMax:50}
     ];
     const PRIO_VINS = new Set(["EDXFB32B2TE041658","EDXFB32B7TE062327","EDEDB21B7SD723791","EDXGD34B1TE022143","EDXGD34B0TE082608","EDXGD34B6TE031162","EDXGD34B3TE031815","EDXGB32B3TE076049","EDXGD34BXTE081949","EDXGD34B5TE082040","EDXGD34B2TE057953","EDEDD24B2SG003755","LVVDC21B7SD594110","LVTDD24B5RD409189"]);
+    const KM_FORK = {
+      "EDXFD32B2TE042710":{ti:50,cash:100},
+      "EDEFD32B1TE101190":{ti:50,cash:100},
+      "EDEFD32B5TE102360":{ti:50,cash:100}
+    };
+    const PANGO_ONLY = {"EDXGD34B6TE031162":"Спеццена. Привезён под сотрудника и поставлен на учёт, чтобы зафиксировать скидку. 1 хозяин по ГИБДД, пробег 500 км. Считаем только PANGO."};
+    function kmBand(vin, useTi, prio, m){
+      const fork=KM_FORK[vin];
+      if(fork){ const t=useTi?fork.ti:fork.cash; return {lo:t, hi:t, lock:true}; }
+      if(prio){ const t=useTi?-100:0; return {lo:t, hi:t, lock:true}; }
+      return {lo:m.kmMin, hi:m.kmMax, lock:false};
+    }
+    function kmBandTxt(lo, hi){ return lo===hi ? (lo+" тыс.") : (lo+" … "+hi+" тыс."); }
     const KM_DC_DEF = 100000;
     const KM_BANKS = [
       {id:"sber", name:"Сбер"},

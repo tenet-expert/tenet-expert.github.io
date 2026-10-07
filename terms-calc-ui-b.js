@@ -60,8 +60,8 @@
       const tiBack=useTi?m.tiBack:0;
       const crAmt=useCr?m.cr:0;
       const crBack=useCr?m.crBack:0;
-      const lo=prio?m.prioMin:m.kmMin;
-      const hi=prio?m.prioMax:m.kmMax;
+      const band=typeof kmBand==="function"?kmBand(kmVin, useTi, prio, m):{lo:prio?m.prioMin:m.kmMin, hi:prio?m.prioMax:m.kmMax, lock:false};
+      const lo=band.lo, hi=band.hi;
       const dcPack={rrc,invoice,vat:m.vat,fee:m.fee,bonus:m.bonus,tiAmt,tiBack,spec,dcTi,crAmt,crBack,addons,casco,card};
       const dcFit=typeof kmDcCrFit==="function"?kmDcCrFit(dcPack, lo):(typeof KM_DC_DEF==="number"?KM_DC_DEF:100000);
       const dcMin=typeof kmDcCrMin==="function"?kmDcCrMin(dcPack, hi):0;
