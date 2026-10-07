@@ -250,6 +250,7 @@ input,textarea{width:100%;background:#fff;border:1px solid var(--border);color:v
 .hub-card[data-go="duty"]::before{background-image:url("hub/duty.jpg?v=5");background-position:50% 48%;background-size:cover;}
 .hub-card[data-go="tune"]::before{background-image:url("hub/tune.jpg?v=1");background-position:50% 62%;background-size:cover;}
 .hub-card[data-go="board"]::before{background-image:url("hub/board.jpg?v=2");background-position:50% 62%;background-size:cover;}
+.hub-card[data-go="senior"]::before{background:linear-gradient(145deg,#1c3f66 0%,#16324f 62%,#8a5a10 140%);}
 .lb-row.other{background:#fbf7f1}
 .lb-row.other td{color:#6d6458}
 .tune-tabs{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0;}
@@ -1830,7 +1831,7 @@ async function pingTelegram(body){
       else if(attest) items=[["hub","Кабинет"],["home","Аттестация"],["rate","Рейтинг"],["study","Справочник"],["quiz","Тест"]];
       else {
         items=[["hub","Кабинет"],["home","Аттестация"]];
-        const extra={terms:"Условия",calc:"Калькулятор",stock:"Склад",docs:"Документы",epts:"ЭПТС",duty:"Чек-лист",gibdd:"ГИБДД",offer:"КП",tune:"Тюнинг"};
+        const extra={terms:"Условия",calc:"Калькулятор",stock:"Склад",docs:"Документы",epts:"ЭПТС",duty:"Чек-лист",gibdd:"ГИБДД",offer:"КП",tune:"Тюнинг",senior:"Старший",board:"Рейтинг",boardrep:"Отчёт"};
         if(extra[active]) items.push([active, extra[active]]);
       }
       const html=items.map(([id,l])=>`<button class="${id===active?"on":""}" data-go="${id}">${l}</button>`).join("");
@@ -2312,7 +2313,7 @@ async function pingTelegram(body){
         }
         if(!MODELS[model]) model="t4l";
         nav(view==="play"?"quiz":view);
-        const map={login,hub,board,boardrep,home,study,quiz:brief,play,rate,hist:rate,review,terms,calc,stock,docs,epts,duty,gibdd,offer,tune};
+        const map={login,hub,board,boardrep,home,study,quiz:brief,play,rate,hist:rate,review,terms,calc,stock,docs,epts,duty,gibdd,offer,tune,senior};
         const fn=map[view]||hub;
         const root=document.getElementById("app");
         if(root) root.innerHTML=fn();
@@ -2333,6 +2334,22 @@ async function pingTelegram(body){
       return `<div class="banner"><div><p class="eyebrow">${escape(sub)}</p><b>${escape(title)}</b></div><div class="banner-name">${escape(word)}</div></div>`;
     }
     function needAuth(){ return !state.surname || !state.authed; }
+    function canSenior(){
+      const blob=norm((state.surname||"")+" "+(state.display||""));
+      return blob.indexOf("спицын")>=0 || blob.indexOf("леонтьев")>=0;
+    }
+    function senior(){
+      if(needAuth()) return login();
+      if(!canSenior()){ view="hub"; return hub(); }
+      const rop=norm((state.surname||"")+" "+(state.display||"")).indexOf("леонтьев")>=0;
+      return banner("Старший менеджер","Закрытый кабинет", state.display)+`
+        <p class="lead">${escape(state.display||"")}, раздел только для Спицына и РОП. Остальные сотрудники эту плитку не видят.</p>
+        <div class="card">
+          <p class="eyebrow">${rop?"РОП":"Старший менеджер"}</p>
+          <p>Кабинет открыт. Сюда можно складывать расчёты и списки, которые не должны видеть менеджеры.</p>
+        </div>
+        <div class="who-line"><button class="btn ghost" data-go="hub" type="button">В кабинет</button></div>`;
+    }
     function hub(){
       if(needAuth()) return login();
       const hour=new Date().getHours();
@@ -2351,6 +2368,7 @@ async function pingTelegram(body){
         ["gibdd","Г","Проверки ГИБДД","ФССП, залоги, банкроты"],
         ["home","A","Аттестация","Тесты, рейтинг, справочник и аргументаторы"]
       ];
+      if(canSenior()) cards.splice(2,0,["senior","СМ","Старший менеджер","Закрытый кабинет Спицына и РОП"]);
       return banner("Кабинет отдела продаж","TENET · Отдел продаж", state.display)+`
         <p class="lead">${hi}, <b>${escape(state.display)}</b>. ${examHint} Разделы ниже — рабочее пространство салона.</p>
         <div class="who-line">
