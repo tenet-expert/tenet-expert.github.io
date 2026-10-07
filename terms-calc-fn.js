@@ -1189,7 +1189,8 @@
       const iron=margin-discount+tiBack+crBack+bonus*1.2;
       const km=(addons*0.3+casco*0.3+card*0.8+iron)/m.vat-carPrice*m.fee;
       const kmK=km/1000;
-      const ok=kmK+0.05>=lo && kmK-0.05<=hi;
+      const kmGate=k=>({ok:k+0.05>=lo, word:k+0.05<lo?"ниже коридора":(k-0.05>hi?"выше коридора":"в коридоре")});
+      const ok=kmGate(kmK).ok;
       const price=Math.round(carPrice);
       const fee=typeof KM_BANK_FEE==="number"?KM_BANK_FEE:30000;
       const _pgTrim=(typeof pangoOf==="function")?pangoOf(m.id):null;
@@ -1275,7 +1276,7 @@
         pIron=pMargin-pDiscount+pTiBack+pBonus*1.2;
         pKm=(pCasco*0.3+pCard*0.8+pIron)/m.vat-pFix*m.fee;
         pKmK=pKm/1000;
-        pOk=pKmK+0.05>=lo && pKmK-0.05<=hi;
+        pOk=kmGate(pKmK).ok;
       }
       let plusAltDirect="", plusAltFleet="", altPick="";
       if(useLoan && (isPlus || m.brand==="TENET")){
@@ -1453,7 +1454,7 @@
           <div class="card dc-result ${(selected&&selected.invoice&&_pg?pOk:ok)?"ok":"bad"}">
             <p class="eyebrow">КМ без НДС${selected&&selected.invoice&&_pg?" · спеццена":""}</p>
             <div class="calc-out">${rub(Math.round(selected&&selected.invoice&&_pg?pKm:km))} ₽</div>
-            <p class="calc-note">Коридор ${lo} … ${hi} тыс. · сейчас ${(selected&&selected.invoice&&_pg?pKmK:kmK).toFixed(1)} тыс. · ${(selected&&selected.invoice&&_pg?pOk:ok)?"в коридоре":"вне коридора"}</p>
+            <p class="calc-note">Коридор ${lo} … ${hi} тыс. · сейчас ${(selected&&selected.invoice&&_pg?pKmK:kmK).toFixed(1)} тыс. · ${kmGate(selected&&selected.invoice&&_pg?pKmK:kmK).word}</p>
             <div class="note-box">${selected&&selected.invoice&&_pg?`Спеццена <b>${rub(pFix)} ₽</b> · скидка от РРЦ ${rub(pDiscount)}<br/>Маржа 1С ${rub(Math.round(pMargin))} · бонус ${rub(Math.round(pBonus))} · доход на железе ${rub(Math.round(pIron))}<br/>Каско 80 000 + GAP/ДМС ${rub(pCard)} внутри PANGO${useTi?" · возмещение трейд-ин "+rub(pTiBack):""}`:`Цена авто <b>${rub(Math.round(carPrice))} ₽</b> · клиенту с Д/О <b>${rub(Math.round(client))} ₽</b><br/>Скидка ${rub(Math.round(discount))} · маржа 1С ${rub(Math.round(margin))}<br/>Бонус ${rub(Math.round(bonus))} (${Math.round(m.bonus*100)}%) · доход на железе ${rub(Math.round(iron))}<br/>НДС ${m.vat===1.22?"22%":"20%"} · сбор ${Math.round(m.fee*100)}% от цены авто${prio?" · приоритет":""}`}</div>
           </div>
           ${(useLoan&&showSplit)||pShow?kmSideList(m, price, downPct, months, extras, {useTi, spec, useDcTi, dcTi, useDcCr, dcCr, downMode, down, finDelta, useLoan}):""}
