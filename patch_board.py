@@ -471,8 +471,8 @@ JS = r'''
         const prim=ch(p), tPrim=ch(total);
         return `<tr${trAttr(p)}><td>${who(p)}</td><td>${plan||"–"}</td><td>${p.issue}</td><td>${boardPct(p.issue, plan)}</td><td>${p.contract}</td><td>${sep?(p.cancel||0):"–"}</td><td>–</td><td>–</td><td>${pace.n}</td><td>${pace.p}</td><td>${prim}</td><td>${boardPct(prim, tPrim)}</td><td>${boardPct(p.visit, total.visit)}</td><td>${boardPct(p.call+p.web, total.call+total.web)}</td><td>${mark(p.contract, prim, "conv")}</td><td>${boardPct(p.issue, prim)}</td><td>${p.visit}</td><td>${p.visitContract}</td><td>${boardPct(p.visitContract, p.visit)}</td>${sep?`<td>${p.service||0}</td><td>${p.ecredit||0}</td>`:""}</tr>`;
       };
-      const tdHead=["Менеджер","План","Факт","Визиты перв.+втор","%"];
-      const rowTd=p=>`<tr${trAttr(p)}><td>${who(p)}</td><td>70%</td><td>${p.td}</td><td>${p.visit+p.meet}</td><td>${mark(p.td, p.visit+p.meet, "td")}</td></tr>`;
+      const tdHead=["Менеджер","План","Факт","Перв. + со звонка + с инт.","%"];
+      const rowTd=p=>`<tr${trAttr(p)}><td>${who(p)}</td><td>70%</td><td>${p.td}</td><td>${p.visit+(p.callVisit||0)+(p.webVisit||0)}</td><td>${mark(p.td, p.visit+(p.callVisit||0)+(p.webVisit||0), "td")}</td></tr>`;
       const callHead=["Менеджер","Звонки","Визит со звонка","% в визит","Контракт со звонка","% в контракт"];
       const webHead=["Менеджер","Интернет","Визит с инт.","% в визит","Контракт с инт.","% в контракт"];
       const rowCall=p=>`<tr${trAttr(p)}><td>${who(p)}</td><td>${p.call}</td><td>${p.callVisit}</td><td>${boardPct(p.callVisit, p.call)}</td><td>${p.callContract}</td><td>${mark(p.callContract, p.call, "conv")}</td></tr>`;
