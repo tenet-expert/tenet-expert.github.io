@@ -588,6 +588,9 @@ input,textarea{width:100%;background:#fff;border:1px solid var(--border);color:v
 .st-vin{word-break:break-all;font-family:ui-monospace,Menlo,monospace;font-size:11px}
 .st-side{text-align:right;min-width:110px}
 .st-side>b{font-variant-numeric:tabular-nums}
+.st-calc{margin-top:8px;white-space:nowrap}
+.km-vin-row{display:flex;gap:8px;align-items:center;margin-top:8px}
+.km-vin-row .st-vin-search{margin:0;flex:1;min-width:0}
 .st-flags{margin-top:6px;display:flex;flex-wrap:wrap;justify-content:flex-end;gap:4px}
 .st-sorts{margin-top:8px}
 .st-sort-lab{font-size:12px;color:#6d6458;align-self:center}
@@ -1469,6 +1472,8 @@ tr.lb-fold-row.open{display:table-row}
     let kmId = "t4lp";
     let kmShown = "";
     let kmVin = "";
+    let kmVinQuery = "";
+    let kmVinMiss = "";
     let kmAltFor = "";
     let kmAltPick = "";
     let mptMonth = 3;
@@ -3866,10 +3871,16 @@ async function pingTelegram(body){
           ${(useLoan&&showSplit)||pShow?kmSideList(m, price, downPct, months, extras, {useTi, spec, useDcTi, dcTi, useDcCr, dcCr, downMode, down, finDelta, useLoan}):""}
         </div>`;
     }
+    function calcVinBar(){
+      const q=escape(typeof kmVinQuery==="string"?kmVinQuery:(typeof kmVin==="string"?kmVin:""));
+      const miss=(typeof kmVinMiss==="string" && kmVinMiss)?`<p class="calc-note">${escape(kmVinMiss)}</p>`:"";
+      const now=(typeof kmVin==="string" && kmVin)?`<p class="calc-note">Считаем VIN <b>${escape(kmVin)}</b></p>`:"";
+      return `<div class="card" style="margin-bottom:12px"><p class="eyebrow">Конкретный VIN</p><div class="km-vin-row"><input id="kmVinFind" class="st-vin-search" type="search" inputmode="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="VIN со склада" value="${q}"><button type="button" class="chip on" id="kmVinGo">Считать</button></div>${now}${miss}</div>`;
+    }
     function calc(){
       if(needAuth()) return login();
       calcMode="km";
-      return calcKm();
+      return calcVinBar()+calcKm();
     }
     function salonLabel(s){
       const t=String(s||"");
@@ -4038,6 +4049,7 @@ async function pingTelegram(body){
         <div class="st-side">
           <b>${price?rub(price)+" ₽":"—"}</b>
           <div class="st-flags">${stockBadges(r)}</div>
+          <button type="button" class="chip st-calc" data-km-vin="${escape(r.vin)}">Калькулятор</button>
         </div>
       </article>`;
     }
@@ -4063,7 +4075,7 @@ async function pingTelegram(body){
         <td>${c.year}</td>
         <td>${rub(c.km)} км</td>
         <td>${rub(c.fix)} ₽</td>
-        <td><button type="button" class="chip" data-km-id="${c.id}">В калькулятор</button></td>
+        <td><button type="button" class="chip" data-km-id="${c.id}">Калькулятор</button></td>
       </tr>`).join("");
       return `<div class="card"><p class="eyebrow">Тесты в продаже</p><h3 style="margin:4px 0 8px">Цена фикс</h3><p class="tune-note">Как в таблице отдела. Продажа на Авито, только через PANGO. Скидки директа и флита не действуют, тюнинг уже в машине.</p><div class="tune-scroll"><table class="tune-table test-sale"><thead><tr><th>Модель</th><th>VIN</th><th>Цена розница</th><th>Сумма тюнинга</th><th>Год</th><th>Пробег</th><th>Цена фикс</th><th></th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
     }
@@ -7712,7 +7724,7 @@ async function confirmCloud(rec){
       document.querySelectorAll("[data-prio-go]").forEach(b=>b.onclick=()=>{ kmVin=b.dataset.prioGo||""; const car=(typeof STOCK!=="undefined"?STOCK:[]).find(x=>x.vin===kmVin); if(car && typeof kmIdFromCar==="function"){ const nid=kmIdFromCar(car); if(nid){ kmId=nid; kmShown=""; } } calcMode="km"; view="calc"; render(); });
       document.querySelectorAll("[data-mpt-day]").forEach(b=>b.onclick=()=>{ mptDay=b.dataset.mptDay||""; view="terms"; render(); });
       document.querySelectorAll("[data-mpt-month]").forEach(b=>b.onclick=()=>{ mptMonth=Number(b.dataset.mptMonth)||3; view="terms"; render(); });
-      document.querySelectorAll("[data-km-id]").forEach(b=>b.onclick=(e)=>{ e.preventDefault(); e.stopPropagation(); kmId=b.dataset.kmId; kmShown=""; kmVin=""; view="calc"; render(); });
+      document.querySelectorAll("[data-km-id]").forEach(b=>b.onclick=(e)=>{ e.preventDefault(); e.stopPropagation(); kmId=b.dataset.kmId; kmShown=""; kmVin=""; kmVinQuery=""; kmVinMiss=""; view="calc"; render(); });
       const kmToOffer=document.getElementById("kmToOffer");
       if(kmToOffer) kmToOffer.onclick=()=>{ if(typeof offerFromCalc==="function") offerFromCalc(); };
       document.querySelectorAll("[data-down-mode]").forEach(b=>b.onclick=()=>{
@@ -7723,165 +7735,41 @@ async function confirmCloud(rec){
       document.querySelectorAll("[data-km-vin]").forEach(b=>b.onclick=()=>{
         const vin=b.dataset.kmVin||"";
         kmVin=vin;
+        kmVinQuery=vin;
+        kmVinMiss="";
         const car=(typeof STOCK!=="undefined"?STOCK:[]).find(x=>x.vin===vin);
         if(car && typeof kmIdFromCar==="function"){
           const nid=kmIdFromCar(car);
           if(nid && nid!==kmId){ kmId=nid; kmShown=""; }
         }
+        calcMode="km";
         view="calc"; render();
       });
-      ["kmRrc","kmInv","kmUseTi","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","cDownMode","cDown","cDownPct","cMonths","kmUseLoan","kmUseCr","kmSpec","kmUseDcTi","kmUseDcCr","kmDcTi","kmDcCr","kmDo","kmPack","kmCasco","kmAltId","kmFleetSub"].forEach(id=>{
-        const el=document.getElementById(id);
-        if(el) el.addEventListener("change", ()=>{ view="calc"; render(); });
-      });
-      const cPreset=document.getElementById("cPreset");
-      if(cPreset) cPreset.onchange=()=>{
-        const p=Number(cPreset.value)||0;
-        const price=document.getElementById("cPrice");
-        const down=document.getElementById("cDown");
-        if(price) price.value=String(p);
-        if(down) down.value=String(Math.round(p*0.2));
+      const kmVinGo=document.getElementById("kmVinGo");
+      const kmVinFind=document.getElementById("kmVinFind");
+      function kmApplyVin(raw){
+        const q=typeof stockVinNorm==="function"?stockVinNorm(raw):String(raw||"").toUpperCase().replace(/[^A-Z0-9]/g,"");
+        kmVinQuery=q;
+        const tests=(typeof TEST_SALE!=="undefined"?TEST_SALE:[]);
+        const test=tests.find(c=>(typeof stockVinNorm==="function"?stockVinNorm(c.vin):c.vin)===q);
+        if(test){ kmId=test.id; kmVin=test.vin; kmVinQuery=test.vin; kmVinMiss=""; kmShown=""; calcMode="km"; view="calc"; render(); return; }
+        const cars=(typeof STOCK!=="undefined"?STOCK:[]);
+        const same=c=>((typeof stockVinNorm==="function"?stockVinNorm(c.vin):String(c.vin||"").toUpperCase()));
+        let hit=cars.find(c=>same(c)===q);
+        if(!hit && q.length>=6){
+          const many=cars.filter(c=>same(c).indexOf(q)>=0);
+          if(many.length===1) hit=many[0];
+          else if(many.length>1){ kmVinMiss="Несколько VIN. Уточните номер."; view="calc"; render(); return; }
+        }
+        if(!hit){ kmVinMiss=q?"VIN не найден на складе.":""; view="calc"; render(); return; }
+        kmVinMiss="";
+        kmVin=hit.vin;
+        kmVinQuery=hit.vin;
+        const nid=typeof kmIdFromCar==="function"?kmIdFromCar(hit):"";
+        if(nid){ kmId=nid; kmShown=""; }
+        calcMode="km";
         view="calc"; render();
-      };
-      ["cPrice","cDown","cMonths","cRate"].forEach(id=>{
-        const el=document.getElementById(id);
-        if(el) el.addEventListener("change", ()=>{ view="calc"; render(); });
-      });
-      document.querySelectorAll("[data-model]").forEach(b=>b.onclick=()=>{
-        if(inExam() || (userRun() && !done)){ view="play"; if(!paper.length) resumeExam(userRun()); else render(); return; }
-        model=b.dataset.model; state.model=model; save(); render();
-      });
-      document.querySelectorAll("[data-practice]").forEach(b=>b.onclick=()=>start("practice", b.dataset.practice));
-      const doLogin=document.getElementById("doLogin");
-      if(doLogin) doLogin.onclick=async()=>{
-        const v=(document.getElementById("surname").value||"").trim();
-        const pinRaw=((document.getElementById("loginPin")||{}).value||"").trim();
-        const err=document.getElementById("loginErr");
-        if(!err) return;
-        if(v.length<2){ err.textContent="Введите фамилию."; return; }
-        if(!pinRaw){ err.textContent="Введите личный код от РОП."; return; }
-        err.textContent="Проверяю код…";
-        const sn=staffKey(v)||norm(v);
-        const baked=await bakedPin(sn);
-        if(pinEq(pinRaw, baked)){
-          state.surname=sn; state.display=v.replace(/\s+/g," "); state.authed=true; save();
-          refreshLocks().catch(()=>{});
-          if(userRun()){ resumeExam(userRun()); return; }
-          view="hub"; state.section="hub"; render();
-          return;
-        }
-        await refreshLocks();
-        const rec=(remoteLocks||[]).find(x=>x && x.type==="login" && x.surname===sn);
-        const cloud=rec && rec.code;
-        const ok=pinEq(pinRaw, cloud);
-        if(!ok){
-          if(!syncOk && !baked){
-            err.textContent="Нет связи с сервером кодов. Откройте сайт в Chrome или Safari — не из Telegram — и повторите.";
-            return;
-          }
-          if(!cloud && !baked){
-            err.textContent="Код для этой фамилии ещё не выдан. Нажмите «Запросить код у РОП».";
-            return;
-          }
-          err.textContent="Неверный код. Только цифры, без пробелов. Откройте сайт в Chrome / Safari, не из Telegram.";
-          return;
-        }
-        state.surname=sn; state.display=v.replace(/\s+/g," "); state.authed=true; save();
-        if(userRun()){ resumeExam(userRun()); return; }
-        view="hub"; state.section="hub"; render();
-      };
-      ["surname","loginPin"].forEach(id=>{
-        const el=document.getElementById(id);
-        if(el) el.addEventListener("keydown", e=>{ if(e.key==="Enter"){ e.preventDefault(); if(doLogin) doLogin.click(); } });
-      });
-      const askPin=document.getElementById("askPin");
-      if(askPin) askPin.onclick=async()=>{
-        const v=(document.getElementById("surname").value||"").trim();
-        const err=document.getElementById("loginErr");
-        if(v.length<2){ err.textContent="Сначала введите фамилию, затем запросите код."; return; }
-        err.textContent="Отправляю запрос РОП…";
-        try{
-          await refreshLocks();
-          const list=await pullList();
-          const rec={type:"pin_request", kind:"login", surname:norm(v), display:v.replace(/\s+/g," "), at:new Date().toISOString(), tgSent:false};
-          const i=list.findIndex(x=>x && x.type==="pin_request" && x.kind==="login" && x.surname===rec.surname && !x.tgSent);
-          if(i>=0) list[i]=rec; else list.push(rec);
-          const r=await withTimeout(fetch("https://rentry.co/api/edit/"+CLOUD_ID,{
-            method:"POST",
-            headers:{"Content-Type":"application/x-www-form-urlencoded"},
-            body:cloudForm({edit_code:CLOUD_KEY, text:JSON.stringify(list)})
-          }),10000);
-          if(!r.ok) throw new Error("edit");
-          remoteLocks=list; syncOk=true;
-          err.textContent="Запрос ушёл РОП в Telegram. Код придёт ему — он назовёт его вам.";
-        }catch(e){
-          err.textContent="Не удалось отправить запрос. Скажите РОП лично.";
-        }
-      };
-      const logout=document.getElementById("logout");
-      if(logout) logout.onclick=()=>{ persistRun(true); stopTick(); state.surname=""; state.display=""; state.authed=false; save(); view="login"; paper=[]; mode="exam"; done=false; render(); };
-      document.querySelectorAll("[data-exam]").forEach(b=>b.onclick=()=>{ examSession=Number(b.dataset.exam)||1; window._wantExam=examSession; view="quiz"; render(); });
-      document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{ studyTab=b.dataset.tab; render(); });
-      document.querySelectorAll("[data-rate]").forEach(b=>b.onclick=()=>{ rateModel=b.dataset.rate; render(); });
-      const se=document.getElementById("startExam");
-      if(se) se.onclick=()=>start("exam", "all", Number(se.dataset.n)||examSession||1);
-      document.querySelectorAll("[data-opt]").forEach(b=>b.onclick=()=>{
-        if(locked) return;
-        const id=b.dataset.opt; const q=paper[idx];
-        if(q.type==="single") selected=[id];
-        else selected=selected.includes(id)?selected.filter(x=>x!==id):[...selected,id];
-        if(mode==="exam") persistRun(false);
-        render();
-      });
-      const ans=document.getElementById("answer");
-      if(ans) ans.onclick=()=>{
-        const q=paper[idx]; const ok=okNow(q);
-        if(mode==="practice"){
-          if(answers[idx]==null) answers[idx]={id:q.id,ok:!!ok,cat:q.cat,p:q.p,x:q.x,pick:(selected||[]).map(id=>((q.o||[]).find(p=>p[0]===id)||[id,id])[1])};
-          locked=true; render();
-        } else commitAndNext(ok);
-      };
-      const nq=document.getElementById("nextQ");
-      if(nq) nq.onclick=next;
-      const uh=document.getElementById("unlockHome");
-      if(uh) uh.onclick=()=>tryUnlock((document.getElementById("pinHome")||{}).value);
-      const ub=document.getElementById("unlockBrief");
-      if(ub) ub.onclick=()=>tryUnlock((document.getElementById("pinBrief")||{}).value);
-      const sn=document.getElementById("syncNow");
-      if(sn) sn.onclick=async()=>{ await refreshLocks(); render(); };
-      const im=document.getElementById("importNow");
-      if(im) im.onclick=async()=>{
-        try{
-          const rec=unpackResult((document.getElementById("importCode")||{}).value||"");
-          if(!rec || !rec.surname || rec.percent==null) throw new Error("Пустой код");
-          rec.status="done";
-          await upsertLock(rec);
-          pinErr="";
-          await refreshLocks();
-          render();
-        }catch(e){ pinErr="Не удалось прочитать код."; render(); }
-      };
-      const uhi=document.getElementById("unlockHist");
-      if(uhi) uhi.onclick=()=>tryUnlock((document.getElementById("pin")||{}).value);
-      if(typeof eptsBind==="function") eptsBind();
-      if(typeof dutyBind==="function") dutyBind();
-    }
-    try { render(); }
-    catch(e){
-      const root=document.getElementById("app");
-      if(root) root.innerHTML="<p>Сбой запуска. Обновите страницу.</p>";
-    }
-    document.addEventListener("visibilitychange", ()=>{
-      if(document.hidden){ persistRun(false); return; }
-      if(inExam()){ catchUp(); if(!done) render(); }
-    });
-    window.addEventListener("pagehide", ()=>{ persistRun(true); });
-    refreshLocks().then(()=>{
-      if(state.authed && state.surname && userRun() && !done){ resumeExam(userRun()); return; }
-      if(view==="home"||view==="rate"||view==="hub") render();
-    }).catch(()=>{});
-    if(state.authed && state.surname && userRun() && !done && !paper.length) resumeExam(userRun());
-  </script>
-<script src="duty-overlay.js?v=d5"></script>
-</body>
-</html>
+      }
+      if(kmVinGo) kmVinGo.onclick=()=>{ kmApplyVin(kmVinFind?kmVinFind.value:""); };
+      if(kmVinFind) kmVinFind.onkeydown=(e)=>{ if(e.key==="Enter"){ e.preventDefault(); kmApplyVin(kmVinFind.value); } };
+      ["kmRrc","kmInv","kmUseTi","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","cDownMode","cDown","cDownPct","cMonths","kmUseLoan","kmUseCr","kmSpec","kmUseDcTi","kmUseDcCr","kmDcTi","kmDcCr","kmDo","kmPack","kmCasco","kmAltId","kmFleetSub"].forEach(id=>{

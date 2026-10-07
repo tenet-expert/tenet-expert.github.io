@@ -165,6 +165,7 @@
         <div class="st-side">
           <b>${price?rub(price)+" ₽":"—"}</b>
           <div class="st-flags">${stockBadges(r)}</div>
+          <button type="button" class="chip st-calc" data-km-vin="${escape(r.vin)}">Калькулятор</button>
         </div>
       </article>`;
     }
@@ -190,7 +191,7 @@
         <td>${c.year}</td>
         <td>${rub(c.km)} км</td>
         <td>${rub(c.fix)} ₽</td>
-        <td><button type="button" class="chip" data-km-id="${c.id}">В калькулятор</button></td>
+        <td><button type="button" class="chip" data-km-id="${c.id}">Калькулятор</button></td>
       </tr>`).join("");
       return `<div class="card"><p class="eyebrow">Тесты в продаже</p><h3 style="margin:4px 0 8px">Цена фикс</h3><p class="tune-note">Как в таблице отдела. Продажа на Авито, только через PANGO. Скидки директа и флита не действуют, тюнинг уже в машине.</p><div class="tune-scroll"><table class="tune-table test-sale"><thead><tr><th>Модель</th><th>VIN</th><th>Цена розница</th><th>Сумма тюнинга</th><th>Год</th><th>Пробег</th><th>Цена фикс</th><th></th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
     }

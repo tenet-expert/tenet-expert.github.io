@@ -358,8 +358,14 @@
           ${(useLoan&&showSplit)||pShow?kmSideList(m, price, downPct, months, extras, {useTi, spec, useDcTi, dcTi, useDcCr, dcCr, downMode, down, finDelta, useLoan}):""}
         </div>`;
     }
+    function calcVinBar(){
+      const q=escape(typeof kmVinQuery==="string"?kmVinQuery:(typeof kmVin==="string"?kmVin:""));
+      const miss=(typeof kmVinMiss==="string" && kmVinMiss)?`<p class="calc-note">${escape(kmVinMiss)}</p>`:"";
+      const now=(typeof kmVin==="string" && kmVin)?`<p class="calc-note">Считаем VIN <b>${escape(kmVin)}</b></p>`:"";
+      return `<div class="card" style="margin-bottom:12px"><p class="eyebrow">Конкретный VIN</p><div class="km-vin-row"><input id="kmVinFind" class="st-vin-search" type="search" inputmode="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="VIN со склада" value="${q}"><button type="button" class="chip on" id="kmVinGo">Считать</button></div>${now}${miss}</div>`;
+    }
     function calc(){
       if(needAuth()) return login();
       calcMode="km";
-      return calcKm();
+      return calcVinBar()+calcKm();
     }
