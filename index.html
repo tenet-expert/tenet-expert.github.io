@@ -1104,7 +1104,21 @@ body:has(.lb-rep-page) .wrap{max-width:none;width:100%;padding:14px 16px 48px}
 .lb-block.d{background:#eef3f6;border-color:#c5d4de;flex:1.15;min-width:0}
 .lb-block.e{background:#f6eef3;border-color:#dcc5d4;flex:0.95;min-width:0}
 .lb-block.f{background:#f8f3e8;border-color:#e2d2b0;flex:1.45;min-width:0}
-@media(max-width:900px){.lb-pair{flex-direction:column}}
+@media(max-width:900px){
+  .lb-pair{flex-direction:column}
+  .lb-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .lb-scroll .lb-rep{width:max-content;min-width:100%;table-layout:auto;border-collapse:separate;border-spacing:0;font-size:13px}
+  .lb-block.a .lb-scroll .lb-rep{width:max-content;min-width:100%;table-layout:auto}
+  .lb-block.a .lb-scroll .lb-rep th:first-child,.lb-block.a .lb-scroll .lb-rep td:first-child{width:auto}
+  .lb-scroll .lb-rep th,.lb-scroll .lb-rep td{white-space:nowrap;padding:7px 8px}
+  .lb-scroll .lb-rep th{font-size:10px;white-space:nowrap}
+  .lb-scroll .lb-rep th:first-child,.lb-scroll .lb-rep td:first-child{position:sticky;left:0;z-index:2;min-width:108px;box-shadow:6px 0 8px -6px rgba(28,26,23,.28)}
+  .lb-block.a .lb-scroll .lb-rep th:first-child,.lb-block.a .lb-scroll .lb-rep td:first-child{background:#f7f4ee}
+  .lb-block.e .lb-scroll .lb-rep th:first-child,.lb-block.e .lb-scroll .lb-rep td:first-child{background:#f6eef3}
+  .lb-block.c .lb-scroll .lb-rep th:first-child,.lb-block.c .lb-scroll .lb-rep td:first-child{background:#f7f1e6}
+  .lb-block.d .lb-scroll .lb-rep th:first-child,.lb-block.d .lb-scroll .lb-rep td:first-child{background:#eef3f6}
+  .lb-block.f .lb-scroll .lb-rep th:first-child,.lb-block.f .lb-scroll .lb-rep td:first-child{background:#f8f3e8}
+}
 .lb-rep tr.sum td{font-weight:800;border-top:2px solid #1c1a17}
 .lb-bad{color:#c62828;font-weight:800}
 .lb-mid{color:#b8860b;font-weight:800}
@@ -2374,12 +2388,12 @@ async function pingTelegram(body){
       const thead=h=>`<thead><tr>${h.map(x=>`<th>${x}</th>`).join("")}</tr></thead>`;
       return `<p class="eyebrow" style="margin:0 0 4px">${escape(per.sub)}</p><h2 style="margin:0 0 10px">${escape(per.title)}</h2>
         <div class="lb-blocks">
-          <section class="lb-block a"><p class="lb-rep-h">Выдачи и трафик</p><table class="lb-rep">${thead(mainHead)}<tbody>${mains.map(p=>rowMain(p, planOf(p))).join("")}${kids.length?rowMain(bucket,0)+kids.map(p=>rowMain(p,0)).join(""):""}${rowMain(total, planN)}</tbody></table></section>
+          <section class="lb-block a"><p class="lb-rep-h">Выдачи и трафик</p><div class="lb-scroll"><table class="lb-rep">${thead(mainHead)}<tbody>${mains.map(p=>rowMain(p, planOf(p))).join("")}${kids.length?rowMain(bucket,0)+kids.map(p=>rowMain(p,0)).join(""):""}${rowMain(total, planN)}</tbody></table></div></section>
           <div class="lb-pair">
-            <section class="lb-block e"><p class="lb-rep-h">Визит первичный</p><table class="lb-rep">${thead(visitHead)}<tbody>${shown.map(rowVisit).join("")}</tbody></table></section>
-            <section class="lb-block c"><p class="lb-rep-h">Звонки в контракт</p><table class="lb-rep">${thead(callHead)}<tbody>${shown.map(rowCall).join("")}</tbody></table></section>
-            <section class="lb-block d"><p class="lb-rep-h">Интернет в контракт</p><table class="lb-rep">${thead(webHead)}<tbody>${shown.map(rowWeb).join("")}</tbody></table></section>
-            <section class="lb-block f"><p class="lb-rep-h">Визит всего</p><table class="lb-rep">${thead(allHead)}<tbody>${shown.map(rowAll).join("")}</tbody></table></section>
+            <section class="lb-block e"><p class="lb-rep-h">Визит первичный</p><div class="lb-scroll"><table class="lb-rep">${thead(visitHead)}<tbody>${shown.map(rowVisit).join("")}</tbody></table></div></section>
+            <section class="lb-block c"><p class="lb-rep-h">Звонки в контракт</p><div class="lb-scroll"><table class="lb-rep">${thead(callHead)}<tbody>${shown.map(rowCall).join("")}</tbody></table></div></section>
+            <section class="lb-block d"><p class="lb-rep-h">Интернет в контракт</p><div class="lb-scroll"><table class="lb-rep">${thead(webHead)}<tbody>${shown.map(rowWeb).join("")}</tbody></table></div></section>
+            <section class="lb-block f"><p class="lb-rep-h">Визит всего</p><div class="lb-scroll"><table class="lb-rep">${thead(allHead)}<tbody>${shown.map(rowAll).join("")}</tbody></table></div></section>
           </div>
         </div>
         <p class="lb-rep-note">Как в «ОП CHERY». ${planNote} Трафик — визиты + звонки + интернет. Конв. в контракт: меньше 10% красным, меньше 15% жёлтым, иначе зелёным. ТД ниже 70% — красным. В строке «Итого» конверсия: основной состав / весь отдел. ${sep?"Сентябрь: контракт = выдача + расторжение. Тест-драйв — только поездка с «движением клиента», без служебных, заправок и центра Hyundai. Повтор одного клиента и поездка мужа с женой считаются один раз. Визит со звонка и с интернета, оценка б/у и e-credit — из воронки, только менеджеры лидерборда.":"Расторжения в журнале октября не ведутся."} Обновлено ${escape((boardCache&&boardCache.stamp)||"")}</p>`;
