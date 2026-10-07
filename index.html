@@ -7773,6 +7773,158 @@ async function confirmCloud(rec){
       }
       if(kmVinGo) kmVinGo.onclick=()=>{ kmApplyVin(kmVinFind?kmVinFind.value:""); };
       if(kmVinFind) kmVinFind.onkeydown=(e)=>{ if(e.key==="Enter"){ e.preventDefault(); kmApplyVin(kmVinFind.value); } };
-      ["kmRrc","kmInv","kmUseTi","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","kmFleetDisc","kmFleetMpt","cDownMode","cDown","cDownPct","cMonths","kmUseLoan","kmUseCr","kmSpec","kmUseDcTi","kmUseDcCr","kmDcTi","kmDcCr","kmDo","kmPack","kmCasco","kmAltId","kmFleetSub"].forEach(id=>{
-
+      ["kmRrc","kmInv","kmUseTi","kmFleetDisc","kmFleetMpt","cDownMode","cDown","cDownPct","cMonths","kmUseLoan","kmUseCr","kmSpec","kmUseDcTi","kmUseDcCr","kmDcTi","kmDcCr","kmDo","kmPack","kmCasco","kmAltId","kmFleetSub"].forEach(id=>{
+        const el=document.getElementById(id);
+        if(el) el.addEventListener("change", ()=>{ view="calc"; render(); });
+      });
+      const cPreset=document.getElementById("cPreset");
+      if(cPreset) cPreset.onchange=()=>{
+        const p=Number(cPreset.value)||0;
+        const price=document.getElementById("cPrice");
+        const down=document.getElementById("cDown");
+        if(price) price.value=String(p);
+        if(down) down.value=String(Math.round(p*0.2));
+        view="calc"; render();
+      };
+      ["cPrice","cDown","cMonths","cRate"].forEach(id=>{
+        const el=document.getElementById(id);
+        if(el) el.addEventListener("change", ()=>{ view="calc"; render(); });
+      });
+      document.querySelectorAll("[data-model]").forEach(b=>b.onclick=()=>{
+        if(inExam() || (userRun() && !done)){ view="play"; if(!paper.length) resumeExam(userRun()); else render(); return; }
+        model=b.dataset.model; state.model=model; save(); render();
+      });
+      document.querySelectorAll("[data-practice]").forEach(b=>b.onclick=()=>start("practice", b.dataset.practice));
+      const doLogin=document.getElementById("doLogin");
+      if(doLogin) doLogin.onclick=async()=>{
+        const v=(document.getElementById("surname").value||"").trim();
+        const pinRaw=((document.getElementById("loginPin")||{}).value||"").trim();
+        const err=document.getElementById("loginErr");
+        if(!err) return;
+        if(v.length<2){ err.textContent="Введите фамилию."; return; }
+        if(!pinRaw){ err.textContent="Введите личный код от РОП."; return; }
+        err.textContent="Проверяю код…";
+        const sn=staffKey(v)||norm(v);
+        const baked=await bakedPin(sn);
+        if(pinEq(pinRaw, baked)){
+          state.surname=sn; state.display=v.replace(/\s+/g," "); state.authed=true; save();
+          refreshLocks().catch(()=>{});
+          if(userRun()){ resumeExam(userRun()); return; }
+          view="hub"; state.section="hub"; render();
+          return;
+        }
+        await refreshLocks();
+        const rec=(remoteLocks||[]).find(x=>x && x.type==="login" && x.surname===sn);
+        const cloud=rec && rec.code;
+        const ok=pinEq(pinRaw, cloud);
+        if(!ok){
+          if(!syncOk && !baked){
+            err.textContent="Нет связи с сервером кодов. Откройте сайт в Chrome или Safari — не из Telegram — и повторите.";
+            return;
+          }
+          if(!cloud && !baked){
+            err.textContent="Код для этой фамилии ещё не выдан. Нажмите «Запросить код у РОП».";
+            return;
+          }
+          err.textContent="Неверный код. Только цифры, без пробелов. Откройте сайт в Chrome / Safari, не из Telegram.";
+          return;
+        }
+        state.surname=sn; state.display=v.replace(/\s+/g," "); state.authed=true; save();
+        if(userRun()){ resumeExam(userRun()); return; }
+        view="hub"; state.section="hub"; render();
+      };
+      ["surname","loginPin"].forEach(id=>{
+        const el=document.getElementById(id);
+        if(el) el.addEventListener("keydown", e=>{ if(e.key==="Enter"){ e.preventDefault(); if(doLogin) doLogin.click(); } });
+      });
+      const askPin=document.getElementById("askPin");
+      if(askPin) askPin.onclick=async()=>{
+        const v=(document.getElementById("surname").value||"").trim();
+        const err=document.getElementById("loginErr");
+        if(v.length<2){ err.textContent="Сначала введите фамилию, затем запросите код."; return; }
+        err.textContent="Отправляю запрос РОП…";
+        try{
+          await refreshLocks();
+          const list=await pullList();
+          const rec={type:"pin_request", kind:"login", surname:norm(v), display:v.replace(/\s+/g," "), at:new Date().toISOString(), tgSent:false};
+          const i=list.findIndex(x=>x && x.type==="pin_request" && x.kind==="login" && x.surname===rec.surname && !x.tgSent);
+          if(i>=0) list[i]=rec; else list.push(rec);
+          const r=await withTimeout(fetch("https://rentry.co/api/edit/"+CLOUD_ID,{
+            method:"POST",
+            headers:{"Content-Type":"application/x-www-form-urlencoded"},
+            body:cloudForm({edit_code:CLOUD_KEY, text:JSON.stringify(list)})
+          }),10000);
+          if(!r.ok) throw new Error("edit");
+          remoteLocks=list; syncOk=true;
+          err.textContent="Запрос ушёл РОП в Telegram. Код придёт ему — он назовёт его вам.";
+        }catch(e){
+          err.textContent="Не удалось отправить запрос. Скажите РОП лично.";
+        }
+      };
+      const logout=document.getElementById("logout");
+      if(logout) logout.onclick=()=>{ persistRun(true); stopTick(); state.surname=""; state.display=""; state.authed=false; save(); view="login"; paper=[]; mode="exam"; done=false; render(); };
+      document.querySelectorAll("[data-exam]").forEach(b=>b.onclick=()=>{ examSession=Number(b.dataset.exam)||1; window._wantExam=examSession; view="quiz"; render(); });
+      document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{ studyTab=b.dataset.tab; render(); });
+      document.querySelectorAll("[data-rate]").forEach(b=>b.onclick=()=>{ rateModel=b.dataset.rate; render(); });
+      const se=document.getElementById("startExam");
+      if(se) se.onclick=()=>start("exam", "all", Number(se.dataset.n)||examSession||1);
+      document.querySelectorAll("[data-opt]").forEach(b=>b.onclick=()=>{
+        if(locked) return;
+        const id=b.dataset.opt; const q=paper[idx];
+        if(q.type==="single") selected=[id];
+        else selected=selected.includes(id)?selected.filter(x=>x!==id):[...selected,id];
+        if(mode==="exam") persistRun(false);
+        render();
+      });
+      const ans=document.getElementById("answer");
+      if(ans) ans.onclick=()=>{
+        const q=paper[idx]; const ok=okNow(q);
+        if(mode==="practice"){
+          if(answers[idx]==null) answers[idx]={id:q.id,ok:!!ok,cat:q.cat,p:q.p,x:q.x,pick:(selected||[]).map(id=>((q.o||[]).find(p=>p[0]===id)||[id,id])[1])};
+          locked=true; render();
+        } else commitAndNext(ok);
+      };
+      const nq=document.getElementById("nextQ");
+      if(nq) nq.onclick=next;
+      const uh=document.getElementById("unlockHome");
+      if(uh) uh.onclick=()=>tryUnlock((document.getElementById("pinHome")||{}).value);
+      const ub=document.getElementById("unlockBrief");
+      if(ub) ub.onclick=()=>tryUnlock((document.getElementById("pinBrief")||{}).value);
+      const sn=document.getElementById("syncNow");
+      if(sn) sn.onclick=async()=>{ await refreshLocks(); render(); };
+      const im=document.getElementById("importNow");
+      if(im) im.onclick=async()=>{
+        try{
+          const rec=unpackResult((document.getElementById("importCode")||{}).value||"");
+          if(!rec || !rec.surname || rec.percent==null) throw new Error("Пустой код");
+          rec.status="done";
+          await upsertLock(rec);
+          pinErr="";
+          await refreshLocks();
+          render();
+        }catch(e){ pinErr="Не удалось прочитать код."; render(); }
+      };
+      const uhi=document.getElementById("unlockHist");
+      if(uhi) uhi.onclick=()=>tryUnlock((document.getElementById("pin")||{}).value);
+      if(typeof eptsBind==="function") eptsBind();
+      if(typeof dutyBind==="function") dutyBind();
+    }
+    try { render(); }
+    catch(e){
+      const root=document.getElementById("app");
+      if(root) root.innerHTML="<p>Сбой запуска. Обновите страницу.</p>";
+    }
+    document.addEventListener("visibilitychange", ()=>{
+      if(document.hidden){ persistRun(false); return; }
+      if(inExam()){ catchUp(); if(!done) render(); }
+    });
+    window.addEventListener("pagehide", ()=>{ persistRun(true); });
+    refreshLocks().then(()=>{
+      if(state.authed && state.surname && userRun() && !done){ resumeExam(userRun()); return; }
+      if(view==="home"||view==="rate"||view==="hub") render();
+    }).catch(()=>{});
+    if(state.authed && state.surname && userRun() && !done && !paper.length) resumeExam(userRun());
+  </script>
 <script src="duty-overlay.js?v=d5"></script>
+</body>
+</html>

@@ -38,10 +38,10 @@ for p in (Path("index.html"), Path("_site/index.html")):
 """
     if ".st.corp{" not in html:
         html = html.replace("</style>", extra_css + "\n</style>", 1)
-    html = html.replace(
-        '["kmRrc","kmInv","kmUseTi"',
-        '["kmRrc","kmInv","kmUseTi","kmFleetDisc","kmFleetMpt"'
-    )
+    old_bind = '["kmRrc","kmInv","kmUseTi"'
+    new_bind = '["kmRrc","kmInv","kmUseTi","kmFleetDisc","kmFleetMpt"'
+    if old_bind in html and new_bind not in html:
+        html = html.replace(old_bind, new_bind, 1)
     if block:
         html2, n = re.subn(
             r"(?:    function fleetPayRows\([^)]*\)\{[\s\S]*?\n    \}\n)*    function fleetCreditBox\([\s\S]*?    function calcFleet\(m\)\{[\s\S]*?\n    \}\n",
