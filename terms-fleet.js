@@ -1,5 +1,4 @@
     const CORP_VINS = new Set([
-      "EDXFB32B2TE041658",
       "EDXFB32B4TE041659",
       "EDXFB32B1TE087336",
       "EDXFB32B3TE091114",
@@ -33,7 +32,7 @@
       l6u:{name:"L6 Ultra",rrc:3040000,dealer:2888000,an:0,client:2584000,prem:0,km:0,tidy:2584000,sub:150000,do:70000,casco:80000}
     };
     const FLEET_TI = 100000;
-    const FLEET_PIN = {"EDXFB32B2TE041658":2333000,"EDXFB32B7TE062327":2333000};
+    const FLEET_PIN = {"EDXFB32B7TE062327":2333000};
     function fleetMonthsLeft(principal, payment, annual){
       if(!(principal>0)) return 0;
       const r=(Number(annual)||0)/100/12;

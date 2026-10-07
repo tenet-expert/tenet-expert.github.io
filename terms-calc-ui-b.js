@@ -357,7 +357,7 @@
             </details>
             ${qFleetPrio?`</div><div class="pay-side prio">
               <p class="eyebrow">Флит · от 2 333</p>
-              <p class="calc-note">EDXFB32B2TE041658 и EDXFB32B7TE062327${fleetPin?" · этот VIN":""}. Старт 2 333 000${useTi?" − трейд-ин "+rub(tiMpt):""}${subAmt?" − субсидия "+rub(subAmt):""}.</p>
+              <p class="calc-note">EDXFB32B7TE062327${fleetPin?" · этот VIN":""}. Старт 2 333 000${useTi?" − трейд-ин "+rub(tiMpt):""}${subAmt?" − субсидия "+rub(subAmt):""}.</p>
               ${typeof fleetBodyTop==="function"?fleetBodyTop(qFleetPrio):""}
               ${kmPayRows(banksMptPrio,"payMpt","overMpt")}
               ${typeof fleetBodyRows==="function"?fleetBodyRows(qFleetPrio):""}
