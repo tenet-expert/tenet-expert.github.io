@@ -272,6 +272,17 @@ input,textarea{width:100%;background:#fff;border:1px solid var(--border);color:v
 .smop-task b{display:block;font-size:14px}
 .smop-task p{margin:3px 0 0;color:var(--muted);font-size:13px;line-height:1.35}
 .smop-task.hit{background:#f6f3fb;margin:0 -10px;padding:8px 10px;border-radius:10px;border-top-color:transparent}
+.smop-line{display:flex;justify-content:space-between;gap:10px;align-items:center}
+.smop-line p{margin:3px 0 0}
+.smop-tick,.smop-time,.smop-meet{border:1px solid var(--border);background:#fff;border-radius:10px;color:inherit;font-weight:700}
+.smop-tick{min-width:64px;padding:8px 12px}
+.smop-tick.on,.smop-time.on,.smop-meet.done{background:#e8f6ee;border-color:#1f7a4d;color:#1f7a4d}
+.smop-meet.plan{background:#fff6df;border-color:#c28b2a;color:#8a5a10}
+.smop-times,.smop-meets{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.smop-time{padding:8px 12px}
+.smop-meet{padding:6px 8px;min-width:58px}
+.smop-meet small,.smop-time small{display:block;font-size:10px;font-weight:600}
+.smop-stand{margin-top:12px}
 @media(min-width:900px){.smop-blocks{grid-template-columns:1fr 1fr 1fr;align-items:start}}
 .lb-row.other{background:#fbf7f1}
 .lb-row.other td{color:#6d6458}
@@ -2367,21 +2378,18 @@ async function pingTelegram(body){
       const blob=norm((state.surname||"")+" "+(state.display||""));
       return blob.indexOf("спицын")>=0 || blob.indexOf("леонтьев")>=0;
     }
+    function smopLoad(){
+      try{ return JSON.parse(localStorage.getItem("tenet-smop-v1")||"{}"); }catch(e){ return {}; }
+    }
+    function smopPatch(fn){
+      const o=smopLoad();
+      fn(o);
+      try{ localStorage.setItem("tenet-smop-v1", JSON.stringify(o)); }catch(e){}
+      render();
+    }
     function senior(){
       if(needAuth()) return login();
       if(!canSenior()){ view="hub"; return hub(); }
-      const tasks=[
-        {n:1,scope:"day",title:"Чек-лист дежурного",text:"Ежедневный контроль соблюдения чек-листа дежурного и качества его заполнения.",when:"каждый рабочий день"},
-        {n:5,scope:"day",title:"Здоровый сток",text:"Контроль ремонта товарных машин, донорства и расстановки в шоу-руме: приоритет, долгий срок, близнецы.",when:"каждый рабочий день"},
-        {n:9,scope:"day",title:"Оценка а/м сервиса",text:"Контроль процедуры оценки автомобилей клиентов сервиса.",when:"каждый рабочий день"},
-        {n:10,scope:"day",title:"Распределение трафика",text:"Распределение трафика между менеджерами в течение дня по данным АТЗ и личной эффективности.",when:"каждый рабочий день"},
-        {n:3,scope:"week",title:"Утренние собрания",text:"По целям РОП: разбор звонков, вебинары и аргументаторы, мозговые штурмы.",when:"2 раза в неделю",days:[1,3],slot:"пн и ср"},
-        {n:4,scope:"week",title:"Торговые условия",text:"Актуальность ТУ в сети отдела и знание условий менеджерами.",when:"2 раза в неделю",days:[2,5],slot:"вт и пт"},
-        {n:6,scope:"week",title:"Отзывы и SSI",text:"Статистика отзывов на Авито, 2ГИС, Яндекс и прохождения опросов SSI.",when:"2 раза в неделю",days:[5,6],slot:"пт и сб"},
-        {n:2,scope:"month",title:"График отдела",text:"График отдела продаж и смежных отделов: КСО, АСП, АТЗ, техники. Контроль соблюдения.",when:"раз в месяц",day:2},
-        {n:7,scope:"month",title:"Выезды, тайные, обучение",text:"Статистика выездных мероприятий, тайных визитов и очных обучений.",when:"мониторинг в течение месяца"},
-        {n:8,scope:"month",title:"Знание продукта",text:"Проверка менеджеров на знание продукта и стандартов продаж.",when:"1 раз в месяц",day:30}
-      ];
       const y=2026, mo=9;
       const offOct=new Set([1,4,8,11,15,18,22,25,29]);
       const workDay=d=>d>=1 && d<=31 && !offOct.has(d);
@@ -2392,37 +2400,79 @@ async function pingTelegram(body){
       const dt=new Date(y,mo,day);
       const wd=dt.getDay()||7;
       const names=["","понедельник","вторник","среда","четверг","пятница","суббота","воскресенье"];
+      const months=["января","февраля","марта","апреля","мая","июня","июля","августа","сентября","октября","ноября","декабря"];
+      const isoOf=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+      const dayIso=isoOf(dt);
+      const store=smopLoad();
+      const rec=(store.days||{})[dayIso]||{};
+      const tick=(on,kind)=>`<button type="button" class="smop-tick${on?" on":""}" data-smop-tick="${kind}" data-smop-key="${dayIso}">${on?"Да":"Нет"}</button>`;
+      const mon=new Date(y,mo,day-((wd+6)%7));
+      const sun=new Date(y,mo,day-((wd+6)%7)+6);
+      const dm=x=>x.getDate()+" "+months[x.getMonth()];
+      const meet=store.meet||{};
+      const meetBtns=["Пн","Вт","Ср","Чт","Пт"].map((name,i)=>{
+        const d=new Date(mon.getFullYear(), mon.getMonth(), mon.getDate()+i);
+        const iso=isoOf(d);
+        const st=Number(meet[iso]||0);
+        const cls=st===2?" done":st===1?" plan":"";
+        const cap=st===2?"проведено":st===1?"планируется":"можно нажать";
+        return `<button type="button" class="smop-meet${cls}" data-smop-meet="${iso}">${name}<small>${d.getDate()} ${months[d.getMonth()]}</small><small>${cap}</small></button>`;
+      }).join("");
+      const wed=new Date(mon.getFullYear(), mon.getMonth(), mon.getDate()+2);
+      const wedIso=isoOf(wed);
+      const ssiOn=!!((store.ssi||{})[wedIso]);
+      const monthKey="2026-10";
+      const schedOn=!!((store.sched||{})[monthKey]);
+      const testOn=!!((store.test||{})[monthKey]);
+      const showSched=day>=20;
+      const showTest=day>=15;
+      const times=[["11","11:00"],["14","14:00"],["17","17:00"]].map(([id,label])=>`<button type="button" class="smop-time${rec["t"+id]?" on":""}" data-smop-time="${id}" data-smop-key="${dayIso}">${label}<small>${rec["t"+id]?"раздал":"не отмечено"}</small></button>`).join("");
       const pad=(new Date(y,mo,1).getDay()+6)%7;
       const cells=[];
       for(let i=0;i<pad;i++) cells.push(`<div class="smop-day pad"></div>`);
       for(let d=1;d<=31;d++){
         const w=new Date(y,mo,d).getDay();
         const work=workDay(d);
-        const wk=w||7;
-        const weekHit=work && tasks.some(t=>t.scope==="week" && t.days.indexOf(wk)>=0);
-        const monthHit=tasks.some(t=>t.scope==="month" && t.day===d);
+        const iso=isoOf(new Date(y,mo,d));
+        const weekHit=work && (w>=1 && w<=5) && (w===3 || Number((store.meet||{})[iso]||0)>0);
+        const monthHit=work && (d===15 || d>=20);
         const dots=work?`<span class="smop-dots"><i></i>${weekHit?`<i class="w"></i>`:""}${monthHit?`<i class="m"></i>`:""}</span>`:"";
         if(!work) cells.push(`<div class="smop-day off"><b>${d}</b></div>`);
         else cells.push(`<button type="button" class="smop-day${d===today?" today":""}${d===day?" on":""}" data-smop-day="${d}"><b>${d}</b>${dots}</button>`);
       }
-      const mon=new Date(y,mo,day-((wd+6)%7));
-      const sun=new Date(y,mo,day-((wd+6)%7)+6);
-      const dm=x=>x.getDate()+" "+["января","февраля","марта","апреля","мая","июня","июля","августа","сентября","октября","ноября","декабря"][x.getMonth()];
-      const block=(scope,title,note,list)=>`<div class="card"><p class="eyebrow">${title}</p><p class="calc-note">${note}</p>${list.map(t=>{
-        const hit=scope==="week"?t.days.indexOf(wd)>=0:(scope==="month"&&t.day===day);
-        return `<div class="smop-task${hit?" hit":""}"><b>${t.n}. ${escape(t.title)}${hit?" · сегодня":""}</b><p>${escape(t.text)}</p><p>${escape(t.when)}${t.slot?" · "+escape(t.slot):""}${t.day?" · "+t.day+" октября":""}</p></div>`;
-      }).join("")}</div>`;
       return banner("СМОП","Старший менеджер отдела продаж", state.display)+`
-        <p class="lead">План адаптации Спицына. Октябрь по графику: работает пт, сб, пн, вт и ср. Выходные — четверг и воскресенье. Обычно у него 5/2 со вторника по субботу.</p>
+        <p class="lead">Октябрь по графику Спицына: пт, сб, пн, вт, ср. Выходные — четверг и воскресенье. Отметки сохраняются на этом телефоне.</p>
         <div class="card">
           <div class="smop-head"><p class="eyebrow" style="margin:0">Октябрь 2026</p><b>${day} октября, ${names[wd]}</b></div>
           <div class="smop-cal"><span class="smop-dow">Пн</span><span class="smop-dow">Вт</span><span class="smop-dow">Ср</span><span class="smop-dow">Чт</span><span class="smop-dow">Пт</span><span class="smop-dow">Сб</span><span class="smop-dow">Вс</span>${cells.join("")}</div>
-          <div class="smop-legend"><span><i style="background:#1c3f66"></i>рабочий день</span><span><i style="background:#c28b2a"></i>2 раза в неделю</span><span><i style="background:#6a3d86"></i>раз в месяц</span><span>выходной не нажимается</span></div>
+          <div class="smop-legend"><span><i style="background:#1c3f66"></i>задачи дня</span><span><i style="background:#c28b2a"></i>собрание или SSI</span><span><i style="background:#6a3d86"></i>месяц: с 15-го и с 20-го</span></div>
         </div>
         <div class="smop-blocks">
-          ${block("day","На день",day+" октября",tasks.filter(t=>t.scope==="day"))}
-          ${block("week","На неделю",dm(mon)+" – "+dm(sun),tasks.filter(t=>t.scope==="week"))}
-          ${block("month","На месяц","октябрь 2026",tasks.filter(t=>t.scope==="month"))}
+          <div class="card">
+            <p class="eyebrow">На день</p>
+            <p class="calc-note">${day} октября</p>
+            <div class="smop-task"><div class="smop-line"><div><b>1. Чек-лист дежурного</b><p>Соблюдение чек-листа и качество заполнения.</p></div>${tick(!!rec.duty,"duty")}</div></div>
+            <div class="smop-task"><div class="smop-line"><div><b>2. Здоровый сток</b><p>Ремонт, донорство, шоу-рум: приоритет, долгий срок, близнецы.</p></div>${tick(!!rec.stock,"stock")}</div></div>
+            <div class="smop-task"><div class="smop-line"><div><b>3. Оценки сервиса</b><p>Процедура оценки автомобилей клиентов сервиса.</p></div>${tick(!!rec.service,"service")}</div></div>
+            <div class="smop-task"><b>4. Распределение трафика</b><p>Три отметки за день по данным АТЗ.</p><div class="smop-times">${times}</div></div>
+          </div>
+          <div class="card">
+            <p class="eyebrow">На неделю</p>
+            <p class="calc-note">${dm(mon)} – ${dm(sun)}</p>
+            <div class="smop-task"><b>1. Собрание</b><p>Нажмите день: пусто — можно назначить, жёлтый — планируется, зелёный — проведено.</p><div class="smop-meets">${meetBtns}</div></div>
+            <div class="smop-task${wd===3?" hit":""}"><div class="smop-line"><div><b>2. Отзывы и SSI</b><p>По средам. Эта неделя — ${wed.getDate()} ${months[wed.getMonth()]}.</p></div><button type="button" class="smop-tick${ssiOn?" on":""}" data-smop-tick="ssi" data-smop-key="${wedIso}">${ssiOn?"Да":"Нет"}</button></div></div>
+          </div>
+          <div class="card">
+            <p class="eyebrow">На месяц</p>
+            <p class="calc-note">октябрь 2026</p>
+            ${showSched?`<div class="smop-task"><div class="smop-line"><div><b>1. График отдела продаж</b><p>КСО, АСП, АТЗ, техники. Задача открыта с 20 по 31 октября.</p></div><button type="button" class="smop-tick${schedOn?" on":""}" data-smop-tick="sched" data-smop-key="${monthKey}">${schedOn?"Да":"Нет"}</button></div></div>`:""}
+            <div class="smop-task"><div class="smop-line"><div><b>${showSched?"2":"1"}. Знание продукта</b><p>С 1 октября готовим и анонсируем тест.${showTest?"":" Галочка «проведён» — с 15 октября."}</p></div>${showTest?`<button type="button" class="smop-tick${testOn?" on":""}" data-smop-tick="test" data-smop-key="${monthKey}">${testOn?"Да":"Нет"}</button>`:""}</div></div>
+          </div>
+        </div>
+        <div class="card smop-stand">
+          <p class="eyebrow">Постоянно</p>
+          <b>Выезды, тайные визиты, обучения</b>
+          <p class="calc-note">Статистика выездных мероприятий, тайных визитов и очных обучений. Ведётся весь месяц, к конкретному дню не привязана.</p>
         </div>
         <div class="who-line"><button class="btn ghost" data-go="hub" type="button">В кабинет</button></div>`;
     }
@@ -7933,6 +7983,36 @@ async function confirmCloud(rec){
       document.querySelectorAll("[data-review]").forEach(b=>b.onclick=()=>{ reviewExamN=Number(b.dataset.review)||1; view="review"; render(); });
       if(typeof offerBind==="function") offerBind();
       document.querySelectorAll("[data-smop-day]").forEach(b=>b.onclick=()=>{ smopDay=Number(b.dataset.smopDay)||1; view="senior"; render(); });
+      document.querySelectorAll("[data-smop-tick]").forEach(b=>b.onclick=()=>{
+        const kind=b.dataset.smopTick;
+        const key=b.dataset.smopKey;
+        smopPatch(o=>{
+          if(kind==="ssi"){ o.ssi=o.ssi||{}; o.ssi[key]=o.ssi[key]?0:1; return; }
+          if(kind==="sched"){ o.sched=o.sched||{}; o.sched[key]=o.sched[key]?0:1; return; }
+          if(kind==="test"){ o.test=o.test||{}; o.test[key]=o.test[key]?0:1; return; }
+          o.days=o.days||{};
+          const rec=o.days[key]||{};
+          rec[kind]=rec[kind]?0:1;
+          o.days[key]=rec;
+        });
+      });
+      document.querySelectorAll("[data-smop-time]").forEach(b=>b.onclick=()=>{
+        const id=b.dataset.smopTime;
+        const key=b.dataset.smopKey;
+        smopPatch(o=>{
+          o.days=o.days||{};
+          const rec=o.days[key]||{};
+          rec["t"+id]=rec["t"+id]?0:1;
+          o.days[key]=rec;
+        });
+      });
+      document.querySelectorAll("[data-smop-meet]").forEach(b=>b.onclick=()=>{
+        const key=b.dataset.smopMeet;
+        smopPatch(o=>{
+          o.meet=o.meet||{};
+          o.meet[key]=(Number(o.meet[key]||0)+1)%3;
+        });
+      });
       document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{
         if(inExam() || (userRun() && !done)){ view="play"; if(!paper.length) resumeExam(userRun()); else render(); return; }
         goSection(b.dataset.go);
