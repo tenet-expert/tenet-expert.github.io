@@ -31,12 +31,14 @@ CSS = """
 
 .lb-rep-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:6;background:var(--bg);padding:6px 0 8px}
 .lb-rep-bar span{display:flex;gap:6px}
-.lb-zoom{overflow:auto;-webkit-overflow-scrolling:touch}
-.lb-sheet{width:1480px;background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px 14px 12px}
+body:has(.lb-rep-page) .wrap{max-width:none;width:100%;padding:14px 16px 48px}
+.lb-sheet{width:100%;max-width:100%;box-sizing:border-box;background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px 12px 12px}
 .lb-rep-h{margin:0 0 6px;font-size:12px;font-weight:750;letter-spacing:.04em;text-transform:uppercase;color:#6d6458}
 .lb-blocks{display:flex;flex-direction:column;gap:18px}
 .lb-block{border:1px solid #e4dfd4;border-radius:14px;padding:12px 12px 8px}
 .lb-block.a{background:#f7f4ee;border-color:#d9cbb6}
+.lb-block.a .lb-rep{table-layout:fixed;width:100%}
+.lb-block.a .lb-rep th:first-child,.lb-block.a .lb-rep td:first-child{width:11%}
 .lb-block.b{background:#f3f6f1;border-color:#c9d7c4;align-self:flex-start}
 .lb-pair{display:flex;gap:18px;align-items:flex-start}
 .lb-block.c{background:#f7f1e6;border-color:#e0cba8;flex:1}
@@ -54,13 +56,13 @@ CSS = """
 .lb-fold-empty{margin:0;padding:6px 0 8px 8px;color:#6d6458;font-size:12px}
 tr.lb-fold-row{display:none}
 tr.lb-fold-row.open{display:table-row}
-.lb-rep{width:100%;border-collapse:collapse;font-size:13px}
+.lb-rep{width:100%;border-collapse:collapse;font-size:clamp(11px,.68vw,13px)}
 .lb-rep.lb-rep-sm{width:auto}
 .lb-rep.lb-rep-sm th,.lb-rep.lb-rep-sm td{width:1%;padding-left:10px;padding-right:10px}
 .lb-rep th,.lb-rep td{border-bottom:1px solid #e4dfd4;padding:6px 4px;text-align:right;white-space:nowrap}
 .lb-rep th{white-space:normal;line-height:1.15;vertical-align:bottom}
 .lb-rep th:first-child,.lb-rep td:first-child{text-align:left}
-.lb-rep th{font-size:10px;letter-spacing:.03em;text-transform:uppercase;color:#6d6458;font-weight:700}
+.lb-rep th{font-size:clamp(9px,.55vw,11px);letter-spacing:.03em;text-transform:uppercase;color:#6d6458;font-weight:700}
 .lb-rep tr.other td{color:#6d6458}
 .lb-rep-note{margin:8px 0 0;font-size:11px;color:#6d6458}
 
@@ -422,8 +424,6 @@ JS = r'''
         ${boardChips()}
         <div id="boardRoot"><div class="card"><p>Загружаю таблицу…</p></div></div>`;
     }
-    let boardZoom = 1;
-    let boardZoomMin = 0.2;
     function boardPeriod(){
       const cache=boardCache||{oct:[],sep:[]};
       if(boardMode==="prev") return {rows:cache.sep||[], roster:BOARD_ROSTER_SEP, title:"Сентябрь", sub:"Предыдущий месяц"};
@@ -502,45 +502,12 @@ JS = r'''
         };
       });
     }
-    function boardApplyZoom(){
-      const sheet=document.getElementById("lbSheet");
-      const space=document.getElementById("lbSpace");
-      if(!sheet||!space) return;
-      sheet.style.transform="scale("+boardZoom+")";
-      sheet.style.transformOrigin="top left";
-      space.style.width=Math.ceil(sheet.offsetWidth*boardZoom)+"px";
-      space.style.height=Math.ceil(sheet.offsetHeight*boardZoom)+"px";
-    }
-    function boardFit(){
-      const sheet=document.getElementById("lbSheet");
-      const box=document.getElementById("lbZoom");
-      if(!sheet||!box) return;
-      const availW=Math.max(280, box.clientWidth-4);
-      const availH=Math.max(220, window.innerHeight-132);
-      boardZoom=Math.min(availW/sheet.offsetWidth, availH/sheet.offsetHeight);
-      boardZoomMin=boardZoom;
-      boardApplyZoom();
-    }
     function boardrep(){
       if(needAuth()) return login();
       setTimeout(()=>{
         const back=document.getElementById("lbBack");
         if(back) back.onclick=()=>{ view="board"; state.section="board"; try{save();}catch(e){} render(); };
-        const box=document.getElementById("lbZoom");
-        let pinch=null;
-        const dist=ev=>{ const a=ev.touches[0], b=ev.touches[1]; return Math.hypot(a.clientX-b.clientX, a.clientY-b.clientY); };
-        const clamp=z=>Math.min(3, Math.max(boardZoomMin||0.2, z));
-        if(box){
-          box.addEventListener("wheel", ev=>{
-            ev.preventDefault();
-            boardZoom=clamp(boardZoom*(ev.deltaY<0?1.12:1/1.12));
-            boardApplyZoom();
-          }, {passive:false});
-          box.addEventListener("touchstart", ev=>{ if(ev.touches.length===2) pinch={d:dist(ev), z:boardZoom}; }, {passive:true});
-          box.addEventListener("touchmove", ev=>{ if(pinch && ev.touches.length===2){ boardZoom=clamp(pinch.z*dist(ev)/pinch.d); boardApplyZoom(); } }, {passive:true});
-          box.addEventListener("touchend", ()=>{ pinch=null; });
-        }
-        const paint=()=>{ const sheet=document.getElementById("lbSheet"); if(sheet) sheet.innerHTML=boardReportHtml(); boardFit(); };
+        const paint=()=>{ const sheet=document.getElementById("lbSheet"); if(sheet) sheet.innerHTML=boardReportHtml(); };
         if(!boardCache){
           const sheet=document.getElementById("lbSheet");
           if(sheet) sheet.innerHTML="<p>Загружаю отчёт…</p>";
@@ -551,8 +518,7 @@ JS = r'''
         <div class="lb-rep-bar">
           <button class="btn ghost" type="button" id="lbBack">К рейтингу</button>
         </div>
-        <p class="tune-note">Лист на один экран. Приблизить — колёсиком или двумя пальцами, затем листать.</p>
-        <div class="lb-zoom" id="lbZoom"><div id="lbSpace"><div class="lb-sheet" id="lbSheet"></div></div></div>
+        <div class="lb-sheet" id="lbSheet"></div>
       </div>`;
     }
 '''
