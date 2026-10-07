@@ -251,6 +251,28 @@ input,textarea{width:100%;background:#fff;border:1px solid var(--border);color:v
 .hub-card[data-go="tune"]::before{background-image:url("hub/tune.jpg?v=1");background-position:50% 62%;background-size:cover;}
 .hub-card[data-go="board"]::before{background-image:url("hub/board.jpg?v=2");background-position:50% 62%;background-size:cover;}
 .hub-card[data-go="senior"]::before{background-image:url("hub/senior.jpg?v=1");background-position:50% 62%;background-size:cover;}
+.smop-head{display:flex;justify-content:space-between;gap:12px;align-items:baseline;flex-wrap:wrap}
+.smop-cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;margin-top:10px}
+.smop-dow{text-align:center;font-size:11px;font-weight:700;color:var(--muted);padding:2px 0}
+.smop-day{min-height:46px;border:1px solid var(--border);background:#fff;border-radius:10px;padding:4px 5px;text-align:left;color:inherit}
+.smop-day b{font-size:14px;font-variant-numeric:tabular-nums}
+.smop-day.off{background:transparent;border-color:transparent;color:#b7b1a6;min-height:46px}
+.smop-day.pad{border-color:transparent;background:transparent;pointer-events:none}
+.smop-day.today{background:#f4efe6}
+.smop-day.on{border-color:#1c3f66;box-shadow:inset 0 0 0 1px #1c3f66}
+.smop-dots{display:flex;gap:3px;min-height:5px;margin-top:4px}
+.smop-dots i{width:5px;height:5px;border-radius:50%;display:block;background:#1c3f66}
+.smop-dots i.w{background:#c28b2a}
+.smop-dots i.m{background:#6a3d86}
+.smop-legend{display:flex;flex-wrap:wrap;gap:10px 14px;margin-top:8px;color:var(--muted);font-size:12px}
+.smop-legend i{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px;vertical-align:middle}
+.smop-blocks{display:grid;gap:10px;margin-top:12px}
+.smop-task{padding:8px 0;border-top:1px solid var(--border)}
+.smop-task:first-of-type{border-top:0}
+.smop-task b{display:block;font-size:14px}
+.smop-task p{margin:3px 0 0;color:var(--muted);font-size:13px;line-height:1.35}
+.smop-task.hit{background:#f6f3fb;margin:0 -10px;padding:8px 10px;border-radius:10px;border-top-color:transparent}
+@media(min-width:900px){.smop-blocks{grid-template-columns:1fr 1fr 1fr;align-items:start}}
 .lb-row.other{background:#fbf7f1}
 .lb-row.other td{color:#6d6458}
 .tune-tabs{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0;}
@@ -2346,12 +2368,56 @@ async function pingTelegram(body){
     function senior(){
       if(needAuth()) return login();
       if(!canSenior()){ view="hub"; return hub(); }
-      const rop=norm((state.surname||"")+" "+(state.display||"")).indexOf("леонтьев")>=0;
-      return banner("Старший менеджер","Закрытый кабинет", state.display)+`
-        <p class="lead">${escape(state.display||"")}, раздел только для Спицына и РОП. Остальные сотрудники эту плитку не видят.</p>
+      const tasks=[
+        {n:1,scope:"day",title:"Чек-лист дежурного",text:"Ежедневный контроль соблюдения чек-листа дежурного и качества его заполнения.",when:"каждый рабочий день"},
+        {n:5,scope:"day",title:"Здоровый сток",text:"Контроль ремонта товарных машин, донорства и расстановки в шоу-руме: приоритет, долгий срок, близнецы.",when:"каждый рабочий день"},
+        {n:9,scope:"day",title:"Оценка а/м сервиса",text:"Контроль процедуры оценки автомобилей клиентов сервиса.",when:"каждый рабочий день"},
+        {n:10,scope:"day",title:"Распределение трафика",text:"Распределение трафика между менеджерами в течение дня по данным АТЗ и личной эффективности.",when:"каждый рабочий день"},
+        {n:3,scope:"week",title:"Утренние собрания",text:"По целям РОП: разбор звонков, вебинары и аргументаторы, мозговые штурмы.",when:"2 раза в неделю",days:[1,4],slot:"пн и чт"},
+        {n:4,scope:"week",title:"Торговые условия",text:"Актуальность ТУ в сети отдела и знание условий менеджерами.",when:"2 раза в неделю",days:[2,5],slot:"вт и пт"},
+        {n:6,scope:"week",title:"Отзывы и SSI",text:"Статистика отзывов на Авито, 2ГИС, Яндекс и прохождения опросов SSI.",when:"2 раза в неделю",days:[3,5],slot:"ср и пт"},
+        {n:2,scope:"month",title:"График отдела",text:"График отдела продаж и смежных отделов: КСО, АСП, АТЗ, техники. Контроль соблюдения.",when:"раз в месяц",day:1},
+        {n:7,scope:"month",title:"Выезды, тайные, обучение",text:"Статистика выездных мероприятий, тайных визитов и очных обучений.",when:"мониторинг в течение месяца"},
+        {n:8,scope:"month",title:"Знание продукта",text:"Проверка менеджеров на знание продукта и стандартов продаж.",when:"1 раз в месяц",day:30}
+      ];
+      const y=2026, mo=9;
+      const now=new Date();
+      const today=(now.getFullYear()===y && now.getMonth()===mo)?now.getDate():0;
+      if(typeof smopDay!=="number" || smopDay<1 || smopDay>31) smopDay=today && new Date(y,mo,today).getDay()%6 ? today : 1;
+      const day=smopDay;
+      const dt=new Date(y,mo,day);
+      const wd=dt.getDay()||7;
+      const names=["","понедельник","вторник","среда","четверг","пятница","суббота","воскресенье"];
+      const pad=(new Date(y,mo,1).getDay()+6)%7;
+      const cells=[];
+      for(let i=0;i<pad;i++) cells.push(`<div class="smop-day pad"></div>`);
+      for(let d=1;d<=31;d++){
+        const w=new Date(y,mo,d).getDay();
+        const work=w!==0 && w!==6;
+        const weekHit=work && tasks.some(t=>t.scope==="week" && t.days.indexOf(w||7)>=0);
+        const monthHit=tasks.some(t=>t.scope==="month" && t.day===d);
+        const dots=work?`<span class="smop-dots"><i></i>${weekHit?`<i class="w"></i>`:""}${monthHit?`<i class="m"></i>`:""}</span>`:"";
+        if(!work) cells.push(`<div class="smop-day off"><b>${d}</b></div>`);
+        else cells.push(`<button type="button" class="smop-day${d===today?" today":""}${d===day?" on":""}" data-smop-day="${d}"><b>${d}</b>${dots}</button>`);
+      }
+      const mon=new Date(y,mo,day-((wd+6)%7));
+      const sun=new Date(y,mo,day-((wd+6)%7)+6);
+      const dm=x=>x.getDate()+" "+["января","февраля","марта","апреля","мая","июня","июля","августа","сентября","октября","ноября","декабря"][x.getMonth()];
+      const block=(scope,title,note,list)=>`<div class="card"><p class="eyebrow">${title}</p><p class="calc-note">${note}</p>${list.map(t=>{
+        const hit=scope==="week"?t.days.indexOf(wd)>=0:(scope==="month"&&t.day===day);
+        return `<div class="smop-task${hit?" hit":""}"><b>${t.n}. ${escape(t.title)}${hit?" · сегодня":""}</b><p>${escape(t.text)}</p><p>${escape(t.when)}${t.slot?" · "+escape(t.slot):""}${t.day?" · "+t.day+" октября":""}</p></div>`;
+      }).join("")}</div>`;
+      return banner("СМОП","Старший менеджер отдела продаж", state.display)+`
+        <p class="lead">План адаптации Спицына. Октябрь 2026. Нажмите рабочий день — откроются задачи на день, на неделю и на месяц.</p>
         <div class="card">
-          <p class="eyebrow">${rop?"РОП":"Старший менеджер"}</p>
-          <p>Кабинет открыт. Сюда можно складывать расчёты и списки, которые не должны видеть менеджеры.</p>
+          <div class="smop-head"><p class="eyebrow" style="margin:0">Октябрь 2026</p><b>${day} октября, ${names[wd]}</b></div>
+          <div class="smop-cal"><span class="smop-dow">Пн</span><span class="smop-dow">Вт</span><span class="smop-dow">Ср</span><span class="smop-dow">Чт</span><span class="smop-dow">Пт</span><span class="smop-dow">Сб</span><span class="smop-dow">Вс</span>${cells.join("")}</div>
+          <div class="smop-legend"><span><i style="background:#1c3f66"></i>каждый день</span><span><i style="background:#c28b2a"></i>2 раза в неделю</span><span><i style="background:#6a3d86"></i>раз в месяц</span></div>
+        </div>
+        <div class="smop-blocks">
+          ${block("day","На день",day+" октября",tasks.filter(t=>t.scope==="day"))}
+          ${block("week","На неделю",dm(mon)+" – "+dm(sun),tasks.filter(t=>t.scope==="week"))}
+          ${block("month","На месяц","октябрь 2026",tasks.filter(t=>t.scope==="month"))}
         </div>
         <div class="who-line"><button class="btn ghost" data-go="hub" type="button">В кабинет</button></div>`;
     }
@@ -2373,7 +2439,7 @@ async function pingTelegram(body){
         ["gibdd","Г","Проверки ГИБДД","ФССП, залоги, банкроты"],
         ["home","A","Аттестация","Тесты, рейтинг, справочник и аргументаторы"]
       ];
-      if(canSenior()) cards.unshift(["senior","СМ","Старший менеджер","Закрытый кабинет Спицына и РОП"]);
+      if(canSenior()) cards.unshift(["senior","СМ","СМОП","Календарь задач старшего менеджера"]);
       return banner("Кабинет отдела продаж","TENET · Отдел продаж", state.display)+`
         <p class="lead">${hi}, <b>${escape(state.display)}</b>. ${examHint} Разделы ниже — рабочее пространство салона.</p>
         <div class="who-line">
@@ -7861,6 +7927,7 @@ async function confirmCloud(rec){
       if(copyBtn) copyBtn.onclick=()=>{ try{ navigator.clipboard.writeText(state.lastCode||""); copyBtn.textContent="Скопировано"; }catch(e){} };
       document.querySelectorAll("[data-review]").forEach(b=>b.onclick=()=>{ reviewExamN=Number(b.dataset.review)||1; view="review"; render(); });
       if(typeof offerBind==="function") offerBind();
+      document.querySelectorAll("[data-smop-day]").forEach(b=>b.onclick=()=>{ smopDay=Number(b.dataset.smopDay)||1; view="senior"; render(); });
       document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{
         if(inExam() || (userRun() && !done)){ view="play"; if(!paper.length) resumeExam(userRun()); else render(); return; }
         goSection(b.dataset.go);
