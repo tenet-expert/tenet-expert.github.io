@@ -1103,6 +1103,7 @@ body:has(.lb-rep-page) .wrap{max-width:none;width:100%;padding:14px 16px 48px}
 .lb-block.c{background:#f7f1e6;border-color:#e0cba8;flex:1.15;min-width:0}
 .lb-block.d{background:#eef3f6;border-color:#c5d4de;flex:1.15;min-width:0}
 .lb-block.e{background:#f6eef3;border-color:#dcc5d4;flex:0.95;min-width:0}
+.lb-block.f{background:#f8f3e8;border-color:#e2d2b0;flex:1.05;min-width:0}
 @media(max-width:900px){.lb-pair{flex-direction:column}}
 .lb-rep tr.sum td{font-weight:800;border-top:2px solid #1c1a17}
 .lb-bad{color:#c62828;font-weight:800}
@@ -2350,6 +2351,8 @@ async function pingTelegram(body){
       const webHead=["Менеджер","Интернет","Визит с инт.","% в визит","Контракт с инт.","% в контракт"];
       const rowCall=p=>`<tr${trAttr(p)}><td>${who(p)}</td><td>${p.call}</td><td>${p.callVisit}</td><td>${boardPct(p.callVisit, p.call)}</td><td>${p.callContract}</td><td>${mark(p.callContract, p.call, "conv")}</td></tr>`;
       const rowWeb=p=>`<tr${trAttr(p)}><td>${who(p)}</td><td>${p.web}</td><td>${p.webVisit}</td><td>${boardPct(p.webVisit, p.web)}</td><td>${p.webContract}</td><td>${mark(p.webContract, p.web, "conv")}</td></tr>`;
+      const allHead=["Менеджер","Визиты","Контракт","E-credit","Трейд-ин"];
+      const rowAll=p=>`<tr${trAttr(p)}><td>${who(p)}</td><td>${(p.visit||0)+(p.meet||0)}</td><td>${fromVisit(p)}</td><td>${p.ecredit||0}</td><td>${p.service||0}</td></tr>`;
       const shown=mains.concat(kids.length?[Object.assign(bucket,{other:true})]:[]).concat(kids.map(p=>Object.assign(p,{kid:true}))).concat([total]);
       const planNote=`Личный план — ${BOARD_PLAN}, общий — ${BOARD_PLAN_TEAM}.`;
       const thead=h=>`<thead><tr>${h.map(x=>`<th>${x}</th>`).join("")}</tr></thead>`;
@@ -2358,9 +2361,10 @@ async function pingTelegram(body){
           <section class="lb-block a"><p class="lb-rep-h">Выдачи и трафик</p><table class="lb-rep">${thead(mainHead)}<tbody>${mains.map(p=>rowMain(p, planOf(p))).join("")}${kids.length?rowMain(bucket,0)+kids.map(p=>rowMain(p,0)).join(""):""}${rowMain(total, planN)}</tbody></table></section>
           <div class="lb-pair">
             <section class="lb-block b"><p class="lb-rep-h">Тест-драйвы</p><table class="lb-rep">${thead(tdHead)}<tbody>${shown.map(rowTd).join("")}</tbody></table></section>
-            <section class="lb-block e"><p class="lb-rep-h">Визит в контракт</p><table class="lb-rep">${thead(visitHead)}<tbody>${shown.map(rowVisit).join("")}</tbody></table></section>
-            <section class="lb-block c"><p class="lb-rep-h">Звонки в визит</p><table class="lb-rep">${thead(callHead)}<tbody>${shown.map(rowCall).join("")}</tbody></table></section>
-            <section class="lb-block d"><p class="lb-rep-h">Интернет в визит</p><table class="lb-rep">${thead(webHead)}<tbody>${shown.map(rowWeb).join("")}</tbody></table></section>
+            <section class="lb-block e"><p class="lb-rep-h">Контракт с визита</p><table class="lb-rep">${thead(visitHead)}<tbody>${shown.map(rowVisit).join("")}</tbody></table></section>
+            <section class="lb-block c"><p class="lb-rep-h">Звонки в контракт</p><table class="lb-rep">${thead(callHead)}<tbody>${shown.map(rowCall).join("")}</tbody></table></section>
+            <section class="lb-block d"><p class="lb-rep-h">Интернет в контракт</p><table class="lb-rep">${thead(webHead)}<tbody>${shown.map(rowWeb).join("")}</tbody></table></section>
+            <section class="lb-block f"><p class="lb-rep-h">Визит всего</p><table class="lb-rep">${thead(allHead)}<tbody>${shown.map(rowAll).join("")}</tbody></table></section>
           </div>
         </div>
         <p class="lb-rep-note">Как в «ОП CHERY». ${planNote} Трафик — визиты + звонки + интернет. Конв. в контракт: меньше 10% красным, меньше 15% жёлтым, иначе зелёным. ТД ниже 70% — красным. ${sep?"Сентябрь: контракт = выдача + расторжение. Тест-драйв — только поездка с «движением клиента», без служебных, заправок и центра Hyundai. Повтор одного клиента и поездка мужа с женой считаются один раз. Визит со звонка и с интернета, оценка б/у и e-credit — из воронки, только менеджеры лидерборда.":"Расторжения в журнале октября не ведутся."} Обновлено ${escape((boardCache&&boardCache.stamp)||"")}</p>`;
