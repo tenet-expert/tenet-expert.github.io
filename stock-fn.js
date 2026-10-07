@@ -157,7 +157,7 @@
         <div>
           <b>${escape(r.name||"")}</b>
           <small>${escape(meta)}</small>
-          <small class="st-vin">${escape(r.vin||"")}${typeof PANGO_ONLY!=="undefined"&&PANGO_ONLY[r.vin]?" · спеццена · сотрудник · 1 хоз ГИБДД · 500 км · только PANGO":""}${typeof KM_FORK!=="undefined"&&KM_FORK[r.vin]?" · КМ 50 тыс. с трейд-ин · 100 без":""}${r.note?" · "+escape(r.note):""}</small>
+          <small class="st-vin">${escape(r.vin||"")}${typeof PANGO_ONLY!=="undefined"&&PANGO_ONLY[r.vin]?" · спеццена · сотрудник · 1 хоз ГИБДД · 500 км · только PANGO":""}${typeof EXCL_FIX!=="undefined"&&EXCL_FIX[r.vin]?" · эксклюзив "+Math.round(EXCL_FIX[r.vin].cash/1000)+" нал / "+Math.round(EXCL_FIX[r.vin].ti/1000)+" с ТИ":""}${typeof KM_FORK!=="undefined"&&KM_FORK[r.vin]?" · КМ 50 тыс. с трейд-ин · 100 без":""}${r.note?" · "+escape(r.note):""}</small>
         </div>
         ${reservedBadge}
         <div class="st-side">

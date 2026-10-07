@@ -51,7 +51,16 @@
     const PANGO_RATE_A = 17.4;
     const PANGO_RATE_B = 14.4;
     const PANGO_NSS = 0.0089;
-    function pangoOf(id){ return (typeof PANGO_FIX!=="undefined" && PANGO_FIX[id]) || null; }
+    const EXCL_FIX = {
+      "EDELB31B1TE103208":{cash:2100000,ti:2000000},
+      "EDELB31BXTE095545":{cash:2200000,ti:2100000},
+      "EDELB31B3TE093989":{cash:2200000,ti:2100000}
+    };
+    function pangoOf(id){
+      const vin=typeof kmVin==="string"?String(kmVin).toUpperCase():"";
+      if(vin && typeof EXCL_FIX!=="undefined" && EXCL_FIX[vin]) return EXCL_FIX[vin];
+      return (typeof PANGO_FIX!=="undefined" && PANGO_FIX[id]) || null;
+    }
     const TERMS_PRIO = [
       {model:"T7",vin:"EDXFB32B2TE041658",trim:"Актив",year:"2026",color:"Чёрный",extra:"",pay:500,bonus:1000},
       {model:"T7",vin:"EDXFB32B7TE062327",trim:"Актив",year:"2026",color:"Чёрный",extra:"Антихром",pay:500,bonus:1000},
