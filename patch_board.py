@@ -366,18 +366,9 @@ JS = r'''
       return `<div class="card" style="margin-top:12px"><p class="eyebrow">${escape(title)}</p><h3 style="margin:4px 0 8px">Лента</h3><div class="lb-feed">${body}</div></div>`;
     }
     function boardHtml(cache){
-      const note=`<p class="tune-note">Обновлено ${escape(cache.stamp)}. Рейтинг: выдача, затем контракт, тест-драйв, визит, трафик.</p>`;
-      const btn=`<div style="margin:12px 0"><button class="btn ivory" type="button" id="boardOpenReport">Расширенный отчёт</button></div>`;
-      if(boardMode==="prev"){
-        const rank=boardSepRank();
-        return note+boardTable([], "Предыдущий месяц", "Сентябрь", BOARD_ROSTER_SEP, rank)+btn+boardSepExtra(rank);
-      }
-      if(boardMode==="month") return note+boardTable(cache.oct, "Месяц", "Октябрь")+btn;
       const yest=boardMode==="yday";
-      const key=boardDayKey(yest?-1:0);
-      const rows=boardSlice(cache, key);
-      const label=yest?"Вчера":"Сегодня";
-      return note+boardTable(rows, label, key)+btn+boardTape(rows, label);
+      const tape=(boardMode==="day"||yest)?boardTape(boardSlice(cache, boardDayKey(yest?-1:0)), yest?"Вчера":"Сегодня"):"";
+      return `<div class="lb-sheet">${boardReportHtml()}</div>`+tape;
     }
     async function boardEnsure(){
       if(boardCache) return boardCache;
@@ -395,8 +386,6 @@ JS = r'''
         await boardEnsure();
         root.innerHTML=boardHtml(boardCache);
         boardBindFolds(root);
-        const open=document.getElementById("boardOpenReport");
-        if(open) open.onclick=()=>{ view="boardrep"; state.section="boardrep"; try{save();}catch(e){} render(); };
       }catch(err){
         root.innerHTML=`<div class="card"><p>Не удалось прочитать трафик. ${escape(err&&err.message||"")}</p><button class="btn ivory" type="button" id="boardRetry">Ещё раз</button></div>`;
         const b=document.getElementById("boardRetry");
@@ -421,10 +410,10 @@ JS = r'''
         });
         boardLoad();
       }, 40);
-      return banner("Leaderboard","Трафик · онлайн","TENET")+`
+      return `<div class="lb-rep-page">`+banner("Leaderboard","Трафик · онлайн","TENET")+`
         <p class="lead">Сегодня, вчера и месяц — из «Трафик октябрь». Сентябрь собран из журналов 1С: первичные звонки, визиты, интернет и тест-драйвы, выдачи и расторжения. Расторжение прибавлено к контракту.</p>
         ${boardChips()}
-        <div id="boardRoot"><div class="card"><p>Загружаю таблицу…</p></div></div>`;
+        <div id="boardRoot"><div class="card"><p>Загружаю таблицу…</p></div></div></div>`;
     }
     function boardPeriod(){
       const cache=boardCache||{oct:[],sep:[]};
@@ -505,23 +494,10 @@ JS = r'''
       });
     }
     function boardrep(){
-      if(needAuth()) return login();
-      setTimeout(()=>{
-        const back=document.getElementById("lbBack");
-        if(back) back.onclick=()=>{ view="board"; state.section="board"; try{save();}catch(e){} render(); };
-        const paint=()=>{ const sheet=document.getElementById("lbSheet"); if(sheet) sheet.innerHTML=boardReportHtml(); };
-        if(!boardCache){
-          const sheet=document.getElementById("lbSheet");
-          if(sheet) sheet.innerHTML="<p>Загружаю отчёт…</p>";
-          boardEnsure().then(paint).catch(()=>{ const s=document.getElementById("lbSheet"); if(s) s.innerHTML="<p>Не удалось прочитать трафик.</p>"; });
-        }else paint();
-      }, 30);
-      return `<div class="lb-rep-page">
-        <div class="lb-rep-bar">
-          <button class="btn ghost" type="button" id="lbBack">К рейтингу</button>
-        </div>
-        <div class="lb-sheet" id="lbSheet"></div>
-      </div>`;
+      view="board";
+      state.section="board";
+      try{save();}catch(e){}
+      return board();
     }
 '''
 
