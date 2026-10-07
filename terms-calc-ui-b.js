@@ -102,6 +102,7 @@
       const hasReg=stockCars.some(c=>!(typeof carIsMpt==="function"?carIsMpt(c):c.mpt)) || !stockCars.length;
       const selected=(typeof STOCK!=="undefined"?STOCK:[]).find(c=>c && c.vin===kmVin);
       if(selected && typeof EXCL_FIX!=="undefined" && EXCL_FIX[selected.vin]) selected.invoice=true;
+      if(selected && typeof NOT_INVOICE!=="undefined" && NOT_INVOICE[selected.vin]) selected.invoice=false;
       const pickMpt=!!(selected && (typeof carIsMpt==="function"?carIsMpt(selected):selected.mpt));
       const fMpt=typeof fleetOf==="function"?fleetOf(m.id):null;
       const canSub=typeof kmHasBrandSub==="function"?kmHasBrandSub(m):!!(fMpt&&(fMpt.sub||0)>0);

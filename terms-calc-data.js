@@ -112,6 +112,7 @@
       "EDEFD32B5TE102360":{ti:50,cash:100}
     };
     const PANGO_ONLY = {"EDXGD34B6TE031162":"Спеццена. Привезён под сотрудника и поставлен на учёт, чтобы зафиксировать скидку. 1 хозяин по ГИБДД, пробег 500 км. Считаем только PANGO. Цена 3 000 000 при любых условиях, трейд-ин её не меняет."};
+    const NOT_INVOICE = {"EDXGD34B7TE034443":1};
     function kmBand(vin, useTi, prio, m){
       const fork=KM_FORK[vin];
       if(fork){ const t=useTi?fork.ti:fork.cash; return {lo:t, hi:t, lock:true}; }

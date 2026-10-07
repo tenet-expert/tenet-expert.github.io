@@ -1,4 +1,5 @@
 DEMO_VINS={"EDXGD34B2TE109064","EDXGB32B0TE110108"}
+NOT_INVOICE={"EDXGD34B7TE034443"}
 MPT_VINS={"EDXFB32B2TE041658","EDXFB32B4TE041659","EDXFB32B7TE062327","EDXFD32B3TE070113","EDXFB32B3TE091114","EDXFB32B1TE087336","EDXFD32B4TE092590","EDXFD32B4TE092587"}
 m=re.search(r"const STOCK = (\[.*?\]);\s*\n\s*const ST_LABEL", html, re.S)
 if not m:
@@ -9,6 +10,8 @@ if m:
     for x in stock:
         x["mpt"]=x.get("vin") in MPT_VINS
         _vin=str(x.get("vin") or "").upper()
+        if _vin in NOT_INVOICE:
+            x["invoice"]=False
         _t=str(x.get("trim") or "").lower()
         _mid=str(x.get("model") or "")
         if x.get("invoice"):

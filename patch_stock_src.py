@@ -100,6 +100,12 @@ def classify_t9(car):
 
 uniq = [classify_t9(c) for c in uniq]
 
+NOT_INVOICE = {"EDXGD34B7TE034443"}
+for c in uniq:
+    if str(c.get("vin") or "").strip().upper() in NOT_INVOICE:
+        c["invoice"] = False
+        print("not invoice", c.get("vin"))
+
 # reserved from parts (PISEC) is kept as is; manual-reserved.json VINs are added on top
 MANUAL_RESERVED = load_manual_reserved()
 for c in uniq:
