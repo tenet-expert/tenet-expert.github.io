@@ -243,19 +243,19 @@ JS = r'''
       return {list, sum};
     }
     const BOARD_SEP_FIXED = [
-      {name:"Ахмадуллин",visit:12,call:2,web:8,td:4,issue:9,cancel:1,callVisit:2,webVisit:1,service:3,ecredit:1},
-      {name:"Коропец",visit:13,call:9,web:15,td:12,issue:3,cancel:0,callVisit:0,webVisit:3,service:5,ecredit:6},
-      {name:"Демьянов",visit:15,call:19,web:23,td:13,issue:5,cancel:1,callVisit:2,webVisit:1,service:6,ecredit:2},
-      {name:"Лавров",visit:12,call:11,web:7,td:15,issue:9,cancel:1,callVisit:1,webVisit:4,service:6,ecredit:2},
-      {name:"Сидоров",visit:8,call:10,web:23,td:13,issue:4,cancel:0,callVisit:4,webVisit:0,service:6,ecredit:4},
-      {name:"Спицын",visit:8,call:12,web:3,td:12,issue:5,cancel:0,callVisit:0,webVisit:0,service:3,ecredit:3},
-      {name:"Тальков",visit:29,call:17,web:25,td:22,issue:3,cancel:1,callVisit:3,webVisit:2,service:14,ecredit:17}
+      {name:"Ахмадуллин",visit:12,call:2,web:8,td:4,issue:9,cancel:1,callVisit:2,webVisit:1,callContract:0,webContract:3,service:3,ecredit:1},
+      {name:"Коропец",visit:13,call:9,web:15,td:12,issue:3,cancel:0,callVisit:0,webVisit:3,callContract:0,webContract:0,service:5,ecredit:6},
+      {name:"Демьянов",visit:15,call:19,web:23,td:13,issue:5,cancel:1,callVisit:2,webVisit:1,callContract:2,webContract:1,service:6,ecredit:2},
+      {name:"Лавров",visit:12,call:11,web:7,td:15,issue:9,cancel:1,callVisit:1,webVisit:4,callContract:1,webContract:2,service:6,ecredit:2},
+      {name:"Сидоров",visit:8,call:10,web:23,td:13,issue:4,cancel:0,callVisit:4,webVisit:0,callContract:3,webContract:1,service:6,ecredit:4},
+      {name:"Спицын",visit:8,call:12,web:3,td:12,issue:5,cancel:0,callVisit:0,webVisit:0,callContract:0,webContract:2,service:3,ecredit:3},
+      {name:"Тальков",visit:29,call:17,web:25,td:22,issue:3,cancel:1,callVisit:3,webVisit:2,callContract:0,webContract:0,service:14,ecredit:17}
     ];
     const BOARD_SEP_OTHER = [
-      {name:"Павлова",visit:4,call:4,issue:4},
-      {name:"Извеков",visit:8,call:15,td:8,issue:3,cancel:1},
-      {name:"Леонтьев",visit:2,web:7,td:3,issue:7},
-      {name:"Елчин",visit:1,web:1,td:2,issue:2,cancel:1},
+      {name:"Павлова",visit:4,call:4,issue:4,callContract:0,webContract:0},
+      {name:"Извеков",visit:8,call:15,td:8,issue:3,cancel:1,callContract:1,webContract:0},
+      {name:"Леонтьев",visit:2,web:7,td:3,issue:7,callContract:0,webContract:2},
+      {name:"Елчин",visit:1,web:1,td:2,issue:2,cancel:1,callContract:1,webContract:0},
       {name:"Клименко",td:2},
       {name:"Бикулов",visit:1},
       {name:"Без менеджера",web:1}
@@ -273,7 +273,7 @@ JS = r'''
       const other=boardBlank();
       other.name="Другие"; other.other=true; other.people=people;
       people.forEach(x=>{
-        ["traffic","visit","call","web","meet","td","contract","issue","cancel","service","ecredit","callVisit","webVisit"].forEach(k=>{ other[k]=(other[k]||0)+(x[k]||0); });
+        ["traffic","visit","call","web","meet","td","contract","issue","cancel","service","ecredit","callVisit","webVisit","callContract","webContract"].forEach(k=>{ other[k]=(other[k]||0)+(x[k]||0); });
       });
       list.push(other);
       const sum=list.reduce((s,p)=>{
