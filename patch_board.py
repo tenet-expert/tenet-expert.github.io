@@ -51,6 +51,8 @@ body:has(.lb-rep-page) .wrap{max-width:none;width:100%;padding:14px 16px 48px}
 .lb-bad{color:#c62828;font-weight:800}
 .lb-mid{color:#b8860b;font-weight:800}
 .lb-ok{color:#2e7d32;font-weight:800}
+.lb-duo{white-space:nowrap}
+.lb-duo i{font-style:normal;color:#8a8074;padding:0 3px}
 .lb-fold{display:none}
 .lb-fold.open{display:block}
 .lb-fold-btn{cursor:pointer}
@@ -454,6 +456,10 @@ JS = r'''
         return s;
       }, boardBlank());
       total.name="Итого";
+      const core=mains.reduce((s,p)=>{
+        ["traffic","visit","call","web","meet","td","contract","issue","visitContract","callVisit","callContract","webVisit","webContract","cancel","service","ecredit"].forEach(k=>s[k]+=p[k]||0);
+        return s;
+      }, boardBlank());
       const planN=BOARD_PLAN_TEAM;
       const planOf=p=>mains.some(n=>n.name===p.name)?BOARD_PLAN:0;
       const ch=p=>p.visit+p.call+p.web;
@@ -463,6 +469,11 @@ JS = r'''
         const v=100*num/den;
         const cls=kind==="td"?(v<70?"lb-bad":""):(v<10?"lb-bad":v<15?"lb-mid":"lb-ok");
         return cls?`<span class="${cls}">${text}</span>`:text;
+      };
+      const convCell=(p, num, den, kind)=>{
+        const cell=x=>kind?mark(num(x), den(x), kind):boardPct(num(x), den(x));
+        if(p.name!=="Итого") return cell(p);
+        return `<span class="lb-duo">${cell(core)}<i>/</i>${cell(total)}</span>`;
       };
       const sep=boardMode==="prev";
       const live=boardMode==="month";
@@ -474,17 +485,17 @@ JS = r'''
         const pace=boardPace(p.issue, plan);
         const prim=ch(p), tPrim=ch(total);
         const paceCells=live?`<td>–</td><td>–</td><td>${pace.n}</td><td>${pace.p}</td>`:"";
-        return `<tr${trAttr(p)}><td>${who(p)}</td><td>${plan||"–"}</td><td>${p.issue}</td><td>${boardPct(p.issue, plan)}</td><td>${p.contract}</td><td>${sep?(p.cancel||0):"–"}</td>${paceCells}<td>${prim}</td><td>${boardPct(prim, tPrim)}</td><td>${boardPct(p.visit, total.visit)}</td><td>${boardPct(p.call+p.web, total.call+total.web)}</td><td>${mark(p.contract, prim, "conv")}</td><td>${boardPct(p.issue, prim)}</td></tr>`;
+        return `<tr${trAttr(p)}><td>${who(p)}</td><td>${plan||"–"}</td><td>${p.issue}</td><td>${boardPct(p.issue, plan)}</td><td>${p.contract}</td><td>${sep?(p.cancel||0):"–"}</td>${paceCells}<td>${prim}</td><td>${boardPct(prim, tPrim)}</td><td>${boardPct(p.visit, total.visit)}</td><td>${boardPct(p.call+p.web, total.call+total.web)}</td><td>${convCell(p, x=>x.contract, ch, "conv")}</td><td>${convCell(p, x=>x.issue, ch)}</td></tr>`;
       };
       const tdBase=p=>(p.visit||0)+(p.callVisit||0)+(p.webVisit||0);
       const allHead=["Менеджер","Всего","ТД","% ТД","Контракт","Оценка","E-credit"];
-      const rowAll=p=>`<tr${trAttr(p)}><td>${who(p)}</td><td>${tdBase(p)}</td><td>${p.td||0}</td><td>${mark(p.td||0, tdBase(p), "td")}</td><td>${p.contract||0}</td><td>${p.service||0}</td><td>${p.ecredit||0}</td></tr>`;
+      const rowAll=p=>`<tr${trAttr(p)}><td>${who(p)}</td><td>${tdBase(p)}</td><td>${p.td||0}</td><td>${convCell(p, x=>x.td||0, tdBase, "td")}</td><td>${p.contract||0}</td><td>${p.service||0}</td><td>${p.ecredit||0}</td></tr>`;
       const visitHead=["Менеджер","Визит","Контракт с визита","Конв. с визита"];
-      const rowVisit=p=>`<tr${trAttr(p)}><td>${who(p)}</td><td>${p.visit}</td><td>${fromVisit(p)}</td><td>${boardPct(fromVisit(p), p.visit)}</td></tr>`;
+      const rowVisit=p=>`<tr${trAttr(p)}><td>${who(p)}</td><td>${p.visit}</td><td>${fromVisit(p)}</td><td>${convCell(p, fromVisit, x=>x.visit)}</td></tr>`;
       const callHead=["Менеджер","Звонки","Визит со звонка","% в визит","Контракт со звонка","% в контракт"];
       const webHead=["Менеджер","Интернет","Визит с инт.","% в визит","Контракт с инт.","% в контракт"];
-      const rowCall=p=>`<tr${trAttr(p)}><td>${who(p)}</td><td>${p.call}</td><td>${p.callVisit}</td><td>${boardPct(p.callVisit, p.call)}</td><td>${p.callContract}</td><td>${mark(p.callContract, p.call, "conv")}</td></tr>`;
-      const rowWeb=p=>`<tr${trAttr(p)}><td>${who(p)}</td><td>${p.web}</td><td>${p.webVisit}</td><td>${boardPct(p.webVisit, p.web)}</td><td>${p.webContract}</td><td>${mark(p.webContract, p.web, "conv")}</td></tr>`;
+      const rowCall=p=>`<tr${trAttr(p)}><td>${who(p)}</td><td>${p.call}</td><td>${p.callVisit}</td><td>${convCell(p, x=>x.callVisit, x=>x.call)}</td><td>${p.callContract}</td><td>${convCell(p, x=>x.callContract, x=>x.call, "conv")}</td></tr>`;
+      const rowWeb=p=>`<tr${trAttr(p)}><td>${who(p)}</td><td>${p.web}</td><td>${p.webVisit}</td><td>${convCell(p, x=>x.webVisit, x=>x.web)}</td><td>${p.webContract}</td><td>${convCell(p, x=>x.webContract, x=>x.web, "conv")}</td></tr>`;
       const shown=mains.concat(kids.length?[Object.assign(bucket,{other:true})]:[]).concat(kids.map(p=>Object.assign(p,{kid:true}))).concat([total]);
       const planNote=`Личный план — ${BOARD_PLAN}, общий — ${BOARD_PLAN_TEAM}.`;
       const thead=h=>`<thead><tr>${h.map(x=>`<th>${x}</th>`).join("")}</tr></thead>`;
@@ -498,7 +509,7 @@ JS = r'''
             <section class="lb-block f"><p class="lb-rep-h">Визит всего</p><table class="lb-rep">${thead(allHead)}<tbody>${shown.map(rowAll).join("")}</tbody></table></section>
           </div>
         </div>
-        <p class="lb-rep-note">Как в «ОП CHERY». ${planNote} Трафик — визиты + звонки + интернет. Конв. в контракт: меньше 10% красным, меньше 15% жёлтым, иначе зелёным. ТД ниже 70% — красным. ${sep?"Сентябрь: контракт = выдача + расторжение. Тест-драйв — только поездка с «движением клиента», без служебных, заправок и центра Hyundai. Повтор одного клиента и поездка мужа с женой считаются один раз. Визит со звонка и с интернета, оценка б/у и e-credit — из воронки, только менеджеры лидерборда.":"Расторжения в журнале октября не ведутся."} Обновлено ${escape((boardCache&&boardCache.stamp)||"")}</p>`;
+        <p class="lb-rep-note">Как в «ОП CHERY». ${planNote} Трафик — визиты + звонки + интернет. Конв. в контракт: меньше 10% красным, меньше 15% жёлтым, иначе зелёным. ТД ниже 70% — красным. В строке «Итого» конверсия: основной состав / весь отдел. ${sep?"Сентябрь: контракт = выдача + расторжение. Тест-драйв — только поездка с «движением клиента», без служебных, заправок и центра Hyundai. Повтор одного клиента и поездка мужа с женой считаются один раз. Визит со звонка и с интернета, оценка б/у и e-credit — из воронки, только менеджеры лидерборда.":"Расторжения в журнале октября не ведутся."} Обновлено ${escape((boardCache&&boardCache.stamp)||"")}</p>`;
     }
     function boardBindFolds(root){
       if(!root) return;
