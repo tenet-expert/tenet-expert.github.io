@@ -2329,11 +2329,12 @@ async function pingTelegram(body){
       const sep=boardMode==="prev";
       const who=p=>p.other?`<b>Другие</b>`:(p.kid?`<span class="lb-sub">${escape(p.name)}</span>`:escape(p.name));
       const trAttr=p=>p.other?` class="lb-fold-btn" data-lb-fold="rep"`:(p.kid?` class="lb-fold-row" data-lb-panel="rep"`:(p.name==="Итого"?` class="sum"`:""));
-      const mainHead=["Менеджер","План","Факт","% плана","Контракты","Расторж.","Действ.","Выдачи+К","Прогноз","Прогноз %","Трафик","% трафика","% визитов","% зв+инт","Конв. в контракт","Конв. в выдачу","Визиты","Контракт с визита","Конв. визита"].concat(sep?["Оценка б/у","E-credit"]:[]);
+      const mainHead=["Менеджер","План","Факт","% плана","Контракты","Расторж.","Действ.","Выдачи+К","Прогноз","Прогноз %","Трафик","% трафика","% визитов","% зв+инт","Конв. в контракт","Конв. в выдачу","Визиты","Контракт с визита","Конв. с визита"].concat(sep?["Оценка б/у","E-credit"]:[]);
+      const fromVisit=p=>Math.max(0,(p.contract||0)-(p.callContract||0)-(p.webContract||0));
       const rowMain=(p, plan)=>{
         const pace=boardPace(p.issue, plan);
         const prim=ch(p), tPrim=ch(total);
-        return `<tr${trAttr(p)}><td>${who(p)}</td><td>${plan||"–"}</td><td>${p.issue}</td><td>${boardPct(p.issue, plan)}</td><td>${p.contract}</td><td>${sep?(p.cancel||0):"–"}</td><td>–</td><td>–</td><td>${pace.n}</td><td>${pace.p}</td><td>${prim}</td><td>${boardPct(prim, tPrim)}</td><td>${boardPct(p.visit, total.visit)}</td><td>${boardPct(p.call+p.web, total.call+total.web)}</td><td>${mark(p.contract, prim, "conv")}</td><td>${boardPct(p.issue, prim)}</td><td>${p.visit}</td><td>${p.visitContract}</td><td>${boardPct(p.visitContract, p.visit)}</td>${sep?`<td>${p.service||0}</td><td>${p.ecredit||0}</td>`:""}</tr>`;
+        return `<tr${trAttr(p)}><td>${who(p)}</td><td>${plan||"–"}</td><td>${p.issue}</td><td>${boardPct(p.issue, plan)}</td><td>${p.contract}</td><td>${sep?(p.cancel||0):"–"}</td><td>–</td><td>–</td><td>${pace.n}</td><td>${pace.p}</td><td>${prim}</td><td>${boardPct(prim, tPrim)}</td><td>${boardPct(p.visit, total.visit)}</td><td>${boardPct(p.call+p.web, total.call+total.web)}</td><td>${mark(p.contract, prim, "conv")}</td><td>${boardPct(p.issue, prim)}</td><td>${p.visit}</td><td>${fromVisit(p)}</td><td>${boardPct(fromVisit(p), p.visit)}</td>${sep?`<td>${p.service||0}</td><td>${p.ecredit||0}</td>`:""}</tr>`;
       };
       const tdHead=["Менеджер","План","Факт","Перв. + со звонка + с инт.","%"];
       const rowTd=p=>`<tr${trAttr(p)}><td>${who(p)}</td><td>70%</td><td>${p.td}</td><td>${p.visit+(p.callVisit||0)+(p.webVisit||0)}</td><td>${mark(p.td, p.visit+(p.callVisit||0)+(p.webVisit||0), "td")}</td></tr>`;
