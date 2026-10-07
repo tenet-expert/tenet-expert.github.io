@@ -2108,20 +2108,22 @@ async function pingTelegram(body){
     }
     const BOARD_SEP_FIXED = [
       {name:"Ахмадуллин",visit:12,call:2,web:8,td:4,issue:6,cancel:1,callVisit:2,webVisit:1,callContract:0,webContract:3,service:3,ecredit:1},
-      {name:"Коропец",visit:13,call:9,web:15,td:12,issue:3,cancel:0,callVisit:0,webVisit:3,callContract:0,webContract:0,service:5,ecredit:6},
-      {name:"Демьянов",visit:15,call:19,web:23,td:13,issue:5,cancel:1,callVisit:2,webVisit:1,callContract:2,webContract:1,service:6,ecredit:2},
-      {name:"Лавров",visit:12,call:11,web:7,td:15,issue:6,cancel:1,callVisit:1,webVisit:4,callContract:1,webContract:2,service:6,ecredit:2},
-      {name:"Сидоров",visit:8,call:10,web:23,td:13,issue:4,cancel:0,callVisit:4,webVisit:0,callContract:3,webContract:1,service:6,ecredit:4},
-      {name:"Спицын",visit:8,call:12,web:3,td:12,issue:2,cancel:0,callVisit:0,webVisit:0,callContract:0,webContract:2,service:3,ecredit:3},
-      {name:"Тальков",visit:29,call:17,web:25,td:22,issue:3,cancel:1,callVisit:3,webVisit:2,callContract:0,webContract:0,service:14,ecredit:17}
+      {name:"Коропец",visit:13,call:9,web:15,td:11,issue:3,cancel:0,callVisit:0,webVisit:3,callContract:0,webContract:0,service:5,ecredit:6},
+      {name:"Демьянов",visit:15,call:19,web:23,td:11,issue:5,cancel:1,callVisit:2,webVisit:1,callContract:2,webContract:1,service:6,ecredit:2},
+      {name:"Лавров",visit:12,call:11,web:7,td:13,issue:6,cancel:1,callVisit:1,webVisit:4,callContract:1,webContract:2,service:6,ecredit:2},
+      {name:"Сидоров",visit:8,call:10,web:23,td:10,issue:4,cancel:0,callVisit:4,webVisit:0,callContract:3,webContract:1,service:6,ecredit:4},
+      {name:"Спицын",visit:8,call:12,web:3,td:8,issue:2,cancel:0,callVisit:0,webVisit:0,callContract:0,webContract:2,service:3,ecredit:3},
+      {name:"Тальков",visit:29,call:17,web:25,td:21,issue:3,cancel:1,callVisit:3,webVisit:2,callContract:0,webContract:0,service:14,ecredit:17}
     ];
     const BOARD_SEP_OTHER = [
       {name:"Павлова",visit:4,call:4,issue:4,callContract:0,webContract:0},
-      {name:"Извеков",visit:8,call:15,td:8,issue:3,cancel:1,callContract:1,webContract:0},
-      {name:"Леонтьев",visit:2,web:7,td:3,issue:7,callContract:0,webContract:2},
-      {name:"Елчин",visit:1,web:1,td:2,issue:2,cancel:1,callContract:1,webContract:0},
-      {name:"Клименко",td:2},
-      {name:"Бикулов",visit:1},
+      {name:"Извеков",visit:8,call:15,td:9,issue:3,cancel:1,callContract:1,webContract:0},
+      {name:"Леонтьев",visit:2,web:7,td:2,issue:7,callContract:0,webContract:2},
+      {name:"Елчин",visit:1,web:1,td:1,issue:2,cancel:1,callContract:1,webContract:0},
+      {name:"Клименко",td:1},
+      {name:"Бикулов",visit:1,td:3},
+      {name:"Назарян",td:3},
+      {name:"Вакилов",td:1},
       {name:"Без менеджера",web:1}
     ];
     function boardSepPerson(o){
@@ -2348,7 +2350,7 @@ async function pingTelegram(body){
             <section class="lb-block d"><p class="lb-rep-h">Интернет в визит</p><table class="lb-rep">${thead(webHead)}<tbody>${shown.map(rowWeb).join("")}</tbody></table></section>
           </div>
         </div>
-        <p class="lb-rep-note">Как в «ОП CHERY». ${planNote} Трафик — визиты + звонки + интернет. Конв. в контракт: меньше 10% красным, меньше 15% жёлтым, иначе зелёным. ТД ниже 70% — красным. ${sep?"Сентябрь: контракт = выдача + расторжение. Визит со звонка и с интернета, оценка б/у и e-credit — из воронки, только менеджеры лидерборда.":"Расторжения в журнале октября не ведутся."} Обновлено ${escape((boardCache&&boardCache.stamp)||"")}</p>`;
+        <p class="lb-rep-note">Как в «ОП CHERY». ${planNote} Трафик — визиты + звонки + интернет. Конв. в контракт: меньше 10% красным, меньше 15% жёлтым, иначе зелёным. ТД ниже 70% — красным. ${sep?"Сентябрь: контракт = выдача + расторжение. Тест-драйв — только поездка с «движением клиента», без служебных, заправок и центра Hyundai. Повтор одного клиента и поездка мужа с женой считаются один раз. Визит со звонка и с интернета, оценка б/у и e-credit — из воронки, только менеджеры лидерборда.":"Расторжения в журнале октября не ведутся."} Обновлено ${escape((boardCache&&boardCache.stamp)||"")}</p>`;
     }
     function boardBindFolds(root){
       if(!root) return;
