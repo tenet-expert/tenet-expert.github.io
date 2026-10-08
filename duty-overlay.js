@@ -260,7 +260,7 @@
         if(!document.getElementById("octFit")){
           var st=document.createElement("style");
           st.id="octFit";
-          st.textContent=".lb-pair{gap:8px}.lb-pair .lb-block{overflow-x:hidden;padding:8px 6px 4px;min-width:0}.lb-pair .lb-scroll{overflow-x:hidden}.lb-pair .lb-rep{table-layout:fixed;width:100%;font-size:11px}.lb-pair .lb-rep th,.lb-pair .lb-rep td{padding:3px 2px}.lb-pair .lb-rep th{font-size:9px;letter-spacing:0;line-height:1.1}.lb-pair .lb-rep td:first-child,.lb-pair .lb-rep th:first-child{overflow:hidden;text-overflow:ellipsis}";
+          st.textContent=".lb-pair{gap:8px}.lb-pair .lb-block{overflow-x:hidden;padding:8px 6px 4px;min-width:0}.lb-block.e{flex:0.7}.lb-block.f{flex:1.78}.lb-pair .lb-scroll{overflow-x:hidden}.lb-pair .lb-rep{table-layout:fixed;width:100%;font-size:11px}.lb-pair .lb-rep th,.lb-pair .lb-rep td{padding:3px 2px}.lb-pair .lb-rep th{font-size:9px;letter-spacing:0;line-height:1.1}.lb-pair .lb-rep td:first-child,.lb-pair .lb-rep th:first-child{overflow:hidden;text-overflow:ellipsis}";
           (document.head||document.documentElement).appendChild(st);
         }
         if(typeof boardEnsure==="function" && !boardEnsure.__sales){
