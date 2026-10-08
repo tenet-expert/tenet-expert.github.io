@@ -187,38 +187,118 @@
       {when:"06.10.2026 12:01", who:"Спицын", client:"Шашков", model:"T4L"},
       {when:"07.10.2026 12:00", who:"Спицын", client:"Стрельников", model:"T7"}
     ];
-    function apply(oct){
-      if(!oct || oct.__sales) return;
-      var i;
-      for(i=0;i<oct.length;i++){ if(oct[i]) oct[i].issue=0; }
-      for(i=0;i<SALES.length;i++){
-        var s=SALES[i];
-        oct.push({when:s.when, who:s.who, client:s.client, model:s.model, visit:0, call:0, web:0, meet:0, service:0, td:0, contract:0, issue:1, note:"продажи"});
-      }
-      oct.__sales=1;
+    var OCT={
+      "Ахмадуллин":{visit:2,call:2,web:3,td:0,issue:0,contract:0,cancel:0,callVisit:0,webVisit:0,callContract:0,webContract:0},
+      "Велиджанов":{visit:1,call:0,web:4,td:1,issue:0,contract:1,cancel:0,callVisit:0,webVisit:0,callContract:0,webContract:0},
+      "Демьянов":{visit:3,call:6,web:4,td:2,issue:2,contract:3,cancel:0,callVisit:0,webVisit:0,callContract:0,webContract:1},
+      "Лавров":{visit:4,call:6,web:5,td:3,issue:2,contract:3,cancel:1,callVisit:0,webVisit:0,callContract:0,webContract:0},
+      "Сидоров":{visit:6,call:6,web:5,td:7,issue:0,contract:2,cancel:1,callVisit:0,webVisit:0,callContract:0,webContract:0},
+      "Спицын":{visit:4,call:3,web:1,td:2,issue:4,contract:7,cancel:0,callVisit:0,webVisit:1,callContract:2,webContract:0},
+      "Тальков":{visit:8,call:5,web:13,td:5,issue:1,contract:2,cancel:0,callVisit:0,webVisit:0,callContract:0,webContract:0}
+    };
+    var OTHER=[
+      {name:"Павлова",visit:0,call:0,web:0,td:0,issue:1,contract:1,cancel:0,callVisit:0,webVisit:0,callContract:0,webContract:0},
+      {name:"Елчин",visit:0,call:0,web:0,td:0,issue:0,contract:1,cancel:1,callVisit:1,webVisit:0,callContract:0,webContract:0},
+      {name:"Леонтьев",visit:1,call:0,web:5,td:1,issue:0,contract:1,cancel:0,callVisit:0,webVisit:2,callContract:0,webContract:1},
+      {name:"Извеков",visit:1,call:0,web:0,td:0,issue:0,contract:0,cancel:0,callVisit:0,webVisit:0,callContract:0,webContract:0},
+      {name:"Клименко",visit:0,call:0,web:0,td:0,issue:0,contract:1,cancel:0,callVisit:0,webVisit:0,callContract:0,webContract:0},
+      {name:"Бикулов",visit:0,call:0,web:0,td:2,issue:0,contract:0,cancel:0,callVisit:0,webVisit:0,callContract:0,webContract:0},
+      {name:"Назарян",visit:0,call:0,web:0,td:1,issue:0,contract:0,cancel:0,callVisit:0,webVisit:0,callContract:0,webContract:0},
+      {name:"Без менеджера",visit:0,call:1,web:1,td:0,issue:0,contract:0,cancel:0,callVisit:0,webVisit:0,callContract:0,webContract:0}
+    ];
+    var KEYS=["visit","call","web","meet","td","contract","issue","cancel","service","ecredit","callVisit","webVisit","callContract","webContract","visitContract","traffic"];
+    function blank(){
+      var p={name:"",people:[],other:false};
+      KEYS.forEach(function(k){ p[k]=0; });
+      return p;
+    }
+    function fill(p, src){
+      KEYS.forEach(function(k){ if(src[k]!=null) p[k]=src[k]; });
+      p.traffic=(p.visit||0)+(p.call||0)+(p.web||0);
+    }
+    function monthRows(rows){
+      var days={};
+      (rows||[]).forEach(function(r){
+        var d=String(r.when||"").slice(0,5);
+        if(/^\d\d\.\d\d$/.test(d)) days[d]=1;
+      });
+      return Object.keys(days).length>=3;
+    }
+    function applyMonth(rank){
+      var mains=[], bucket=null;
+      rank.list.forEach(function(p){ if(p.other) bucket=p; else mains.push(p); });
+      mains.forEach(function(p){ if(OCT[p.name]) fill(p, OCT[p.name]); });
+      var kids=OTHER.map(function(o){ var p=blank(); p.name=o.name; fill(p,o); return p; });
+      kids.sort(function(a,b){ return (b.issue-a.issue)||(b.contract-a.contract)||(b.td-a.td)||a.name.localeCompare(b.name,"ru"); });
+      if(!bucket){ bucket=blank(); bucket.name="Другие"; bucket.other=true; }
+      fill(bucket, {});
+      kids.forEach(function(x){ KEYS.forEach(function(k){ bucket[k]=(bucket[k]||0)+(x[k]||0); }); });
+      bucket.traffic=(bucket.visit||0)+(bucket.call||0)+(bucket.web||0);
+      bucket.people=kids;
+      bucket.other=true;
+      mains.sort(function(a,b){ return (b.issue-a.issue)||(b.contract-a.contract)||(b.td-a.td)||(b.visit-a.visit)||a.name.localeCompare(b.name,"ru"); });
+      rank.list=mains.concat([bucket]);
+      var order=mains.concat([bucket]).concat(kids);
+      var total=blank(); total.name="Итого";
+      mains.concat(kids).forEach(function(p){ KEYS.forEach(function(k){ total[k]+=p[k]||0; }); });
+      order.push(total);
+      window.__octCancel=order.map(function(p){ return p.cancel||0; });
     }
     function hook(){
       try{
-        if(typeof boardEnsure!=="function" || boardEnsure.__sales) return;
-        var orig=boardEnsure;
-        var wrapped=function(){
-          return Promise.resolve().then(function(){ return orig(); }).then(function(cache){
-            try{ if(cache && cache.oct) apply(cache.oct); }catch(e){}
-            return cache;
-          });
-        };
-        wrapped.__sales=1;
-        boardEnsure=wrapped;
+        if(typeof boardEnsure==="function" && !boardEnsure.__sales){
+          var orig=boardEnsure;
+          var wrapped=function(){
+            return Promise.resolve().then(function(){ return orig(); }).then(function(cache){
+              try{
+                if(cache && cache.oct && !cache.oct.__sales){
+                  cache.oct.forEach(function(r){ if(r) r.issue=0; });
+                  SALES.forEach(function(s){
+                    cache.oct.push({when:s.when, who:s.who, client:s.client, model:s.model, visit:0, call:0, web:0, meet:0, service:0, td:0, contract:0, issue:1, note:"вкладка Продажи"});
+                  });
+                  cache.oct.__sales=1;
+                }
+              }catch(e){}
+              return cache;
+            });
+          };
+          wrapped.__sales=1;
+          boardEnsure=wrapped;
+        }
+        if(typeof boardRank==="function" && !boardRank.__oct){
+          var origRank=boardRank;
+          var wrappedRank=function(rows, roster){
+            var rank=origRank(rows, roster);
+            try{ if(rank && monthRows(rows) && roster && roster.indexOf("Велиджанов")>=0) applyMonth(rank); }catch(e){}
+            return rank;
+          };
+          wrappedRank.__oct=1;
+          boardRank=wrappedRank;
+        }
+        if(typeof boardReportHtml==="function" && !boardReportHtml.__oct){
+          var origRep=boardReportHtml;
+          var wrappedRep=function(){
+            var html=origRep();
+            try{
+              html=html.replace("Расторжения в журнале октября не ведутся.","Октябрь снят со скринов 1–7: визиты, звонки и интернет — первичные, без задвоенных. Контракт = действующий резерв + выдача + расторжение. Расторжения: Елчин T8, Лавров T9, Сидоров T7. Паймушкин — контракт Велиджанова.");
+              var nums=window.__octCancel||[];
+              var i=0;
+              html=html.replace(/<td>–<\/td><td>–<\/td><td>–<\/td>/g, function(){
+                var n=nums[i++];
+                if(n==null) return "<td>–</td><td>–</td><td>–</td>";
+                return "<td>"+n+"</td><td>–</td><td>–</td>";
+              });
+            }catch(e){}
+            return html;
+          };
+          wrappedRep.__oct=1;
+          boardReportHtml=wrappedRep;
+        }
       }catch(e){}
     }
     hook();
     var n=0;
-    var timer=setInterval(function(){
-      hook();
-      if(++n>20) clearInterval(timer);
-    }, 300);
-    setTimeout(function(){
-      try{ if(typeof boardLoad==="function") boardLoad(); }catch(e){}
-    }, 400);
+    var timer=setInterval(function(){ hook(); if(++n>20) clearInterval(timer); }, 300);
+    setTimeout(function(){ try{ if(typeof boardLoad==="function") boardLoad(); }catch(e){} }, 500);
   }catch(e){}
 })();
