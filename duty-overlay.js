@@ -242,7 +242,9 @@
       var total=blank(); total.name="Итого";
       mains.concat(kids).forEach(function(p){ KEYS.forEach(function(k){ total[k]+=p[k]||0; }); });
       order.push(total);
+      order.forEach(function(p){ p.active=Math.max(0,(p.contract||0)-(p.issue||0)-(p.cancel||0)); });
       window.__octCancel=order.map(function(p){ return p.cancel||0; });
+      window.__octActive=order.map(function(p){ return p.active||0; });
     }
     function hook(){
       try{
@@ -280,13 +282,16 @@
           var wrappedRep=function(){
             var html=origRep();
             try{
-              html=html.replace("Расторжения в журнале октября не ведутся.","Октябрь снят со скринов 1–7: визиты, звонки и интернет — первичные, без задвоенных. Контракт = действующий резерв + выдача + расторжение. Расторжения: Елчин T8, Лавров T9, Сидоров T7. Паймушкин — контракт Велиджанова.");
+              html=html.replace("Расторжения в журнале октября не ведутся.","Октябрь снят со скринов 1–7: визиты, звонки и интернет — первичные, без задвоенных. Контракт = действующий резерв + выдача + расторжение. Действующие — то, что в резерве и ещё не выдано: Паймушкин (Велиджанов), Жулин (Демьянов), Сухова (Сидоров), Неведрова, Горланов, Инкина (Спицын), Меркулов (Тальков), Козлов (Леонтьев), Мирсаяпов (Клименко). Расторжения: Елчин T8, Лавров T9, Сидоров T7.");
               var nums=window.__octCancel||[];
+              var act=window.__octActive||[];
               var i=0;
               html=html.replace(/<td>–<\/td><td>–<\/td><td>–<\/td>/g, function(){
-                var n=nums[i++];
+                var n=nums[i];
+                var a=act[i];
+                i++;
                 if(n==null) return "<td>–</td><td>–</td><td>–</td>";
-                return "<td>"+n+"</td><td>–</td><td>–</td>";
+                return "<td>"+n+"</td><td>"+(a==null?"–":a)+"</td><td>–</td>";
               });
             }catch(e){}
             return html;
