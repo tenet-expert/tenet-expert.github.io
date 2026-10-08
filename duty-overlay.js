@@ -188,23 +188,24 @@
       {when:"07.10.2026 12:00", who:"Спицын", client:"Стрельников", model:"T7"}
     ];
     var OCT={
-      "Ахмадуллин":{visit:2,call:2,web:3,td:0,issue:0,contract:0,cancel:0,callVisit:0,webVisit:0,callContract:0,webContract:0},
-      "Велиджанов":{visit:1,call:0,web:4,td:1,issue:0,contract:1,cancel:0,callVisit:0,webVisit:0,callContract:0,webContract:0},
-      "Демьянов":{visit:3,call:6,web:4,td:2,issue:2,contract:3,cancel:0,callVisit:0,webVisit:0,callContract:0,webContract:1},
-      "Лавров":{visit:4,call:6,web:5,td:3,issue:2,contract:3,cancel:1,callVisit:0,webVisit:0,callContract:0,webContract:0},
-      "Сидоров":{visit:6,call:6,web:5,td:7,issue:0,contract:2,cancel:1,callVisit:0,webVisit:0,callContract:0,webContract:0},
-      "Спицын":{visit:4,call:3,web:1,td:2,issue:4,contract:7,cancel:0,callVisit:0,webVisit:1,callContract:2,webContract:0},
-      "Тальков":{visit:8,call:5,web:13,td:5,issue:1,contract:2,cancel:0,callVisit:0,webVisit:0,callContract:0,webContract:0}
+      "Ахмадуллин":{visit:2,call:2,web:3,td:0,issue:0,contract:0,cancel:0,service:0,ecredit:0,callVisit:0,webVisit:0,callContract:0,webContract:0},
+      "Велиджанов":{visit:1,call:0,web:4,td:1,issue:0,contract:1,cancel:0,service:1,ecredit:1,callVisit:0,webVisit:0,callContract:0,webContract:0},
+      "Демьянов":{visit:3,call:6,web:4,td:2,issue:2,contract:3,cancel:0,service:3,ecredit:2,callVisit:0,webVisit:0,callContract:0,webContract:1},
+      "Лавров":{visit:4,call:6,web:5,td:3,issue:2,contract:3,cancel:1,service:3,ecredit:3,callVisit:0,webVisit:0,callContract:0,webContract:0},
+      "Сидоров":{visit:6,call:6,web:5,td:7,issue:0,contract:2,cancel:1,service:4,ecredit:6,callVisit:0,webVisit:0,callContract:0,webContract:0},
+      "Спицын":{visit:4,call:3,web:1,td:2,issue:4,contract:7,cancel:0,service:0,ecredit:3,callVisit:0,webVisit:1,callContract:2,webContract:0},
+      "Тальков":{visit:8,call:5,web:13,td:5,issue:1,contract:2,cancel:0,service:1,ecredit:7,callVisit:0,webVisit:0,callContract:0,webContract:0}
     };
     var OTHER=[
       {name:"Павлова",visit:0,call:0,web:0,td:0,issue:1,contract:1,cancel:0,callVisit:0,webVisit:0,callContract:0,webContract:0},
       {name:"Елчин",visit:0,call:0,web:0,td:0,issue:0,contract:1,cancel:1,callVisit:1,webVisit:0,callContract:0,webContract:0},
-      {name:"Леонтьев",visit:1,call:0,web:5,td:1,issue:0,contract:1,cancel:0,callVisit:0,webVisit:2,callContract:0,webContract:1},
-      {name:"Извеков",visit:1,call:0,web:0,td:0,issue:0,contract:0,cancel:0,callVisit:0,webVisit:0,callContract:0,webContract:0},
+      {name:"Леонтьев",visit:1,call:0,web:5,td:1,issue:0,contract:1,cancel:0,service:2,ecredit:1,callVisit:0,webVisit:2,callContract:0,webContract:1},
+      {name:"Извеков",visit:1,call:0,web:0,td:0,issue:0,contract:0,cancel:0,service:1,ecredit:1,callVisit:0,webVisit:0,callContract:0,webContract:0},
       {name:"Клименко",visit:0,call:0,web:0,td:0,issue:0,contract:1,cancel:0,callVisit:0,webVisit:0,callContract:0,webContract:0},
       {name:"Бикулов",visit:0,call:0,web:0,td:2,issue:0,contract:0,cancel:0,callVisit:0,webVisit:0,callContract:0,webContract:0},
       {name:"Назарян",visit:0,call:0,web:0,td:1,issue:0,contract:0,cancel:0,callVisit:0,webVisit:0,callContract:0,webContract:0},
-      {name:"Без менеджера",visit:0,call:1,web:1,td:0,issue:0,contract:0,cancel:0,callVisit:0,webVisit:0,callContract:0,webContract:0}
+      {name:"Без менеджера",visit:0,call:1,web:1,td:0,issue:0,contract:0,cancel:0,callVisit:0,webVisit:0,callContract:0,webContract:0},
+      {name:"Коропец",visit:0,call:0,web:0,td:0,issue:0,contract:0,cancel:0,service:0,ecredit:1,callVisit:0,webVisit:0,callContract:0,webContract:0}
     ];
     var KEYS=["visit","call","web","meet","td","contract","issue","cancel","service","ecredit","callVisit","webVisit","callContract","webContract","visitContract","traffic"];
     function blank(){
@@ -245,9 +246,23 @@
       order.forEach(function(p){ p.active=Math.max(0,(p.contract||0)-(p.issue||0)-(p.cancel||0)); });
       window.__octCancel=order.map(function(p){ return p.cancel||0; });
       window.__octActive=order.map(function(p){ return p.active||0; });
+      window.__octPipe=order.map(function(p){ return (p.active||0)+(p.issue||0); });
+      window.__octPlan=order.map(function(p){
+        if(p.name==="Итого") return 65;
+        if(p.name==="Спицын") return 5;
+        if(p.other) return 0;
+        if(OCT[p.name]) return 10;
+        return 0;
+      });
     }
     function hook(){
       try{
+        if(!document.getElementById("octFit")){
+          var st=document.createElement("style");
+          st.id="octFit";
+          st.textContent=".lb-pair{gap:8px}.lb-pair .lb-block{overflow-x:hidden;padding:8px 6px 4px;min-width:0}.lb-pair .lb-scroll{overflow-x:hidden}.lb-pair .lb-rep{table-layout:fixed;width:100%;font-size:11px}.lb-pair .lb-rep th,.lb-pair .lb-rep td{padding:3px 2px}.lb-pair .lb-rep th{font-size:9px;letter-spacing:0;line-height:1.1}.lb-pair .lb-rep td:first-child,.lb-pair .lb-rep th:first-child{overflow:hidden;text-overflow:ellipsis}";
+          (document.head||document.documentElement).appendChild(st);
+        }
         if(typeof boardEnsure==="function" && !boardEnsure.__sales){
           var orig=boardEnsure;
           var wrapped=function(){
@@ -282,16 +297,28 @@
           var wrappedRep=function(){
             var html=origRep();
             try{
-              html=html.replace("Расторжения в журнале октября не ведутся.","Октябрь снят со скринов 1–7: визиты, звонки и интернет — первичные, без задвоенных. Контракт = действующий резерв + выдача + расторжение. Действующие — то, что в резерве и ещё не выдано: Паймушкин (Велиджанов), Жулин (Демьянов), Сухова (Сидоров), Неведрова, Горланов, Инкина (Спицын), Меркулов (Тальков), Козлов (Леонтьев), Мирсаяпов (Клименко). Расторжения: Елчин T8, Лавров T9, Сидоров T7.");
+              html=html.replace("Расторжения в журнале октября не ведутся.","Октябрь снят со скринов 1–7: визиты, звонки и интернет — первичные, без задвоенных. Контракт = действующий резерв + выдача + расторжение. Действующие — резерв, ещё не выдан. Выдачи+К = действующие + выдачи, без расторжений, из них считается прогноз. Оценки и e-credit — из воронки 1–7. Расторжения: Елчин T8, Лавров T9, Сидоров T7.");
               var nums=window.__octCancel||[];
               var act=window.__octActive||[];
+              var pipe=window.__octPipe||[];
+              var plans=window.__octPlan||[];
               var i=0;
-              html=html.replace(/<td>–<\/td><td>–<\/td><td>–<\/td>/g, function(){
-                var n=nums[i];
-                var a=act[i];
+              function paceOf(n, plan){
+                var now=new Date();
+                var days=new Date(now.getFullYear(), now.getMonth()+1, 0).getDate();
+                var passed=Math.min(days, Math.max(1, now.getDate()));
+                var f=Math.round((n||0)*days/passed);
+                if(!plan) return {n:String(f), p:"–"};
+                var v=100*f/plan;
+                var s=Math.abs(v-Math.round(v))<0.05?String(Math.round(v)):v.toFixed(1).replace(".",",");
+                return {n:String(f), p:s+"%"};
+              }
+              html=html.replace(/<td>–<\/td><td>–<\/td><td>–<\/td><td>[^<]*<\/td><td>[^<]*<\/td>/g, function(){
+                var n=nums[i], a=act[i], k=pipe[i], plan=plans[i];
                 i++;
-                if(n==null) return "<td>–</td><td>–</td><td>–</td>";
-                return "<td>"+n+"</td><td>"+(a==null?"–":a)+"</td><td>–</td>";
+                if(n==null) return "<td>–</td><td>–</td><td>–</td><td>–</td><td>–</td>";
+                var pc=paceOf(k||0, plan||0);
+                return "<td>"+n+"</td><td>"+(a==null?"–":a)+"</td><td>"+(k==null?"–":k)+"</td><td>"+pc.n+"</td><td>"+pc.p+"</td>";
               });
             }catch(e){}
             return html;
