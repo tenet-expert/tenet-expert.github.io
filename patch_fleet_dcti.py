@@ -53,6 +53,18 @@ SUBS = [
     ('"Цена по госпрограмме с учётом субсидии и трейд-ин "+rub(gov)+" ₽",',
      '"Цена по госпрограмме с учётом субсидии"+(ti?" и трейд-ин ":" ")+rub(gov)+" ₽",'),
 ]
+DONE2 = "/*fleet-2389*/"
+# Stage 2: special T7 Active 2WD fleet base 2 333 000 -> 2 389 000 (ФЛИТ 08.10),
+# and КП fleet payment computed from the same price as «Цена по госпрограмме».
+SUBS2 = [
+    ('const FLEET_PIN = {"EDXFB32B7TE062327":2333000};',
+     'const FLEET_PIN = {"EDXFB32B7TE062327":2389000};' + DONE2),
+    ('fleetSubQuote(Math.max(0, 2333000-tiMpt),', 'fleetSubQuote(Math.max(0, 2389000-tiMpt),'),
+    ('<p class="eyebrow">Флит · от 2 333</p>', '<p class="eyebrow">Флит · от 2 389</p>'),
+    ('Старт 2 333 000${useDcTi?', 'Старт 2 389 000${useDcTi?'),
+    ('const q=typeof fleetSubQuote==="function"?fleetSubQuote(base, sub, have, f.do||70000',
+     'const q=typeof fleetSubQuote==="function"?fleetSubQuote(Math.max(0, base-ti), sub, have, f.do||70000'),
+]
 BLANKS = re.compile(r"\n(?:[ \t]*\n){2,}(    const BOARD_OCT = )")
 
 
@@ -71,15 +83,22 @@ def js_ok(html):
     return True
 
 
-def patch(text):
+def stage(text, done, subs, tag):
+    if done in text:
+        return text
     out = text
-    if DONE not in out:
-        for old, new in SUBS:
-            if out.count(old) != 1:
-                print("fleet-dcti: anchor count", out.count(old), "->", old[:70].replace("\n", " "))
-                out = text
-                break
-            out = out.replace(old, new, 1)
+    for old, new in subs:
+        if out.count(old) != 1:
+            print(tag + ": anchor count", out.count(old), "->", old[:70].replace("\n", " "))
+            return text
+        out = out.replace(old, new, 1)
+    return out
+
+
+def patch(text):
+    out = stage(text, DONE, SUBS, "fleet-dcti")
+    if DONE in out:
+        out = stage(out, DONE2, SUBS2, "fleet-2389")
     out = BLANKS.sub(r"\n\n\1", out)
     return out
 
@@ -97,7 +116,7 @@ def main():
             print(p, "fleet-dcti: JS check failed -> not written")
             continue
         p.write_text(out, encoding="utf-8")
-        print(p, "fleet-dcti: patched", "(dcti)" if DONE in out and DONE not in src else "(blank lines only)")
+        print(p, "fleet-dcti: patched", "dcti" if DONE in out and DONE not in src else "", "2389" if DONE2 in out and DONE2 not in src else "")
 
 
 if __name__ == "__main__":
