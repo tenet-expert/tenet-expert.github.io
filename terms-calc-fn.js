@@ -556,6 +556,20 @@
       const paid=Math.max(0, Math.round((q&&q.early)||0)+Math.round((q&&q.earlyOver)||0));
       return {deal, after:Math.max(0, deal-paid), pv:Math.max(0, Math.round((q&&q.pv)||0))};
     }
+    function fleetPvHave(q){
+      if(!q) return 0;
+      return Math.max(0, Math.round(Number(q.pv)||0)+Math.round(Number(q.early)||0)+Math.round(Number(q.earlyOver)||0)+Math.round(Number(q.sub)||0));
+    }
+    function pvMinBox(have, base, minPct, how){
+      base=Math.max(0, Math.round(Number(base)||0));
+      have=Math.max(0, Math.round(Number(have)||0));
+      if(!(base>0)) return {low:false, html:""};
+      const need=Math.round(base*minPct/100);
+      if(have+1>=need) return {low:false, html:""};
+      const got=Math.round(have*1000/base)/10;
+      const gotTxt=String(got).replace(".",",");
+      return {low:true, html:`<p class="pv-min">Минималка ${minPct}%<b>${rub(need)} ₽</b><span>${how} сейчас ${rub(have)} ₽ · ${gotTxt}%</span></p>`};
+    }
     function fleetBodyTop(q){
       const b=fleetPaid(q);
       return `<p class="calc-note">ПВ ${rub(b.pv)} · тело ${rub(b.after)} с учётом всех денег</p>`;
@@ -656,6 +670,7 @@
       const pack=typeof kmVal==="function"?kmVal("kmPack", 150000):150000;
       const finDelta=(addons-70000)+(pack-150000);
       const q=fleetSubQuote(base, subAmt, down, addons, pack, months, isSub, fleetRateOf(m));
+      const fleetWarn=pvMinBox(fleetPvHave(q), q.base, 20, "свои + субсидия");
       const creditMpt=q.credit;
       const banksMpt=[{id:"sovcom", name:"Совкомбанк", rate:q.rate, term:q.termAfter, capped:!q.early && q.term!==months, termNote:q.early?(q.termAfter+" мес. вместо "+q.term+" · досрочное не меняет платёж"):"", payMpt:q.pay, overMpt:q.over}];
       const priceReg=Math.max(0, (m&&m.rrc?m.rrc:f.rrc)-(useTi&&m&&m.ti?m.ti:0));
@@ -697,6 +712,7 @@
         </div>
         <input type="hidden" id="cDownMode" value="${downMode==="sum"?"sum":"pct"}" />
         <p class="calc-note">${rub(down)} ₽ · ${downPct}% · одинаковые ПВ и срок для обоих расчётов</p>
+        ${fleetWarn.html}
       </div>`;
       const stdCol=`<div class="pay-col std km-pay">
             <p class="eyebrow">Директ</p>
@@ -704,8 +720,9 @@
             ${fleetPayRows(banks,"pay","over",months)}
             ${regBreak}
           </div>`;
-      const altCol=`<div class="pay-col sub km-pay">
+      const altCol=`<div class="pay-col sub km-pay${fleetWarn.low?" pv-low":""}">
             <p class="eyebrow">${isSub?"Флит · субсидия бренда":"Флит · Совкомбанк "+fleetRateTxt(q.rate)+"%"}</p>
+            ${fleetWarn.html}
             ${fleetBodyTop(q)}
             ${fleetPayRows(banksMpt,"payMpt","overMpt",months)}
             ${fleetBodyRows(q)}
@@ -736,8 +753,10 @@
         const pPayB=typeof calcPay==="function"?calcPay(pCreditB+pDownP, pDownP, months, pRateB):0;
         const pOverA=pPayA*months-pBase;
         const pOverB=pPayB*months-pCreditB;
-        pangoCol=`<div class="pay-col pango km-pay">
+        const pangoWarn=pvMinBox(pDownP, pFix, 10, "первый взнос");
+        pangoCol=`<div class="pay-col pango km-pay${pangoWarn.low?" pv-low":""}">
             <p class="eyebrow">Спеццена · PANGO</p>
+            ${pangoWarn.html}
             <p class="eyebrow" style="margin-top:8px">17,4% без комиссий</p>
             <div class="bank-row pay-top"><span><b>Платёж</b><br/><small>${pRateA}% · ${months} мес. · переплата ~${rub(Math.round(pOverA))}</small></span><span class="pay">${rub(Math.round(pPayA))} ₽</span></div>
             <div class="bank-row"><span>Тело кредита</span><span class="pay">${rub(pBase)}</span></div>

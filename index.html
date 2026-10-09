@@ -948,6 +948,12 @@ input,textarea{width:100%;background:#fff;border:1px solid var(--border);color:v
 .km-pay .bank-row,.pay-col .bank-row{align-items:flex-start;gap:8px}
 .km-pay .bank-row span:first-child,.pay-col .bank-row span:first-child{min-width:0;overflow-wrap:anywhere}
 .km-contrast .bank-row > span:first-child{overflow-wrap:normal;word-break:normal}
+.pv-min{margin:8px 0 10px;padding:10px 12px;border-radius:12px;background:#fdecee;color:#9a1b28;font-weight:800;font-size:22px;line-height:1.05;letter-spacing:-.03em}
+.pv-min b{display:block;margin-top:2px;font-size:32px;line-height:1;letter-spacing:-.04em}
+.pv-min span{display:block;margin-top:6px;font-size:13px;font-weight:700;letter-spacing:0;line-height:1.3}
+.pay-cell.pv-low{background:#fff6f6;border-radius:12px;box-shadow:inset 0 0 0 2px #c62828}
+.pay-col.pv-low{background:#fff6f6!important;box-shadow:inset 0 0 0 2px #c62828!important}
+.pay-cell.pv-low .eyebrow,.pay-col.pv-low .eyebrow{color:#9a1b28!important}
 .pay-col.sub .km-contrast .bank-row .pay,.pay-col.mpt .km-contrast .bank-row .pay{font-size:17px;line-height:1.15}
 @media(min-width:1100px){
   .km-stage.km-4 .km-pays:has(.fleet-pair){grid-template-columns:minmax(0,1.05fr) minmax(320px,1.5fr) minmax(0,.9fr)}
@@ -3231,6 +3237,20 @@ async function pingTelegram(body){
       const paid=Math.max(0, Math.round((q&&q.early)||0)+Math.round((q&&q.earlyOver)||0));
       return {deal, after:Math.max(0, deal-paid), pv:Math.max(0, Math.round((q&&q.pv)||0))};
     }
+    function fleetPvHave(q){
+      if(!q) return 0;
+      return Math.max(0, Math.round(Number(q.pv)||0)+Math.round(Number(q.early)||0)+Math.round(Number(q.earlyOver)||0)+Math.round(Number(q.sub)||0));
+    }
+    function pvMinBox(have, base, minPct, how){
+      base=Math.max(0, Math.round(Number(base)||0));
+      have=Math.max(0, Math.round(Number(have)||0));
+      if(!(base>0)) return {low:false, html:""};
+      const need=Math.round(base*minPct/100);
+      if(have+1>=need) return {low:false, html:""};
+      const got=Math.round(have*1000/base)/10;
+      const gotTxt=String(got).replace(".",",");
+      return {low:true, html:`<p class="pv-min">Минималка ${minPct}%<b>${rub(need)} ₽</b><span>${how} сейчас ${rub(have)} ₽ · ${gotTxt}%</span></p>`};
+    }
     function fleetBodyTop(q){
       const b=fleetPaid(q);
       return `<p class="calc-note">ПВ ${rub(b.pv)} · тело ${rub(b.after)} с учётом всех денег</p>`;
@@ -3333,6 +3353,7 @@ async function pingTelegram(body){
       const pack=typeof kmVal==="function"?kmVal("kmPack", 150000):150000;
       const finDelta=(addons-70000)+(pack-150000);
       const q=fleetSubQuote(base, subAmt, down, addons, pack, months, isSub, fleetRateOf(m));
+      const fleetWarn=pvMinBox(fleetPvHave(q), q.base, 20, "свои + субсидия");
       const creditMpt=q.credit;
       const banksMpt=[{id:"sovcom", name:"Совкомбанк", rate:q.rate, term:q.termAfter, capped:!q.early && q.term!==months, termNote:q.early?(q.termAfter+" мес. вместо "+q.term+" · досрочное не меняет платёж"):"", payMpt:q.pay, overMpt:q.over}];
       const priceReg=Math.max(0, (m&&m.rrc?m.rrc:f.rrc)-(useTi&&m&&m.ti?m.ti:0));
@@ -3374,6 +3395,7 @@ async function pingTelegram(body){
         </div>
         <input type="hidden" id="cDownMode" value="${downMode==="sum"?"sum":"pct"}" />
         <p class="calc-note">${rub(down)} ₽ · ${downPct}% · одинаковые ПВ и срок для обоих расчётов</p>
+        ${fleetWarn.html}
       </div>`;
       const stdCol=`<div class="pay-col std km-pay">
             <p class="eyebrow">Директ</p>
@@ -3381,8 +3403,9 @@ async function pingTelegram(body){
             ${fleetPayRows(banks,"pay","over",months)}
             ${regBreak}
           </div>`;
-      const altCol=`<div class="pay-col sub km-pay">
+      const altCol=`<div class="pay-col sub km-pay${fleetWarn.low?" pv-low":""}">
             <p class="eyebrow">${isSub?"Флит · субсидия бренда":"Флит · Совкомбанк "+fleetRateTxt(q.rate)+"%"}</p>
+            ${fleetWarn.html}
             ${fleetBodyTop(q)}
             ${fleetPayRows(banksMpt,"payMpt","overMpt",months)}
             ${fleetBodyRows(q)}
@@ -3413,8 +3436,10 @@ async function pingTelegram(body){
         const pPayB=typeof calcPay==="function"?calcPay(pCreditB+pDownP, pDownP, months, pRateB):0;
         const pOverA=pPayA*months-pBase;
         const pOverB=pPayB*months-pCreditB;
-        pangoCol=`<div class="pay-col pango km-pay">
+        const pangoWarn=pvMinBox(pDownP, pFix, 10, "первый взнос");
+        pangoCol=`<div class="pay-col pango km-pay${pangoWarn.low?" pv-low":""}">
             <p class="eyebrow">Спеццена · PANGO</p>
+            ${pangoWarn.html}
             <p class="eyebrow" style="margin-top:8px">17,4% без комиссий</p>
             <div class="bank-row pay-top"><span><b>Платёж</b><br/><small>${pRateA}% · ${months} мес. · переплата ~${rub(Math.round(pOverA))}</small></span><span class="pay">${rub(Math.round(pPayA))} ₽</span></div>
             <div class="bank-row"><span>Тело кредита</span><span class="pay">${rub(pBase)}</span></div>
@@ -3864,6 +3889,7 @@ async function pingTelegram(body){
       const pPayB=calcPay(pCreditB+pDown, pDown, months, pRateB);
       const pOverA=pPayA*months-pBase;
       const pOverB=pPayB*months-pCreditB;
+      const pangoWarn=pvMinBox(pDown, pFix, 10, "первый взнос");
       return banner("Калькулятор","Тест · только PANGO","CHERY")+`
         <p class="lead">Эта машина продаётся только по PANGO. Цена фикс, скидки директа и флита не применяются.</p>
         <div class="km-stage">
@@ -3883,10 +3909,12 @@ async function pingTelegram(body){
             <label class="field" style="max-width:none"><span>Срок, мес.</span><input id="cMonths" inputmode="numeric" value="${months}" /></label>
             <input type="hidden" id="cDownMode" value="sum" />
             <p class="calc-note">${rub(pDown)} ₽ · ${downPct}% от цены фикс</p>
+            ${pangoWarn.html}
           </div>
           <div class="km-right">
-            <div class="pay-col pango km-pay">
+            <div class="pay-col pango km-pay${pangoWarn.low?" pv-low":""}">
               <p class="eyebrow">Только PANGO</p>
+              ${pangoWarn.html}
               <p class="eyebrow" style="margin-top:8px">17,4% без комиссий</p>
               <div class="bank-row pay-top"><span><b>Платёж</b><br/><small>${pRateA}% · ${months} мес. · переплата ~${rub(Math.round(pOverA))}</small></span><span class="pay">${rub(Math.round(pPayA))} ₽</span></div>
               <div class="bank-row"><span>Тело кредита</span><span class="pay">${rub(pBase)}</span></div>
@@ -4160,6 +4188,9 @@ async function pingTelegram(body){
       const qFleetPrio=(m.id==="t7a" && typeof fleetSubQuote==="function")?fleetSubQuote(Math.max(0, 2389000-tiMpt), subAmt, down, addons, pack||0, months, !!(showSub && subAmt), fleetRateOf(m)):null;
       const banksMptPrio=qFleetPrio?[{id:"sovcom", name:"Совкомбанк", rate:qFleetPrio.rate, term:qFleetPrio.termAfter, capped:!qFleetPrio.early && qFleetPrio.term!==months, termNote:qFleetPrio.early?(qFleetPrio.termAfter+" мес. вместо "+qFleetPrio.term+" · досрочное не меняет платёж"):"", payMpt:qFleetPrio.pay, overMpt:qFleetPrio.over}]:[];
       const prioKmTxt=useTi?"−100 тыс. с трейд-ин":"0 тыс. без трейд-ин";
+      const fleetWarn=(showSub||showFleet)?pvMinBox(fleetPvHave(qFleet), qFleet&&qFleet.base, 20, "свои + субсидия"):{low:false,html:""};
+      const fleetPrioWarn=qFleetPrio?pvMinBox(fleetPvHave(qFleetPrio), qFleetPrio.base, 20, "свои + субсидия"):{low:false,html:""};
+      const pangoWarn=(_pg&&pFix>0)?pvMinBox(pDownP, pFix, 10, "первый взнос"):{low:false,html:""};
       return banner("Калькулятор","КМ и платёж · база "+TERMS_DATE,"TENET")+`
         <p class="lead">${pangoOnly?"Только спеццена PANGO. Директ и флит для этого VIN не считаем.":pShow?"Три расчёта рядом: директ, флит с субсидией бренда и спеццена PANGO.":"Сначала комплектация. Кредит и СЖ открываются галочкой «Кредит»."}</p>
         <div class="km-stage${pangoOnly?" km-pango":pShow?" km-4":useLoan&&showSplit?" km-3":""}">
@@ -4200,6 +4231,7 @@ async function pingTelegram(body){
                 ?`<label class="field" style="max-width:none"><span>Первый взнос, ₽</span><input id="cDown" inputmode="numeric" value="${down}" /></label>`
                 :`<label class="field" style="max-width:none"><span>Первый взнос, %</span><input id="cDownPct" inputmode="decimal" value="${downPct}" /></label>`}
               <p class="calc-note">${rub(down)} ₽ · ${downPct}% от цены авто${(showMpt||showSub||showFleet)?` · ${showFleet?"флит":"субс. бренда"}: ${rub(priceMpt)} − ПВ в авто ${rub(downMptCar)} = тело ${rub(creditMpt)}`:""}</p>
+              ${(showSub||showFleet)?fleetWarn.html:""}${qFleetPrio&&fleetPrioWarn.low&&!(fleetWarn.low&&fleetWarn.html===fleetPrioWarn.html)?fleetPrioWarn.html:""}${pShow?pangoWarn.html:""}
               <label class="field" style="max-width:none"><span>Срок, мес.</span><input id="cMonths" inputmode="numeric" value="${months}" /></label>`:""}
             <button type="button" class="btn ivory" id="kmToOffer" style="margin-top:16px;width:100%">Сформировать КП</button>
           </div>
@@ -4217,6 +4249,7 @@ async function pingTelegram(body){
           </div>
           <input type="hidden" id="cDownMode" value="${downMode==="sum"?"sum":"pct"}" />
           <p class="calc-note">${rub(down)} ₽ · ${downPct}% от цены авто${(showMpt||showSub||showFleet)?` · ${showFleet?"флит":"субс. бренда"}: ${rub(priceMpt)} − ПВ в авто ${rub(downMptCar)} = тело ${rub(creditMpt)}`:""}</p>
+          ${(showSub||showFleet)?fleetWarn.html:""}${qFleetPrio&&fleetPrioWarn.low&&!(fleetWarn.low&&fleetWarn.html===fleetPrioWarn.html)?fleetPrioWarn.html:""}${pShow?pangoWarn.html:""}
         </div>${pangoOnly?"":altPick}<div class="km-pays">
           ${pangoOnly?"":`<div class="pay-col std km-pay">
             <div class="km-contrast${prioInStock?"":" solo"}">
@@ -4237,13 +4270,15 @@ async function pingTelegram(body){
           </div>
           <div class="pay-col ${showSub?"sub":"mpt"} km-pay${qFleetPrio?" fleet-pair":""}">
             ${qFleetPrio?`<div class="km-contrast">
-              <div class="pay-cell">
+              <div class="pay-cell${fleetWarn.low?" pv-low":""}">
                 <p class="eyebrow">${showFleet||isPlus?"Флит · Совкомбанк "+fleetRateTxt(qFleet.rate)+"%":showSub?"Флит · субсидия бренда":"Флит · Совкомбанк "+fleetRateTxt(qFleet.rate)+"%"}</p>
+                ${fleetWarn.html}
                 ${typeof fleetBodyTop==="function"?fleetBodyTop(qFleet):""}
               </div>
-              <div class="pay-cell prio">
+              <div class="pay-cell prio${fleetPrioWarn.low?" pv-low":""}">
                 <p class="eyebrow">Флит · от 2 389</p>
                 <p class="calc-note">EDXFB32B2TE041658 · EDXFB32B7TE062327${fleetPin?" · этот VIN":""}. Старт 2 389 000${useDcTi?" − трейд-ин "+rub(tiMpt):""}${subAmt?" − субсидия "+rub(subAmt):""}.</p>
+                ${fleetPrioWarn.html}
                 ${typeof fleetBodyTop==="function"?fleetBodyTop(qFleetPrio):""}
               </div>
               <div class="pay-cell">${kmPayRows(banksMpt,"payMpt","overMpt")}</div>
@@ -4261,6 +4296,7 @@ async function pingTelegram(body){
               </div>
               <div class="pay-cell prio"><p class="calc-note">${qFleet.price>qFleetPrio.price?"Дешевле обычного флита на "+rub(qFleet.price-qFleetPrio.price)+".":""}</p></div>
             </div>`:`<p class="eyebrow">${showFleet||isPlus?"Флит · Совкомбанк "+fleetRateTxt(qFleet.rate)+"%":showSub?"Флит · субсидия бренда":"Флит · Совкомбанк "+fleetRateTxt(qFleet.rate)+"%"}</p>
+            ${fleetWarn.html}
             ${typeof fleetBodyTop==="function"?fleetBodyTop(qFleet):""}
             ${kmPayRows(banksMpt,"payMpt","overMpt")}
             ${typeof fleetBodyRows==="function"?fleetBodyRows(qFleet):`<div class="bank-row"><span>Тело кредита</span><span class="pay">${rub(creditMpt)}</span></div>`}
@@ -4272,8 +4308,9 @@ async function pingTelegram(body){
             </details>`}
             ${plusAltFleet}
           </div>`}
-          ${pShow?`<div class="pay-col pango km-pay">
+          ${pShow?`<div class="pay-col pango km-pay${pangoWarn.low?" pv-low":""}">
             <p class="eyebrow">Спеццена · PANGO</p>
+            ${pangoWarn.html}
             <p class="eyebrow" style="margin-top:8px">17,4% без комиссий</p>
             <div class="bank-row pay-top"><span><b>Платёж</b><br/><small>${pRateA}% · ${months} мес. · переплата ~${rub(Math.round(pOverA))}</small></span><span class="pay">${rub(Math.round(pPayA))} ₽</span></div>
             <div class="bank-row"><span>Тело кредита</span><span class="pay">${rub(pBase)}</span></div>
@@ -8422,6 +8459,7 @@ async function confirmCloud(rec){
       const pPayA=calcPay(pBase+pDown, pDown, months, pRateA);
       const pPayB=calcPay(pCreditB+pDown, pDown, months, pRateB);
       const downPct=read.downPct;
+      const pangoWarn=pvMinBox(pDown, pFix, 10, "первый взнос");
       const pYearsLabel=Math.abs(pYears-Math.round(pYears))<0.05?String(Math.round(pYears)):pYears.toFixed(1);
       const yNum=Number(pYearsLabel);
       const pYearsWord=(yNum===1)?"год":(yNum>1&&yNum<5&&Math.abs(yNum-Math.round(yNum))<0.05?"года":"лет");
@@ -8444,10 +8482,12 @@ async function confirmCloud(rec){
             <label class="field" style="max-width:none"><span>Срок, мес.</span><input id="cMonths" inputmode="numeric" value="${months}" /></label>
             <input type="hidden" id="cDownMode" value="sum" />
             <p class="calc-note">${rub(pDown)} ₽ · ${downPct}% от цены фикс</p>
+            ${pangoWarn.html}
           </div>
           <div class="km-right">
-            <div class="pay-col pango km-pay">
+            <div class="pay-col pango km-pay${pangoWarn.low?" pv-low":""}">
               <p class="eyebrow">Только PANGO</p>
+              ${pangoWarn.html}
               <div class="bank-row pay-top"><span><b>Платёж</b><br/><small>${pRateA}% · ${months} мес.</small></span><span class="pay">${rub(Math.round(pPayA))} ₽</span></div>
               <div class="bank-row"><span>Тело кредита</span><span class="pay">${rub(pBase)}</span></div>
               <p class="eyebrow" style="margin-top:8px">14,4% · НСС в теле</p>
