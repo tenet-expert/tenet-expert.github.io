@@ -4,7 +4,8 @@
 The DC checkbox is shown and effective on its own. Direct column logic for
 kmUseTi (table trade-in / возмещение) is unchanged. Corporate-VIN BFS mode
 (calcFleet) is not touched. Also trims the blank lines that patch_board.py
-adds before BOARD_OCT on every build. Idempotent; all-or-nothing per file;
+adds before BOARD_OCT on every build. Idempotent; every substitution is
+re-applied independently on each build (earlier steps may revert pieces);
 node --check guard.
 """
 import os, re, shutil, subprocess, tempfile
@@ -91,24 +92,35 @@ def js_ok(html):
     return True
 
 
-def stage(text, done, subs, tag):
-    if done in text:
-        return text
+PIN_RE = re.compile(r'const FLEET_PIN = \{[^}]*\};(?:/\*fleet-[a-z0-9]+\*/)*')
+PIN_NEW = ('const FLEET_PIN = {"EDXFB32B7TE062327":2389000,"EDXFB32B2TE041658":2389000};'
+           + DONE2 + DONE3)
+NOTE_RE = re.compile(r'<p class="calc-note">(?:EDXFB32B2TE041658 · )?EDXFB32B7TE062327\$\{fleetPin')
+NOTE_NEW = '<p class="calc-note">EDXFB32B2TE041658 · EDXFB32B7TE062327${fleetPin'
+
+
+def apply_each(text, subs):
+    # Each substitution is applied on its own whenever its old text is present
+    # exactly once, so pieces reverted by earlier build steps (patch_km.py
+    # re-splices the KM block) are re-patched on every build. Markers are
+    # informational only.
     out = text
     for old, new in subs:
-        if out.count(old) != 1:
-            print(tag + ": anchor count", out.count(old), "->", old[:70].replace("\n", " "))
-            return text
-        out = out.replace(old, new, 1)
+        n = out.count(old)
+        if n == 1:
+            out = out.replace(old, new, 1)
+        elif n > 1:
+            print("fleet: ambiguous anchor", n, "->", old[:70].replace("\n", " "))
     return out
 
 
 def patch(text):
-    out = stage(text, DONE, SUBS, "fleet-dcti")
-    if DONE in out:
-        out = stage(out, DONE2, SUBS2, "fleet-2389")
-    if DONE2 in out:
-        out = stage(out, DONE3, SUBS3, "fleet-pin2")
+    out = apply_each(text, SUBS)
+    out = apply_each(out, [s for s in SUBS2 if not s[0].startswith("const FLEET_PIN")])
+    if len(PIN_RE.findall(out)) == 1:
+        out = PIN_RE.sub(lambda m: PIN_NEW, out)
+    if len(NOTE_RE.findall(out)) == 1:
+        out = NOTE_RE.sub(lambda m: NOTE_NEW, out)
     out = BLANKS.sub(r"\n\n\1", out)
     return out
 
@@ -126,7 +138,7 @@ def main():
             print(p, "fleet-dcti: JS check failed -> not written")
             continue
         p.write_text(out, encoding="utf-8")
-        print(p, "fleet-dcti: patched", "dcti" if DONE in out and DONE not in src else "", "2389" if DONE2 in out and DONE2 not in src else "", "pin2" if DONE3 in out and DONE3 not in src else "")
+        print(p, "fleet-dcti: patched")
 
 
 if __name__ == "__main__":
