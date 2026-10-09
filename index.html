@@ -4136,7 +4136,7 @@ async function pingTelegram(body){
       }
       const ordDeal=kmDeal(ordDc);
       const prioDeal=kmDeal(prioDc);
-      const qFleetPrio=(m.id==="t7a" && typeof fleetSubQuote==="function")?fleetSubQuote(Math.max(0, 2389000-tiMpt), subAmt, down, addons, pack||0, months, !!(showSub && subAmt), fleetRateOf(m)):null;
+      const qFleetPrio=(m.id==="t7a" && typeof fleetSubQuote==="function")?fleetSubQuote(Math.max(0, 2333000-tiMpt), subAmt, down, addons, pack||0, months, !!(showSub && subAmt), fleetRateOf(m)):null;
       const banksMptPrio=qFleetPrio?[{id:"sovcom", name:"Совкомбанк", rate:qFleetPrio.rate, term:qFleetPrio.termAfter, capped:!qFleetPrio.early && qFleetPrio.term!==months, termNote:qFleetPrio.early?(qFleetPrio.termAfter+" мес. вместо "+qFleetPrio.term+" · досрочное не меняет платёж"):"", payMpt:qFleetPrio.pay, overMpt:qFleetPrio.over}]:[];
       const prioKmTxt=useTi?"−100 тыс. с трейд-ин":"0 тыс. без трейд-ин";
       return banner("Калькулятор","КМ и платёж · база "+TERMS_DATE,"TENET")+`
@@ -4229,8 +4229,8 @@ async function pingTelegram(body){
               ${mptBreak}
             </details>
             ${qFleetPrio?`</div><div class="pay-side prio">
-              <p class="eyebrow">Флит · от 2 389</p>
-              <p class="calc-note">EDXFB32B7TE062327${fleetPin?" · этот VIN":""}. Старт 2 389 000${useDcTi?" − трейд-ин "+rub(tiMpt):""}${subAmt?" − субсидия "+rub(subAmt):""}.</p>
+              <p class="eyebrow">Флит · от 2 333</p>
+              <p class="calc-note">EDXFB32B7TE062327${fleetPin?" · этот VIN":""}. Старт 2 333 000${useDcTi?" − трейд-ин "+rub(tiMpt):""}${subAmt?" − субсидия "+rub(subAmt):""}.</p>
               ${typeof fleetBodyTop==="function"?fleetBodyTop(qFleetPrio):""}
               ${kmPayRows(banksMptPrio,"payMpt","overMpt")}
               ${typeof fleetBodyRows==="function"?fleetBodyRows(qFleetPrio):""}
@@ -4897,7 +4897,7 @@ async function pingTelegram(body){
       const months=Math.max(1, Math.round(Number(d.months)||60));
       const down=Math.max(0, Math.round(Number(d.down)||0));
       const have=(d.service && d.ownVal)?Math.max(0, Math.round(d.ownVal)):down;
-      const q=typeof fleetSubQuote==="function"?fleetSubQuote(Math.max(0, base-ti), sub, have, f.do||70000, f.casco||80000, months, true, typeof fleetRateOf==="function"?fleetRateOf(d.m):19.2):null;
+      const q=typeof fleetSubQuote==="function"?fleetSubQuote(base, sub, have, f.do||70000, f.casco||80000, months, true, typeof fleetRateOf==="function"?fleetRateOf(d.m):19.2):null;
       const gov=Math.max(0, base-sub-ti);
       const lines=[
         "Цена по госпрограмме с учётом субсидии"+(ti?" и трейд-ин ":" ")+rub(gov)+" ₽",
