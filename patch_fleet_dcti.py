@@ -65,6 +65,14 @@ SUBS2 = [
     ('const q=typeof fleetSubQuote==="function"?fleetSubQuote(base, sub, have, f.do||70000',
      'const q=typeof fleetSubQuote==="function"?fleetSubQuote(Math.max(0, base-ti), sub, have, f.do||70000'),
 ]
+DONE3 = "/*fleet-pin2*/"
+# Stage 3: both special T7 Active 2WD cars pinned at 2 389 000; column names both VINs.
+SUBS3 = [
+    ('const FLEET_PIN = {"EDXFB32B7TE062327":2389000};' + DONE2,
+     'const FLEET_PIN = {"EDXFB32B7TE062327":2389000,"EDXFB32B2TE041658":2389000};' + DONE2 + DONE3),
+    ('<p class="calc-note">EDXFB32B7TE062327${fleetPin?" · этот VIN":""}. Старт 2 389 000',
+     '<p class="calc-note">EDXFB32B2TE041658 · EDXFB32B7TE062327${fleetPin?" · этот VIN":""}. Старт 2 389 000'),
+]
 BLANKS = re.compile(r"\n(?:[ \t]*\n){2,}(    const BOARD_OCT = )")
 
 
@@ -99,6 +107,8 @@ def patch(text):
     out = stage(text, DONE, SUBS, "fleet-dcti")
     if DONE in out:
         out = stage(out, DONE2, SUBS2, "fleet-2389")
+    if DONE2 in out:
+        out = stage(out, DONE3, SUBS3, "fleet-pin2")
     out = BLANKS.sub(r"\n\n\1", out)
     return out
 
@@ -116,7 +126,7 @@ def main():
             print(p, "fleet-dcti: JS check failed -> not written")
             continue
         p.write_text(out, encoding="utf-8")
-        print(p, "fleet-dcti: patched", "dcti" if DONE in out and DONE not in src else "", "2389" if DONE2 in out and DONE2 not in src else "")
+        print(p, "fleet-dcti: patched", "dcti" if DONE in out and DONE not in src else "", "2389" if DONE2 in out and DONE2 not in src else "", "pin2" if DONE3 in out and DONE3 not in src else "")
 
 
 if __name__ == "__main__":
