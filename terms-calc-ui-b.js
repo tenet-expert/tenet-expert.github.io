@@ -329,6 +329,17 @@
       }
       const ordDeal=kmDeal(ordDc);
       const prioDeal=kmDeal(prioDc);
+      const prioInStock=(typeof kmStockCars==="function"?kmStockCars(m):[]).some(c=>c.status==="in" && typeof PRIO_VINS!=="undefined" && PRIO_VINS.has(c.vin));
+      function kmBankCell(b){
+        const yearsWant=Math.round(months/12);
+        const yearsHave=Math.round((b.term||months)/12);
+        const note=b.termNote?b.termNote:(b.capped?`нет ${yearsWant} ${yearsWant===1?"года":"лет"} · считаем ${b.term} мес. (${yearsHave} ${yearsHave===1?"год":yearsHave<5?"года":"лет"})`:`${b.term} мес.`);
+        return `<div class="bank-row"><span><b>${escape(b.name)}</b><br/><small>${b.rate}% · ${note} · переплата ~${rub(Math.round(b.over||0))}</small></span><span class="pay">${rub(Math.round(b.pay||0))} ₽</span></div>`;
+      }
+      const directPairs=(ordDeal.banks||[]).map((b,i)=>{
+        const rb=prioInStock&&prioDeal.banks?prioDeal.banks[i]:null;
+        return `<div class="pay-cell">${kmBankCell(b)}</div>`+(rb?`<div class="pay-cell prio">${kmBankCell(rb)}</div>`:"");
+      }).join("");
       const qFleetPrio=(m.id==="t7a" && typeof fleetSubQuote==="function")?fleetSubQuote(Math.max(0, 2333000-tiMpt), subAmt, down, addons, pack||0, months, !!(showSub && subAmt), fleetRateOf(m)):null;
       const banksMptPrio=qFleetPrio?[{id:"sovcom", name:"Совкомбанк", rate:qFleetPrio.rate, term:qFleetPrio.termAfter, capped:!qFleetPrio.early && qFleetPrio.term!==months, termNote:qFleetPrio.early?(qFleetPrio.termAfter+" мес. вместо "+qFleetPrio.term+" · досрочное не меняет платёж"):"", payMpt:qFleetPrio.pay, overMpt:qFleetPrio.over}]:[];
       const prioKmTxt=useTi?"−100 тыс. с трейд-ин":"0 тыс. без трейд-ин";
@@ -391,20 +402,18 @@
           <p class="calc-note">${rub(down)} ₽ · ${downPct}% от цены авто${(showMpt||showSub||showFleet)?` · ${showFleet?"флит":"субс. бренда"}: ${rub(priceMpt)} − ПВ в авто ${rub(downMptCar)} = тело ${rub(creditMpt)}`:""}</p>
         </div>${pangoOnly?"":altPick}<div class="km-pays">
           ${pangoOnly?"":`<div class="pay-col std km-pay">
-            <div class="km-contrast">
-              <div class="pay-side">
+            <div class="km-contrast${prioInStock?"":" solo"}">
+              <div class="pay-cell">
                 <p class="eyebrow">Директ</p>
                 <p class="calc-note">Обычный. Цена ${rub(ordDeal.price)} · ПВ ${rub(ordDeal.down)} · тело ${rub(ordDeal.credit)}</p>
-                ${kmPayRows(ordDeal.banks,"pay","over")}
-                <p class="calc-note">КМ ${Math.round(ordDeal.km/1000)} тыс. · коридор ${typeof kmBandTxt==="function"?kmBandTxt(ob.lo,ob.hi):ob.lo+" … "+ob.hi}</p>
               </div>
-              <div class="pay-side prio">
+              ${prioInStock?`<div class="pay-cell prio">
                 <p class="eyebrow">Директ · приоритет</p>
-                <p class="calc-note">Коридор ${prioKmTxt}. Цена ${rub(prioDeal.price)} · скидка ДЦ ${rub(prioDeal.dc)}</p>
-                <p class="calc-note">ПВ ${rub(prioDeal.down)} · тело ${rub(prioDeal.credit)}</p>
-                ${kmPayRows(prioDeal.banks,"pay","over")}
-                <p class="calc-note">КМ ${Math.round(prioDeal.km/1000)} тыс.${prioDeal.price<ordDeal.price?" · дешевле на "+rub(ordDeal.price-prioDeal.price):""}</p>
-              </div>
+                <p class="calc-note">Коридор ${prioKmTxt}. Цена ${rub(prioDeal.price)} · скидка ДЦ ${rub(prioDeal.dc)} · ПВ ${rub(prioDeal.down)} · тело ${rub(prioDeal.credit)}</p>
+              </div>`:""}
+              ${directPairs}
+              <div class="pay-cell"><p class="calc-note">КМ ${Math.round(ordDeal.km/1000)} тыс. · коридор ${typeof kmBandTxt==="function"?kmBandTxt(ob.lo,ob.hi):ob.lo+" … "+ob.hi}</p></div>
+              ${prioInStock?`<div class="pay-cell prio"><p class="calc-note">КМ ${Math.round(prioDeal.km/1000)} тыс.${prioDeal.price<ordDeal.price?" · дешевле на "+rub(ordDeal.price-prioDeal.price):""}</p></div>`:""}
             </div>
             <p class="calc-note">${isPlus?"Ставки TENET PLUS, ИП 1938/И.":"Ставки TENET ФИНАНС, ИП 1890/И."}</p>
             ${plusAltDirect}
