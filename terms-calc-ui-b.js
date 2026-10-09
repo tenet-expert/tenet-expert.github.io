@@ -418,9 +418,32 @@
             <p class="calc-note">${isPlus?"Ставки TENET PLUS, ИП 1938/И.":"Ставки TENET ФИНАНС, ИП 1890/И."}</p>
             ${plusAltDirect}
           </div>
-          <div class="pay-col ${showSub?"sub":"mpt"} km-pay">
-            ${qFleetPrio?`<div class="km-contrast"><div class="pay-side">`:""}
-            <p class="eyebrow">${showFleet||isPlus?"Флит · Совкомбанк "+fleetRateTxt(qFleet.rate)+"%":showSub?"Флит · субсидия бренда":"Флит · Совкомбанк "+fleetRateTxt(qFleet.rate)+"%"}</p>
+          <div class="pay-col ${showSub?"sub":"mpt"} km-pay${qFleetPrio?" fleet-pair":""}">
+            ${qFleetPrio?`<div class="km-contrast">
+              <div class="pay-cell">
+                <p class="eyebrow">${showFleet||isPlus?"Флит · Совкомбанк "+fleetRateTxt(qFleet.rate)+"%":showSub?"Флит · субсидия бренда":"Флит · Совкомбанк "+fleetRateTxt(qFleet.rate)+"%"}</p>
+                ${typeof fleetBodyTop==="function"?fleetBodyTop(qFleet):""}
+              </div>
+              <div class="pay-cell prio">
+                <p class="eyebrow">Флит · от 2 333</p>
+                <p class="calc-note">EDXFB32B7TE062327${fleetPin?" · этот VIN":""}. Старт 2 333 000${useTi?" − трейд-ин "+rub(tiMpt):""}${subAmt?" − субсидия "+rub(subAmt):""}.</p>
+                ${typeof fleetBodyTop==="function"?fleetBodyTop(qFleetPrio):""}
+              </div>
+              <div class="pay-cell">${kmPayRows(banksMpt,"payMpt","overMpt")}</div>
+              <div class="pay-cell prio">${kmPayRows(banksMptPrio,"payMpt","overMpt")}</div>
+              <div class="pay-cell">${typeof fleetBodyRows==="function"?fleetBodyRows(qFleet):`<div class="bank-row"><span>Тело кредита</span><span class="pay">${rub(creditMpt)}</span></div>`}</div>
+              <div class="pay-cell prio">${typeof fleetBodyRows==="function"?fleetBodyRows(qFleetPrio):""}</div>
+              <div class="pay-cell">${typeof fleetClientRow==="function"?fleetClientRow(qFleet):""}</div>
+              <div class="pay-cell prio">${typeof fleetClientRow==="function"?fleetClientRow(qFleetPrio):""}</div>
+              <div class="pay-cell">
+                <details class="calc-more">
+                  <summary>Подробности расчёта</summary>
+                  <p class="calc-note">${typeof fleetSubNote==="function"?fleetSubNote(qFleet):""}</p>
+                  ${mptBreak}
+                </details>
+              </div>
+              <div class="pay-cell prio"><p class="calc-note">${qFleet.price>qFleetPrio.price?"Дешевле обычного флита на "+rub(qFleet.price-qFleetPrio.price)+".":""}</p></div>
+            </div>`:`<p class="eyebrow">${showFleet||isPlus?"Флит · Совкомбанк "+fleetRateTxt(qFleet.rate)+"%":showSub?"Флит · субсидия бренда":"Флит · Совкомбанк "+fleetRateTxt(qFleet.rate)+"%"}</p>
             ${typeof fleetBodyTop==="function"?fleetBodyTop(qFleet):""}
             ${kmPayRows(banksMpt,"payMpt","overMpt")}
             ${typeof fleetBodyRows==="function"?fleetBodyRows(qFleet):`<div class="bank-row"><span>Тело кредита</span><span class="pay">${rub(creditMpt)}</span></div>`}
@@ -429,16 +452,7 @@
               <summary>Подробности расчёта</summary>
               <p class="calc-note">${typeof fleetSubNote==="function"?fleetSubNote(qFleet):""}</p>
               ${mptBreak}
-            </details>
-            ${qFleetPrio?`</div><div class="pay-side prio">
-              <p class="eyebrow">Флит · от 2 333</p>
-              <p class="calc-note">EDXFB32B7TE062327${fleetPin?" · этот VIN":""}. Старт 2 333 000${useTi?" − трейд-ин "+rub(tiMpt):""}${subAmt?" − субсидия "+rub(subAmt):""}.</p>
-              ${typeof fleetBodyTop==="function"?fleetBodyTop(qFleetPrio):""}
-              ${kmPayRows(banksMptPrio,"payMpt","overMpt")}
-              ${typeof fleetBodyRows==="function"?fleetBodyRows(qFleetPrio):""}
-              ${typeof fleetClientRow==="function"?fleetClientRow(qFleetPrio):""}
-              <p class="calc-note">${qFleet.price>qFleetPrio.price?"Дешевле обычного флита на "+rub(qFleet.price-qFleetPrio.price)+".":""}</p>
-            </div></div>`:""}
+            </details>`}
             ${plusAltFleet}
           </div>`}
           ${pShow?`<div class="pay-col pango km-pay">
