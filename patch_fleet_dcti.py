@@ -114,8 +114,28 @@ def apply_each(text, subs):
     return out
 
 
+# Суперспец only for T4L (Александр via Склад, 11.10.2026): T8 EDXGD34B6TE031162 is
+# no longer суперспец; T4L 103208 / 095545 / 093989 sold 05.10. Removed from EXCL_FIX.
+EXCL_DROP = ("EDXGD34B6TE031162", "EDELB31B1TE103208", "EDELB31BXTE095545", "EDELB31B3TE093989")
+EXCL_RE = re.compile(r'(const EXCL_FIX = \{)(.*?)(\n?[ \t]*\};)', re.S)
+
+
+def drop_excl(text):
+    m = EXCL_RE.search(text)
+    if not m:
+        return text
+    body = m.group(2)
+    lines = [l for l in body.split("\n") if l.strip() and not any(('"%s"' % v) in l for v in EXCL_DROP)]
+    if len(lines) == len([l for l in body.split("\n") if l.strip()]):
+        return text
+    lines = [l.rstrip().rstrip(",") for l in lines]
+    new = ("\n" + ",\n".join(lines) + "\n    ") if lines else ""
+    return text[:m.start()] + m.group(1) + new + "};" + text[m.end():]
+
+
 def patch(text):
-    out = apply_each(text, SUBS)
+    out = drop_excl(text)
+    out = apply_each(out, SUBS)
     out = apply_each(out, [s for s in SUBS2 if not s[0].startswith("const FLEET_PIN")])
     if len(PIN_RE.findall(out)) == 1:
         out = PIN_RE.sub(lambda m: PIN_NEW, out)
@@ -126,6 +146,13 @@ def patch(text):
 
 
 def main():
+    for p in (Path("terms-calc-data.js"), Path("_site/terms-calc-data.js")):
+        if p.exists():
+            src = p.read_text(encoding="utf-8")
+            out = drop_excl(src)
+            if out != src:
+                p.write_text(out, encoding="utf-8")
+                print(p, "excl-fix: dropped")
     for p in (Path("index.html"), Path("_site/index.html")):
         if not p.exists() or p.stat().st_size < 100000:
             continue

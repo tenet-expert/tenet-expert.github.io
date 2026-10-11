@@ -113,10 +113,8 @@ for c in uniq:
         c["reserved"] = True
 print("reserved in STOCK:", sum(1 for c in uniq if c.get("reserved")), "manual list:", len(MANUAL_RESERVED))
 
+# T4L 103208 / 095545 / 093989 sold 05.10.2026 (Склад): no stubs re-added.
 EXCL_CARS = {
-    "EDELB31B1TE103208": {"vin":"EDELB31B1TE103208","model":"t4l","name":"T4L","trim":"Актив","color":"Белый","status":"in","note":"В салоне · СУПЕРСПЕЦ 2 100 нал / 2 000 с ТИ","prod":"21.08.2026","rrc":2329000,"invoice":True,"mpt":False,"corp":False,"demo":False},
-    "EDELB31BXTE095545": {"vin":"EDELB31BXTE095545","model":"t4l","name":"T4L","trim":"Прайм","color":"Белый","status":"in","note":"В салоне · СУПЕРСПЕЦ 2 200 нал / 2 100 с ТИ","prod":"31.07.2026","rrc":2479000,"invoice":True,"mpt":False,"corp":False,"demo":False},
-    "EDELB31B3TE093989": {"vin":"EDELB31B3TE093989","model":"t4l","name":"T4L","trim":"Прайм","color":"Белый","status":"in","note":"В салоне · СУПЕРСПЕЦ 2 200 нал / 2 100 с ТИ","prod":"27.07.2026","rrc":2479000,"invoice":True,"mpt":False,"corp":False,"demo":False},
 }
 by_vin = {str(c.get("vin") or ""): c for c in uniq}
 for vin, stub in EXCL_CARS.items():
