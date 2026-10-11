@@ -48,8 +48,10 @@
     function stockBadges(r){
       const bits=[];
       bits.push(`<span class="st ${r.status}">${(ST_LABEL&&ST_LABEL[r.status])||r.status}</span>`);
-      const superSpec=typeof EXCL_FIX!=="undefined" && !!EXCL_FIX[r.vin];
+      const superSpec=typeof EXCL_FIX!=="undefined" && !!EXCL_FIX[r.vin] && r.model==="t4l";
+      const wayDual=r.status==="way" && (r.model==="t8"||r.model==="t9");
       if(superSpec) bits.push(`<span class="st super">СУПЕРСПЕЦ</span>`);
+      else if(wayDual) bits.push(`<span class="st inv">Спец</span> <span class="st mpt">Директ/флит</span>`);
       else if(r.invoice) bits.push(`<span class="st inv">Спец инвойс</span>`);
       else {
         if(typeof carIsMpt==="function"?carIsMpt(r):r.mpt) bits.push(`<span class="st mpt">МПТ</span>`);
@@ -157,9 +159,9 @@
       const tone=stockTone(r.color);
       return `<article class="st-row${tone?" "+tone:""}${reservedCls}${r.invoice?" is-invoice":""}">
         <div>
-          <b>${escape(r.name||"")}${(typeof EXCL_FIX!=="undefined"&&EXCL_FIX[r.vin])?" · СУПЕРСПЕЦ":""}</b>
+          <b>${escape(r.name||"")}${(typeof EXCL_FIX!=="undefined"&&EXCL_FIX[r.vin]&&r.model==="t4l")?" · СУПЕРСПЕЦ":""}</b>
           <small>${escape(meta)}</small>
-          <small class="st-vin">${escape(r.vin||"")}${typeof PANGO_ONLY!=="undefined"&&PANGO_ONLY[r.vin]?" · спеццена · сотрудник · 1 хоз ГИБДД · 500 км · только PANGO":""}${typeof EXCL_FIX!=="undefined"&&EXCL_FIX[r.vin]?" · СУПЕРСПЕЦ "+Math.round(EXCL_FIX[r.vin].cash/1000)+" нал / "+Math.round(EXCL_FIX[r.vin].ti/1000)+" с ТИ":""}${typeof KM_FORK!=="undefined"&&KM_FORK[r.vin]?" · КМ 50 тыс. с трейд-ин · 100 без":""}${r.note?" · "+escape(r.note):""}</small>
+          <small class="st-vin">${escape(r.vin||"")}${typeof PANGO_ONLY!=="undefined"&&PANGO_ONLY[r.vin]?" · спеццена · сотрудник · 1 хоз ГИБДД · 500 км · только PANGO":""}${typeof EXCL_FIX!=="undefined"&&EXCL_FIX[r.vin]&&r.model==="t4l"?" · СУПЕРСПЕЦ "+Math.round(EXCL_FIX[r.vin].cash/1000)+" нал / "+Math.round(EXCL_FIX[r.vin].ti/1000)+" с ТИ":""}${typeof KM_FORK!=="undefined"&&KM_FORK[r.vin]?" · КМ 50 тыс. с трейд-ин · 100 без":""}${r.note?" · "+escape(r.note):""}</small>
         </div>
         ${reservedBadge}
         <div class="st-side">
