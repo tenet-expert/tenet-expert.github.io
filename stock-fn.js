@@ -164,6 +164,7 @@
       if(typeof KM_FORK!=="undefined"&&KM_FORK[r.vin]) notes.push("КМ 50 тыс. с трейд-ин · 100 без");
       if(r.note) notes.push(r.note);
       return `<article class="st-row${tone?" "+tone:""}${reservedCls}${r.invoice?" is-invoice":""}" data-st-card>
+        <div class="st-swatch" aria-hidden="true"></div>
         <div class="st-face">
           <b class="st-name">${escape(r.name||"")}${superOn?" · СУПЕРСПЕЦ":""}</b>
           <small class="st-color">${escape(r.color||"—")}${year?" · "+year:""}</small>
