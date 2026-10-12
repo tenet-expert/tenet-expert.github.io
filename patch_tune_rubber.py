@@ -8,6 +8,8 @@ PAIRS = [
      '["235/55 R19",15750,63000,"0 · под заказ 3 раб дня"]'),
     ('["Royal Black Royalstud II 235/50 R19 103T шип",15500,62000,"1"]',
      '["Royal Black Royalstud II 235/50 R19 103T, шип.",15500,62000,"1"]'),
+    ('["Hankook 235/55R18 100T Winter I*cept X RW10 TL",15500,62000,"1"]',
+     '["Автошина 235/55 R18 Tracmax 104T XL X-Privilo S500 TL (шип.)",12500,50000,"3"]'),
 ]
 
 def patch(path: Path) -> bool:
