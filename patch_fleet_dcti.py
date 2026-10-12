@@ -8,7 +8,7 @@ adds before BOARD_OCT on every build. Idempotent; every substitution is
 re-applied independently on each build (earlier steps may revert pieces);
 node --check guard.
 """
-import os, re, shutil, subprocess, tempfile
+import json, os, re, shutil, subprocess, tempfile
 from pathlib import Path
 
 DONE = "/*fleet-dcti*/"
@@ -144,6 +144,8 @@ def patch(text):
     if len(NOTE_RE.findall(out)) == 1:
         out = NOTE_RE.sub(lambda m: NOTE_NEW, out)
     out = plus_patch(out)
+    out = plus_stock(out)
+    out = apply_each(out, PLUS_UI_SUBS)
     out = BLANKS.sub(r"\n\n\1", out)
     return out
 
@@ -309,6 +311,72 @@ def plus_patch(text):
         out = out.replace(CAPTION_OLD, CAPTION_NEW)
     out = plus_banks_filter(out)
     return out
+
+
+# TENET PLUS stock (LS TENET PLUS dealer cabinet, 12.10.2026): 14 unsold cars.
+# RRC only, purchase cost is never published. A VIN already present in STOCK
+# (e.g. once stock.json carries it) is skipped, so there are no duplicates.
+PLUS_RRC = {"Стайл": 2540000, "Элегант": 2690000}
+PLUS_RRC6 = {"Элегант": 2890000, "Ультра": 3040000}
+PLUS_CARS = [
+    ("EFEDB21B0T3002466", "pl4", "Элегант", "Чёрный", "f", "СПб Сестрорецк"),
+    ("EFEDB21B2T3001755", "pl4", "Элегант", "Чёрный", "in", "01.10.2026"),
+    ("EFEDB21B1T3001374", "pl4", "Стайл", "Серый", "in", "23.09.2026"),
+    ("EFEDB21B2T3002176", "pl4", "Элегант", "Серый", "in", "01.10.2026"),
+    ("EFEDB21B0T3001351", "pl4", "Стайл", "Серый", "in", "01.10.2026"),
+    ("EDEMB31B9TE119337", "pl6", "Ультра", "Оранжевый", "f", "Калуга"),
+    ("EDEMB31B1TE126640", "pl6", "Элегант", "Оранжевый", "way", "15.10.2026"),
+    ("EDEMB31B0TE126578", "pl6", "Элегант", "Оранжевый", "in", "12.10.2026"),
+    ("EFEDB21B1T3000922", "pl4", "Стайл", "Красный", "in", "17.09.2026"),
+    ("EDEMB31B0TE127195", "pl6", "Элегант", "Серебристый", "in", "12.10.2026"),
+    ("EFEDB21B0T3002595", "pl4", "Элегант", "Белый", "f", "СПб"),
+    ("EFEDB21B1T3000094", "pl4", "Элегант", "Белый", "in", "23.09.2026"),
+    ("EFEDB21B0T3001236", "pl4", "Элегант", "Белый", "in", "17.09.2026"),
+    ("EFEDB21B1T3002041", "pl4", "Элегант", "Белый", "in", "01.10.2026"),
+]
+STOCK_RE = re.compile(r'(const STOCK = \[)(.*?)(\];)', re.S)
+
+
+def plus_car(vin, model, trim, color, st, info):
+    if st == "in":
+        status, note = "in", "В салоне · с " + info
+    elif st == "way":
+        status, note = "way", "В пути · ожидается " + info
+    else:
+        status, note = "way", "На заводе · подтверждён к отгрузке (" + info + ")"
+    rrc = (PLUS_RRC if model == "pl4" else PLUS_RRC6)[trim]
+    car = {"vin": vin, "model": model, "name": "L4" if model == "pl4" else "L6",
+           "trim": trim, "color": color, "status": status, "note": note, "rrc": rrc}
+    return json.dumps(car, ensure_ascii=False)
+
+
+def plus_stock(text):
+    m = STOCK_RE.search(text)
+    if not m:
+        return text
+    body = m.group(2)
+    add = [plus_car(*c) for c in PLUS_CARS if ('"%s"' % c[0]) not in body]
+    if not add:
+        return text
+    sep = ", " if body.strip() else ""
+    return text[:m.end(2)] + sep + ", ".join(add) + text[m.end(2):]
+
+
+PLUS_UI_SUBS = [
+    ('      if(id==="t7l") return true;\n      return true;',
+     '      if(id==="l4s") return t.includes("стайл")||t.includes("style");\n'
+     '      if(id==="l4e"||id==="l6e") return t.includes("элегант")||t.includes("elegant");\n'
+     '      if(id==="l6u") return t.includes("ультра")||t.includes("ultra");\n'
+     '      if(id==="t7l") return true;\n      return true;'),
+    ('      if(car.model==="t7l") return "t7l";\n      return "";',
+     '      if(car.model==="t7l") return "t7l";\n'
+     '      if(car.model==="pl4") return (t.includes("стайл")||t.includes("style"))?"l4s":"l4e";\n'
+     '      if(car.model==="pl6") return (t.includes("ультра")||t.includes("ultra"))?"l6u":"l6e";\n      return "";'),
+    ('const modelOrder=["t4","t4l","t7","t8","tt9","t9","t7l","ta8","a8"];',
+     'const modelOrder=["t4","t4l","t7","t8","tt9","t9","t7l","ta8","a8","pl4","pl6"];'),
+    ('ta8:["TENET","A8"],a8:["CHERY","Arrizo 8"]};',
+     'ta8:["TENET","A8"],a8:["CHERY","Arrizo 8"],pl4:["TENET PLUS","L4"],pl6:["TENET PLUS","L6"]};'),
+]
 
 
 def main():
