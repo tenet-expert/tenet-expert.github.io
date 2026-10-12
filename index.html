@@ -611,18 +611,30 @@ input,textarea{width:100%;background:#fff;border:1px solid var(--border);color:v
 .st-trim>summary b{font-size:14px;font-weight:700}
 .st-trim>summary b::before{content:none!important}
 .st-trim .st-chev{width:26px;height:26px;background:#fff}
-.st-list{background:#fff;border-top:1px solid #f0e6d8}
-.st-row{display:grid;grid-template-columns:1fr auto;gap:6px 12px;padding:12px 14px;border-top:1px solid #f3eadc;background:#fff}
-.st-row.tone-black:not(.is-reserved):not(.is-invoice){background:#f2f2f3;border-left:3px solid #6a6a6e}
-.st-row.tone-white:not(.is-reserved):not(.is-invoice){background:#fffdf9;border-left:3px solid #e4ddd2}
-.st-row.tone-red:not(.is-reserved):not(.is-invoice){background:#fdf3f3;border-left:3px solid #d98989}
-.st-row.tone-green:not(.is-reserved):not(.is-invoice){background:#f2f6f2;border-left:3px solid #7d9e84}
-.st-row.tone-blue:not(.is-reserved):not(.is-invoice){background:#f2f6fb;border-left:3px solid #86a9c6}
-.st-row.tone-silver:not(.is-reserved):not(.is-invoice){background:#f4f5f6;border-left:3px solid #b4bac1}
-.st-row.tone-bamboo:not(.is-reserved):not(.is-invoice){background:#f4f5f0;border-left:3px solid #a3ad90}
-.st-row.tone-light:not(.is-reserved):not(.is-invoice){background:#f5f6f7;border-left:3px solid #c5c9ce}
-.st-row.tone-gray:not(.is-reserved):not(.is-invoice){background:#f1f2f3;border-left:3px solid #9ea3a8}
-.st-row:first-child{border-top:0}
+.st-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(126px,1fr));gap:10px;padding:10px;background:#faf7f2;border-top:0}
+.st-row{display:flex;flex-direction:column;aspect-ratio:1;border-radius:14px;padding:10px;border:1px solid #eadfcf;background:#fff;cursor:pointer;position:relative;overflow:hidden;transition:box-shadow .15s ease,transform .15s ease;align-items:stretch}
+.st-row:hover{box-shadow:0 6px 16px rgba(28,26,23,.08);transform:translateY(-1px)}
+.st-row.open{aspect-ratio:auto;grid-column:span 2;min-height:160px}
+.st-face{display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;height:100%;gap:2px;min-height:0}
+.st-name{font-size:13px;font-weight:750;letter-spacing:-.02em;line-height:1.2;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.st-color{font-size:11px;color:#6d6458;line-height:1.3}
+.st-price{font-size:14px;font-weight:800;margin-top:auto;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.st-flags-mini{display:flex;gap:3px;flex-wrap:wrap;margin-top:4px}
+.st-flags-mini .st{font-size:10px;padding:2px 6px;line-height:1.3}
+.st-more{display:none;margin-top:8px;padding-top:8px;border-top:1px dashed #eadfcf}
+.st-row.open .st-more{display:block}
+.st-row.tone-black:not(.is-reserved):not(.is-invoice){background:#f2f2f3;border-top:3px solid #6a6a6e;border-left:1px solid #eadfcf}
+.st-row.tone-white:not(.is-reserved):not(.is-invoice){background:#fffdf9;border-top:3px solid #e4ddd2;border-left:1px solid #eadfcf}
+.st-row.tone-red:not(.is-reserved):not(.is-invoice){background:#fdf3f3;border-top:3px solid #d98989;border-left:1px solid #eadfcf}
+.st-row.tone-green:not(.is-reserved):not(.is-invoice){background:#f2f6f2;border-top:3px solid #7d9e84;border-left:1px solid #eadfcf}
+.st-row.tone-blue:not(.is-reserved):not(.is-invoice){background:#f2f6fb;border-top:3px solid #86a9c6;border-left:1px solid #eadfcf}
+.st-row.tone-silver:not(.is-reserved):not(.is-invoice){background:#f4f5f6;border-top:3px solid #b4bac1;border-left:1px solid #eadfcf}
+.st-row.tone-bamboo:not(.is-reserved):not(.is-invoice){background:#f4f5f0;border-top:3px solid #a3ad90;border-left:1px solid #eadfcf}
+.st-row.tone-light:not(.is-reserved):not(.is-invoice){background:#f5f6f7;border-top:3px solid #c5c9ce;border-left:1px solid #eadfcf}
+.st-row.tone-gray:not(.is-reserved):not(.is-invoice){background:#f1f2f3;border-top:3px solid #9ea3a8;border-left:1px solid #eadfcf}
+.st-row.is-reserved{background:#e8f1fc}
+.st-row.is-invoice{background:#fdecee}
+.st-row .st-reserved-mid{position:static;transform:none;margin-top:4px;font-size:10px;padding:2px 6px}
 .st-row small{display:block;color:#7a7166;font-size:12px;line-height:1.35}
 .st-vin{word-break:break-all;font-family:ui-monospace,Menlo,monospace;font-size:11px}
 .st-side{text-align:right;min-width:110px}
@@ -634,9 +646,9 @@ input,textarea{width:100%;background:#fff;border:1px solid var(--border);color:v
 .st-sorts{margin-top:8px}
 .st-sort-lab{font-size:12px;color:#6d6458;align-self:center}
 @media(min-width:900px){
-  .st-list{display:grid;grid-template-columns:1fr 1fr}
-  .st-row{align-items:center;border-top:0;border-bottom:1px solid #f3eadc}
-  .st-list>.st-row:nth-child(odd){box-shadow:inset -1px 0 0 #f3eadc}
+  .st-list{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}
+  .st-row{align-items:stretch;border:1px solid #eadfcf}
+  .st-list>.st-row:nth-child(odd){box-shadow:none}
 }
 .study-pick{flex-wrap:wrap}
 @media print{
@@ -4553,18 +4565,24 @@ async function pingTelegram(body){
       const year=stockYear(r);
       const meta=[r.color, year?String(year):"", salon].filter(Boolean).join(" · ");
       const reservedCls=r.reserved?" is-reserved":"";
-      const reservedBadge=r.reserved?`<span class="st reserved st-reserved-mid">Забронирован</span>`:"";
+      const reservedBadge=r.reserved?`<span class="st reserved">Забронирован</span>`:"";
       const tone=stockTone(r.color);
-      return `<article class="st-row${tone?" "+tone:""}${reservedCls}${r.invoice?" is-invoice":""}">
-        <div>
-          <b>${escape(r.name||"")}${(typeof EXCL_FIX!=="undefined"&&EXCL_FIX[r.vin])?" · СУПЕРСПЕЦ":""}</b>
-          <small>${escape(meta)}</small>
-          <small class="st-vin">${escape(r.vin||"")}${typeof PANGO_ONLY!=="undefined"&&PANGO_ONLY[r.vin]?" · спеццена · сотрудник · 1 хоз ГИБДД · 500 км · только PANGO":""}${typeof EXCL_FIX!=="undefined"&&EXCL_FIX[r.vin]?" · СУПЕРСПЕЦ "+Math.round(EXCL_FIX[r.vin].cash/1000)+" нал / "+Math.round(EXCL_FIX[r.vin].ti/1000)+" с ТИ":""}${typeof KM_FORK!=="undefined"&&KM_FORK[r.vin]?" · КМ 50 тыс. с трейд-ин · 100 без":""}${r.note?" · "+escape(r.note):""}</small>
+      const superOn=typeof EXCL_FIX!=="undefined"&&EXCL_FIX[r.vin]&&r.model==="t4l";
+      const notes=[];
+      if(typeof PANGO_ONLY!=="undefined"&&PANGO_ONLY[r.vin]) notes.push("спеццена · сотрудник · 1 хоз ГИБДД · 500 км · только PANGO");
+      if(superOn) notes.push("СУПЕРСПЕЦ "+Math.round(EXCL_FIX[r.vin].cash/1000)+" нал / "+Math.round(EXCL_FIX[r.vin].ti/1000)+" с ТИ");
+      if(typeof KM_FORK!=="undefined"&&KM_FORK[r.vin]) notes.push("КМ 50 тыс. с трейд-ин · 100 без");
+      if(r.note) notes.push(r.note);
+      return `<article class="st-row${tone?" "+tone:""}${reservedCls}${r.invoice?" is-invoice":""}" data-st-card>
+        <div class="st-face">
+          <b class="st-name">${escape(r.name||"")}${superOn?" · СУПЕРСПЕЦ":""}</b>
+          <small class="st-color">${escape(r.color||"—")}${year?" · "+year:""}</small>
+          <b class="st-price">${price?rub(price)+" ₽":"—"}</b>
+          <div class="st-flags-mini">${stockBadges(r)}${reservedBadge}</div>
         </div>
-        ${reservedBadge}
-        <div class="st-side">
-          <b>${price?rub(price)+" ₽":"—"}</b>
-          <div class="st-flags">${stockBadges(r)}</div>
+        <div class="st-more">
+          <small>${escape(meta)}</small>
+          <small class="st-vin">${escape(r.vin||"")}${notes.length?" · "+escape(notes.join(" · ")):""}</small>
           <button type="button" class="chip st-calc" data-km-vin="${escape(r.vin)}">Калькулятор</button>
         </div>
       </article>`;
@@ -8278,6 +8296,12 @@ async function confirmCloud(rec){
         render();
       });
       document.querySelectorAll("details[data-acc]").forEach(d=>{ d.ontoggle=()=>{ stockOpen[d.dataset.acc]=d.open; }; });
+      document.querySelectorAll("[data-st-card]").forEach(el=>{
+        el.onclick=(e)=>{
+          if(e.target.closest(".st-calc")) return;
+          el.classList.toggle("open");
+        };
+      });
       document.querySelectorAll("[data-calc-mode]").forEach(b=>b.onclick=()=>{ calcMode=b.dataset.calcMode; view="calc"; render(); });
       document.querySelectorAll("[data-prio-go]").forEach(b=>b.onclick=()=>{ kmVin=b.dataset.prioGo||""; const car=(typeof STOCK!=="undefined"?STOCK:[]).find(x=>x.vin===kmVin); if(car && typeof kmIdFromCar==="function"){ const nid=kmIdFromCar(car); if(nid){ kmId=nid; kmShown=""; } } calcMode="km"; view="calc"; render(); });
       document.querySelectorAll("[data-mpt-day]").forEach(b=>b.onclick=()=>{ mptDay=b.dataset.mptDay||""; view="terms"; render(); });

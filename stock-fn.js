@@ -155,18 +155,24 @@
       const year=stockYear(r);
       const meta=[r.color, year?String(year):"", salon].filter(Boolean).join(" · ");
       const reservedCls=r.reserved?" is-reserved":"";
-      const reservedBadge=r.reserved?`<span class="st reserved st-reserved-mid">Забронирован</span>`:"";
+      const reservedBadge=r.reserved?`<span class="st reserved">Забронирован</span>`:"";
       const tone=stockTone(r.color);
-      return `<article class="st-row${tone?" "+tone:""}${reservedCls}${r.invoice?" is-invoice":""}">
-        <div>
-          <b>${escape(r.name||"")}${(typeof EXCL_FIX!=="undefined"&&EXCL_FIX[r.vin]&&r.model==="t4l")?" · СУПЕРСПЕЦ":""}</b>
-          <small>${escape(meta)}</small>
-          <small class="st-vin">${escape(r.vin||"")}${typeof PANGO_ONLY!=="undefined"&&PANGO_ONLY[r.vin]?" · спеццена · сотрудник · 1 хоз ГИБДД · 500 км · только PANGO":""}${typeof EXCL_FIX!=="undefined"&&EXCL_FIX[r.vin]&&r.model==="t4l"?" · СУПЕРСПЕЦ "+Math.round(EXCL_FIX[r.vin].cash/1000)+" нал / "+Math.round(EXCL_FIX[r.vin].ti/1000)+" с ТИ":""}${typeof KM_FORK!=="undefined"&&KM_FORK[r.vin]?" · КМ 50 тыс. с трейд-ин · 100 без":""}${r.note?" · "+escape(r.note):""}</small>
+      const superOn=typeof EXCL_FIX!=="undefined"&&EXCL_FIX[r.vin]&&r.model==="t4l";
+      const notes=[];
+      if(typeof PANGO_ONLY!=="undefined"&&PANGO_ONLY[r.vin]) notes.push("спеццена · сотрудник · 1 хоз ГИБДД · 500 км · только PANGO");
+      if(superOn) notes.push("СУПЕРСПЕЦ "+Math.round(EXCL_FIX[r.vin].cash/1000)+" нал / "+Math.round(EXCL_FIX[r.vin].ti/1000)+" с ТИ");
+      if(typeof KM_FORK!=="undefined"&&KM_FORK[r.vin]) notes.push("КМ 50 тыс. с трейд-ин · 100 без");
+      if(r.note) notes.push(r.note);
+      return `<article class="st-row${tone?" "+tone:""}${reservedCls}${r.invoice?" is-invoice":""}" data-st-card>
+        <div class="st-face">
+          <b class="st-name">${escape(r.name||"")}${superOn?" · СУПЕРСПЕЦ":""}</b>
+          <small class="st-color">${escape(r.color||"—")}${year?" · "+year:""}</small>
+          <b class="st-price">${price?rub(price)+" ₽":"—"}</b>
+          <div class="st-flags-mini">${stockBadges(r)}${reservedBadge}</div>
         </div>
-        ${reservedBadge}
-        <div class="st-side">
-          <b>${price?rub(price)+" ₽":"—"}</b>
-          <div class="st-flags">${stockBadges(r)}</div>
+        <div class="st-more">
+          <small>${escape(meta)}</small>
+          <small class="st-vin">${escape(r.vin||"")}${notes.length?" · "+escape(notes.join(" · ")):""}</small>
           <button type="button" class="chip st-calc" data-km-vin="${escape(r.vin)}">Калькулятор</button>
         </div>
       </article>`;
