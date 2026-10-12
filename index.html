@@ -1219,7 +1219,7 @@ tr.lb-fold-row.open{display:table-row}
     const PRICE = { date: "08.10.2026", active: 2344000, prime: 2494000, delta: 150000 };
     const PASS = 80, EXPERT = 90, QSEC = 30, PRACTICE_N = 12;
     const PIN = "РОП26";
-    const LOGIN_PINS = {"леонтьев": "1010", "спицын": "3759", "кокуркин": "8736", "якубовская": "6588", "сидоров": "4969", "лавров": "7472", "тальков": "9858", "ахмадуллин": "3597", "демьянов": "8942", "аншаков": "1488", "жукавина": "3275", "елчин": "9397", "коропец": "8925", "тест": "7894", "бикулов": "2282", "мясоедова": "6564", "хорошунов": "8529", "хорошунгв": "8944", "неськина": "4358", "извеков": "7993", "абубакиров": "2795", "назарян": "2877", "велиджанов": "2434"};
+    const LOGIN_PINS = {"леонтьев": "1010", "спицын": "3759", "кокуркин": "8736", "якубовская": "6588", "сидоров": "4969", "лавров": "7472", "тальков": "9858", "ахмадуллин": "3597", "демьянов": "8942", "аншаков": "1488", "жукавина": "3275", "елчин": "9397", "коропец": "8925", "тест": "7894", "бикулов": "2282", "мясоедова": "6564", "хорошунов": "8529", "хорошунгв": "8944", "неськина": "4358", "извеков": "7993", "абубакиров": "2795", "назарян": "2877", "велиджанов": "2434", "ао": "2582"};
     const CLOUD_ID = "o6nq7rki";
     const CLOUD_KEY = "4fmBrr2H";
     const SMOP_CLOUD_ID = "xu9rvggs";
@@ -8325,7 +8325,7 @@ async function confirmCloud(rec){
       }
       if(kmVinGo) kmVinGo.onclick=()=>{ kmApplyVin(kmVinFind?kmVinFind.value:""); };
       if(kmVinFind) kmVinFind.onkeydown=(e)=>{ if(e.key==="Enter"){ e.preventDefault(); kmApplyVin(kmVinFind.value); } };
-      ["kmRrc","kmInv","kmUseTi","kmUseLoyal","kmFleetDisc","kmFleetMpt","kmUseLoyal","kmFleetDisc","kmFleetMpt","cDownMode","cDown","cDownPct","cMonths","kmUseLoan","kmUseCr","kmSpec","kmUseDcTi","kmUseDcCr","kmDcTi","kmDcCr","kmDo","kmPack","kmCasco","kmAltId","kmFleetSub"].forEach(id=>{
+      ["kmRrc","kmInv","kmUseTi","kmUseLoyal","kmFleetDisc","kmFleetMpt","kmUseLoyal","kmFleetDisc","kmFleetMpt","kmUseLoyal","kmFleetDisc","kmFleetMpt","cDownMode","cDown","cDownPct","cMonths","kmUseLoan","kmUseCr","kmSpec","kmUseDcTi","kmUseDcCr","kmDcTi","kmDcCr","kmDo","kmPack","kmCasco","kmAltId","kmFleetSub"].forEach(id=>{
         const el=document.getElementById(id);
         if(el) el.addEventListener("change", ()=>{ view="calc"; render(); });
       });
