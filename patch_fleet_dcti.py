@@ -106,6 +106,8 @@ def apply_each(text, subs):
     # informational only.
     out = text
     for old, new in subs:
+        if old in new and new in out:
+            continue
         n = out.count(old)
         if n == 1:
             out = out.replace(old, new, 1)
@@ -141,7 +143,171 @@ def patch(text):
         out = PIN_RE.sub(lambda m: PIN_NEW, out)
     if len(NOTE_RE.findall(out)) == 1:
         out = NOTE_RE.sub(lambda m: NOTE_NEW, out)
+    out = plus_patch(out)
     out = BLANKS.sub(r"\n\n\1", out)
+    return out
+
+
+# ---- TENET PLUS (ИП 1938/И, 1921/И; approved 12.10.2026) ----
+# 1) Совкомбанк L6 ПВ 50-59,99% 60/72/84 -> 7,30/8,00/8,40.
+# 2) Альфа-Банк L4/L6: no ПВ 0-9,99% row (bank n/a below 10%).
+# 3) ВТБ tables L6/L4 (1938/И p.4); ВТБ shown only for TENET PLUS.
+# 4) «Elegant Трейд-Ин» (Mazda/KIA/Hyundai) +100 000 / +100 000 for L4/L6, calc + КП.
+# 5) Caption: ИП 1938/И пролонгирована.
+VTB_ROWS = (
+    "      vtb:{\n"
+    "        plusL6:{\n"
+    "          80:[0.01,0.01,0.01,0.01,0.01,0.01,0.01],\n"
+    "          70:[0.01,0.01,0.01,0.01,0.01,0.01,0.01],\n"
+    "          60:[0.01,0.01,0.01,0.01,1.00,3.00,4.50],\n"
+    "          50:[0.01,0.01,0.01,2.00,4.50,6.50,7.50],\n"
+    "          40:[0.01,0.01,2.00,5.50,7.50,8.50,9.50],\n"
+    "          30:[0.01,0.01,4.50,7.50,9.00,10.00,11.00],\n"
+    "          20:[0.01,2.00,6.50,9.00,10.50,11.50,12.00],\n"
+    "          10:[0.01,4.00,8.00,10.00,11.50,12.50,13.00]\n"
+    "        },\n"
+    "        plusL4:{\n"
+    "          80:[0.01,0.01,0.01,0.01,0.01,0.01,0.01],\n"
+    "          70:[0.01,0.01,0.01,0.01,0.01,0.01,2.00],\n"
+    "          60:[0.01,0.01,0.01,0.01,3.00,5.00,6.00],\n"
+    "          50:[0.01,0.01,0.50,4.00,6.00,7.50,8.50],\n"
+    "          40:[0.01,0.01,4.00,7.00,8.50,9.50,10.50],\n"
+    "          30:[0.01,1.20,6.00,8.50,10.00,11.00,11.50],\n"
+    "          20:[0.01,3.50,8.00,10.00,11.30,12.00,12.50],\n"
+    "          10:[0.01,5.00,9.00,11.00,12.00,13.00,13.50]\n"
+    "        }\n"
+    "      }\n"
+)
+PLUS_ISP = 'const isPlusM=(m&&(m.stock==="pl4"||m.stock==="pl6"));'
+LOYAL_LBL_KM = ('${(m.stock==="pl4"||m.stock==="pl6")?`<label class="check-row"><input id="kmUseLoyal" type="checkbox" ${useLoyal?"checked":""} /> '
+                '<span>Elegant Трейд-Ин (сдаёт Mazda / KIA / Hyundai) ${rub(100000)} / возмещение ${rub(100000)}</span></label>`:""}')
+LOYAL_LBL_OF = ('${(d.m.stock==="pl4"||d.m.stock==="pl6")?`<label class="check-row"><input id="ofLoyal" type="checkbox" ${d.useLoyal?"checked":""} /> '
+                '<span>Elegant Трейд-Ин (Mazda / KIA / Hyundai) ${rub(100000)}</span></label>`:""}')
+PLUS_SUBS = [
+    # bank lists
+    ('      {id:"tbank", name:"Т-Банк"}\n    ];',
+     '      {id:"tbank", name:"Т-Банк"},\n      {id:"vtb", name:"ВТБ"}\n    ];'),
+    ('      tbank:[12,24,36,48,60,72,84,96]\n    };\n    const KM_BANK_RATES',
+     '      tbank:[12,24,36,48,60,72,84,96],\n      vtb:[12,24,36,48,60,72,84]\n    };\n    const KM_BANK_RATES'),
+    # kmBankRate: n/a handling
+    ('      const table=(KM_BANK_RATES[bankId]||{})[group]||(KM_BANK_RATES[bankId]||{}).t4l_t7||{};\n'
+     '      const row=table[band]||table[10]||table[20]||[];',
+     '      const bankT=KM_BANK_RATES[bankId]||{};/*plus-banks*/\n'
+     '      if(bankId==="vtb" && !bankT[group]) return {rate:0, term:n, band, capped:false, na:true};\n'
+     '      const table=bankT[group]||bankT.t4l_t7||{};\n'
+     '      if(/^plus/.test(String(group||"")) && !table[band]) return {rate:0, term:n, band, capped:false, na:true};\n'
+     '      const row=table[band]||table[10]||table[20]||[];'),
+    # calcKm loyal trade-in
+    ('      const tiAmt=useTi?m.ti:0;\n      const tiBack=useTi?m.tiBack:0;',
+     '      const useLoyal=(m.stock==="pl4"||m.stock==="pl6") && kmVal("kmUseLoyal", false);/*plus-loyal*/\n'
+     '      const tiAmt=(useTi?m.ti:0)+(useLoyal?100000:0);\n'
+     '      const tiBack=(useTi?m.tiBack:0)+(useLoyal?100000:0);'),
+    ('            <label class="check-row"><input id="kmUseTi" type="checkbox" ${useTi?"checked":""} /> <span>Трейд-ин ${m.ti?rub(m.ti)+" / возмещение "+rub(m.tiBack):"нет в базе"}</span></label>\n',
+     '            <label class="check-row"><input id="kmUseTi" type="checkbox" ${useTi?"checked":""} /> <span>Трейд-ин ${m.ti?rub(m.ti)+" / возмещение "+rub(m.tiBack):"нет в базе"}</span></label>\n'
+     '            ' + LOYAL_LBL_KM + '\n'),
+    ('["kmRrc","kmInv","kmUseTi","kmFleetDisc"', '["kmRrc","kmInv","kmUseTi","kmUseLoyal","kmFleetDisc"'),
+    ('        useTi:useTi,\n        useLoan:useLoan,\n', '        useTi:useTi,\n        useLoyal:on("kmUseLoyal"),\n        useLoan:useLoan,\n'),
+    # КП
+    ('      const useTi=S?!!S.useTi:offerOn("ofTi");\n',
+     '      const useTi=S?!!S.useTi:offerOn("ofTi");\n'
+     '      const useLoyal=(m.stock==="pl4"||m.stock==="pl6") && (S?!!S.useLoyal:offerOn("ofLoyal"));/*plus-loyal*/\n'),
+    ('      if(tiAmt) discs.push(["Трейд-ин импортёра", tiAmt]);\n',
+     '      if(tiAmt) discs.push(["Трейд-ин импортёра", tiAmt]);\n'
+     '      if(useLoyal) discs.push(["Elegant Трейд-Ин (Mazda / KIA / Hyundai)", 100000]);\n'),
+    ('      return {m, mid, models, client, color, price, useTi, useLoan,',
+     '      return {m, mid, models, client, color, price, useTi, useLoyal, useLoan,'),
+    ('        <label class="check-row"><input id="ofTi" type="checkbox" ${d.useTi?"checked":""} /> <span>Трейд-ин ${d.m.ti?rub(d.m.ti):"нет в базе"}</span></label>\n',
+     '        <label class="check-row"><input id="ofTi" type="checkbox" ${d.useTi?"checked":""} /> <span>Трейд-ин ${d.m.ti?rub(d.m.ti):"нет в базе"}</span></label>\n'
+     '        ' + LOYAL_LBL_OF + '\n'),
+    ('"ofMonths","ofValid","ofTi","ofLoan"', '"ofMonths","ofValid","ofTi","ofLoyal","ofLoan"'),
+]
+CAPTION_OLD = '"Ставки TENET PLUS, ИП 1938/И."'
+CAPTION_NEW = '"Ставки TENET PLUS, ИП 1938/И (пролонгирована)."'
+SOV_L6_50_OLD = "50:[0.01,0.01,2.80,4.30,6.60,7.30,8.00]"
+SOV_L6_50_NEW = "50:[0.01,0.01,2.80,4.30,7.30,8.00,8.40]"
+BANKS_MAP = re.compile(r'KM_BANKS:\[[^\n]*?\]\)\.map\(b=>\{\n')
+
+
+def _block(text, name, start=0, end=None):
+    """Return (i, j) span of '<name>:{ ... }' (brace matched) inside text[start:end]."""
+    end = len(text) if end is None else end
+    i = text.find(name + ":{", start, end)
+    if i < 0:
+        return None
+    k = i + len(name) + 1
+    depth = 0
+    for q in range(k, end):
+        c = text[q]
+        if c == "{":
+            depth += 1
+        elif c == "}":
+            depth -= 1
+            if depth == 0:
+                return (i, q + 1)
+    return None
+
+
+def plus_rates(text):
+    a = text.find("const KM_BANK_RATES = {")
+    b = text.find("    function kmRateGroup(m){", a)
+    if a < 0 or b < 0:
+        return text
+    rates = text[a:b]
+    # 1) Совкомбанк plusL6 row 50
+    sv = _block(rates, "sovcom")
+    if sv:
+        l6 = _block(rates, "plusL6", sv[0], sv[1])
+        if l6 and rates.count(SOV_L6_50_OLD, l6[0], l6[1]) == 1:
+            seg = rates[l6[0]:l6[1]].replace(SOV_L6_50_OLD, SOV_L6_50_NEW, 1)
+            rates = rates[:l6[0]] + seg + rates[l6[1]:]
+    # 2) Альфа plusL6 / plusL4 without row 0
+    for grp in ("plusL6", "plusL4"):
+        al = _block(rates, "alfa")
+        if not al:
+            break
+        g = _block(rates, grp, al[0], al[1])
+        if not g:
+            continue
+        seg = rates[g[0]:g[1]]
+        seg2 = re.sub(r',\n[ \t]*0:\[[^\]]*\]', '', seg, count=1)
+        rates = rates[:g[0]] + seg2 + rates[g[1]:]
+    # 3) ВТБ tables
+    if "      vtb:{" not in rates:
+        m = re.search(r'\n      \}\n    \};\n$', rates)
+        if m:
+            rates = rates[:m.start()] + "\n      },\n" + VTB_ROWS + "    };\n" + rates[m.end():]
+    return text[:a] + rates + text[b:]
+
+
+def plus_banks_filter(text):
+    out, pos = [], 0
+    for m in BANKS_MAP.finditer(text):
+        ls = text.rfind("\n", 0, m.start()) + 1
+        indent = re.match(r"[ \t]*", text[ls:]).group(0)
+        look = text.find("const look=", m.end())
+        look_end = text.find("\n", look)
+        close = text.find("\n" + indent + "});", m.end())
+        if look < 0 or close < 0 or look > close:
+            continue
+        nxt = text[look_end + 1:look_end + 80]
+        if "if(look&&look.na) return null;" in nxt:
+            continue
+        li = re.match(r"[ \t]*", text[text.rfind("\n", 0, look) + 1:]).group(0)
+        out.append(text[pos:look_end + 1])
+        out.append(li + "if(look&&look.na) return null;\n")
+        out.append(text[look_end + 1:close])
+        out.append("\n" + indent + "}).filter(Boolean);")
+        pos = close + len("\n" + indent + "});")
+    out.append(text[pos:])
+    return "".join(out)
+
+
+def plus_patch(text):
+    out = plus_rates(text)
+    out = apply_each(out, PLUS_SUBS)
+    if CAPTION_OLD in out:
+        out = out.replace(CAPTION_OLD, CAPTION_NEW)
+    out = plus_banks_filter(out)
     return out
 
 
