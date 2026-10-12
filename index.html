@@ -2775,13 +2775,15 @@ async function pingTelegram(body){
       {id:"sber", name:"Сбер"},
       {id:"sovcom", name:"Совкомбанк"},
       {id:"alfa", name:"Альфа"},
-      {id:"tbank", name:"Т-Банк"}
+      {id:"tbank", name:"Т-Банк"},
+      {id:"vtb", name:"ВТБ"}
     ];
     const KM_BANK_MONTHS = {
       sber:[12,24,36,48,60,72,84,96,108,120],
       sovcom:[12,24,36,48,60,72,84],
       alfa:[12,24,36,48,60,72,84,96],
-      tbank:[12,24,36,48,60,72,84,96]
+      tbank:[12,24,36,48,60,72,84,96],
+      vtb:[12,24,36,48,60,72,84]
     };
     const KM_BANK_RATES = {
       sber:{
@@ -2879,7 +2881,7 @@ async function pingTelegram(body){
           80:[0.01,0.01,0.01,0.01,0.01,0.01,0.01],
           70:[0.01,0.01,0.01,0.01,0.01,2.20,3.00],
           60:[0.01,0.01,0.01,1.80,3.50,4.90,5.20],
-          50:[0.01,0.01,2.80,4.30,6.60,7.30,8.00],
+          50:[0.01,0.01,2.80,4.30,7.30,8.00,8.40],
           40:[0.01,1.00,4.60,6.60,8.40,9.00,9.70],
           30:[0.01,3.00,6.40,8.10,9.60,9.90,10.50],
           20:[0.01,5.40,8.10,10.50,11.00,11.90,12.10],
@@ -2940,8 +2942,7 @@ async function pingTelegram(body){
           40:[0.01,0.01,4.50,6.70,8.20,9.50,10.60,11.90],
           30:[0.01,2.10,6.60,8.50,9.80,11.00,11.90,13.00],
           20:[0.01,4.40,8.30,10.00,11.20,12.20,13.00,14.00],
-          10:[0.01,6.30,9.70,11.20,12.20,13.20,13.80,14.70],
-          0:[0.01,6.30,9.70,11.20,12.20,13.20,13.80,14.70]
+          10:[0.01,6.30,9.70,11.20,12.20,13.20,13.80,14.70]
         },
         plusL4:{
           80:[0.01,0.01,0.01,0.01,0.01,0.01,0.01,2.50],
@@ -2951,8 +2952,7 @@ async function pingTelegram(body){
           40:[0.01,1.30,5.00,7.00,8.40,9.70,10.60,12.10],
           30:[0.01,2.90,7.00,8.70,9.90,11.10,12.00,13.20],
           20:[0.01,5.10,8.70,10.20,11.20,12.30,13.00,14.10],
-          10:[2.00,6.90,10.00,11.30,12.20,13.20,13.80,14.80],
-          0:[2.00,6.90,10.00,11.30,12.20,13.20,13.80,14.80]
+          10:[2.00,6.90,10.00,11.30,12.20,13.20,13.80,14.80]
         }
       },
       tbank:{
@@ -3011,6 +3011,28 @@ async function pingTelegram(body){
           10:[0.70,7.80,10.50,12.20,13.10,13.80,14.20,14.60],
           0:[3.20,9.30,11.70,13.30,14.10,14.70,15.10,15.40]
         }
+      },
+      vtb:{
+        plusL6:{
+          80:[0.01,0.01,0.01,0.01,0.01,0.01,0.01],
+          70:[0.01,0.01,0.01,0.01,0.01,0.01,0.01],
+          60:[0.01,0.01,0.01,0.01,1.00,3.00,4.50],
+          50:[0.01,0.01,0.01,2.00,4.50,6.50,7.50],
+          40:[0.01,0.01,2.00,5.50,7.50,8.50,9.50],
+          30:[0.01,0.01,4.50,7.50,9.00,10.00,11.00],
+          20:[0.01,2.00,6.50,9.00,10.50,11.50,12.00],
+          10:[0.01,4.00,8.00,10.00,11.50,12.50,13.00]
+        },
+        plusL4:{
+          80:[0.01,0.01,0.01,0.01,0.01,0.01,0.01],
+          70:[0.01,0.01,0.01,0.01,0.01,0.01,2.00],
+          60:[0.01,0.01,0.01,0.01,3.00,5.00,6.00],
+          50:[0.01,0.01,0.50,4.00,6.00,7.50,8.50],
+          40:[0.01,0.01,4.00,7.00,8.50,9.50,10.50],
+          30:[0.01,1.20,6.00,8.50,10.00,11.00,11.50],
+          20:[0.01,3.50,8.00,10.00,11.30,12.00,12.50],
+          10:[0.01,5.00,9.00,11.00,12.00,13.00,13.50]
+        }
       }
     };
     function kmRateGroup(m){
@@ -3051,7 +3073,10 @@ async function pingTelegram(body){
         }
       }
       const band=kmDownBand(downPct);
-      const table=(KM_BANK_RATES[bankId]||{})[group]||(KM_BANK_RATES[bankId]||{}).t4l_t7||{};
+      const bankT=KM_BANK_RATES[bankId]||{};/*plus-banks*/
+      if(bankId==="vtb" && !bankT[group]) return {rate:0, term:n, band, capped:false, na:true};
+      const table=bankT[group]||bankT.t4l_t7||{};
+      if(/^plus/.test(String(group||"")) && !table[band]) return {rate:0, term:n, band, capped:false, na:true};
       const row=table[band]||table[10]||table[20]||[];
       let rate=row[idx];
       let term=terms[idx];
@@ -3359,10 +3384,11 @@ async function pingTelegram(body){
       const rateGroup=typeof kmRateGroup==="function"?kmRateGroup(m):"t4l_t7";
       const banks=(typeof KM_BANKS!=="undefined"?KM_BANKS:[{id:"sovcom",name:"Совкомбанк",rate:19.2}]).map(b=>{
         const look=typeof kmBankRate==="function"?kmBankRate(b.id, rateGroup, months, downMode==="pct"?downPct:(priceReg>0?Math.round(downReg*1000/priceReg)/10:0)):{rate:b.rate||19.2, term:months, capped:false};
+        if(look&&look.na) return null;
         const term=look.term||months;
         const pay=typeof calcPay==="function"?calcPay(priceReg+extras, downReg, term, look.rate):0;
         return Object.assign({}, b, {rate:look.rate, term, capped:!!look.capped, pay, over:pay*term-creditReg});
-      });
+      }).filter(Boolean);
       const stockCars=typeof kmStockCars==="function"?kmStockCars(m):[];
       const analog=stockCars.find(c=>!(typeof carIsMpt==="function"?carIsMpt(c):c.mpt) && !(typeof carIsCorp==="function"?carIsCorp(c):c.corp)) || stockCars.find(c=>!(typeof carIsMpt==="function"?carIsMpt(c):c.mpt)) || null;
       const mptBreak=fleetSubBreak(q, {name:(f&&f.name)||(m&&m.name)||"", rrc:f.rrc, trade:!!useTi});
@@ -3962,8 +3988,9 @@ async function pingTelegram(body){
         card=0;
       }
       const prio=PRIO_VINS.has(kmVin);
-      const tiAmt=useTi?m.ti:0;
-      const tiBack=useTi?m.tiBack:0;
+      const useLoyal=(m.stock==="pl4"||m.stock==="pl6") && kmVal("kmUseLoyal", false);/*plus-loyal*/
+      const tiAmt=(useTi?m.ti:0)+(useLoyal?100000:0);
+      const tiBack=(useTi?m.tiBack:0)+(useLoyal?100000:0);
       const crAmt=useCr?m.cr:0;
       const crBack=useCr?m.crBack:0;
       const band=typeof kmBand==="function"?kmBand(kmVin, useTi, prio, m):{lo:prio?m.prioMin:m.kmMin, hi:prio?m.prioMax:m.kmMax, lock:false};
@@ -4035,10 +4062,11 @@ async function pingTelegram(body){
       const mptBreak=typeof fleetSubBreak==="function"?fleetSubBreak(qFleet, {name:(fMpt&&fMpt.name)||m.name, stock:mptSample?escape(mptSample.color||"—")+" · "+escape(mptSample.vin||""):"", rrc:mptRrc, trade:!!useDcTi}):"";
       const banks=(typeof KM_BANKS!=="undefined"?KM_BANKS:[]).map(b=>{
         const look=typeof kmBankRate==="function"?kmBankRate(b.id, rateGroup, months, downPct):{rate:b.rate||0, term:months, capped:false};
+        if(look&&look.na) return null;
         const term=look.term||months;
         const pay=calcPay(price+extras, down, term, look.rate);
         return Object.assign({}, b, {rate:look.rate, term, capped:!!look.capped, pay, over:pay*term-credit});
-      });
+      }).filter(Boolean);
       function kmPayRows(list, payKey, overKey){
         return list.map(b=>{
           const yearsWant=Math.round(months/12);
@@ -4110,10 +4138,11 @@ async function pingTelegram(body){
           const altCredit=Math.max(0, altPrice-altDown+extras);
           const altBanks=(typeof KM_BANKS!=="undefined"?KM_BANKS:[]).map(b=>{
             const look=typeof kmBankRate==="function"?kmBankRate(b.id, altGroup, months, altPct):{rate:0, term:months, capped:false};
+            if(look&&look.na) return null;
             const term=look.term||months;
             const pay=calcPay(altPrice+extras, altDown, term, look.rate);
             return Object.assign({}, b, {rate:look.rate, term, capped:!!look.capped, pay, over:pay*term-altCredit});
-          });
+          }).filter(Boolean);
           const fAlt=typeof fleetOf==="function"?fleetOf(alt.id):null;
           const altSub=(fAlt&&fAlt.sub)||0;
           const altTidy=(fAlt&&fAlt.tidy)||alt.rrc;
@@ -4160,10 +4189,11 @@ async function pingTelegram(body){
         const pct=pr>0?Math.round(dn*1000/pr)/10:0;
         const list=(typeof KM_BANKS!=="undefined"?KM_BANKS:[]).map(b=>{
           const look=typeof kmBankRate==="function"?kmBankRate(b.id, rateGroup, months, downMode==="pct"?downPct:pct):{rate:b.rate||0, term:months, capped:false};
+          if(look&&look.na) return null;
           const term=look.term||months;
           const pay=calcPay(pr+extras, dn, term, look.rate);
           return Object.assign({}, b, {rate:look.rate, term, capped:!!look.capped, pay, over:pay*term-cr});
-        });
+        }).filter(Boolean);
         const k=typeof kmProfit==="function"?kmProfit(Object.assign({}, dcPack, {dcCr:d})):0;
         return {dc:d, price:pr, down:dn, credit:cr, banks:list, km:k};
       }
@@ -4196,6 +4226,7 @@ async function pingTelegram(body){
             <label class="field" style="max-width:none;margin-top:8px"><span>РРЦ, ₽ · из условий ${TERMS_DATE}</span><input id="kmRrc" inputmode="numeric" value="${rrc}" /></label>
             <label class="field" style="max-width:none"><span>Сумма счёта, ₽ · из условий ${TERMS_DATE}</span><input id="kmInv" inputmode="numeric" value="${invoice}" /></label>
             <label class="check-row"><input id="kmUseTi" type="checkbox" ${useTi?"checked":""} /> <span>Трейд-ин ${m.ti?rub(m.ti)+" / возмещение "+rub(m.tiBack):"нет в базе"}</span></label>
+            ${(m.stock==="pl4"||m.stock==="pl6")?`<label class="check-row"><input id="kmUseLoyal" type="checkbox" ${useLoyal?"checked":""} /> <span>Elegant Трейд-Ин (сдаёт Mazda / KIA / Hyundai) ${rub(100000)} / возмещение ${rub(100000)}</span></label>`:""}
             <label class="check-row"><input id="kmUseLoan" type="checkbox" ${useLoan?"checked":""} /> <span>Кредит</span></label>
             ${showDealCr?`<label class="check-row"><input id="kmUseCr" type="checkbox" ${useCr?"checked":""} /> <span>${dealCrLabel} · ${rub(m.cr)}${m.crBack?` / возмещение ${rub(m.crBack)}`:""}</span></label>`:""}
             ${pangoOnly?"":`<label class="field" style="max-width:none"><span>Спецпредложение, ₽</span><input id="kmSpec" inputmode="numeric" value="${spec}" /></label>
@@ -4260,7 +4291,7 @@ async function pingTelegram(body){
               <div class="pay-cell"><p class="calc-note">КМ ${Math.round(ordDeal.km/1000)} тыс. · коридор ${typeof kmBandTxt==="function"?kmBandTxt(ob.lo,ob.hi):ob.lo+" … "+ob.hi}</p></div>
               ${prioInStock?`<div class="pay-cell prio"><p class="calc-note">КМ ${Math.round(prioDeal.km/1000)} тыс.${prioDeal.price<ordDeal.price?" · дешевле на "+rub(ordDeal.price-prioDeal.price):""}</p></div>`:""}
             </div>
-            <p class="calc-note">${isPlus?"Ставки TENET PLUS, ИП 1938/И.":"Ставки TENET ФИНАНС, ИП 1890/И."}</p>
+            <p class="calc-note">${isPlus?"Ставки TENET PLUS, ИП 1938/И (пролонгирована).":"Ставки TENET ФИНАНС, ИП 1890/И."}</p>
             ${plusAltDirect}
           </div>
           <div class="pay-col ${showSub?"sub":"mpt"} km-pay${qFleetPrio?" fleet-pair":""}">
@@ -4335,7 +4366,7 @@ async function pingTelegram(body){
               ${mptBreak}</details>`
               :`<p class="eyebrow" style="margin-top:16px">Платёж в месяц</p>
               ${kmPayRows(banks,"pay","over")}`}
-              <p class="calc-note">${showSub?"Субсидия бренда. ":showFleet?"Флит. ":""}${isPlus?"Ставки TENET PLUS, ИП 1938/И.":"Ставки TENET ФИНАНС, ИП 1890/И."} Кредит = авто ${rub(price)} − ПВ + Д/О ${rub(addons)} + каско ${rub(pack)} + комиссия банка.</p>
+              <p class="calc-note">${showSub?"Субсидия бренда. ":showFleet?"Флит. ":""}${isPlus?"Ставки TENET PLUS, ИП 1938/И (пролонгирована).":"Ставки TENET ФИНАНС, ИП 1890/И."} Кредит = авто ${rub(price)} − ПВ + Д/О ${rub(addons)} + каско ${rub(pack)} + комиссия банка.</p>
             </div>`:`<div class="card"><p class="eyebrow">Кредит</p><p class="lead" style="max-width:none">Включите галочку «Кредит», чтобы открыть расчёт платежа${canSub?" и сравнение с субсидией бренда":""}.</p></div>`}
             ${kmSideList(m, price, downPct, months, extras, {useTi, spec, useDcTi, dcTi, useDcCr, dcCr, downMode, down, finDelta, useLoan})}
           </div>`}
@@ -4764,6 +4795,7 @@ async function pingTelegram(body){
       let price=S?(Number(S.price)||0):(offerNum("ofPrice", m.rrc)||m.rrc);
       if(!S && prevModel!==mid) price=m.rrc;
       const useTi=S?!!S.useTi:offerOn("ofTi");
+      const useLoyal=(m.stock==="pl4"||m.stock==="pl6") && (S?!!S.useLoyal:offerOn("ofLoyal"));/*plus-loyal*/
       const useLoan=S?!!S.useLoan:offerOn("ofLoan");
       const showDealCr=(m.cr||0)>0 && (m.id!=="t7p" || useLoan);
       const useCr=showDealCr && (S?!!S.useCr:offerOn("ofCr"));
@@ -4787,6 +4819,7 @@ async function pingTelegram(body){
       const crAmt=useCr?(m.cr||0):0;
       const discs=[];
       if(tiAmt) discs.push(["Трейд-ин импортёра", tiAmt]);
+      if(useLoyal) discs.push(["Elegant Трейд-Ин (Mazda / KIA / Hyundai)", 100000]);
       if(useCr && crAmt) discs.push([m.id==="t7p"?"Выгодный кредит":"Программа кредита", crAmt]);
       if(spec) discs.push(["Спецпредложение", spec]);
       if(dcTi) discs.push(["Скидка ДЦ за трейд-ин", dcTi]);
@@ -4805,10 +4838,11 @@ async function pingTelegram(body){
       const rateGroup=typeof kmRateGroup==="function"?kmRateGroup(m):"t4l_t7";
       const banks=(useLoan && typeof KM_BANKS!=="undefined"?KM_BANKS:[]).map(b=>{
         const look=typeof kmBankRate==="function"?kmBankRate(b.id, rateGroup, months, downPct):{rate:19.2, term:months};
+        if(look&&look.na) return null;
         const term=look.term||months;
         const pay=typeof calcPay==="function"?calcPay(carPrice+extras, down, term, look.rate):0;
         return {name:b.name, rate:look.rate, term, pay:Math.round(pay)};
-      });
+      }).filter(Boolean);
       const rivals=offerRivalsPicked(m, months, downPct, banks);
       const ownEl=document.getElementById("ofOwnCar");
       if(ownEl) offerOwnCar=String(ownEl.value||"").trim();
@@ -4818,7 +4852,7 @@ async function pingTelegram(body){
         offerOwnVal=Number.isFinite(n)?Math.max(0, Math.round(n)):0;
       }
       const service=offerTab==="service";
-      return {m, mid, models, client, color, price, useTi, useLoan, showDealCr, useCr, spec, useDcTi, useDcCr, dcDef, dcTi, dcCr, addons, casco, pack, months, downMode, downPct, down, carPrice, clientPay, credit, fee, valid, packEq, banks, discs, discount, rivals, service, ownCar:offerOwnCar, ownVal:service?offerOwnVal:0};
+      return {m, mid, models, client, color, price, useTi, useLoyal, useLoan, showDealCr, useCr, spec, useDcTi, useDcCr, dcDef, dcTi, dcCr, addons, casco, pack, months, downMode, downPct, down, carPrice, clientPay, credit, fee, valid, packEq, banks, discs, discount, rivals, service, ownCar:offerOwnCar, ownVal:service?offerOwnVal:0};
     }
     function offerDash(v){ const s=String(v||"").trim(); return s||"—"; }
     function offerPhotoKey(id){
@@ -5410,6 +5444,7 @@ async function pingTelegram(body){
         ${offerRivalChecks(d.m)}
         <p class="eyebrow">Скидки</p>
         <label class="check-row"><input id="ofTi" type="checkbox" ${d.useTi?"checked":""} /> <span>Трейд-ин ${d.m.ti?rub(d.m.ti):"нет в базе"}</span></label>
+        ${(d.m.stock==="pl4"||d.m.stock==="pl6")?`<label class="check-row"><input id="ofLoyal" type="checkbox" ${d.useLoyal?"checked":""} /> <span>Elegant Трейд-Ин (Mazda / KIA / Hyundai) ${rub(100000)}</span></label>`:""}
         <label class="check-row"><input id="ofLoan" type="checkbox" ${d.useLoan?"checked":""} /> <span>Кредит</span></label>
         ${d.showDealCr?`<label class="check-row"><input id="ofCr" type="checkbox" ${d.useCr?"checked":""} /> <span>${d.m.id==="t7p"?"Выгодный кредит":"Программа кредита"} · ${rub(d.m.cr||0)}</span></label>`:""}
         ${offerField("Спецпредложение, ₽", `<input id="ofSpec" inputmode="numeric" value="${d.spec}" />`)}
@@ -5443,6 +5478,7 @@ async function pingTelegram(body){
         mid:mid,
         price:price,
         useTi:useTi,
+        useLoyal:on("kmUseLoyal"),
         useLoan:useLoan,
         useCr:on("kmUseCr"),
         spec:num("kmSpec", 0),
@@ -6074,7 +6110,7 @@ async function pingTelegram(body){
       document.querySelectorAll("[data-offer-pdf]").forEach(b=>b.onclick=()=>offerPdf());
       document.querySelectorAll("[data-offer-down]").forEach(b=>b.onclick=()=>{ const hid=document.getElementById("ofDownMode"); if(hid) hid.value=b.dataset.offerDown||"pct"; view="offer"; render(); });
       document.querySelectorAll("[data-offer-rival]").forEach(el=>el.addEventListener("change", ()=>{ view="offer"; render(); }));
-      ["ofClient","ofOwnCar","ofOwnVal","ofModel","ofColor","ofPrice","ofSpec","ofDo","ofPack","ofCasco","ofDown","ofDownPct","ofMonths","ofValid","ofTi","ofLoan","ofCr","ofDcTi","ofDcCr","ofDcTiAmt","ofDcCrAmt","osClient","osModel","osCar","osVin","osPack","osPrice","osNote","osValid","olCo","olInn","olModel","olPrice","olAdv","olMonths","olValid"].forEach(id=>{ const el=document.getElementById(id); if(el) el.addEventListener("change", ()=>{ view="offer"; render(); }); });
+      ["ofClient","ofOwnCar","ofOwnVal","ofModel","ofColor","ofPrice","ofSpec","ofDo","ofPack","ofCasco","ofDown","ofDownPct","ofMonths","ofValid","ofTi","ofLoyal","ofLoan","ofCr","ofDcTi","ofDcCr","ofDcTiAmt","ofDcCrAmt","osClient","osModel","osCar","osVin","osPack","osPrice","osNote","osValid","olCo","olInn","olModel","olPrice","olAdv","olMonths","olValid"].forEach(id=>{ const el=document.getElementById(id); if(el) el.addEventListener("change", ()=>{ view="offer"; render(); }); });
     }
 
     let tuneTab = "do";
@@ -8289,7 +8325,7 @@ async function confirmCloud(rec){
       }
       if(kmVinGo) kmVinGo.onclick=()=>{ kmApplyVin(kmVinFind?kmVinFind.value:""); };
       if(kmVinFind) kmVinFind.onkeydown=(e)=>{ if(e.key==="Enter"){ e.preventDefault(); kmApplyVin(kmVinFind.value); } };
-      ["kmRrc","kmInv","kmUseTi","kmFleetDisc","kmFleetMpt","cDownMode","cDown","cDownPct","cMonths","kmUseLoan","kmUseCr","kmSpec","kmUseDcTi","kmUseDcCr","kmDcTi","kmDcCr","kmDo","kmPack","kmCasco","kmAltId","kmFleetSub"].forEach(id=>{
+      ["kmRrc","kmInv","kmUseTi","kmUseLoyal","kmFleetDisc","kmFleetMpt","cDownMode","cDown","cDownPct","cMonths","kmUseLoan","kmUseCr","kmSpec","kmUseDcTi","kmUseDcCr","kmDcTi","kmDcCr","kmDo","kmPack","kmCasco","kmAltId","kmFleetSub"].forEach(id=>{
         const el=document.getElementById(id);
         if(el) el.addEventListener("change", ()=>{ view="calc"; render(); });
       });
