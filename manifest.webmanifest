@@ -2,7 +2,7 @@
   "name": "TENET · Отдел продаж",
   "short_name": "TENET",
   "description": "Кабинет отдела продаж",
-  "start_url": "/?v=d3",
+  "start_url": "/?v=d6",
   "scope": "/",
   "display": "standalone",
   "background_color": "#f4f1ea",
