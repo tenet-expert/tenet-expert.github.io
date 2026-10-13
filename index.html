@@ -1174,8 +1174,9 @@ body:has(.lb-rep-page) .wrap{max-width:none;width:100%;padding:14px 16px 48px}
 .lb-duo i{font-style:normal;color:#8a8074;padding:0 3px}
 .lb-block.e .sum .lb-duo,.lb-block.c .sum .lb-duo,.lb-block.d .sum .lb-duo,.lb-block.f .sum .lb-duo{display:block;white-space:normal;line-height:1.25}
 .lb-block.e .sum .lb-duo i,.lb-block.c .sum .lb-duo i,.lb-block.d .sum .lb-duo i,.lb-block.f .sum .lb-duo i{display:block;padding:0;font-size:9px;color:#8a8074}
-.lb-ratio{display:inline-flex;gap:4px;align-items:baseline;white-space:nowrap}
-.lb-ratio .lb-pct{font-size:11px;opacity:.85}
+.lb-ratio{display:inline-flex;gap:6px;align-items:baseline}
+.lb-ratio b{min-width:2ch;text-align:right;font-variant-numeric:tabular-nums;color:#1c1a17}
+.lb-ratio .lb-pct{font-size:11px;opacity:.9}
 .lb-fold{display:none}
 .lb-fold.open{display:block}
 .lb-fold-btn{cursor:pointer}
@@ -2068,7 +2069,7 @@ async function pingTelegram(body){
     const BOARD_PLAN = 10;
     const BOARD_PLAN_TEAM = 70;
     function boardBlank(){
-      return {name:"",traffic:0,visit:0,call:0,web:0,meet:0,service:0,td:0,contract:0,issue:0,visitContract:0,callVisit:0,callContract:0,webVisit:0,webContract:0,cancel:0,ecredit:0,other:false,people:[]};
+      return {name:"",traffic:0,visit:0,call:0,web:0,meet:0,service:0,td:0,contract:0,issue:0,visitContract:0,callVisit:0,callContract:0,webVisit:0,webContract:0,cancel:0,reserve:0,ecredit:0,other:false,people:[]};
     }
     function boardAdd(p, r){
       if(r.visit||r.call||r.web) p.traffic++;
@@ -2402,9 +2403,9 @@ async function pingTelegram(body){
       const ratioCell=(p, numFn, min)=>{
         const one=x=>{
           const n=numFn(x)||0, d=tdBase(x), text=boardPct(n, d);
-          if(text==="–") return String(n);
+          if(text==="–") return `<span class="lb-ratio"><b>${n}</b></span>`;
           const pct=100*n/d<min?`<span class="lb-bad">${text}</span>`:text;
-          return `${n} ${pct}`;
+          return `<span class="lb-ratio"><b>${n}</b><span class="lb-pct">${pct}</span></span>`;
         };
         if(p.name!=="Итого") return one(p);
         return `<span class="lb-duo">${one(core)}<i>/</i>${one(total)}</span>`;
