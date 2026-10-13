@@ -1165,12 +1165,17 @@ body:has(.lb-rep-page) .wrap{max-width:none;width:100%;padding:14px 16px 48px}
   .lb-block.d .lb-scroll .lb-rep th:first-child,.lb-block.d .lb-scroll .lb-rep td:first-child{background:#eef3f6}
   .lb-block.f .lb-scroll .lb-rep th:first-child,.lb-block.f .lb-scroll .lb-rep td:first-child{background:#f8f3e8}
 }
-.lb-rep tr.sum td{font-weight:800;border-top:2px solid #1c1a17}
+.lb-rep tr.sum td{font-weight:800;border-top:2px solid #1c1a17;vertical-align:middle}
+.lb-block.e .sum td,.lb-block.c .sum td,.lb-block.d .sum td,.lb-block.f .sum td{height:42px;line-height:1.2}
 .lb-bad{color:#c62828;font-weight:800}
 .lb-mid{color:#b8860b;font-weight:800}
 .lb-ok{color:#2e7d32;font-weight:800}
 .lb-duo{white-space:nowrap}
 .lb-duo i{font-style:normal;color:#8a8074;padding:0 3px}
+.lb-block.e .sum .lb-duo,.lb-block.c .sum .lb-duo,.lb-block.d .sum .lb-duo,.lb-block.f .sum .lb-duo{display:block;white-space:normal;line-height:1.25}
+.lb-block.e .sum .lb-duo i,.lb-block.c .sum .lb-duo i,.lb-block.d .sum .lb-duo i,.lb-block.f .sum .lb-duo i{display:block;padding:0;font-size:9px;color:#8a8074}
+.lb-ratio{display:inline-flex;gap:4px;align-items:baseline;white-space:nowrap}
+.lb-ratio .lb-pct{font-size:11px;opacity:.85}
 .lb-fold{display:none}
 .lb-fold.open{display:block}
 .lb-fold-btn{cursor:pointer}
@@ -2367,7 +2372,7 @@ async function pingTelegram(body){
           const n=numFn(x)||0, d=tdBase(x), text=boardPct(n, d);
           if(text==="–") return String(n);
           const pct=100*n/d<min?`<span class="lb-bad">${text}</span>`:text;
-          return `${n} ${pct}`;
+          return `<span class="lb-ratio"><b>${n}</b><span class="lb-pct">${pct}</span></span>`;
         };
         if(p.name!=="Итого") return one(p);
         return `<span class="lb-duo">${one(core)}<i>/</i>${one(total)}</span>`;
