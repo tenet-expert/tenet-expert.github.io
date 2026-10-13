@@ -2160,7 +2160,7 @@ async function pingTelegram(body){
       const other=boardBlank();
       other.name="Другие"; other.other=true; other.people=people;
       people.forEach(x=>{
-        ["traffic","visit","call","web","meet","td","contract","issue","cancel","service","ecredit","callVisit","webVisit","callContract","webContract"].forEach(k=>{ other[k]=(other[k]||0)+(x[k]||0); });
+        ["traffic","visit","call","web","meet","td","contract","issue","cancel","reserve","service","ecredit","callVisit","webVisit","callContract","webContract"].forEach(k=>{ other[k]=(other[k]||0)+(x[k]||0); });
       });
       list.push(other);
       const sum=list.reduce((s,p)=>{
@@ -2175,7 +2175,7 @@ async function pingTelegram(body){
       const other=boardBlank();
       other.name="Другие"; other.other=true; other.people=people;
       people.forEach(x=>{
-        ["traffic","visit","call","web","meet","td","contract","issue","cancel","service","ecredit","callVisit","webVisit","callContract","webContract"].forEach(k=>{ other[k]=(other[k]||0)+(x[k]||0); });
+        ["traffic","visit","call","web","meet","td","contract","issue","cancel","reserve","service","ecredit","callVisit","webVisit","callContract","webContract"].forEach(k=>{ other[k]=(other[k]||0)+(x[k]||0); });
       });
       list.push(other);
       const sum=list.reduce((s,p)=>{
@@ -2345,12 +2345,12 @@ async function pingTelegram(body){
       const kids=bucket.people||[];
       const people=mains.concat(kids);
       const total=people.reduce((s,p)=>{
-        ["traffic","visit","call","web","meet","td","contract","issue","visitContract","callVisit","callContract","webVisit","webContract","cancel","service","ecredit"].forEach(k=>s[k]+=p[k]||0);
+        ["traffic","visit","call","web","meet","td","contract","issue","visitContract","callVisit","callContract","webVisit","webContract","cancel","reserve","service","ecredit"].forEach(k=>s[k]+=p[k]||0);
         return s;
       }, boardBlank());
       total.name="Итого";
       const core=mains.reduce((s,p)=>{
-        ["traffic","visit","call","web","meet","td","contract","issue","visitContract","callVisit","callContract","webVisit","webContract","cancel","service","ecredit"].forEach(k=>s[k]+=p[k]||0);
+        ["traffic","visit","call","web","meet","td","contract","issue","visitContract","callVisit","callContract","webVisit","webContract","cancel","reserve","service","ecredit"].forEach(k=>s[k]+=p[k]||0);
         return s;
       }, boardBlank());
       const planOf=p=>{
@@ -2391,10 +2391,12 @@ async function pingTelegram(body){
       const mainHead=["Менеджер","План","Факт","% плана","Контракты","Расторж."].concat(live?["Действ.","Выдачи+К","Прогноз","Прогноз %"]:[]).concat(["Трафик","% трафика","% визитов","% зв+инт","Конв. в контракт","Конв. в выдачу"]);
       const fromVisit=p=>Math.max(0,(p.contract||0)-(p.callContract||0)-(p.webContract||0));
       const rowMain=(p, plan)=>{
-        const pace=boardPace(p.issue, plan);
+        const pace=boardPace((p.issue||0)+(p.reserve||0), plan);
         const prim=ch(p), tPrim=ch(total);
-        const paceCells=live?`<td>–</td><td>–</td><td>${pace.n}</td><td>${pace.p}</td>`:"";
-        return `<tr${trAttr(p)}><td>${who(p)}</td><td>${plan||"–"}</td><td>${p.issue}</td><td>${boardPct(p.issue, plan)}</td><td>${p.contract}</td><td>${sep?(p.cancel||0):"–"}</td>${paceCells}<td>${prim}</td><td>${sharePct(prim, tPrim, p)}</td><td>${sharePct(p.visit, total.visit, p)}</td><td>${sharePct(p.call+p.web, total.call+total.web, p)}</td><td>${convCell(p, x=>x.contract, ch, "conv")}</td><td>${convCell(p, x=>x.issue, ch)}</td></tr>`;
+        const active=p.reserve||0;
+        const issueK=(p.issue||0)+active;
+        const paceCells=live?`<td>${active}</td><td>${issueK}</td><td>${pace.n}</td><td>${pace.p}</td>`:"";
+        return `<tr${trAttr(p)}><td>${who(p)}</td><td>${plan||"–"}</td><td>${p.issue}</td><td>${boardPct(p.issue, plan)}</td><td>${p.contract}</td><td>${p.cancel||0}</td>${paceCells}<td>${prim}</td><td>${sharePct(prim, tPrim, p)}</td><td>${sharePct(p.visit, total.visit, p)}</td><td>${sharePct(p.call+p.web, total.call+total.web, p)}</td><td>${convCell(p, x=>x.contract, ch, "conv")}</td><td>${convCell(p, x=>x.issue, ch)}</td></tr>`;
       };
       const tdBase=p=>(p.visit||0)+(p.callVisit||0)+(p.webVisit||0);
       const ratioCell=(p, numFn, min)=>{
