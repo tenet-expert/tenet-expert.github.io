@@ -1952,7 +1952,9 @@ async function pingTelegram(body){
     function nav(active){
       const attest=["home","study","quiz","play","rate","hist"].includes(active);
       let items=[];
-      if(active==="login") items=[];
+      if(isAo()){
+        if(active!=="login") items=[["hub","Кабинет"],["calc","Калькулятор"],["stock","Склад"]];
+      } else if(active==="login") items=[];
       else if(active==="hub") items=[];
       else if(attest) items=[["hub","Кабинет"],["home","Аттестация"],["rate","Рейтинг"],["study","Справочник"],["quiz","Тест"]];
       else {
@@ -1971,6 +1973,7 @@ async function pingTelegram(body){
       if(mark) mark.textContent = "T";
     }
     function goSection(id){
+      if(isAo() && !["hub","calc","stock","login"].includes(id)) id="hub";
       const attest=["home","study","quiz","play","rate","hist"];
       view=id;
       state.section = id==="hub" ? "hub" : (attest.includes(id) ? "attest" : id);
@@ -2453,6 +2456,7 @@ async function pingTelegram(body){
     }
     function render(){
       try{
+        if(isAo() && !["hub","calc","stock","login"].includes(view)) view="hub";
         if(state.authed && state.surname && !done){
           const run=userRun();
           if(run && view!=="login"){
@@ -2483,6 +2487,7 @@ async function pingTelegram(body){
       return `<div class="banner"><div><p class="eyebrow">${escape(sub)}</p><b>${escape(title)}</b></div><div class="banner-name">${escape(word)}</div></div>`;
     }
     function needAuth(){ return !state.surname || !state.authed; }
+    function isAo(){ return norm(state.surname||"")==="ао" || norm(state.surname||"")==="ao"; }
     function canSenior(){
       const blob=norm((state.surname||"")+" "+(state.display||""));
       return blob.indexOf("спицын")>=0 || blob.indexOf("леонтьев")>=0;
@@ -2688,6 +2693,17 @@ async function pingTelegram(body){
     }
     function hub(){
       if(needAuth()) return login();
+      if(isAo()){
+        const cards=[["calc","%","Калькулятор","T PLUS · L4 и L6"],["stock","S","Склад","L4 и L6 — в наличии и в пути"]];
+        return banner("Кабинет","TENET PLUS · L4 / L6", state.display)+`
+          <p class="lead">Добро пожаловать. Доступны калькулятор и склад по L4 и L6.</p>
+          <div class="who-line"><button class="btn ghost" id="logout">Выйти</button></div>
+          <div class="hub-grid">${cards.map(([id,mark,title,lead])=>`
+            <button class="card hub-card" data-go="${id}" type="button">
+              <span class="hub-mark">${mark}</span>
+              <div class="txt"><h3>${title}</h3><p>${lead}</p></div>
+            </button>`).join("")}</div>`;
+      }
       const hour=new Date().getHours();
       const hi=hour<12?"Доброе утро":hour<18?"Добрый день":"Добрый вечер";
       const examHint=hasExam1()?(expertLocked()?"Аттестация закреплена экспертом.":"Аттестация №1 сдана."):"Аттестация №1 ещё впереди.";
@@ -3827,7 +3843,7 @@ async function pingTelegram(body){
     }
     function kmChipGroups(active){
       const groups={};
-      const off={t9p:1,a8a:1,a8u:1};
+      const off=isAo()?Object.fromEntries(KM_MODELS.filter(x=>x.stock!=="pl4"&&x.stock!=="pl6").map(x=>[x.id,1])):{t9p:1,a8a:1,a8u:1};
       KM_MODELS.forEach(x=>{
         if(off[x.id]) return;
         const g=kmLineOf(x.id);
@@ -3835,6 +3851,12 @@ async function pingTelegram(body){
       });
       const line=(g,tone)=>groups[g]&&groups[g].length?`<div class="km-line tone-${tone}"><p class="stock-h">${escape(g)}</p><div class="km-grid">${groups[g].map(x=>`<button type="button" class="chip ${x.id===active?"on":""}" data-km-id="${x.id}">${escape(x.name)}<small>${x.brand} · РРЦ ${rub(x.rrc)}</small></button>`).join("")}</div></div>`:"";
       const slot=(cls,html)=>html?`<div class="km-slot ${cls}">${html}</div>`:"";
+      if(isAo()){
+        return `<div class="km-board"><span class="km-brand plus">TENET PLUS</span>`
+          +slot("s-l4",line("L4","a"))
+          +slot("s-l6",line("L6","a"))
+          +`</div>`;
+      }
       const tests=(typeof TEST_SALE!=="undefined"?TEST_SALE:[]);
       const testSlot=tests.length?slot("s-test", `<div class="km-line tone-test"><p class="stock-h">Тесты в продаже · только PANGO</p><div class="km-grid">${tests.map(x=>`<button type="button" class="chip ${x.id===active?"on":""}" data-km-id="${x.id}">${escape(x.short)}<small>фикс ${rub(x.fix)}</small></button>`).join("")}</div></div>`):"";
       return `<div class="km-board"><span class="km-brand tenet">TENET</span><span class="km-brand plus">TENET PLUS</span><span class="km-brand chery">CHERY</span>`
@@ -4032,8 +4054,8 @@ async function pingTelegram(body){
     }
     function calcKm(){
       const testHit=typeof testSaleOf==="function"?testSaleOf(kmId):null;
-      if(testHit) return calcTestSale(testHit);
-      const kmOff={t9p:1,a8a:1,a8u:1};
+      if(testHit && !isAo()) return calcTestSale(testHit);
+      const kmOff=isAo()?Object.fromEntries(KM_MODELS.filter(x=>x.stock!=="pl4"&&x.stock!=="pl6").map(x=>[x.id,1])):{t9p:1,a8a:1,a8u:1};
       if(typeof kmId!=="string" || !KM_MODELS.some(x=>x.id===kmId && !kmOff[x.id])) kmId=(KM_MODELS.find(x=>!kmOff[x.id])||KM_MODELS[0]).id;
       if(typeof kmVin!=="string") kmVin="";
       const m=KM_MODELS.find(x=>x.id===kmId)||KM_MODELS[0];
@@ -4679,7 +4701,7 @@ async function pingTelegram(body){
       if(typeof stockSortDir!=="number") stockSortDir=1;
       if(typeof stockOpen!=="object" || !stockOpen) stockOpen={};
       const meta=typeof STOCK_META==="object"?STOCK_META:{updated:"11.09.2026"};
-      const sale=(typeof STOCK!=="undefined"?STOCK:[]);
+      const sale=(typeof STOCK!=="undefined"?STOCK:[]).filter(x=>!isAo() || x.model==="pl4" || x.model==="pl6");
       const q=stockVinNorm(typeof stockVin==="string"?stockVin:"");
       const list=sale.filter(x=>{
         if(q) return stockVinNorm(x.vin).indexOf(q)>=0;
@@ -4757,7 +4779,7 @@ async function pingTelegram(body){
           <button class="chip ${stockStatus==="all"?"on":""}" data-stock-st="all">Все · ${scoped.length}</button>
           <button class="chip ${stockStatus==="in"?"on":""}" data-stock-st="in">В наличии · ${nIn}</button>
           <button class="chip ${stockStatus==="way"?"on":""}" data-stock-st="way">В пути · ${nWay}</button>
-          <button class="chip ${stockStatus==="test"?"on":""}" data-stock-st="test">Тесты в продаже · ${(typeof TEST_SALE!=="undefined"?TEST_SALE.length:0)}</button>
+          ${isAo()?"":`<button class="chip ${stockStatus==="test"?"on":""}" data-stock-st="test">Тесты в продаже · ${(typeof TEST_SALE!=="undefined"?TEST_SALE.length:0)}</button>`}
         </div>
         ${testOn?"":`<div class="study-pick st-filters st-sorts">
           <span class="st-sort-lab">Сортировка</span>
