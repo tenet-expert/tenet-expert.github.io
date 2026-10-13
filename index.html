@@ -3843,7 +3843,7 @@ async function pingTelegram(body){
     }
     function kmChipGroups(active){
       const groups={};
-      const off={t9p:1,a8a:1,a8u:1};
+      const off={t9p:1,t9u:1,a8a:1,a8p:1,a8u:1};
       KM_MODELS.forEach(x=>{
         if(off[x.id]) return;
         const g=kmLineOf(x.id);
@@ -3861,9 +3861,7 @@ async function pingTelegram(body){
         +slot("s-t8",line("T8","a"))
         +slot("s-plus",`<div class="km-pair">${line("L4","c")}${line("L6","c")}</div>`)
         +slot("s-t9",line("TENET T9","a"))
-        +slot("s-c9",line("Tiggo 9","b"))
         +slot("s-a8",line("TENET A8","a"))
-        +slot("s-ca",line("Arrizo 8","b"))
         +`</div>`;
     }
     function kmPrioRecRows(cur, carPrice, downPct, months, extras, deal){
@@ -4049,7 +4047,7 @@ async function pingTelegram(body){
     function calcKm(){
       const testHit=typeof testSaleOf==="function"?testSaleOf(kmId):null;
       if(testHit) return calcTestSale(testHit);
-      const kmOff={t9p:1,a8a:1,a8u:1};
+      const kmOff={t9p:1,t9u:1,a8a:1,a8p:1,a8u:1};
       if(typeof kmId!=="string" || !KM_MODELS.some(x=>x.id===kmId && !kmOff[x.id])) kmId=(KM_MODELS.find(x=>!kmOff[x.id])||KM_MODELS[0]).id;
       if(typeof kmVin!=="string") kmVin="";
       const m=KM_MODELS.find(x=>x.id===kmId)||KM_MODELS[0];
@@ -4664,9 +4662,7 @@ async function pingTelegram(body){
       </article>`;
     }
     const TEST_SALE = [
-      {id:"tst4", short:"Tiggo 4", model:"CHERY Tiggo 4", vin:"LVVDB21B8RC106478", rrc:2395000, tune:164200, year:2024, km:4983, fix:2150000},
-      {id:"tst9", short:"Tiggo 9", model:"CHERY Tiggo 9", vin:"LVTDD24B9RG094198", rrc:4640000, tune:220000, year:2024, km:3853, fix:3500000},
-      {id:"tsa8", short:"Arrizo 8", model:"CHERY Arrizo 8", vin:"LVVDC21B2RD562966", rrc:3260000, tune:230000, year:2024, km:4970, fix:2300000}
+      {id:"tst4", short:"Tiggo 4", model:"CHERY Tiggo 4", vin:"LVVDB21B8RC106478", rrc:2395000, tune:164200, year:2024, km:4983, fix:2150000}
     ];
     function testSaleOf(id){ return (typeof TEST_SALE!=="undefined" && TEST_SALE.find(x=>x.id===id)) || null; }
     function stockVinNorm(s){
