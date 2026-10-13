@@ -4199,7 +4199,7 @@ async function pingTelegram(body){
         pOk=kmGate(pKmK).ok;
       }
       let plusAltDirect="", plusAltFleet="", altPick="";
-      if(useLoan && (isPlus || m.brand==="TENET")){
+      if(isPlus || m.brand==="TENET"){
         const wantPlus=!isPlus;
         const alts=(typeof KM_MODELS!=="undefined"?KM_MODELS:[]).filter(x=>x && x.brand===(wantPlus?"TENET PLUS":"TENET"));
         if(typeof kmAltFor!=="string") kmAltFor="";
@@ -4477,7 +4477,8 @@ async function pingTelegram(body){
             <div class="note-box">${kmPango?`Спеццена <b>${rub(pFix)} ₽</b> · скидка от РРЦ ${rub(pDiscount)}<br/>Маржа 1С ${rub(Math.round(pMargin))} · бонус ${rub(Math.round(pBonus))} · доход на железе ${rub(Math.round(pIron))}<br/>Каско 80 000 + GAP/ДМС ${rub(pCard)} внутри PANGO${useTi?" · возмещение трейд-ин "+rub(pTiBack):""}`:`Цена авто <b>${rub(Math.round(carPrice))} ₽</b> · клиенту с Д/О <b>${rub(Math.round(client))} ₽</b><br/>Скидка ${rub(Math.round(discount))} · маржа 1С ${rub(Math.round(margin))}<br/>Бонус ${rub(Math.round(bonus))} (${Math.round(m.bonus*100)}%) · доход на железе ${rub(Math.round(iron))}<br/>НДС ${m.vat===1.22?"22%":"20%"} · сбор ${(m.fee*100).toFixed(m.fee*100%1?1:0)}% от цены авто${prio?" · приоритет":""}`}</div>
           </div>
           ${(useLoan&&showSplit)||pShow?kmSideList(m, price, downPct, months, extras, {useTi, spec, useDcTi, dcTi, useDcCr, dcCr, downMode, down, finDelta, useLoan}):""}
-        </div>`;
+        </div>
+        ${!useLoan && plusAltDirect?`<div class="card" style="margin-top:12px">${altPick}<div class="${altCls}"><p class="eyebrow">${head}</p><p class="calc-note">Наличные · РРЦ ${rub(alt.rrc)} · ${altDisc} · цена ${rub(altPrice)}</p><div class="bank-row"><span>Цена авто</span><span class="pay">${rub(altPrice)} ₽</span></div><div class="bank-row"><span>Ваша цена</span><span class="pay">${rub(price)} ₽</span></div><div class="bank-row"><span>Разница</span><span class="pay">${altPrice>price?"дороже на "+rub(altPrice-price):altPrice<price?"дешевле на "+rub(price-altPrice):"одинаково"}</span></div>${altLoyalChk}<button type="button" class="chip" data-km-id="${alt.id}">Открыть ${escape(alt.name)}</button></div></div>`:""}`;
     }
     function calcVinBar(){
       const q=escape(typeof kmVinQuery==="string"?kmVinQuery:(typeof kmVin==="string"?kmVin:""));
