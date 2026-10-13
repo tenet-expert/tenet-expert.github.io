@@ -2112,6 +2112,20 @@ async function pingTelegram(body){
       }), {traffic:0,visit:0,td:0,contract:0,issue:0});
       return {list, sum};
     }
+    const BOARD_OCT_FIXED = [
+      {name:"Ахмадуллин",visit:6,call:2,web:4,td:2,issue:2,cancel:2,callVisit:0,webVisit:0,callContract:0,webContract:0,service:1,ecredit:1},
+      {name:"Велиджанов",visit:3,call:7,web:6,td:3,issue:1,cancel:1,callVisit:1,webVisit:1,callContract:0,webContract:0,service:2,ecredit:1},
+      {name:"Демьянов",visit:6,call:9,web:6,td:2,issue:3,cancel:1,callVisit:3,webVisit:2,callContract:1,webContract:2,service:5,ecredit:7},
+      {name:"Лавров",visit:6,call:5,web:4,td:4,issue:3,cancel:1,callVisit:2,webVisit:2,callContract:1,webContract:2,service:5,ecredit:5},
+      {name:"Сидоров",visit:9,call:10,web:8,td:11,issue:2,cancel:1,callVisit:3,webVisit:2,callContract:3,webContract:2,service:7,ecredit:7},
+      {name:"Спицын",visit:4,call:5,web:1,td:8,issue:6,cancel:0,callVisit:1,webVisit:0,callContract:2,webContract:0,service:3,ecredit:1},
+      {name:"Тальков",visit:11,call:7,web:16,td:15,issue:2,cancel:1,callVisit:1,webVisit:3,callContract:0,webContract:1,service:5,ecredit:6}
+    ];
+    const BOARD_OCT_OTHER = [
+      {name:"Леонтьев",visit:1,call:0,web:9,td:3,issue:2,cancel:0,callVisit:0,webVisit:0,service:3,ecredit:4},
+      {name:"Елчин",visit:0,call:0,web:0,td:0,issue:0,cancel:1,callVisit:0,webVisit:0,service:0,ecredit:0},
+      {name:"Бикулов",visit:1,td:0,issue:0,cancel:1}
+    ];
     const BOARD_SEP_FIXED = [
       {name:"Ахмадуллин",visit:12,call:2,web:8,td:4,issue:6,cancel:1,callVisit:2,webVisit:1,callContract:0,webContract:3,service:3,ecredit:1},
       {name:"Коропец",visit:13,call:9,web:15,td:11,issue:3,cancel:0,callVisit:0,webVisit:3,callContract:0,webContract:0,service:5,ecredit:6},
@@ -2138,6 +2152,21 @@ async function pingTelegram(body){
       p.traffic=(p.visit||0)+(p.call||0)+(p.web||0);
       p.contract=(p.issue||0)+(p.cancel||0);
       return p;
+    }
+    function boardOctRank(){
+      const list=BOARD_OCT_FIXED.map(boardSepPerson).sort(boardCmp);
+      const people=BOARD_OCT_OTHER.map(boardSepPerson).sort(boardCmp);
+      const other=boardBlank();
+      other.name="Другие"; other.other=true; other.people=people;
+      people.forEach(x=>{
+        ["traffic","visit","call","web","meet","td","contract","issue","cancel","service","ecredit","callVisit","webVisit","callContract","webContract"].forEach(k=>{ other[k]=(other[k]||0)+(x[k]||0); });
+      });
+      list.push(other);
+      const sum=list.reduce((s,p)=>{
+        ["traffic","visit","call","web","td","contract","issue","cancel","service","ecredit"].forEach(k=>s[k]+=p[k]||0);
+        return s;
+      }, boardBlank());
+      return {list, sum};
     }
     function boardSepRank(){
       const list=BOARD_SEP_FIXED.map(boardSepPerson).sort(boardCmp);
@@ -2283,7 +2312,7 @@ async function pingTelegram(body){
         boardLoad();
       }, 40);
       return `<div class="lb-rep-page">`+banner("Leaderboard","Трафик · онлайн","TENET")+`
-        <p class="lead">Сегодня, вчера и месяц — из «Трафик октябрь». Сентябрь собран из журналов 1С: первичные звонки, визиты, интернет и тест-драйвы, выдачи и расторжения. Расторжение прибавлено к контракту.</p>
+        <p class="lead">Сегодня и вчера — из «Трафик октябрь». Месяц — снимок из журналов 1С на 13.10: звонки, визиты, интернет, тест-драйвы, выдачи и расторжения. Визиты со звонка и интернета, оценка и e-credit — из воронки. Расторжение прибавлено к контракту.</p>
         ${boardChips()}
         <div id="boardRoot"><div class="card"><p>Загружаю таблицу…</p></div></div></div>`;
     }
@@ -2309,7 +2338,7 @@ async function pingTelegram(body){
     }
     function boardReportHtml(){
       const per=boardPeriod();
-      const rank=boardMode==="prev"?boardSepRank():boardRank(per.rows, per.roster);
+      const rank=boardMode==="prev"?boardSepRank():(boardMode==="month"?boardOctRank():boardRank(per.rows, per.roster));
       const bucket=rank.list.find(p=>p.other)||boardBlank();
       const mains=rank.list.filter(p=>!p.other);
       const kids=bucket.people||[];
