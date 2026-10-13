@@ -1671,7 +1671,7 @@ tr.lb-fold-row.open{display:table-row}
     function shuffle(a){ const x=[...a]; for(let i=x.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [x[i],x[j]]=[x[j],x[i]]; } return x; }
     function grade(p){ return p>=EXPERT?"expert":p>=PASS?"pass":p>=60?"retry":"fail"; }
     const GRADE = {expert:{t:"Эксперт",l:"90%+. Результат закреплён в рейтинге. Тренировки — по желанию."},pass:{t:"Зачёт",l:"Результат закреплён. До 90% — тренировка и пересдача по коду РОП."},retry:{t:"Пересдача",l:"Результат закреплён. Тренировка и пересдача — код РОП."},fail:{t:"Не сдал",l:"Результат закреплён. Тренировка и пересдача — код РОП."}};
-    function escape(s){ return String(s||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m])); }
+    function escape(s){ return String(s||"").replace(/[&<>"']/g,m=>({"&":"&","<":"<",">":">","\"":""","'":"&#39;"}[m])); }
     function packResult(rec){
       try { return "TENET1."+btoa(unescape(encodeURIComponent(JSON.stringify(rec)))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,""); }
       catch(e){ return ""; }
@@ -6195,7 +6195,7 @@ async function pingTelegram(body){
         mount:[["R16",5300],["R17, R18, R19",6300],["R20",8600]],
         notes:["Допускается на T4L резина от T7 R18 225/55.","В файле от 29.09 без цены: Fortune 225/55R19 103T Polaro Ice TL, 230 шип.","Sailun RoadX 225/55R18 98T RXFrost WH12 TL, 102 шип."],
         groups:[
-          ["T9 R20",[["Fortune 245/50R20 105T Polaro Ice TL, 230 шип.",15500,62000,"1"]]],
+          ["T9 R20",[["Fortune 245/50R20 105T Polaro Ice TL, 230 шип.",15500,62000,"2"]]],
           ["T9 R19",[["235/55 R19",15750,63000,"0 · под заказ 3 раб дня"]]],
           ["T8 R19",[["Royal Black Royalstud II 235/50 R19 103T, шип.",15500,62000,"1"],["Fortune 235/50R19 103T Polaro Ice TL, шип.",15500,62000,"2"]]],
           ["T8 R18",[["Pirelli Formula 235/55 R18 104T XL Ice TL, шип.",15500,62000,"1"],["Автошина 235/55 R18 Tracmax 104T XL X-Privilo S500 TL (шип.)",12500,50000,"3"]]],
@@ -6204,7 +6204,7 @@ async function pingTelegram(body){
           ["T4L",[["Fortune 225/60 R18 104T Polaro Ice TL, шип.",12000,48000,"2"],["Pirelli Formula 225/60 R18 104T XL Ice TL, шип.",15500,62000,"1"]]],
           ["T4 R17 / L4",[["Fortune 215/60R17 100T Polaro Ice TL, шип.",11000,44000,"3"],["Formula Ice Friction 215/60 R17 100T XL, липучка",9600,38400,"1"],["Lanvigator Ice Spider II 215/60 R17 100T шип XL",13500,54000,"1"]]],
           ["T4 R18",[["Goodride 215/55 R18 99H XL FrostExtreme SW606 TL, шип.",12500,50000,"1"]]],
-          ["Arrizo R17",[["Pirelli Formula 215/50R17 95T XL Ice TL, шип.",11100,44400,"1"]]]
+          ["Arrizo R17",[["Автошина Hankook 225/45R18 95T XL Winter i*Pike RS2 W429 TL (шип.)",18500,74000,"1"],["Pirelli Formula 215/50R17 95T XL Ice TL, шип.",11100,44400,"1"]]]
         ]
       }
     };
