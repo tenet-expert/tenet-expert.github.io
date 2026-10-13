@@ -2113,18 +2113,18 @@ async function pingTelegram(body){
       return {list, sum};
     }
     const BOARD_OCT_FIXED = [
-      {name:"Ахмадуллин",visit:6,call:2,web:4,td:2,issue:2,cancel:2,callVisit:0,webVisit:0,callContract:0,webContract:0,service:1,ecredit:1},
-      {name:"Велиджанов",visit:3,call:7,web:6,td:3,issue:1,cancel:1,callVisit:1,webVisit:1,callContract:0,webContract:0,service:2,ecredit:1},
-      {name:"Демьянов",visit:6,call:9,web:6,td:2,issue:3,cancel:1,callVisit:3,webVisit:2,callContract:1,webContract:2,service:5,ecredit:7},
-      {name:"Лавров",visit:6,call:5,web:4,td:4,issue:3,cancel:1,callVisit:2,webVisit:2,callContract:1,webContract:2,service:5,ecredit:5},
-      {name:"Сидоров",visit:9,call:10,web:8,td:11,issue:2,cancel:1,callVisit:3,webVisit:2,callContract:3,webContract:2,service:7,ecredit:7},
-      {name:"Спицын",visit:4,call:5,web:1,td:8,issue:6,cancel:0,callVisit:1,webVisit:0,callContract:2,webContract:0,service:3,ecredit:1},
-      {name:"Тальков",visit:11,call:7,web:16,td:15,issue:2,cancel:1,callVisit:1,webVisit:3,callContract:0,webContract:1,service:5,ecredit:6}
+      {name:"Ахмадуллин",visit:6,call:2,web:4,td:2,issue:2,cancel:2,reserve:0,callVisit:0,webVisit:0,callContract:0,webContract:0,service:1,ecredit:1},
+      {name:"Велиджанов",visit:3,call:7,web:6,td:3,issue:1,cancel:1,reserve:0,callVisit:1,webVisit:1,callContract:0,webContract:0,service:2,ecredit:1},
+      {name:"Демьянов",visit:6,call:9,web:6,td:2,issue:3,cancel:1,reserve:0,callVisit:3,webVisit:2,callContract:1,webContract:2,service:5,ecredit:7},
+      {name:"Лавров",visit:6,call:5,web:4,td:4,issue:3,cancel:1,reserve:1,callVisit:2,webVisit:2,callContract:1,webContract:2,service:5,ecredit:5},
+      {name:"Сидоров",visit:9,call:10,web:8,td:11,issue:3,cancel:1,reserve:0,callVisit:3,webVisit:2,callContract:3,webContract:2,service:7,ecredit:7},
+      {name:"Спицын",visit:4,call:5,web:1,td:8,issue:6,cancel:0,reserve:1,callVisit:1,webVisit:0,callContract:2,webContract:0,service:3,ecredit:1},
+      {name:"Тальков",visit:11,call:7,web:16,td:15,issue:2,cancel:1,reserve:1,callVisit:1,webVisit:3,callContract:0,webContract:1,service:5,ecredit:6}
     ];
     const BOARD_OCT_OTHER = [
-      {name:"Леонтьев",visit:1,call:0,web:9,td:3,issue:2,cancel:0,callVisit:0,webVisit:0,service:3,ecredit:4},
-      {name:"Елчин",visit:0,call:0,web:0,td:0,issue:0,cancel:1,callVisit:0,webVisit:0,service:0,ecredit:0},
-      {name:"Бикулов",visit:1,td:0,issue:0,cancel:1}
+      {name:"Леонтьев",visit:1,call:0,web:9,td:3,issue:2,cancel:0,reserve:0,callVisit:0,webVisit:0,service:3,ecredit:4},
+      {name:"Елчин",visit:0,call:0,web:0,td:0,issue:0,cancel:1,reserve:0,callVisit:0,webVisit:0,service:0,ecredit:0},
+      {name:"Бикулов",visit:1,td:0,issue:0,cancel:1,reserve:1}
     ];
     const BOARD_SEP_FIXED = [
       {name:"Ахмадуллин",visit:12,call:2,web:8,td:4,issue:6,cancel:1,callVisit:2,webVisit:1,callContract:0,webContract:3,service:3,ecredit:1},
@@ -2150,7 +2150,8 @@ async function pingTelegram(body){
       const p=boardBlank();
       Object.assign(p, o);
       p.traffic=(p.visit||0)+(p.call||0)+(p.web||0);
-      p.contract=(p.issue||0)+(p.cancel||0);
+      p.reserve=o.reserve||0;
+      p.contract=(p.issue||0)+(p.reserve||0)+(p.cancel||0);
       return p;
     }
     function boardOctRank(){
@@ -2427,7 +2428,7 @@ async function pingTelegram(body){
             <section class="lb-block f"><p class="lb-rep-h">Визит всего</p><div class="lb-scroll"><table class="lb-rep">${thead(allHead)}<tbody>${shown.map(rowAll).join("")}</tbody></table></div></section>
           </div>
         </div>
-        <p class="lb-rep-note">Как в «ОП CHERY». ${planNote} Трафик — визиты + звонки + интернет. Конв. в контракт: меньше 10% красным, меньше 15% жёлтым, иначе зелёным. Конв. с визита: ниже 20% красным, до 30% жёлтым, от 30% зелёным. Звонок в визит: ниже 10 / до 15 / от 15. Интернет в визит: ниже 5 / до 10 / от 10. Оценка — от 70% визитов, e-credit — от 60%, иначе красным. ТД ниже 70% — красным. Доля трафика, визитов и звонков с интернетом, а также объёмы в нижних блоках: меньше 10% или больше 20% — красным. В строке «Итого» конверсия: основной состав / весь отдел. ${sep?"Сентябрь: контракт = выдача + расторжение. Тест-драйв — только поездка с «движением клиента», без служебных, заправок и центра Hyundai. Повтор одного клиента и поездка мужа с женой считаются один раз. Визит со звонка и с интернета, оценка б/у и e-credit — из воронки, только менеджеры лидерборда.":"Расторжения в журнале октября не ведутся."} Обновлено ${escape((boardCache&&boardCache.stamp)||"")}</p>`;
+        <p class="lb-rep-note">Как в «ОП CHERY». ${planNote} Трафик — визиты + звонки + интернет. Конв. в контракт: меньше 10% красным, меньше 15% жёлтым, иначе зелёным. Конв. с визита: ниже 20% красным, до 30% жёлтым, от 30% зелёным. Звонок в визит: ниже 10 / до 15 / от 15. Интернет в визит: ниже 5 / до 10 / от 10. Оценка — от 70% визитов, e-credit — от 60%, иначе красным. ТД ниже 70% — красным. Доля трафика, визитов и звонков с интернетом, а также объёмы в нижних блоках: меньше 10% или больше 20% — красным. В строке «Итого» конверсия: основной состав / весь отдел. ${sep?"Сентябрь: контракт = выдача + расторжение. Тест-драйв — только поездка с «движением клиента», без служебных, заправок и центра Hyundai. Повтор одного клиента и поездка мужа с женой считаются один раз. Визит со звонка и с интернета, оценка б/у и e-credit — из воронки, только менеджеры лидерборда.":"Октябрь на 13.10: контракт = выдача + действующая бронь + расторжение. 22 — выдачи факт. Визиты со звонка и интернета, оценка и e-credit — из воронки."} Обновлено ${escape((boardCache&&boardCache.stamp)||"")}</p>`;
     }
     function boardBindFolds(root){
       if(!root) return;
