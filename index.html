@@ -4220,8 +4220,8 @@ async function pingTelegram(body){
           const altLoyal=(alt.stock==="pl4"||alt.stock==="pl6") && kmVal("kmAltLoyal", false);
           const altTiAmt=(useTi?(alt.ti||0):0)+(altLoyal?100000:0);
           const altCrAmt=useCr?(alt.cr||0):0;
-          const altDcTi=useDcTi?kmVal("kmDcTi", typeof KM_DC_DEF==="number"?KM_DC_DEF:100000):0;
-          const altDcCr=useDcCr?kmVal("kmDcCr", 0):0;
+          const altDcTi=useDcTi?(typeof dcTi==="number"?dcTi:0):0;
+          const altDcCr=useDcCr?(typeof dcCr==="number"?dcCr:0):0;
           const altDiscount=altTiAmt+altDcTi+altDcCr+altCrAmt;
           const altPrice=Math.max(0, (alt.rrc||0)-altDiscount);
           const altDown=Math.max(0, Math.min(altPrice, Math.round(altPrice*Math.max(0, downPct)/100)));
@@ -4239,7 +4239,7 @@ async function pingTelegram(body){
           const altSub=(fAlt&&fAlt.sub)||0;
           const altTidy=(fAlt&&fAlt.tidy)||alt.rrc;
           const altTi=useDcTi?(typeof FLEET_TI==="number"?FLEET_TI:100000):0;
-          const altBase=Math.max(0, altTidy-altTi-altDcTi-altDcCr);
+          const altBase=Math.max(0, altTidy-altTi);
           const altQ=useLoan && typeof fleetSubQuote==="function"?fleetSubQuote(altBase, altSub, altDown, addons, pack||0, months, altSub>0, fleetRateOf(alt)):null;
           const altFleetPrice=altQ?altQ.price:Math.max(0, altBase-altSub);
           const altFleetCredit=altQ?altQ.credit:Math.max(0, altFleetPrice-altDown);
