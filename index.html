@@ -3924,7 +3924,8 @@ async function pingTelegram(body){
       });
       const inn=cars.filter(c=>c.status==="in");
       const way=cars.filter(c=>c.status==="way");
-      const recs=kmPrioRecRows(m, carPrice!=null?carPrice:m.rrc, downPct!=null?downPct:20, months!=null?months:60, extras||0, deal);
+      const isPlus=m && (m.stock==="pl4"||m.stock==="pl6"||m.brand==="TENET PLUS");
+      const recs=isPlus?[]:kmPrioRecRows(m, carPrice!=null?carPrice:m.rrc, downPct!=null?downPct:20, months!=null?months:60, extras||0, deal);
       const hereVins=new Set(cars.map(c=>c.vin));
       const recVins=new Set(recs.map(r=>r.c.vin));
       const recOther=recs.filter(r=>!hereVins.has(r.c.vin));
