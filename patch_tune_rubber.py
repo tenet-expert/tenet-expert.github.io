@@ -22,6 +22,9 @@ PAIRS = [
     # Drive 12.10.2026: Arrizo R17 + Hankook 225/45R18
     ('["Arrizo R17",[["Pirelli Formula 215/50R17 95T XL Ice TL, шип.",11100,44400,"1"]]]',
      '["Arrizo R17",[["Автошина Hankook 225/45R18 95T XL Winter i*Pike RS2 W429 TL (шип.)",18500,74000,"1"],["Pirelli Formula 215/50R17 95T XL Ice TL, шип.",11100,44400,"1"]]]'),
+    # Drive 14.10.2026: шиномонтаж комплексный R16 6800, R17-R19 8000, R20 10600
+    ('mount:[["R16",5300],["R17, R18, R19",6300],["R20",8600]]',
+     'mount:[["R16",6800],["R17, R18, R19",8000],["R20",10600]]'),
 ]
 
 def patch(path: Path) -> bool:
