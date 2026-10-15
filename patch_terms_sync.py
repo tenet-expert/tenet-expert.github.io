@@ -82,6 +82,24 @@ def js_ok(html):
     return True
 
 
+def ensure_t9(text):
+    """T9 specials added 15.10 in the trade-terms sheet. Keep them if the remote source is behind."""
+    if "tt9p:{cash:3450000" not in text and "t8u4:{cash:3300000,ti:3200000}" in text:
+        text = text.replace(
+            "t8u4:{cash:3300000,ti:3200000}",
+            "t8u4:{cash:3300000,ti:3200000},\n      tt9p:{cash:3450000,ti:3400000},\n      tt9u:{cash:3800000,ti:3500000}",
+            1,
+        )
+    needle = '{model:"T8",trim:"Ultra 4WD",price:"3 300 нал, 3 200 ТИ"}'
+    if "3 450 нал, 3 400 ТИ" not in text and needle in text:
+        text = text.replace(
+            needle,
+            needle + ',\n      {model:"T9",trim:"Prime 5 мест 4WD",price:"3 450 нал, 3 400 ТИ"},\n      {model:"T9",trim:"Ultra 5 мест 4WD",price:"3 800 нал, 3 500 ТИ"}',
+            1,
+        )
+    return text
+
+
 def main():
     try:
         canon = urllib.request.urlopen(SRC, timeout=30).read().decode("utf-8")
@@ -116,6 +134,7 @@ def main():
             out = out[:s[0]] + new + out[s[1]:]
         if out is None:
             continue
+        out = ensure_t9(out)
         if out == src:
             print(p, "terms already in sync")
             continue
