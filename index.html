@@ -1208,7 +1208,12 @@ tr.lb-fold-row.open{display:table-row}
 .lb-card h3{margin:2px 0 4px}
 .lb-hit{display:block}
 .lb-hit-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
-.lb-feed-label{margin:12px 0 0;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#6d6458;font-weight:700}
+.lb-day-log,.lb-day-sum{width:100%;border-collapse:collapse;font-size:13px}
+.lb-day-log th,.lb-day-log td,.lb-day-sum th,.lb-day-sum td{border-bottom:1px solid #e4dfd4;padding:6px 8px;text-align:center;white-space:nowrap}
+.lb-day-log th,.lb-day-sum th{font-size:11px;letter-spacing:.03em;text-transform:uppercase;color:#6d6458;font-weight:700;text-align:center}
+.lb-day-log td:nth-child(2),.lb-day-log td:nth-child(3),.lb-day-log td:nth-child(4),.lb-day-log .lb-note,.lb-day-sum td:first-child,.lb-day-sum th:first-child{text-align:left}
+.lb-day-log .lb-note{white-space:normal;color:#6d6458;font-size:12px;max-width:280px}
+.lb-day-sum tr.sum td{font-weight:800;border-top:2px solid #1c1a17}
 .lb-scale{display:grid;grid-template-columns:repeat(var(--n,4),minmax(0,1fr));gap:4px;margin-top:8px}
 .lb-scale span{min-width:0;font-size:10px;line-height:1.15;text-align:center;color:#8a8175;background:#f3eadc;border-radius:7px;padding:6px 2px}
 .lb-scale span.on{color:#fff;font-weight:700}
@@ -2301,12 +2306,37 @@ async function pingTelegram(body){
       const body=rows.length?block("Визиты",visits)+block("Звонки и интернет",leads)+block("Остальное",rest):`<p class="lead">Записей пока нет.</p>`;
       return `<div class="card" style="margin-top:12px"><p class="eyebrow">${escape(title)}</p><h3 style="margin:4px 0 8px">Лента</h3><div class="lb-feed">${body}</div></div>`;
     }
-    function boardHtml(cache){
+    function boardDayHtml(cache){
       const yest=boardMode==="yday";
       const key=boardDayKey(yest?-1:0);
-      const plus=(BOARD_DAY_PLUS[key]||[]).map((x,i)=>({when:"14.10.2026 2"+i+":00", who:x.name, client:"Воронка", model:"", visit:0, call:0, web:0, contract:x.contract?1:0, issue:x.issue?1:0, note:x.note||""}));
-      const tape=(boardMode==="day"||yest)?boardTape(boardSlice(cache, key).concat(yest?plus:[]), yest?"Вчера":"Сегодня"):"";
-      return `<div class="lb-sheet">${boardReportHtml()}</div>`+tape;
+      const rows=boardSlice(cache, key).slice().sort((a,b)=>String(a.when||"").localeCompare(String(b.when||"")));
+      (BOARD_DAY_PLUS[key]||[]).forEach((x,i)=>{
+        rows.push({when:key+".2026", who:x.name, client:"", model:"", visit:(x.callVisit||x.webVisit)?1:0, call:0, web:0, meet:0, service:0, td:0, contract:x.contract?1:0, issue:x.issue?1:0, note:x.note||""});
+      });
+      const mark=v=>v?String(v):"";
+      const log=rows.map(r=>`<tr><td>${escape(String(r.when||"").slice(11,16))}</td><td>${escape(r.client||"")}</td><td>${escape(r.who||"")}</td><td>${escape(r.model||"")}</td><td>${mark(r.visit)}</td><td>${mark(r.call)}</td><td>${mark(r.web)}</td><td>${mark(r.meet)}</td><td>${mark(r.service)}</td><td>${mark(r.td)}</td><td>${mark(r.contract)}</td><td>${mark(r.issue)}</td><td class="lb-note">${escape(r.note||"")}</td></tr>`).join("") || `<tr><td colspan="13">Записей пока нет.</td></tr>`;
+      const roster=["Ахмадуллин","Велиджанов","Демьянов","Лавров","Сидоров","Спицын","Тальков","Павлова","Извеков","Леонтьев"];
+      const map={};
+      roster.forEach(n=>{ map[n]=boardBlank(); map[n].name=n; });
+      rows.forEach(r=>{
+        const name=r.who||"";
+        if(!name) return;
+        if(!map[name]){ map[name]=boardBlank(); map[name].name=name; }
+        const p=map[name];
+        p.visit+=r.visit||0; p.call+=r.call||0; p.web+=r.web||0; p.meet+=r.meet||0; p.service+=r.service||0; p.td+=r.td||0; p.contract+=r.contract||0; p.issue+=r.issue||0;
+      });
+      const order=roster.concat(Object.keys(map).filter(n=>roster.indexOf(n)<0));
+      const people=order.map(n=>map[n]).filter(Boolean);
+      const sum=people.reduce((s,p)=>{ ["visit","call","web","meet","service","td","contract","issue"].forEach(k=>s[k]+=p[k]||0); return s; }, boardBlank());
+      const all=p=>(p.visit||0)+(p.call||0)+(p.web||0);
+      const line=p=>`<tr><td>${escape(p.name)}</td><td>${all(p)}</td><td>${p.visit||0}</td><td>${p.call||0}</td><td>${p.web||0}</td><td>${p.meet||0}</td><td>${p.service||0}</td><td>${p.td||0}</td><td>${p.contract||0}</td><td>${p.issue||0}</td></tr>`;
+      const heads=["Время","Клиент","Менеджер","Интерес","Визит","Звонок","Интернет","Встреча","Сервис","ТД","Контракт","Выдача","Комментарий"];
+      const sumHeads=["Менеджер","Всего","Визит","Звонок","Интернет","Встреча","Сервис","ТД","Контракт","Выдача"];
+      return `<div class="lb-sheet lb-day"><p class="eyebrow">${yest?"Вчера":"Сегодня"}</p><h2 style="margin:0 0 8px">${escape(key)}</h2><p class="lb-sum">Один день · как в «Трафик октябрь». ${all(sum)} первичных · ${sum.contract||0} контрактов · ${sum.issue||0} выдач.</p><div class="lb-scroll"><table class="lb-day-log"><thead><tr>${heads.map(h=>`<th>${h}</th>`).join("")}</tr></thead><tbody>${log}</tbody></table></div><h3 class="lb-rep-h" style="margin-top:16px">Итог дня</h3><div class="lb-scroll"><table class="lb-day-sum"><thead><tr>${sumHeads.map(h=>`<th>${h}</th>`).join("")}</tr></thead><tbody>${people.map(line).join("")}<tr class="sum"><td>Итого</td><td>${all(sum)}</td><td>${sum.visit||0}</td><td>${sum.call||0}</td><td>${sum.web||0}</td><td>${sum.meet||0}</td><td>${sum.service||0}</td><td>${sum.td||0}</td><td>${sum.contract||0}</td><td>${sum.issue||0}</td></tr></tbody></table></div></div>`;
+    }
+    function boardHtml(cache){
+      if(boardMode==="day"||boardMode==="yday") return boardDayHtml(cache);
+      return `<div class="lb-sheet">${boardReportHtml()}</div>`;
     }
     async function boardEnsure(){
       if(boardCache) return boardCache;
