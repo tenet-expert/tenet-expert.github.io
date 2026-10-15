@@ -388,10 +388,41 @@ JS = r'''
       const body=rows.length?block("Визиты",visits)+block("Звонки и интернет",leads)+block("Остальное",rest):`<p class="lead">Записей пока нет.</p>`;
       return `<div class="card" style="margin-top:12px"><p class="eyebrow">${escape(title)}</p><h3 style="margin:4px 0 8px">Лента</h3><div class="lb-feed">${body}</div></div>`;
     }
-    function boardHtml(cache){
+    function boardDayHtml(cache){
       const yest=boardMode==="yday";
-      const tape=(boardMode==="day"||yest)?boardTape(boardSlice(cache, boardDayKey(yest?-1:0)), yest?"Вчера":"Сегодня"):"";
-      return `<div class="lb-sheet">${boardReportHtml()}</div>`+tape;
+      const key=boardDayKey(yest?-1:0);
+      const plus={
+        "14.10":[
+          {name:"Спицын", visit:1, contract:1, issue:1, note:"визит после звонка · контракт · выдача"},
+          {name:"Велиджанов", visit:0, contract:1, issue:0, note:"контракт с первичного визита"},
+          {name:"Тальков", visit:1, contract:1, issue:0, note:"визит со звонка · контракт со звонка"},
+          {name:"Леонтьев", visit:1, contract:1, issue:0, note:"визит с интернета · контракт с интернета"}
+        ]
+      };
+      const rows=boardSlice(cache, key).slice();
+      (plus[key]||[]).forEach(x=>{
+        rows.push({when:key+".2026", who:x.name, client:"", model:"", visit:x.visit||0, call:0, web:0, meet:0, service:0, td:0, contract:x.contract?1:0, issue:x.issue?1:0, note:x.note||""});
+      });
+      const roster=["Ахмадуллин","Велиджанов","Демьянов","Лавров","Сидоров","Спицын","Тальков","Павлова","Извеков"];
+      const map={};
+      roster.forEach(n=>{ map[n]=boardBlank(); map[n].name=n; });
+      rows.forEach(r=>{
+        const name=r.who||"";
+        if(!name) return;
+        if(!map[name]){ map[name]=boardBlank(); map[name].name=name; }
+        const p=map[name];
+        p.visit+=r.visit||0; p.call+=r.call||0; p.web+=r.web||0; p.meet+=r.meet||0; p.service+=r.service||0; p.td+=r.td||0; p.contract+=r.contract||0; p.issue+=r.issue||0;
+      });
+      const people=roster.concat(Object.keys(map).filter(n=>roster.indexOf(n)<0)).map(n=>map[n]);
+      const sum=people.reduce((s,p)=>{ ["visit","call","web","meet","service","td","contract","issue"].forEach(k=>s[k]+=p[k]||0); return s; }, boardBlank());
+      const all=p=>(p.visit||0)+(p.call||0)+(p.web||0);
+      const line=p=>`<tr><td>${escape(p.name)}</td><td>${all(p)}</td><td>${p.visit||0}</td><td>${p.call||0}</td><td>${p.web||0}</td><td>${p.meet||0}</td><td>${p.service||0}</td><td>${p.td||0}</td><td>${p.contract||0}</td><td>${p.issue||0}</td></tr>`;
+      const heads=["Менеджер","Всего","Первичный трафик<br>Визит","Звонок","Интернет","Вторичный трафик<br>Запланированная встреча","Сервис","Тест-драйв","Контракт","Выдача"];
+      return `<div class="lb-sheet lb-day"><p class="eyebrow">${yest?"Вчера":"Сегодня"}</p><h2 style="margin:0 0 8px">${escape(key)}</h2><div class="lb-scroll"><table class="lb-day-sum"><thead><tr>${heads.map(h=>`<th>${h}</th>`).join("")}</tr></thead><tbody>${people.map(line).join("")}<tr class="sum"><td>Итого</td><td>${all(sum)}</td><td>${sum.visit||0}</td><td>${sum.call||0}</td><td>${sum.web||0}</td><td>${sum.meet||0}</td><td>${sum.service||0}</td><td>${sum.td||0}</td><td>${sum.contract||0}</td><td>${sum.issue||0}</td></tr></tbody></table></div></div>`+boardTape(rows, yest?"Вчера":"Сегодня");
+    }
+    function boardHtml(cache){
+      if(boardMode==="day"||boardMode==="yday") return boardDayHtml(cache);
+      return `<div class="lb-sheet">${boardReportHtml()}</div>`;
     }
     async function boardEnsure(){
       if(boardCache) return boardCache;
@@ -609,6 +640,16 @@ def apply(path: Path):
 .lb-mini th{font-size:11px;color:var(--muted);font-weight:700}
 </style>""", 1)
         print("lb-mini", path)
+    if ".lb-day{" not in html and "</style>" in html:
+        html = html.replace("</style>", """.lb-day{width:max-content;max-width:100%}
+.lb-day-sum{width:auto;border-collapse:collapse;font-size:13px}
+.lb-day-sum th,.lb-day-sum td{border-bottom:1px solid #e4dfd4;padding:6px 8px;text-align:center;white-space:nowrap}
+.lb-day-sum th{white-space:normal;line-height:1.15;max-width:108px;vertical-align:bottom;font-size:11px;font-weight:700;color:#6d6458;text-transform:none;letter-spacing:0}
+.lb-day .lb-scroll{width:max-content;max-width:100%;overflow-x:auto}
+.lb-day-sum td:first-child,.lb-day-sum th:first-child{text-align:left}
+.lb-day-sum tr.sum td{font-weight:800;border-top:2px solid #1c1a17}
+</style>""", 1)
+        print("lb-day", path)
     if ".lb-row.other" not in html and "</style>" in html:
         html = html.replace("</style>", ".lb-row.other{background:#fbf7f1}\n.lb-row.other td{color:#6d6458}\n</style>", 1)
     card = '["board","L","Leaderboard","Трафик, контракты и выдача отдела"]'
