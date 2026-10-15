@@ -2120,6 +2120,31 @@ async function pingTelegram(body){
       }), {traffic:0,visit:0,td:0,contract:0,issue:0});
       return {list, sum};
     }
+    const BOARD_DAY_PLUS = {
+      "14.10": [
+        {name:"Спицын", callVisit:1, callContract:1, contract:1, issue:1, note:"визит после звонка · контракт · выдача"},
+        {name:"Велиджанов", contract:1, note:"контракт с первичного визита"},
+        {name:"Тальков", callVisit:1, callContract:1, contract:1, note:"визит со звонка · контракт со звонка"},
+        {name:"Леонтьев", webVisit:1, webContract:1, contract:1, note:"визит с интернета · контракт с интернета"}
+      ]
+    };
+    function boardApplyDayPlus(rank, key){
+      const plus=(BOARD_DAY_PLUS[String(key||"").slice(0,5)])||[];
+      if(!plus.length || !rank) return;
+      const other=rank.list.find(p=>p.other);
+      const keys=["contract","issue","callVisit","callContract","webVisit","webContract","visitContract"];
+      plus.forEach(x=>{
+        let p=rank.list.find(r=>r.name===x.name && !r.other);
+        if(!p && other){
+          other.people=other.people||[];
+          p=other.people.find(r=>r.name===x.name);
+          if(!p){ p=boardBlank(); p.name=x.name; other.people.push(p); }
+          keys.forEach(k=>{ if(x[k]) other[k]=(other[k]||0)+x[k]; });
+        }
+        if(!p) return;
+        keys.forEach(k=>{ if(x[k]) p[k]=(p[k]||0)+x[k]; });
+      });
+    }
     const BOARD_OCT_FIXED = [
       {name:"Ахмадуллин",visit:6,call:2,web:4,td:2,issue:2,cancel:0,reserve:0,callVisit:0,webVisit:0,callContract:0,webContract:0,service:1,ecredit:1},
       {name:"Велиджанов",visit:3,call:7,web:6,td:3,issue:1,cancel:0,reserve:0,callVisit:1,webVisit:1,callContract:0,webContract:0,service:2,ecredit:1},
@@ -2278,7 +2303,9 @@ async function pingTelegram(body){
     }
     function boardHtml(cache){
       const yest=boardMode==="yday";
-      const tape=(boardMode==="day"||yest)?boardTape(boardSlice(cache, boardDayKey(yest?-1:0)), yest?"Вчера":"Сегодня"):"";
+      const key=boardDayKey(yest?-1:0);
+      const plus=(BOARD_DAY_PLUS[key]||[]).map((x,i)=>({when:"14.10.2026 2"+i+":00", who:x.name, client:"Воронка", model:"", visit:0, call:0, web:0, contract:x.contract?1:0, issue:x.issue?1:0, note:x.note||""}));
+      const tape=(boardMode==="day"||yest)?boardTape(boardSlice(cache, key).concat(yest?plus:[]), yest?"Вчера":"Сегодня"):"";
       return `<div class="lb-sheet">${boardReportHtml()}</div>`+tape;
     }
     async function boardEnsure(){
@@ -2349,6 +2376,7 @@ async function pingTelegram(body){
     function boardReportHtml(){
       const per=boardPeriod();
       const rank=boardMode==="prev"?boardSepRank():(boardMode==="month"?boardOctRank():boardRank(per.rows, per.roster));
+      if(boardMode==="day"||boardMode==="yday") boardApplyDayPlus(rank, per.title);
       const bucket=rank.list.find(p=>p.other)||boardBlank();
       const mains=rank.list.filter(p=>!p.other);
       const kids=bucket.people||[];
