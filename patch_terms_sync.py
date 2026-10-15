@@ -84,17 +84,17 @@ def js_ok(html):
 
 def ensure_t9(text):
     """T9 specials added 15.10 in the trade-terms sheet. Keep them if the remote source is behind."""
-    if "tt9p:{cash:3450000" not in text and "t8u4:{cash:3300000,ti:3200000}" in text:
+    if "tt9p:{cash:3500000" not in text and "t8u4:{cash:3300000,ti:3200000}" in text:
         text = text.replace(
             "t8u4:{cash:3300000,ti:3200000}",
-            "t8u4:{cash:3300000,ti:3200000},\n      tt9p:{cash:3450000,ti:3400000},\n      tt9u:{cash:3800000,ti:3500000}",
+            "t8u4:{cash:3300000,ti:3200000},\n      tt9p:{cash:3500000,ti:3400000},\n      tt9u:{cash:3800000,ti:3500000}",
             1,
         )
     needle = '{model:"T8",trim:"Ultra 4WD",price:"3 300 нал, 3 200 ТИ"}'
-    if "3 450 нал, 3 400 ТИ" not in text and needle in text:
+    if "3 500 нал, 3 400 ТИ" not in text and needle in text:
         text = text.replace(
             needle,
-            needle + ',\n      {model:"T9",trim:"Prime 5 мест 4WD",price:"3 450 нал, 3 400 ТИ"},\n      {model:"T9",trim:"Ultra 5 мест 4WD",price:"3 800 нал, 3 500 ТИ"}',
+            needle + ',\n      {model:"T9",trim:"Prime 5 мест 4WD",price:"3 500 нал, 3 400 ТИ"},\n      {model:"T9",trim:"Ultra 5 мест 4WD",price:"3 800 нал, 3 500 ТИ"}',
             1,
         )
     return text
