@@ -430,7 +430,7 @@ JS = r'''
         return v<60?`<span class="lb-bad">${s}</span>`:s;
       };
       const line=p=>`<tr class="${p.name==="Итого"?"sum":""}"><td class="nm">${escape(p.name)}</td><td class="g1 tot"><b>${all(p)}</b><i>${share(all(p))}</i></td><td class="g1">${p.call||0}</td><td class="g1">${p.visit||0}</td><td class="g1">${p.web||0}</td><td class="g2">${p.meet||0}</td><td class="g2">${p.service||0}</td><td class="g3">${p.td||0}<i>${tdPct(p)}</i></td><td class="g4">${p.contract||0}</td><td class="g5">${p.issue||0}</td></tr>`;
-      return `<div class="lb-sheet lb-day"><p class="eyebrow">${yest?"Вчера":"Сегодня"}</p><h2 style="margin:0 0 8px">${escape(key)}</h2><div class="lb-scroll"><table class="lb-day-sum"><thead><tr><th class="nm" rowspan="2">Менеджер</th><th class="g1" rowspan="2">Всего</th><th class="g1" colspan="3">Первичный трафик</th><th class="g2" colspan="2">Вторичный</th><th class="g3" rowspan="2">Тест-драйв</th><th class="g4" rowspan="2">Контракт</th><th class="g5" rowspan="2">Выдача</th></tr><tr><th class="g1">Звонок</th><th class="g1">Визит</th><th class="g1">Интернет</th><th class="g2">Встреча</th><th class="g2">Сервис</th></tr></thead><tbody>${people.map(line).join("")}${line(Object.assign(sum,{name:"Итого"}))}</tbody></table></div></div>`+boardTape(rows, yest?"Вчера":"Сегодня");
+      return `<div class="lb-day-row"><div class="lb-sheet lb-day"><p class="eyebrow">${yest?"Вчера":"Сегодня"}</p><h2 style="margin:0 0 8px">${escape(key)}</h2><div class="lb-scroll"><table class="lb-day-sum"><thead><tr><th class="nm" rowspan="2">Менеджер</th><th class="g1" rowspan="2">Всего</th><th class="g1" colspan="3">Первичный трафик</th><th class="g2" colspan="2">Вторичный</th><th class="g3" rowspan="2">Тест-драйв</th><th class="g4" rowspan="2">Контракт</th><th class="g5" rowspan="2">Выдача</th></tr><tr><th class="g1">Звонок</th><th class="g1">Визит</th><th class="g1">Интернет</th><th class="g2">Встреча</th><th class="g2">Сервис</th></tr></thead><tbody>${people.map(line).join("")}${line(Object.assign(sum,{name:"Итого"}))}</tbody></table></div></div><div class="lb-tape">${boardTape(rows, yest?"Вчера":"Сегодня")}</div></div>`;
     }
     function boardHtml(cache){
       if(boardMode==="day"||boardMode==="yday") return boardDayHtml(cache);
@@ -665,6 +665,10 @@ def apply(path: Path):
 .lb-day-sum .g5{background:#e3f0df}
 .lb-day-sum td i{display:block;font-style:normal;font-size:11px;color:#6d6458;font-weight:650}
 .lb-day-sum tr.sum td{font-weight:800;border-top:2px solid #1c1a17}
+.lb-day-row{display:flex;align-items:flex-start;gap:16px;width:100%}
+.lb-day-row .lb-tape{flex:1;min-width:280px}
+.lb-day-row .lb-tape .card{margin-top:0}
+@media(max-width:980px){.lb-day-row{flex-direction:column}.lb-day-row .lb-tape{width:100%;min-width:0}}
 .lb-day-v2{}
 </style>""", 1)
         print("lb-day", path)
