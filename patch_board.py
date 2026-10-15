@@ -381,9 +381,9 @@ JS = r'''
     }
     function boardTape(rows, title){
       const byTime=(a,b)=>String(b.when||"").localeCompare(String(a.when||""));
-      const visits=rows.filter(r=>r.visit).sort(byTime);
+      const visits=rows.filter(r=>r.visit||r.meet).sort(byTime);
       const leads=rows.filter(r=>!r.visit&&(r.call||r.web)).sort(byTime);
-      const rest=rows.filter(r=>!r.visit&&!r.call&&!r.web).sort(byTime);
+      const rest=rows.filter(r=>!r.visit&&!r.meet&&!r.call&&!r.web).sort(byTime);
       const block=(lab,list)=>list.length?`<p class="lb-feed-label">${lab}</p>`+list.map(boardHit).join(""):"";
       const body=rows.length?block("Визиты",visits)+block("Звонки и интернет",leads)+block("Остальное",rest):`<p class="lead">Записей пока нет.</p>`;
       return `<div class="card" style="margin-top:12px"><p class="eyebrow">${escape(title)}</p><h3 style="margin:4px 0 8px">Лента</h3><div class="lb-feed">${body}</div></div>`;
@@ -393,15 +393,15 @@ JS = r'''
       const key=boardDayKey(yest?-1:0);
       const plus={
         "14.10":[
-          {name:"Спицын", visit:1, contract:1, issue:1, note:"визит после звонка · контракт · выдача"},
-          {name:"Велиджанов", visit:0, contract:1, issue:0, note:"контракт с первичного визита"},
-          {name:"Тальков", visit:1, contract:1, issue:0, note:"визит со звонка · контракт со звонка"},
-          {name:"Леонтьев", visit:1, contract:1, issue:0, note:"визит с интернета · контракт с интернета"}
+          {name:"Спицын", visit:0, meet:1, contract:1, issue:1, note:"визит после звонка · контракт · выдача"},
+          {name:"Велиджанов", visit:0, meet:0, contract:1, issue:0, note:"контракт с первичного визита"},
+          {name:"Тальков", visit:0, meet:1, contract:1, issue:0, note:"визит со звонка · контракт со звонка"},
+          {name:"Леонтьев", visit:0, meet:1, contract:1, issue:0, note:"визит с интернета · контракт с интернета"}
         ]
       };
       const rows=boardSlice(cache, key).slice();
       (plus[key]||[]).forEach(x=>{
-        rows.push({when:key+".2026", who:x.name, client:"", model:"", visit:x.visit||0, call:0, web:0, meet:0, service:0, td:0, contract:x.contract?1:0, issue:x.issue?1:0, note:x.note||""});
+        rows.push({when:key+".2026", who:x.name, client:"", model:"", visit:x.visit||0, call:0, web:0, meet:x.meet||0, service:0, td:0, contract:x.contract?1:0, issue:x.issue?1:0, note:x.note||""});
       });
       const roster=["Ахмадуллин","Велиджанов","Демьянов","Лавров","Сидоров","Спицын","Тальков","Павлова","Извеков"];
       const map={};
