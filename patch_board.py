@@ -416,9 +416,21 @@ JS = r'''
       const people=roster.concat(Object.keys(map).filter(n=>roster.indexOf(n)<0)).map(n=>map[n]);
       const sum=people.reduce((s,p)=>{ ["visit","call","web","meet","service","td","contract","issue"].forEach(k=>s[k]+=p[k]||0); return s; }, boardBlank());
       const all=p=>(p.visit||0)+(p.call||0)+(p.web||0);
-      const line=p=>`<tr><td>${escape(p.name)}</td><td>${all(p)}</td><td>${p.visit||0}</td><td>${p.call||0}</td><td>${p.web||0}</td><td>${p.meet||0}</td><td>${p.service||0}</td><td>${p.td||0}</td><td>${p.contract||0}</td><td>${p.issue||0}</td></tr>`;
-      const heads=["Менеджер","Всего","Первичный трафик<br>Визит","Звонок","Интернет","Вторичный трафик<br>Запланированная встреча","Сервис","Тест-драйв","Контракт","Выдача"];
-      return `<div class="lb-sheet lb-day"><p class="eyebrow">${yest?"Вчера":"Сегодня"}</p><h2 style="margin:0 0 8px">${escape(key)}</h2><div class="lb-scroll"><table class="lb-day-sum"><thead><tr>${heads.map(h=>`<th>${h}</th>`).join("")}</tr></thead><tbody>${people.map(line).join("")}<tr class="sum"><td>Итого</td><td>${all(sum)}</td><td>${sum.visit||0}</td><td>${sum.call||0}</td><td>${sum.web||0}</td><td>${sum.meet||0}</td><td>${sum.service||0}</td><td>${sum.td||0}</td><td>${sum.contract||0}</td><td>${sum.issue||0}</td></tr></tbody></table></div></div>`+boardTape(rows, yest?"Вчера":"Сегодня");
+      const share=n=>{
+        const t=all(sum);
+        if(!t) return "–";
+        const v=100*n/t;
+        return (Math.abs(v-Math.round(v))<0.05?String(Math.round(v)):v.toFixed(1).replace(".",","))+"%";
+      };
+      const tdPct=p=>{
+        const d=(p.visit||0)+(p.meet||0);
+        if(!d) return "";
+        const v=100*(p.td||0)/d;
+        const s=(Math.abs(v-Math.round(v))<0.05?String(Math.round(v)):v.toFixed(1).replace(".",","))+"%";
+        return v<60?`<span class="lb-bad">${s}</span>`:s;
+      };
+      const line=p=>`<tr class="${p.name==="Итого"?"sum":""}"><td class="nm">${escape(p.name)}</td><td class="g1 tot"><b>${all(p)}</b><i>${share(all(p))}</i></td><td class="g1">${p.call||0}</td><td class="g1">${p.visit||0}</td><td class="g1">${p.web||0}</td><td class="g2">${p.meet||0}</td><td class="g2">${p.service||0}</td><td class="g3">${p.td||0}<i>${tdPct(p)}</i></td><td class="g4">${p.contract||0}</td><td class="g5">${p.issue||0}</td></tr>`;
+      return `<div class="lb-sheet lb-day"><p class="eyebrow">${yest?"Вчера":"Сегодня"}</p><h2 style="margin:0 0 8px">${escape(key)}</h2><div class="lb-scroll"><table class="lb-day-sum"><thead><tr><th class="nm" rowspan="2">Менеджер</th><th class="g1" rowspan="2">Всего</th><th class="g1" colspan="3">Первичный трафик</th><th class="g2" colspan="2">Вторичный</th><th class="g3" rowspan="2">Тест-драйв</th><th class="g4" rowspan="2">Контракт</th><th class="g5" rowspan="2">Выдача</th></tr><tr><th class="g1">Звонок</th><th class="g1">Визит</th><th class="g1">Интернет</th><th class="g2">Встреча</th><th class="g2">Сервис</th></tr></thead><tbody>${people.map(line).join("")}${line(Object.assign(sum,{name:"Итого"}))}</tbody></table></div></div>`+boardTape(rows, yest?"Вчера":"Сегодня");
     }
     function boardHtml(cache){
       if(boardMode==="day"||boardMode==="yday") return boardDayHtml(cache);
@@ -640,14 +652,20 @@ def apply(path: Path):
 .lb-mini th{font-size:11px;color:var(--muted);font-weight:700}
 </style>""", 1)
         print("lb-mini", path)
-    if ".lb-day{" not in html and "</style>" in html:
+    if ".lb-day-v2" not in html and "</style>" in html:
         html = html.replace("</style>", """.lb-day{width:max-content;max-width:100%}
-.lb-day-sum{width:auto;border-collapse:collapse;font-size:13px}
-.lb-day-sum th,.lb-day-sum td{border-bottom:1px solid #e4dfd4;padding:6px 8px;text-align:center;white-space:nowrap}
-.lb-day-sum th{white-space:normal;line-height:1.15;max-width:108px;vertical-align:bottom;font-size:11px;font-weight:700;color:#6d6458;text-transform:none;letter-spacing:0}
+.lb-day-sum{width:auto;border-collapse:collapse;font-size:13px;border:1px solid #d9d0c2}
+.lb-day-sum th,.lb-day-sum td{border:1px solid #e0d6c8;padding:6px 8px;text-align:center;white-space:nowrap;background:#fff}
+.lb-day-sum th{line-height:1.15;font-size:11px;font-weight:700;color:#6d6458;text-transform:none;letter-spacing:0;vertical-align:bottom}
 .lb-day .lb-scroll{width:max-content;max-width:100%;overflow-x:auto}
-.lb-day-sum td:first-child,.lb-day-sum th:first-child{text-align:left}
+.lb-day-sum td.nm,.lb-day-sum th.nm{text-align:left;font-weight:700}
+.lb-day-sum .g1{background:#f7f1e6}
+.lb-day-sum .g2{background:#eef3f6}
+.lb-day-sum .g4{background:#f8e7c8}
+.lb-day-sum .g5{background:#e3f0df}
+.lb-day-sum td i{display:block;font-style:normal;font-size:11px;color:#6d6458;font-weight:650}
 .lb-day-sum tr.sum td{font-weight:800;border-top:2px solid #1c1a17}
+.lb-day-v2{}
 </style>""", 1)
         print("lb-day", path)
     if ".lb-row.other" not in html and "</style>" in html:
