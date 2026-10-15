@@ -693,7 +693,7 @@ def apply(path: Path):
         else:
             html = html.replace(anchor, JS + anchor, 1)
             print("fn", path)
-    elif "const BOARD_SEP_FIXED" not in html or "const BOARD_SEP" not in html or 'data-board-mode="yday"' not in html or "function boardrep" not in html:
+    elif "function boardDayHtml" not in html and ("const BOARD_SEP_FIXED" not in html or "const BOARD_SEP" not in html or 'data-board-mode="yday"' not in html or "function boardrep" not in html):
         a = html.find("    const BOARD_SHEET")
         if a < 0:
             a = html.find("    const BOARD_OCT")
