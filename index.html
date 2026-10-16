@@ -421,16 +421,32 @@ input,textarea{width:100%;background:#fff;border:1px solid var(--border);color:v
 .pay-col.pango .bank-row.pay-top .pay,.pay-col.mpt .bank-row:first-of-type .pay,.pay-col.sub .bank-row:first-of-type .pay{font-size:22px;line-height:1.1}
 .mpt-tag{display:block;color:#1b5e20;font-weight:700;font-size:12px;margin:4px 0 2px}
 
-.terms-spec{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:0 0 18px;align-items:start}
+.terms-spec{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin:0 0 18px;align-items:start}
 .terms-spec section{border-radius:16px;padding:12px 12px 2px}
 .terms-spec h2{margin:0 0 8px}
-.terms-spec .terms-cards{grid-template-columns:1fr;margin-bottom:8px}
+.terms-spec .terms-cards{margin-bottom:8px}
+.terms-spec .spec-tenet{grid-column:span 2}
+.terms-spec .spec-tenet .terms-cards{grid-template-columns:1fr 1fr}
+.terms-spec .spec-plus .terms-cards{grid-template-columns:1fr}
 .terms-spec .spec-tenet{background:#fbf6ee}
 .terms-spec .spec-plus{background:#f4efe4}
 .terms-spec .spec-tenet h2,.terms-spec .spec-plus h2{color:#8a5a10}
 .terms-spec .spec-tenet .term-card{background:#fffaf3;border-color:#ead4b0}
 .terms-spec .spec-plus .term-card{background:#fff;border-color:#e0c48a}
-@media(max-width:800px){.terms-spec{grid-template-columns:1fr}}
+.terms-fold{border-radius:16px;overflow:hidden}
+.terms-fold summary{cursor:pointer;font-size:18px;font-weight:800;letter-spacing:-.02em;padding:12px 14px;list-style:none}
+.terms-fold summary::-webkit-details-marker{display:none}
+.terms-fold summary:before{content:"▸  ";color:#6d6458;font-weight:700}
+.terms-fold[open] summary:before{content:"▾  "}
+.terms-top .terms-fold:nth-child(1){background:#eef3f8}
+.terms-top .terms-fold:nth-child(2){background:#eef6ee}
+.terms-top .terms-fold:nth-child(1) summary{color:#1f4e79}
+.terms-top .terms-fold:nth-child(2) summary{color:#1e5c24}
+@media(max-width:800px){
+  .terms-spec{grid-template-columns:1fr}
+  .terms-spec .spec-tenet{grid-column:auto}
+  .terms-spec .spec-tenet .terms-cards{grid-template-columns:1fr}
+}
 .prio-item{padding:6px 10px}
 .prio-top{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .prio-top b{font-size:13px}
@@ -1989,7 +2005,7 @@ async function pingTelegram(body){
       const attest=["home","study","quiz","play","rate","hist"].includes(active);
       let items=[];
       if(isAo()){
-        if(active!=="login") items=[["hub","Кабинет"],["calc","Калькулятор"],["stock","Склад"]];
+        if(active!=="login") items=[["hub","Кабинет"],["calc","Калькулятор"],["stock","Склад"],["terms","Условия"]];
       } else if(active==="login") items=[];
       else if(active==="hub") items=[];
       else if(attest) items=[["hub","Кабинет"],["home","Аттестация"],["rate","Рейтинг"],["study","Справочник"],["quiz","Тест"]];
@@ -2009,7 +2025,7 @@ async function pingTelegram(body){
       if(mark) mark.textContent = "T";
     }
     function goSection(id){
-      if(isAo() && !["hub","calc","stock","login"].includes(id)) id="hub";
+      if(isAo() && !["hub","calc","stock","terms","login"].includes(id)) id="hub";
       const attest=["home","study","quiz","play","rate","hist"];
       view=id;
       state.section = id==="hub" ? "hub" : (attest.includes(id) ? "attest" : id);
@@ -2554,7 +2570,7 @@ async function pingTelegram(body){
     }
     function render(){
       try{
-        if(isAo() && !["hub","calc","stock","login"].includes(view)) view="hub";
+        if(isAo() && !["hub","calc","stock","terms","login"].includes(view)) view="hub";
         if(state.authed && state.surname && !done){
           const run=userRun();
           if(run && view!=="login"){
@@ -2792,9 +2808,9 @@ async function pingTelegram(body){
     function hub(){
       if(needAuth()) return login();
       if(isAo()){
-        const cards=[["calc","%","Калькулятор","T PLUS · L4 и L6"],["stock","S","Склад","L4 и L6 — в наличии и в пути"]];
+        const cards=[["calc","%","Калькулятор","T PLUS · L4 и L6"],["stock","S","Склад","L4 и L6 — в наличии и в пути"],["terms","₽","Торговые условия","Спеццены TENET и TENET+"]];
         return banner("Кабинет","TENET PLUS · L4 / L6", state.display)+`
-          <p class="lead">Добро пожаловать. Доступны калькулятор и склад по L4 и L6.</p>
+          <p class="lead">Добро пожаловать. Доступны калькулятор, склад L4 и L6 и торговые условия.</p>
           <div class="who-line"><button class="btn ghost" id="logout">Выйти</button></div>
           <div class="hub-grid">${cards.map(([id,mark,title,lead])=>`
             <button class="card hub-card" data-go="${id}" type="button">
@@ -3891,17 +3907,17 @@ async function pingTelegram(body){
         `<div class="terms-cards">`+(typeof TERMS_INV_PLUS!=="undefined"?TERMS_INV_PLUS:[]).map(r=>termCard(r.model+" · "+r.trim, escape(r.price), "")).join("")+`</div></section>`+
         `</div>`+
         `<div class="terms-top">`+
-        `<section><h2>Доходность</h2>`+
-        `<div class="terms-cards">`+termGroup(KM_CORRIDOR,"km")+`</div></section>`+
-        `<section><h2>Бонусы</h2>`+
-        `<div class="terms-cards">`+termGroup(TERMS_BONUS,"bonus")+`</div></section>`+
+        `<details class="terms-fold"><summary>Доходность</summary>`+
+        `<div class="terms-cards">`+termGroup(KM_CORRIDOR,"km")+`</div></details>`+
+        `<details class="terms-fold"><summary>Бонусы</summary>`+
+        `<div class="terms-cards">`+termGroup(TERMS_BONUS,"bonus")+`</div></details>`+
         `</div>`+
         (typeof stockTestHtml==="function"?stockTestHtml():"")+
         `<h2>Приоритет · октябрь · ${TERMS_PRIO.length} авто</h2>`+
         `<p class="lead">Личная победа — 2 машины. Командная — 12. Шкала показывает, сколько уже есть и сколько осталось.</p>`+
         prioList()+
         `<p class="lead">Доплата за 4WD на T7 — 205 000 ₽. Мотор T7 везде 1.6T 150.</p>`+
-        `<div class="who-line"><button class="btn ivory" data-go="calc">В калькулятор</button><button class="btn ghost" data-go="docs">Документы</button></div>`+
+        `<div class="who-line"><button class="btn ivory" data-go="calc">В калькулятор</button>${isAo()?"":`<button class="btn ghost" data-go="docs">Документы</button>`}</div>`+
         `</div>`;
     }
     function calcPay(price, down, months, rate){
