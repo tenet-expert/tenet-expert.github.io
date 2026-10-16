@@ -35,7 +35,7 @@
         const left=Math.max(0, goal-p.n);
         const won=p.n>=goal;
         return `<div class="prio-scale${won?" won":""}">
-          <div class="row"><b>${escape(p.name)}</b><span>${won?"личная победа":p.n+" из "+goal+" · ещё "+left}</span></div>
+          <div class="row"><b>${escape(p.name)}</b><span>${won?"Личный план выполнен":p.n+" из "+goal+" · ещё "+left}</span></div>
           <div class="prio-track"><div class="prio-fill" style="width:${pct(p.n*100/goal)}%"></div></div>
         </div>`;
       }).join("")+`</div>`;
