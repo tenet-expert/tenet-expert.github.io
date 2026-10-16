@@ -16,15 +16,15 @@
     }
     function prioList(){
       const goal=2, teamGoal=12;
-      const roster=["Ахмадуллин","Велиджанов","Демьянов","Елчин","Лавров","Новиков","Сидоров","Спицын","Тальков","Павлова","Извеков"];
+      const roster=["Ахмадуллин","Велиджанов","Демьянов","Лавров","Сидоров","Спицын","Тальков"];
       const soldBy={};
       roster.forEach(n=>{ soldBy[n]=0; });
       TERMS_PRIO.forEach(r=>{
         if(r.sold && r.seller) soldBy[r.seller]=(soldBy[r.seller]||0)+1;
       });
-      const people=Object.keys(soldBy).map(name=>({name, n:soldBy[name]}));
+      const people=roster.map(name=>({name, n:soldBy[name]||0}));
       people.sort((a,b)=>b.n-a.n || a.name.localeCompare(b.name,"ru"));
-      const team=people.reduce((s,p)=>s+p.n,0);
+      const team=Object.keys(soldBy).reduce((s,name)=>s+(soldBy[name]||0),0);
       const pct=max=>Math.max(0, Math.min(100, Math.round(max)));
       const teamLeft=Math.max(0, teamGoal-team);
       const teamBar=`<div class="prio-scale team${team>=teamGoal?" won":""}">

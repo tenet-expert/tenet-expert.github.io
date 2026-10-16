@@ -3782,15 +3782,15 @@ async function pingTelegram(body){
     }
     function prioList(){
       const goal=2, teamGoal=12;
-      const roster=["Ахмадуллин","Велиджанов","Демьянов","Елчин","Лавров","Новиков","Сидоров","Спицын","Тальков","Павлова","Извеков"];
+      const roster=["Ахмадуллин","Велиджанов","Демьянов","Лавров","Сидоров","Спицын","Тальков"];
       const soldBy={};
       roster.forEach(n=>{ soldBy[n]=0; });
       TERMS_PRIO.forEach(r=>{
         if(r.sold && r.seller) soldBy[r.seller]=(soldBy[r.seller]||0)+1;
       });
-      const people=Object.keys(soldBy).map(name=>({name, n:soldBy[name]}));
+      const people=roster.map(name=>({name, n:soldBy[name]||0}));
       people.sort((a,b)=>b.n-a.n || a.name.localeCompare(b.name,"ru"));
-      const team=people.reduce((s,p)=>s+p.n,0);
+      const team=Object.keys(soldBy).reduce((s,name)=>s+(soldBy[name]||0),0);
       const pct=max=>Math.max(0, Math.min(100, Math.round(max)));
       const teamLeft=Math.max(0, teamGoal-team);
       const teamBar=`<div class="prio-scale team${team>=teamGoal?" won":""}">
@@ -3916,7 +3916,7 @@ async function pingTelegram(body){
         `</div>`+
         (typeof stockTestHtml==="function"?stockTestHtml():"")+
         `<h2>Приоритет · октябрь · ${TERMS_PRIO.length} авто</h2>`+
-        `<p class="lead">Личная победа — 2 машины. Командная — 12. Шкала показывает, сколько уже есть и сколько осталось.</p>`+
+        `<p class="lead">Личный план — 2 машины, только у основы. Остальные могут продавать приоритет: в их шкалу это не идёт, в командный зачёт — да. Командная победа — 12.</p>`+
         prioList()+
         `<p class="lead">Доплата за 4WD на T7 — 205 000 ₽. Мотор T7 везде 1.6T 150.</p>`+
         `<div class="who-line"><button class="btn ivory" data-go="calc">В калькулятор</button>${isAo()?"":`<button class="btn ghost" data-go="docs">Документы</button>`}</div>`+
