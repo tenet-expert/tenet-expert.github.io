@@ -100,6 +100,22 @@ def ensure_t9(text):
     return text
 
 
+def ensure_local(text):
+    text = ensure_t9(text)
+    text = text.replace(
+        'vin:"EDEDD24B2SG003755",trim:"Ультра 4WD",year:"2025",color:"Светло-серый",extra:"",pay:500,bonus:3000,reserved:true,seller:"Спицын"',
+        'vin:"EDEDD24B2SG003755",trim:"Ультра 4WD",year:"2025",color:"Светло-серый",extra:"",pay:500,bonus:3000,sold:true,seller:"Спицын"',
+        1,
+    )
+    if "l4e:{cash:2350000" not in text and "tt9u:{cash:3800000,ti:3500000}" in text:
+        text = text.replace(
+            "tt9u:{cash:3800000,ti:3500000}",
+            "tt9u:{cash:3800000,ti:3500000},\n      l4e:{cash:2350000,ti:2250000},\n      l6u:{cash:2600000,ti:2450000}",
+            1,
+        )
+    return text
+
+
 def main():
     try:
         canon = urllib.request.urlopen(SRC, timeout=30).read().decode("utf-8")
@@ -134,7 +150,7 @@ def main():
             out = out[:s[0]] + new + out[s[1]:]
         if out is None:
             continue
-        out = ensure_t9(out)
+        out = ensure_local(out)
         if out == src:
             print(p, "terms already in sync")
             continue

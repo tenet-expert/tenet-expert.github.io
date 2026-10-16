@@ -49,7 +49,9 @@
       t8p4:{cash:3100000,ti:3000000},
       t8u4:{cash:3300000,ti:3200000},
       tt9p:{cash:3500000,ti:3400000},
-      tt9u:{cash:3800000,ti:3500000}
+      tt9u:{cash:3800000,ti:3500000},
+      l4e:{cash:2350000,ti:2250000},
+      l6u:{cash:2600000,ti:2450000}
     };
     const PANGO_BUNDLE = 150000;
     const PANGO_RATE_A = 17.4;
@@ -64,7 +66,7 @@
       {model:"T8",vin:"EDXGD34B1TE022143",trim:"Prime 4WD",year:"2026",color:"Светло-серый",extra:"",pay:500,bonus:2000},
       {model:"T8",vin:"EDXGD34B6TE031162",trim:"Prime 4WD",year:"2026",color:"Чёрный",extra:"",pay:500,bonus:2000},
       {model:"T8",vin:"EDXGD34B3TE031815",trim:"Ultra 4WD",year:"2026",color:"Белый",extra:"",pay:500,bonus:2000},
-      {model:"Tiggo 9",vin:"EDEDD24B2SG003755",trim:"Ultra",year:"2025",color:"Светло-серый",extra:"",pay:500,bonus:3000},
+      {model:"Tiggo 9",vin:"EDEDD24B2SG003755",trim:"Ultra",year:"2025",color:"Светло-серый",extra:"",pay:500,bonus:3000,sold:true,seller:"Спицын"},
       {model:"Tiggo 9",vin:"EDEDD24B3SG003926",trim:"Ultra",year:"2025",color:"Матовый",extra:"Лавров",pay:500,bonus:3000,sold:true,seller:"Лавров"},
       {model:"Tiggo 9",vin:"EDEDD24B1SG002595",trim:"Ultra",year:"2025",color:"Чёрный",extra:"Новиков",pay:500,bonus:0,sold:true,seller:"Новиков"},
       {model:"Arrizo 8",vin:"LVVDC21B7SD594110",trim:"Prime",year:"2025",color:"Белый",extra:"",pay:500,bonus:3000},

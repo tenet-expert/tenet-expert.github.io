@@ -10,7 +10,9 @@ DATA = '''    const PANGO_FIX = {
       t8p4:{cash:3100000,ti:3000000},
       t8u4:{cash:3300000,ti:3200000},
       tt9p:{cash:3500000,ti:3400000},
-      tt9u:{cash:3800000,ti:3500000}
+      tt9u:{cash:3800000,ti:3500000},
+      l4e:{cash:2350000,ti:2250000},
+      l6u:{cash:2600000,ti:2450000}
     };
     const PANGO_BUNDLE = 150000;
     const PANGO_RATE_A = 17.4;
