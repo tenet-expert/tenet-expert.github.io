@@ -949,8 +949,6 @@
       if(needAuth()) return login();
       return banner("Торговые условия","Файл «Торговые условия» · с "+TERMS_DATE,"TENET")+
         `<div class="terms-col">`+
-        `<p class="lead">Клиенту называть рекомендованную цену. Максимум с выгодами — после расчёта РОП. КМ — коридор доходности без НДС, тыс. руб.</p>`+
-        `<div class="note-box">Скидки импортёра не обещать, если их нет в прайсе. Цифры внутренние.</div>`+
         `<div class="terms-top">`+
         `<section><h2>Доходность</h2>`+
         `<div class="terms-cards">`+termGroup(KM_CORRIDOR,"km")+`</div></section>`+
