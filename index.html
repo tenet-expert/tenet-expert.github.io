@@ -433,6 +433,8 @@ input,textarea{width:100%;background:#fff;border:1px solid var(--border);color:v
 .terms-spec .spec-tenet h2,.terms-spec .spec-plus h2{color:#8a5a10}
 .terms-spec .spec-tenet .term-card{background:#fffaf3;border-color:#ead4b0}
 .terms-spec .spec-plus .term-card{background:#fff;border-color:#e0c48a}
+.terms-spec .term-group{border:1.5px solid #c4a574;box-shadow:none}
+.terms-spec .term-group>b{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#8a5a10;border-bottom:1px solid #ead4b0;padding-bottom:6px}
 .terms-fold{border-radius:16px;overflow:hidden}
 .terms-fold summary{cursor:pointer;font-size:18px;font-weight:800;letter-spacing:-.02em;padding:12px 14px;list-style:none}
 .terms-fold summary::-webkit-details-marker{display:none}
@@ -3902,9 +3904,9 @@ async function pingTelegram(body){
         `<div class="note-box">Скидки импортёра не обещать, если их нет в прайсе. Цифры внутренние.</div>`+
         `<div class="terms-spec">`+
         `<section class="spec-tenet"><h2>Спец · TENET</h2>`+
-        `<div class="terms-cards">`+TERMS_INV.map(r=>termCard(r.model+" · "+r.trim, escape(r.price), "")).join("")+`</div></section>`+
+        `<div class="terms-cards">`+termGroup(TERMS_INV,"price")+`</div></section>`+
         `<section class="spec-plus"><h2>Спец · TENET+</h2>`+
-        `<div class="terms-cards">`+(typeof TERMS_INV_PLUS!=="undefined"?TERMS_INV_PLUS:[]).map(r=>termCard(r.model+" · "+r.trim, escape(r.price), "")).join("")+`</div></section>`+
+        `<div class="terms-cards">`+termGroup(typeof TERMS_INV_PLUS!=="undefined"?TERMS_INV_PLUS:[],"price")+`</div></section>`+
         `</div>`+
         `<div class="terms-top">`+
         `<details class="terms-fold"><summary>Доходность</summary>`+
