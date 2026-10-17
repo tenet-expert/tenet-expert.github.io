@@ -1079,7 +1079,12 @@ input,textarea{width:100%;background:#fff;border:1px solid var(--border);color:v
 .km-pair > .km-line,.km-slot > .km-line{margin:0;padding:8px 10px 10px;border-radius:14px;min-width:0}
 .km-line.tone-a{background:#f3e8d8;border:1px solid #d4c0a0;border-left:5px solid #b8956a}
 .km-line.tone-b{background:#e4edf4;border:1px solid #b8ccd8;border-left:5px solid #5a7a94}
-.km-line.tone-c{background:#fdf3d8;border:1px solid #e0c888;border-left:5px solid #b87820}
+.km-line.tone-c{background:linear-gradient(180deg,#fff4c4 0%,#f0c84a 100%);border:1.5px solid #d4a017;border-left:6px solid #c8960a;box-shadow:0 0 0 1px rgba(212,160,23,.45),0 8px 18px rgba(180,130,20,.16)}
+.km-line.tone-c .stock-h{color:#7a5608;font-weight:800;letter-spacing:.16em}
+.km-slot.s-plus .chip{background:#fffaf0;border-color:#e0b84a;color:#5c4308}
+.km-slot.s-plus .chip small{color:#8a6208}
+.km-slot.s-plus .chip.on{background:#c8960a;border-color:#8a6208;color:#fff}
+.km-slot.s-plus .chip.on small{color:#fff6d4}
 .km-line.tone-test{background:#f0e6f6;border:1px solid #c8b0d8;border-left:5px solid #5a2d76}
 .km-slot .chip,.km-pair .chip{border-radius:6px;min-height:52px;display:flex;flex-direction:column;justify-content:center;padding:8px 10px}
 .km-slot > .km-line,.km-pair > .km-line{border-radius:8px;min-height:88px}
@@ -1093,7 +1098,7 @@ input,textarea{width:100%;background:#fff;border:1px solid var(--border);color:v
   .km-board{display:grid;grid-template-columns:minmax(460px,1.2fr) minmax(210px,.72fr) minmax(300px,.95fr);gap:10px 12px;align-items:start}
   .km-brand{display:block;margin:0 2px 0;font-size:13px;font-weight:800;letter-spacing:.18em}
   .km-brand.tenet{grid-column:1;grid-row:1;color:#8a6840}
-  .km-brand.plus{grid-column:2;grid-row:1;color:#8a5a10}
+  .km-brand.plus{grid-column:2;grid-row:1;color:#c8960a;text-shadow:0 1px 0 #fff3c4}
   .km-brand.chery{grid-column:3;grid-row:1;color:#3e5870}
   .km-slot.s-test{grid-column:1 / -1;grid-row:8;position:relative;z-index:3}
   .km-slot.s-test .km-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
