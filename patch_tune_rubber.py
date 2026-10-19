@@ -25,6 +25,15 @@ PAIRS = [
     # Drive 14.10.2026: шиномонтаж комплексный R16 6800, R17-R19 8000, R20 10600
     ('mount:[["R16",5300],["R17, R18, R19",6300],["R20",8600]]',
      'mount:[["R16",6800],["R17, R18, R19",8000],["R20",10600]]'),
+    # Drive 16.10.2026: новые Ikon Tyres в T8 R19, T8 R18, T7 R18, T4L (группа «T4L / L6»)
+    ('["T8 R19",[["Royal Black Royalstud II 235/50 R19 103T, шип.",15500,62000,"1"],["Fortune 235/50R19 103T Polaro Ice TL, шип.",15500,62000,"2"]]]',
+     '["T8 R19",[["Royal Black Royalstud II 235/50 R19 103T, шип.",15500,62000,"1"],["Автошина Ikon Tyres 235/50 R19 103T XL Autograph Snow 3 SUV TL",21000,84000,"2"],["Fortune 235/50R19 103T Polaro Ice TL, шип.",15500,62000,"2"]]]'),
+    ('["T8 R18",[["Pirelli Formula 235/55 R18 104T XL Ice TL, шип.",15500,62000,"1"],["Автошина 235/55 R18 Tracmax 104T XL X-Privilo S500 TL (шип.)",12500,50000,"3"]]]',
+     '["T8 R18",[["Pirelli Formula 235/55 R18 104T XL Ice TL, шип.",15500,62000,"1"],["Автошина Ikon Tyres 235/55R18 104T XL Character Ice 7 SUV TL (шип.)",17500,70000,"2"],["Автошина 235/55 R18 Tracmax 104T XL X-Privilo S500 TL (шип.)",12500,50000,"3"]]]'),
+    ('["T7 R18",[["Pirelli Formula 225/55 R18 102T XL Ice TL, шип.",14500,58000,"2"]',
+     '["T7 R18",[["Автошина Ikon Tyres 225/55 R18 Ikon Character Ice 7 SUV 102T XL (шип.)",16000,64000,"3"],["Pirelli Formula 225/55 R18 102T XL Ice TL, шип.",14500,58000,"2"]'),
+    ('["T4L",[["Fortune 225/60 R18 104T Polaro Ice TL, шип.",12000,48000,"2"],["Pirelli Formula 225/60 R18 104T XL Ice TL, шип.",15500,62000,"1"]]]',
+     '["T4L / L6",[["Fortune 225/60 R18 104T Polaro Ice TL, шип.",12000,48000,"2"],["Pirelli Formula 225/60 R18 104T XL Ice TL, шип.",15500,62000,"1"],["Автошина 225/60 R18 Ikon 104T XL Character Ice 7 SUV TL /шипованная/",16000,64000,"3"]]]'),
 ]
 
 def patch(path: Path) -> bool:
