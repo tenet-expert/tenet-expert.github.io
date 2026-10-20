@@ -313,41 +313,52 @@ def plus_patch(text):
     return out
 
 
-# TENET PLUS stock (LS TENET PLUS dealer cabinet, 12.10.2026): 14 unsold cars.
-# RRC only, purchase cost is never published. A VIN already present in STOCK
-# (e.g. once stock.json carries it) is skipped, so there are no duplicates.
-PLUS_RRC = {"Стайл": 2540000, "Элегант": 2690000}
-PLUS_RRC6 = {"Элегант": 2890000, "Ультра": 3040000}
+# TENET PLUS stock (Logicstars TENET PLUS portal, 20.10.2026): 26 cars.
+# Exact site objects, field order vin, model, name, trim, color, status, note, rrc.
+# RRC only; purchase cost is never published. Every build drops existing pl4/pl6
+# (and EFEDB21/EDEMB31 VINs) from STOCK and inserts this list, so a stale baked
+# block cannot survive the Pages workflow. stock-part1/part2/stock.json are not
+# the source of these cars and are left untouched.
+PLUS_MODELS = {"pl4", "pl6"}
+PLUS_VIN_PREFIXES = ("EFEDB21", "EDEMB31")
 PLUS_CARS = [
-    ("EFEDB21B0T3002466", "pl4", "Элегант", "Чёрный", "f", "СПб Сестрорецк"),
-    ("EFEDB21B2T3001755", "pl4", "Элегант", "Чёрный", "in", "01.10.2026"),
-    ("EFEDB21B1T3001374", "pl4", "Стайл", "Серый", "in", "23.09.2026"),
-    ("EFEDB21B2T3002176", "pl4", "Элегант", "Серый", "in", "01.10.2026"),
-    ("EFEDB21B0T3001351", "pl4", "Стайл", "Серый", "in", "01.10.2026"),
-    ("EDEMB31B9TE119337", "pl6", "Ультра", "Оранжевый", "f", "Калуга"),
-    ("EDEMB31B1TE126640", "pl6", "Элегант", "Оранжевый", "way", "15.10.2026"),
-    ("EDEMB31B0TE126578", "pl6", "Элегант", "Оранжевый", "in", "12.10.2026"),
-    ("EFEDB21B1T3000922", "pl4", "Стайл", "Красный", "in", "17.09.2026"),
-    ("EDEMB31B0TE127195", "pl6", "Элегант", "Серебристый", "in", "12.10.2026"),
-    ("EFEDB21B0T3002595", "pl4", "Элегант", "Белый", "f", "СПб"),
-    ("EFEDB21B1T3000094", "pl4", "Элегант", "Белый", "in", "23.09.2026"),
-    ("EFEDB21B0T3001236", "pl4", "Элегант", "Белый", "in", "17.09.2026"),
-    ("EFEDB21B1T3002041", "pl4", "Элегант", "Белый", "in", "01.10.2026"),
+    {"vin": "EDEMB31B3TE133430", "model": "pl6", "name": "L6", "trim": "Элегант", "color": "Оранжевый", "status": "way", "note": "На заводе (Калуга) · отгрузка 21.10.2026", "rrc": 2890000},
+    {"vin": "EFEDB21B5T3000583", "model": "pl4", "name": "L4", "trim": "Стайл", "color": "Серый", "status": "way", "note": "На заводе (СПб Сестрорецк) · отгрузка 18.10.2026", "rrc": 2540000},
+    {"vin": "EFEDB21B0T3002547", "model": "pl4", "name": "L4", "trim": "Элегант", "color": "Белый", "status": "way", "note": "На заводе (СПб Сестрорецк) · отгрузка 18.10.2026", "rrc": 2690000},
+    {"vin": "EFEDB21B3T3002798", "model": "pl4", "name": "L4", "trim": "Стайл", "color": "Серый", "status": "way", "note": "На заводе (СПб Сестрорецк) · отгрузка 18.10.2026", "rrc": 2540000},
+    {"vin": "EFEDB21B1T3000922", "model": "pl4", "name": "L4", "trim": "Стайл", "color": "Красный", "status": "in", "note": "В салоне · с 17.09.2026", "rrc": 2540000},
+    {"vin": "EFEDB21B0T3001236", "model": "pl4", "name": "L4", "trim": "Элегант", "color": "Белый", "status": "in", "note": "В салоне · с 17.09.2026", "rrc": 2690000},
+    {"vin": "EFEDB21B1T3000094", "model": "pl4", "name": "L4", "trim": "Элегант", "color": "Белый", "status": "in", "note": "В салоне · с 23.09.2026", "rrc": 2690000},
+    {"vin": "EFEDB21B1T3002041", "model": "pl4", "name": "L4", "trim": "Элегант", "color": "Белый", "status": "in", "note": "В салоне · с 01.10.2026", "rrc": 2690000},
+    {"vin": "EFEDB21B2T3002176", "model": "pl4", "name": "L4", "trim": "Элегант", "color": "Серый", "status": "in", "note": "В салоне · с 01.10.2026", "rrc": 2690000},
+    {"vin": "EFEDB21B0T3001351", "model": "pl4", "name": "L4", "trim": "Стайл", "color": "Серый", "status": "in", "note": "В салоне · с 01.10.2026", "rrc": 2540000},
+    {"vin": "EDEMB31B9TE119337", "model": "pl6", "name": "L6", "trim": "Ультра", "color": "Оранжевый", "status": "in", "note": "В салоне · с 19.10.2026", "rrc": 3040000},
+    {"vin": "EFEDB21B0T3002466", "model": "pl4", "name": "L4", "trim": "Элегант", "color": "Чёрный", "status": "in", "note": "В салоне · с 20.10.2026", "rrc": 2690000},
+    {"vin": "EFEDB21B0T3002595", "model": "pl4", "name": "L4", "trim": "Элегант", "color": "Белый", "status": "in", "note": "В салоне · с 20.10.2026", "rrc": 2690000},
+    {"vin": "EDEMB31B7TE100589", "model": "pl6", "name": "L6", "trim": "Ультра", "color": "Белый", "status": "in", "note": "В салоне · с 28.09.2026", "rrc": 3040000},
+    {"vin": "EDEMB31B5TE101384", "model": "pl6", "name": "L6", "trim": "Ультра", "color": "Серебристый", "status": "in", "note": "В салоне · с 07.10.2026", "rrc": 3040000},
+    {"vin": "EDEMB31B4TE100291", "model": "pl6", "name": "L6", "trim": "Ультра", "color": "Чёрный", "status": "in", "note": "В салоне · с 30.09.2026", "rrc": 3040000},
+    {"vin": "EDEMB31B3TE113985", "model": "pl6", "name": "L6", "trim": "Ультра", "color": "Белый", "status": "in", "note": "В салоне · с 30.09.2026", "rrc": 3040000},
+    {"vin": "EFEDB21B2T3000637", "model": "pl4", "name": "L4", "trim": "Стайл", "color": "Белый", "status": "in", "note": "В салоне · с 30.09.2026", "rrc": 2540000},
+    {"vin": "EFEDB21B2T3000394", "model": "pl4", "name": "L4", "trim": "Стайл", "color": "Белый", "status": "in", "note": "В салоне · с 28.09.2026", "rrc": 2540000},
+    {"vin": "EFEDB21B2T3000556", "model": "pl4", "name": "L4", "trim": "Стайл", "color": "Серый", "status": "in", "note": "В салоне · с 28.09.2026", "rrc": 2540000},
+    {"vin": "EFEDB21B0T3000135", "model": "pl4", "name": "L4", "trim": "Элегант", "color": "Чёрный", "status": "in", "note": "В салоне · с 28.09.2026", "rrc": 2690000},
+    {"vin": "EFEDB21B1T3001374", "model": "pl4", "name": "L4", "trim": "Стайл", "color": "Серый", "status": "in", "note": "В салоне · с 14.10.2026", "rrc": 2540000},
+    {"vin": "EFEDB21B2T3002128", "model": "pl4", "name": "L4", "trim": "Элегант", "color": "Красный", "status": "in", "note": "В салоне · с 08.10.2026", "rrc": 2690000},
+    {"vin": "EFEDB21B1T3001911", "model": "pl4", "name": "L4", "trim": "Стайл", "color": "Белый", "status": "in", "note": "В салоне · с 09.10.2026", "rrc": 2540000},
+    {"vin": "EFEDB21B2T3001755", "model": "pl4", "name": "L4", "trim": "Элегант", "color": "Чёрный", "status": "in", "note": "В салоне · с 12.10.2026", "rrc": 2690000},
+    {"vin": "EDEMB31B1TE126640", "model": "pl6", "name": "L6", "trim": "Элегант", "color": "Оранжевый", "status": "in", "note": "В салоне · с 13.10.2026", "rrc": 2890000},
 ]
 STOCK_RE = re.compile(r'(const STOCK = \[)(.*?)(\];)', re.S)
 
 
-def plus_car(vin, model, trim, color, st, info):
-    if st == "in":
-        status, note = "in", "В салоне · с " + info
-    elif st == "way":
-        status, note = "way", "В пути · ожидается " + info
-    else:
-        status, note = "way", "На заводе · подтверждён к отгрузке (" + info + ")"
-    rrc = (PLUS_RRC if model == "pl4" else PLUS_RRC6)[trim]
-    car = {"vin": vin, "model": model, "name": "L4" if model == "pl4" else "L6",
-           "trim": trim, "color": color, "status": status, "note": note, "rrc": rrc}
-    return json.dumps(car, ensure_ascii=False)
+def _is_plus_car(obj):
+    if not isinstance(obj, dict):
+        return False
+    if obj.get("model") in PLUS_MODELS:
+        return True
+    vin = str(obj.get("vin") or "")
+    return vin.startswith(PLUS_VIN_PREFIXES)
 
 
 def plus_stock(text):
@@ -355,11 +366,31 @@ def plus_stock(text):
     if not m:
         return text
     body = m.group(2)
-    add = [plus_car(*c) for c in PLUS_CARS if ('"%s"' % c[0]) not in body]
-    if not add:
+    dec = json.JSONDecoder()
+    i, n = 0, len(body)
+    kept = []
+    removed = 0
+    try:
+        while i < n:
+            while i < n and body[i] in " \t\r\n,":
+                i += 1
+            if i >= n:
+                break
+            obj, end = dec.raw_decode(body, i)
+            if _is_plus_car(obj):
+                removed += 1
+            else:
+                kept.append(body[i:end])
+            i = end
+    except json.JSONDecodeError as e:
+        print("plus stock parse fail", e)
         return text
-    sep = ", " if body.strip() else ""
-    return text[:m.end(2)] + sep + ", ".join(add) + text[m.end(2):]
+    add = [json.dumps(c, ensure_ascii=False) for c in PLUS_CARS]
+    new_body = ", ".join(kept + add)
+    if new_body == body:
+        return text
+    print("plus stock: removed", removed, "inserted", len(add))
+    return text[:m.start(2)] + new_body + text[m.end(2):]
 
 
 PLUS_UI_SUBS = [
