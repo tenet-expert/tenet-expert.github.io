@@ -259,15 +259,17 @@ function schedShiftBoard(b){
   var on = {};
   b.duty.concat(b.event, b.work).forEach(function(r){ on[r.p.id] = r; });
   var left = "";
+  var mid = "";
   var right = "";
   SCHED.groups.forEach(function(g){
     var block = schedDeptBlock(g, on);
     if(!block) return;
     if(g.id === "sales" || g.id === "plus") left += block;
-    else right += block;
+    else if(g.id === "spec" || g.id === "extra") right += block;
+    else mid += block;
   });
-  if(!left && !right) return "<p class=\"sc-empty\">Никого в смене</p>";
-  return "<div class=\"sc-depts\"><div class=\"sc-col\">" + left + "</div><div class=\"sc-col\">" + right + "</div></div>";
+  if(!left && !mid && !right) return "<p class=\"sc-empty\">Никого в смене</p>";
+  return "<div class=\"sc-depts\"><div class=\"sc-col\">" + left + "</div><div class=\"sc-col\">" + mid + "</div><div class=\"sc-col\">" + right + "</div></div>";
 }
 
 function schedDateNotes(b){
