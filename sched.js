@@ -25,6 +25,15 @@ var SCHED = {
       ]
     },
     {
+      id: "plus",
+      title: "ОП ТЕНЕТ ПЛЮС",
+      note: "В смене один. Возможны усиления",
+      people: [
+        { id: "bik", last: "Бикулов", first: "Камиль", days: "88..88...88..888..88...88..888." },
+        { id: "naz", last: "Назарян", first: "Карен", days: "..88..888..88...88..888..88...8" }
+      ]
+    },
+    {
       id: "spec",
       title: "Специалисты",
       note: "Отдельная лента графика",
@@ -200,7 +209,7 @@ function schedRow(p, today){
     "<button type=\"button\" class=\"sc-name\" data-sched-person=\"" + p.id + "\">" +
       "<b>" + p.last + "</b>" +
       (p.first ? "<small>" + p.first + "</small>" : "") +
-      "<em class=\"k-" + now.cls + "\">" + (SCHED_STATE.day ? now.label : "") + "</em>" +
+      "<em class=\"k-" + now.cls + "\">" + now.label + "</em>" +
     "</button>" +
     "<div class=\"sc-days\">" + cells + "</div>" +
     "<div class=\"sc-sum\"><b>" + st.work + "</b>" + (st.duty ? "<i>" + st.duty + "</i>" : "<i class=\"ghost\">·</i>") + "</div>" +
