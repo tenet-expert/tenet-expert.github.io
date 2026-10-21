@@ -245,23 +245,29 @@ function schedHead(today){
   "</div>";
 }
 
+function schedDeptBlock(g, on){
+  var mine = [];
+  g.people.forEach(function(p){ if(on[p.id]) mine.push(on[p.id]); });
+  if(!mine.length) return "";
+  return "<div class=\"sc-dept\"><p>" + g.title + "</p><ul>" + mine.map(function(r){
+    var badge = r.c === "D" ? "<i class=\"sc-badge\">дежурство</i>" : "";
+    return "<li><button type=\"button\" data-sched-person=\"" + r.p.id + "\"><b>" + schedFull(r.p) + "</b>" + badge + "</button></li>";
+  }).join("") + "</ul></div>";
+}
+
 function schedShiftBoard(b){
   var on = {};
   b.duty.concat(b.event, b.work).forEach(function(r){ on[r.p.id] = r; });
-  var html = "";
-  var any = false;
+  var left = "";
+  var right = "";
   SCHED.groups.forEach(function(g){
-    var mine = [];
-    g.people.forEach(function(p){ if(on[p.id]) mine.push(on[p.id]); });
-    if(!mine.length) return;
-    any = true;
-    html += "<div class=\"sc-dept\"><p>" + g.title + "</p><ul>" + mine.map(function(r){
-      var badge = r.c === "D" ? "<i class=\"sc-badge\">дежурство</i>" : "";
-      return "<li><button type=\"button\" data-sched-person=\"" + r.p.id + "\"><b>" + schedFull(r.p) + "</b>" + badge + "</button></li>";
-    }).join("") + "</ul></div>";
+    var block = schedDeptBlock(g, on);
+    if(!block) return;
+    if(g.id === "sales" || g.id === "plus") left += block;
+    else right += block;
   });
-  if(!any) return "<p class=\"sc-empty\">Никого в смене</p>";
-  return "<div class=\"sc-depts\">" + html + "</div>";
+  if(!left && !right) return "<p class=\"sc-empty\">Никого в смене</p>";
+  return "<div class=\"sc-depts\"><div class=\"sc-col\">" + left + "</div><div class=\"sc-col\">" + right + "</div></div>";
 }
 
 function schedDateNotes(b){
