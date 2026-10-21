@@ -245,12 +245,23 @@ function schedHead(today){
   "</div>";
 }
 
-function schedList(rows, empty){
-  if(!rows.length) return "<p class=\"sc-empty\">" + empty + "</p>";
-  return "<ul>" + rows.map(function(r){
-    var kind = r.k && r.k.label && r.k.label !== "Смена" ? r.k.label : r.p.groupTitle;
-    return "<li><button type=\"button\" data-sched-person=\"" + r.p.id + "\"><b>" + schedFull(r.p) + "</b><span>" + kind + "</span></button></li>";
-  }).join("") + "</ul>";
+function schedShiftBoard(b){
+  var on = {};
+  b.duty.concat(b.event, b.work).forEach(function(r){ on[r.p.id] = r; });
+  var html = "";
+  var any = false;
+  SCHED.groups.forEach(function(g){
+    var mine = [];
+    g.people.forEach(function(p){ if(on[p.id]) mine.push(on[p.id]); });
+    if(!mine.length) return;
+    any = true;
+    html += "<div class=\"sc-dept\"><p>" + g.title + "</p><ul>" + mine.map(function(r){
+      var badge = r.c === "D" ? "<i class=\"sc-badge\">дежурство</i>" : "";
+      return "<li><button type=\"button\" data-sched-person=\"" + r.p.id + "\"><b>" + schedFull(r.p) + "</b>" + badge + "</button></li>";
+    }).join("") + "</ul></div>";
+  });
+  if(!any) return "<p class=\"sc-empty\">Никого в смене</p>";
+  return html;
 }
 
 function schedPersonCard(p, day){
@@ -317,8 +328,7 @@ function sched(){
         "<em>" + dow + "</em>" +
       "</button>" +
       "<div class=\"sc-hero-grid\">" +
-        "<article class=\"sc-hero-col du\"><p class=\"eyebrow\">Дежурство</p>" + schedList(b.duty, "Дежурных нет") + "</article>" +
-        "<article class=\"sc-hero-col work\"><p class=\"eyebrow\">В смене</p>" + schedList(b.event.concat(b.work), "Никого в смене") + "</article>" +
+        "<article class=\"sc-hero-col work\"><p class=\"eyebrow\">В смене</p>" + schedShiftBoard(b) + "</article>" +
         "<article class=\"sc-hero-col meet\"><p class=\"eyebrow\">Особое</p>" +
           (b.meet.length || b.train.length || b.vac.length
             ? "<ul>" +
