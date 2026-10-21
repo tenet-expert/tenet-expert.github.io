@@ -109,8 +109,10 @@ function schedPerson(id){
 }
 function schedCode(person, day){
   var c = (person.days || "")[day - 1] || ".";
-  if(schedWeekend(day) && c === "M") return "8";
-  if(schedWeekend(day) && c === "e") return "1";
+  var id = person && person.id;
+  var plain = schedWeekend(day) || id === "ish" || id === "nag" || id === "kri" || id === "oso" || id === "mol";
+  if(plain && c === "M") return "8";
+  if(plain && c === "e") return "1";
   return c;
 }
 function schedFull(p){
