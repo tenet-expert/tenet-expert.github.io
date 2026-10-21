@@ -261,7 +261,21 @@ function schedShiftBoard(b){
     }).join("") + "</ul></div>";
   });
   if(!any) return "<p class=\"sc-empty\">Никого в смене</p>";
-  return html;
+  return "<div class=\"sc-depts\">" + html + "</div>";
+}
+
+function schedDateNotes(b){
+  var bits = [];
+  function add(rows, label, cls){
+    rows.forEach(function(r){
+      bits.push("<button type=\"button\" class=\"sc-note " + cls + "\" data-sched-person=\"" + r.p.id + "\"><i></i><b>" + r.p.last + "</b><span>" + label + "</span></button>");
+    });
+  }
+  add(b.meet, "собрание", "mt");
+  add(b.train, "обучение", "tr");
+  add(b.vac, "отпуск", "va");
+  if(!bits.length) return "";
+  return "<div class=\"sc-notes\">" + bits.join("") + "</div>";
 }
 
 function schedPersonCard(p, day){
@@ -322,23 +336,15 @@ function sched(){
     "<div class=\"banner\"><div><p class=\"eyebrow\">TENET · отдел продаж</p><b>График сотрудников</b></div><div class=\"banner-name\">ОКТ</div></div>" +
     "<p class=\"lead\">Октябрь 2026. Нажмите день — увидите, кто в смене, на дежурстве и на собрании. Нажмите фамилию — карточка месяца.</p>" +
     "<div class=\"sc-hero\">" +
-      "<button type=\"button\" class=\"sc-date\" data-sched-day=\"" + (today || day) + "\">" +
-        "<small>" + (today === day ? "сегодня" : "выбран день") + "</small>" +
-        "<strong>" + day + "</strong>" +
-        "<em>" + dow + "</em>" +
-      "</button>" +
-      "<div class=\"sc-hero-grid\">" +
-        "<article class=\"sc-hero-col work\"><p class=\"eyebrow\">В смене</p>" + schedShiftBoard(b) + "</article>" +
-        "<article class=\"sc-hero-col meet\"><p class=\"eyebrow\">Особое</p>" +
-          (b.meet.length || b.train.length || b.vac.length
-            ? "<ul>" +
-              b.meet.map(function(r){ return "<li><button type=\"button\" data-sched-person=\"" + r.p.id + "\"><b>" + schedFull(r.p) + "</b><span>Собрание</span></button></li>"; }).join("") +
-              b.train.map(function(r){ return "<li><button type=\"button\" data-sched-person=\"" + r.p.id + "\"><b>" + schedFull(r.p) + "</b><span>Обучение</span></button></li>"; }).join("") +
-              b.vac.map(function(r){ return "<li><button type=\"button\" data-sched-person=\"" + r.p.id + "\"><b>" + schedFull(r.p) + "</b><span>Отпуск</span></button></li>"; }).join("") +
-              "</ul>"
-            : "<p class=\"sc-empty\">Собраний, обучения и отпусков нет</p>") +
-        "</article>" +
+      "<div class=\"sc-date\">" +
+        "<button type=\"button\" class=\"sc-date-main\" data-sched-day=\"" + (today || day) + "\">" +
+          "<small>" + (today === day ? "сегодня" : "выбран день") + "</small>" +
+          "<strong>" + day + "</strong>" +
+          "<em>" + dow + "</em>" +
+        "</button>" +
+        schedDateNotes(b) +
       "</div>" +
+      "<article class=\"sc-hero-col work\"><p class=\"eyebrow\">В смене</p>" + schedShiftBoard(b) + "</article>" +
     "</div>" +
     "<div class=\"sc-legend\">" +
       "<span class=\"lg k-s8\"><i>8</i> Смена</span>" +
