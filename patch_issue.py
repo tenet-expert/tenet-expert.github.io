@@ -43,7 +43,9 @@ def patch(html: str, css: str, js: str) -> str:
         html = html.replace(CLOUD_OLD, CLOUD_NEW, 1)
     if "state.rop=false; save(); view=\"login\"" not in html and LOGOUT_OLD in html:
         html = html.replace(LOGOUT_OLD, LOGOUT_NEW, 1)
-    if "offer,sched,issue}" not in html and "offer,sched}" in html:
+    if "sched,issue}" not in html and "senior,sched}" in html:
+        html = html.replace("senior,sched}", "senior,sched,issue}", 1)
+    elif "offer,sched,issue}" not in html and "offer,sched}" in html:
         html = html.replace("offer,sched}", "offer,sched,issue}", 1)
     elif ",issue}" not in html and "offer,tune,senior}" in html:
         html = html.replace("offer,tune,senior}", "offer,tune,senior,issue}", 1)
