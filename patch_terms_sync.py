@@ -15,6 +15,7 @@ SRC = os.environ.get("TERMS_SRC",
       "https://raw.githubusercontent.com/sanchesefn/tenet-expert/main/terms-calc-data.js")
 DATA = ["TERMS_DATE", "KM_CORRIDOR", "TERMS_BONUS", "TERMS_MPT", "TERMS_INV",
         "PANGO_FIX", "PANGO_BUNDLE", "PANGO_RATE_A", "PANGO_RATE_B", "PANGO_NSS",
+        "PANGO_VIN",
         "TERMS_PRIO", "KM_MODELS", "PRIO_VINS", "KM_DC_DEF", "KM_BANKS",
         "KM_BANK_MONTHS", "KM_BANK_RATES"]
 TARGETS = [Path("index.html"), Path("_site/index.html")]
