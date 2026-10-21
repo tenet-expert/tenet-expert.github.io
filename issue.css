@@ -1,0 +1,35 @@
+/* График выдач */
+.hub-card[data-go="issue"]::before{
+  content:"";
+  background:
+    radial-gradient(90px 54px at 86% 16%, rgba(255,255,255,.16), transparent 70%),
+    linear-gradient(165deg, #171c24 0%, #243044 58%, #1d4e89 130%);
+}
+.issue-page .lead{max-width:720px;}
+.is-months{margin-top:12px;}
+.is-days{display:flex;gap:6px;overflow-x:auto;padding:10px 0 4px;}
+.is-day{border:1px solid var(--border);background:#fff;border-radius:999px;min-width:36px;height:36px;font-weight:700;}
+.is-day.on{background:#161618;color:#fff;border-color:#161618;}
+.is-board{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;}
+.is-board section{border:1px solid var(--border);border-radius:16px;background:#fffcf8;padding:12px;}
+.is-board h2{margin:0 0 8px;font-size:18px;letter-spacing:-.03em;}
+.is-slot{width:100%;text-align:left;border-radius:12px;margin-top:6px;padding:8px 10px;display:flex;flex-direction:column;gap:2px;}
+.is-slot.free{border:1px dashed rgba(17,17,20,.18);background:#fff;color:var(--muted);}
+.is-slot.free b{color:#161618;}
+.is-slot.busy{border:1px solid rgba(17,17,20,.06);background:#f6f5f3;min-height:calc(var(--h, 1) * 28px);}
+.is-slot.busy.tenet{background:#eef3f8;box-shadow:inset 3px 0 0 #1d4e89;}
+.is-slot.busy.local{outline:1px dashed #1d4e89;}
+.is-slot b{font-size:13px;}
+.is-slot em{font-style:normal;font-weight:700;font-size:13px;}
+.is-slot span{color:var(--muted);font-size:12px;}
+.is-form{margin-top:14px;border:1px solid var(--border);border-radius:16px;background:#fff;padding:14px;}
+.is-form h3{margin:4px 0 10px;}
+.is-types{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
+.is-span{color:var(--muted);font-size:13px;margin:8px 0;}
+.is-err{color:var(--primary);font-size:13px;}
+.is-ok{color:#1d4e89;font-weight:700;}
+.is-actions{display:flex;gap:8px;flex-wrap:wrap;}
+.is-hook{margin-top:16px;color:var(--muted);font-size:13px;}
+@media(max-width:800px){
+  .is-board{grid-template-columns:1fr;}
+}
