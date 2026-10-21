@@ -11,7 +11,7 @@ var SCHED = {
   groups: [
     {
       id: "sales",
-      title: "Продажи",
+      title: "TENET",
       note: "В салоне по графику — 4",
       floor: "4444444444444444444444444444444",
       people: [
@@ -26,7 +26,7 @@ var SCHED = {
     },
     {
       id: "plus",
-      title: "ОП ТЕНЕТ ПЛЮС",
+      title: "TENET PLUS",
       note: "В смене один. Возможны усиления",
       people: [
         { id: "bik", last: "Бикулов", first: "Камиль", days: "88..88...88..888..88...88..888." },
@@ -35,7 +35,7 @@ var SCHED = {
     },
     {
       id: "spec",
-      title: "Специалисты",
+      title: "Администратор",
       note: "Отдельная лента графика",
       people: [
         { id: "shab", last: "Шабакаева", first: "Алиса", days: ".8M..88..MM..888MM..888MM..888M" },
@@ -44,7 +44,7 @@ var SCHED = {
     },
     {
       id: "office",
-      title: "Офис",
+      title: "КСО",
       note: "В салоне по графику — 2",
       floor: "2222222222222222222222222222222",
       people: [
@@ -56,7 +56,7 @@ var SCHED = {
     },
     {
       id: "one",
-      title: "Смена «1»",
+      title: "Трейд-ин",
       note: "В клетке графика стоит 1, не 8",
       people: [
         { id: "ish", last: "Ишмедов", first: "", days: "..ee1..11...11..ee1..11...e1..e" },
@@ -66,7 +66,7 @@ var SCHED = {
     },
     {
       id: "extra",
-      title: "Дополнительно",
+      title: "Техник",
       note: "",
       people: [
         { id: "oso", last: "Осокин", first: "Сергей", days: ".8MM...88M...888...888...MM8..." },
@@ -171,7 +171,7 @@ function schedCopy(day){
     "Собрание: " + schedNames(b.meet),
     "Отпуск: " + schedNames(b.vac),
     "Выходной: " + schedNames(b.off),
-    "В салоне, продажи: 4 · офис: 2"
+    "В салоне, TENET: 4 · КСО: 2"
   ];
   return lines.join("\n");
 }
