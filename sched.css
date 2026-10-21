@@ -75,6 +75,7 @@ body:has(.sched-page) .wrap{max-width:1180px;}
 .sc-c.k-s8{background:#fff;}
 .k-du,.sc-c.k-du,.sc-legend .k-du i{background:#ffe9a8;color:#3a2e08;}
 .k-ev,.sc-c.k-ev,.sc-legend .k-ev i{background:#e07a32;color:#fff;}
+.sc-c.we.k-ev,.sc-pips .pip.we.k-ev{background:#fff;color:#161618;}
 .k-tr,.sc-c.k-tr,.sc-legend .k-tr i{background:#3c6d8d;color:#fff;}
 .k-mt,.sc-c.k-mt,.sc-legend .k-mt i{background:#c4323c;color:#fff;}
 .k-va,.sc-c.k-va,.sc-legend .k-va i{background:#8c2430;color:#fff;}

@@ -108,7 +108,10 @@ function schedPerson(id){
   return schedPeople().filter(function(p){ return p.id === id; })[0] || null;
 }
 function schedCode(person, day){
-  return (person.days || "")[day - 1] || ".";
+  var c = (person.days || "")[day - 1] || ".";
+  if(schedWeekend(day) && c === "M") return "8";
+  if(schedWeekend(day) && c === "e") return "1";
+  return c;
 }
 function schedFull(p){
   return (p.last + " " + (p.first || "")).trim();
@@ -124,7 +127,7 @@ function schedDayWord(day){
 function schedStats(p){
   var s = { work: 0, duty: 0, event: 0, train: 0, meet: 0, off: 0, vac: 0 };
   for(var i = 0; i < 31; i++){
-    var c = p.days[i] || ".";
+    var c = schedCode(p, i + 1);
     if(c === ".") s.off++;
     else if(c === "D"){ s.work++; s.duty++; }
     else if(c === "M" || c === "e"){ s.work++; s.event++; }
