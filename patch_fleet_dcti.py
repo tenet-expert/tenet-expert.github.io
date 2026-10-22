@@ -322,8 +322,8 @@ def plus_patch(text):
 PLUS_MODELS = {"pl4", "pl6"}
 PLUS_VIN_PREFIXES = ("EFEDB21", "EDEMB31")
 PLUS_CARS = [
-    {"vin": "EDEMB31B3TE133430", "model": "pl6", "name": "L6", "trim": "Элегант", "color": "Оранжевый", "status": "way", "note": "На заводе (Калуга) · отгрузка 21.10.2026", "rrc": 2890000},
-    {"vin": "EDEMB31B1TE136956", "model": "pl6", "name": "L6", "trim": "Элегант", "color": "Чёрный", "status": "way", "note": "На заводе (Калуга) · отгрузка 26.10.2026", "rrc": 2890000},
+    {"vin": "EDEMB31B1TE136973", "model": "pl6", "name": "L6", "trim": "Элегант", "color": "Чёрный", "status": "way", "note": "На заводе (Калуга) · отгрузка 27.10.2026", "rrc": 2890000},
+    {"vin": "EDEMB31B0TE136852", "model": "pl6", "name": "L6", "trim": "Ультра", "color": "Белый", "status": "way", "note": "На заводе (Калуга) · отгрузка 27.10.2026", "rrc": 3040000},
     {"vin": "EFEDB21B5T3000583", "model": "pl4", "name": "L4", "trim": "Стайл", "color": "Серый", "status": "way", "note": "На заводе (СПб Сестрорецк)", "rrc": 2540000},
     {"vin": "EFEDB21B0T3002547", "model": "pl4", "name": "L4", "trim": "Элегант", "color": "Белый", "status": "way", "note": "На заводе (СПб Сестрорецк) · отгрузка 18.10.2026", "rrc": 2690000},
     {"vin": "EFEDB21B3T3002798", "model": "pl4", "name": "L4", "trim": "Стайл", "color": "Серый", "status": "way", "note": "На заводе (СПб Сестрорецк)", "rrc": 2540000},
@@ -341,12 +341,10 @@ PLUS_CARS = [
     {"vin": "EFEDB21B0T3002466", "model": "pl4", "name": "L4", "trim": "Элегант", "color": "Чёрный", "status": "in", "note": "В салоне · с 20.10.2026", "rrc": 2690000},
     {"vin": "EFEDB21B0T3002595", "model": "pl4", "name": "L4", "trim": "Элегант", "color": "Белый", "status": "in", "note": "В салоне · с 20.10.2026", "rrc": 2690000},
     {"vin": "EDEMB31B7TE100589", "model": "pl6", "name": "L6", "trim": "Ультра", "color": "Белый", "status": "in", "note": "В салоне · с 28.09.2026", "rrc": 3040000},
-    {"vin": "EDEMB31B5TE101384", "model": "pl6", "name": "L6", "trim": "Ультра", "color": "Серебристый", "status": "in", "note": "В салоне · с 07.10.2026", "rrc": 3040000},
     {"vin": "EDEMB31B4TE100291", "model": "pl6", "name": "L6", "trim": "Ультра", "color": "Чёрный", "status": "in", "note": "В салоне · с 30.09.2026", "rrc": 3040000},
     {"vin": "EDEMB31B3TE113985", "model": "pl6", "name": "L6", "trim": "Ультра", "color": "Белый", "status": "in", "note": "В салоне · с 30.09.2026", "rrc": 3040000},
     {"vin": "EFEDB21B2T3000637", "model": "pl4", "name": "L4", "trim": "Стайл", "color": "Белый", "status": "in", "note": "В салоне · с 30.09.2026", "rrc": 2540000},
     {"vin": "EFEDB21B2T3000394", "model": "pl4", "name": "L4", "trim": "Стайл", "color": "Белый", "status": "in", "note": "В салоне · с 28.09.2026", "rrc": 2540000},
-    {"vin": "EFEDB21B2T3000556", "model": "pl4", "name": "L4", "trim": "Стайл", "color": "Серый", "status": "in", "note": "В салоне · с 28.09.2026", "rrc": 2540000},
     {"vin": "EFEDB21B0T3000135", "model": "pl4", "name": "L4", "trim": "Элегант", "color": "Чёрный", "status": "in", "note": "В салоне · с 28.09.2026", "rrc": 2690000},
     {"vin": "EFEDB21B1T3001374", "model": "pl4", "name": "L4", "trim": "Стайл", "color": "Серый", "status": "in", "note": "В салоне · с 14.10.2026", "rrc": 2540000},
     {"vin": "EFEDB21B2T3002128", "model": "pl4", "name": "L4", "trim": "Элегант", "color": "Красный", "status": "in", "note": "В салоне · с 08.10.2026", "rrc": 2690000},
