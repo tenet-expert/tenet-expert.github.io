@@ -44,6 +44,21 @@ PAIRS = [
     # Drive 20.10.2026: позиций «без цены» в файле больше нет
     ('notes:["Допускается на T4L резина от T7 R18 225/55.","В файле от 29.09 без цены: Fortune 225/55R19 103T Polaro Ice TL, 230 шип.","Sailun RoadX 225/55R18 98T RXFrost WH12 TL, 102 шип."]',
      'notes:["Допускается на T4L резина от T7 R18 225/55."]'),
+    # Drive 21.10.2026: T8 R19 Ikon Autograph Snow 3 — «липучка» в названии
+    ('["Автошина Ikon Tyres 235/50 R19 103T XL Autograph Snow 3 SUV TL",21000,84000,"2"]',
+     '["Автошина Ikon Tyres 235/50 R19 103T XL Autograph Snow 3 SUV TL лип",21000,84000,"2"]'),
+    # Drive 21.10.2026: T7 R18 Sailun RoadX 12 500 / 50 000
+    ('["Sailun RoadX 225/55 R18 98T RXFrost WH12 TL, шип.",11000,44000,"2"]',
+     '["Sailun RoadX 225/55 R18 98T RXFrost WH12 TL, шип.",12500,50000,"2"]'),
+    # Drive 21.10.2026: T7 R19 / L6 Tracmax в наличии 2
+    ('["Tracmax 225/55 R19 103T XL X-Privilo S500 TL, шип.",15500,62000,"4"]',
+     '["Tracmax 225/55 R19 103T XL X-Privilo S500 TL, шип.",15500,62000,"2"]'),
+    # Drive 21.10.2026: T4L / L6 Fortune 12 500 / 50 000
+    ('["Fortune 225/60 R18 104T Polaro Ice TL, шип.",12000,48000,"2"]',
+     '["Fortune 225/60 R18 104T Polaro Ice TL, шип.",12500,50000,"2"]'),
+    # Drive 21.10.2026: T4 R17 / L4 — Lanvigator Ice Spider II убран из файла
+    ('["T4 R17 / L4",[["Fortune 215/60R17 100T Polaro Ice TL, шип.",11000,44000,"3"],["Formula Ice Friction 215/60 R17 100T XL, липучка",9600,38400,"1"],["Lanvigator Ice Spider II 215/60 R17 100T шип XL",13500,54000,"1"]]]',
+     '["T4 R17 / L4",[["Fortune 215/60R17 100T Polaro Ice TL, шип.",11000,44000,"3"],["Formula Ice Friction 215/60 R17 100T XL, липучка",9600,38400,"1"]]]'),
 ]
 
 # Drive «Прайс тюнинг.xlsx» 19.10.2026: колонки L4 / L6 (TENET PLUS) в TUNE_DO.
