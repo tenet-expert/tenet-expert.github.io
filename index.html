@@ -3443,15 +3443,18 @@ async function pingTelegram(body){
       return months<1?1:months;
     }
     function fleetRateOf(m){
-      const id=String(m&&m.id||"");
-      const stock=String(m&&(m.stock||m.model)||"");
-      const brand=String(m&&m.brand||"");
-      if(brand==="CHERY"||stock==="t9"||stock==="a8"||stock==="t7l"||id==="t9p"||id==="t9u"||id==="a8a"||id==="a8p"||id==="a8u"||id==="t7l") return 22.9;
-      return 19.2;
+      return 22.5;
     }
     function fleetRateTxt(n){
       const x=Number(n);
-      return String(Number.isFinite(x)&&x>0?x:19.2).replace(".",",");
+      return String(Number.isFinite(x)&&x>0?x:22.5).replace(".",",");
+    }
+    function fleetBanksFrom(qSov, qSber, months){
+      function one(id, name, q){
+        if(!q) return null;
+        return {id:id, name:name, rate:q.rate, term:q.termAfter, capped:!q.early && q.term!==months, termNote:q.early?(q.termAfter+" мес. вместо "+q.term+" · досрочное не меняет платёж"):"", payMpt:q.pay, overMpt:q.over};
+      }
+      return [one("sovcom","Совкомбанк",qSov), one("sber","Сбер",qSber)].filter(Boolean);
     }
     function fleetSubQuote(base, sub, down, doAmt, cascoAmt, months, limitPv, rateIn){
       base=Math.max(0, Math.round(Number(base)||0));
@@ -3476,7 +3479,7 @@ async function pingTelegram(body){
       const credit=Math.max(0, price-pvCar+extrasCredit);
       const term=Math.min(Math.max(1, Math.round(Number(months)||84)), 84);
       const given=Number(rateIn);
-      const rate=Number.isFinite(given)&&given>0?given:19.2;
+      const rate=Number.isFinite(given)&&given>0?given:22.5;
       const pay=typeof calcPay==="function"?calcPay(credit+pvCar, pvCar, term, rate):0;
       let termAfter=term;
       if(early>0){
