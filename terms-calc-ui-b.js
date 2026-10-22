@@ -188,13 +188,14 @@
       const fleetPin=(typeof FLEET_PIN!=="undefined" && FLEET_PIN[kmVin])||0;
       const fleetBase=Math.max(0, mptTidy-tiMpt);
       const subAmt=(showSub && fMpt && fMpt.sub)||0;
-      const qFleet=typeof fleetSubQuote==="function"?fleetSubQuote(fleetBase, subAmt, down, addons, pack||0, months, !!(showSub && subAmt), fleetRateOf(m)):{price:fleetBase, pv:down, pvCar:down, credit:Math.max(0,fleetBase-down), term:Math.min(months,84), termAfter:Math.min(months,84), rate:fleetRateOf(m), pay:0, over:0, doCasco:(addons||0)+(pack||0), pvExtras:0, extrasCredit:0, early:0, earlyOver:0, limited:false, sub:subAmt, base:fleetBase, cap49:0, earlyCap:0};
+      const qFleet=typeof fleetSubQuote==="function"?fleetSubQuote(fleetBase, subAmt, down, addons, pack||0, months, !!(showSub && subAmt), 22.5):{price:fleetBase, pv:down, pvCar:down, credit:Math.max(0,fleetBase-down), term:Math.min(months,84), termAfter:Math.min(months,84), rate:22.5, pay:0, over:0, doCasco:(addons||0)+(pack||0), pvExtras:0, extrasCredit:0, early:0, earlyOver:0, limited:false, sub:subAmt, base:fleetBase, cap49:0, earlyCap:0};
       const priceMpt=qFleet.price;
       const downMptShow=qFleet.pv;
       const downMptCar=qFleet.pvCar;
       const creditMpt=qFleet.credit;
       const mptTerm=qFleet.termAfter;
-      const banksMpt=[{id:"sovcom", name:"Совкомбанк", rate:qFleet.rate, term:qFleet.termAfter, capped:!qFleet.early && qFleet.term!==months, termNote:qFleet.early?(qFleet.termAfter+" мес. вместо "+qFleet.term+" · досрочное не меняет платёж"):"", payMpt:qFleet.pay, overMpt:qFleet.over}];
+      const qFleetSber=typeof fleetSubQuote==="function"?fleetSubQuote(fleetBase, subAmt, down, addons, pack||0, months, !!(showSub && subAmt), 24):null;
+      const banksMpt=typeof fleetBanksFrom==="function"?fleetBanksFrom(qFleet, qFleetSber, months):[{id:"sovcom", name:"Совкомбанк", rate:qFleet.rate, term:qFleet.termAfter, capped:!qFleet.early && qFleet.term!==months, termNote:"", payMpt:qFleet.pay, overMpt:qFleet.over}];
       const mptBreak=typeof fleetSubBreak==="function"?fleetSubBreak(qFleet, {name:(fMpt&&fMpt.name)||m.name, stock:mptSample?escape(mptSample.color||"—")+" · "+escape(mptSample.vin||""):"", rrc:mptRrc, trade:!!useTi}):"";
       const banks=(typeof KM_BANKS!=="undefined"?KM_BANKS:[]).map(b=>{
         const look=typeof kmBankRate==="function"?kmBankRate(b.id, rateGroup, months, downPct):{rate:b.rate||0, term:months, capped:false};
@@ -282,7 +283,8 @@
           const altTidy=(fAlt&&fAlt.tidy)||alt.rrc;
           const altTi=useTi?(typeof FLEET_TI==="number"?FLEET_TI:100000):0;
           const altBase=Math.max(0, altTidy-altTi);
-          const altQ=typeof fleetSubQuote==="function"?fleetSubQuote(altBase, altSub, altDown, addons, pack||0, months, altSub>0, fleetRateOf(alt)):null;
+          const altQ=typeof fleetSubQuote==="function"?fleetSubQuote(altBase, altSub, altDown, addons, pack||0, months, altSub>0, 22.5):null;
+          const altQSber=typeof fleetSubQuote==="function"?fleetSubQuote(altBase, altSub, altDown, addons, pack||0, months, altSub>0, 24):null;
           const altFleetPrice=altQ?altQ.price:Math.max(0, altBase-altSub);
           const altFleetCredit=altQ?altQ.credit:Math.max(0, altFleetPrice-altDown);
           const altTerm=altQ?altQ.termAfter:Math.min(Math.max(1, months), 84);
@@ -300,7 +302,7 @@
           const altOpts=alts.map(x=>`<option value="${x.id}"${x.id===alt.id?" selected":""}>${escape(x.name)} · РРЦ ${rub(x.rrc)}${auto&&x.id===auto.id?" · ближе по цене":""}</option>`).join("");
           altPick=`<label class="plus-alt-pick"><span>Сравнить с</span><select id="kmAltId">${altOpts}</select></label>`;
           plusAltDirect=`<div class="${altCls}"><p class="eyebrow">${head}</p><p class="calc-note">${altKind} · РРЦ ${rub(alt.rrc)} · ${altDisc} · цена ${rub(altPrice)} · ПВ ${rub(altDown)} · ${altPct}% · тело ${rub(altCredit)}</p>${kmPayRows(altBanks,"pay","over")}<p class="calc-note">Тот же процент взноса и срок. ${altRule}</p><button type="button" class="chip" data-km-id="${alt.id}">Открыть ${escape(alt.name)}</button></div>`;
-          plusAltFleet=`<div class="${altCls}"><p class="eyebrow">${head}</p>${altQ&&typeof fleetBodyTop==="function"?fleetBodyTop(altQ):""}<div class="bank-row"><span><b>Совкомбанк</b><br/><small>${altRate}% · ${altQ&&altQ.early?altQ.termAfter+" мес. вместо "+altQ.term+" · досрочное не меняет платёж":altTerm+" мес."+(altTerm!==months&&!(altQ&&altQ.early)?" · считаем "+altTerm+" мес.":"")} · переплата ~${rub(Math.round(altOver))}</small></span><span class="pay">${rub(Math.round(altPay))} ₽</span></div><div class="bank-row"><span>${useTi?"Флит + трейд-ин":"Флит"}${altSub?" · субсидия −"+rub(altSub):""}</span><span class="pay">${rub(altFleetPrice)}</span></div>${altQ&&typeof fleetBodyRows==="function"?fleetBodyRows(altQ):`<div class="bank-row"><span>Тело кредита</span><span class="pay">${rub(altFleetCredit)}</span></div>`}${altQ&&altQ.early?`<div class="bank-row"><span>Досрочно · сокращает срок</span><span class="pay">${rub(altQ.early)}</span></div>`:""}<p class="calc-note">${wantPlus?"Панго нет. ":""}${altQ?fleetSubNote(altQ):"ПВ "+rub(altDown)+" · каско и Д/О из взноса."}</p></div>`;
+          plusAltFleet=`<div class="${altCls}"><p class="eyebrow">${head}</p>${altQ&&typeof fleetBodyTop==="function"?fleetBodyTop(altQ):""}<div class="bank-row"><span><b>Совкомбанк</b><br/><small>${altRate}% · ${altQ&&altQ.early?altQ.termAfter+" мес. вместо "+altQ.term+" · досрочное не меняет платёж":altTerm+" мес."+(altTerm!==months&&!(altQ&&altQ.early)?" · считаем "+altTerm+" мес.":"")} · переплата ~${rub(Math.round(altOver))}</small></span><span class="pay">${rub(Math.round(altPay))} ₽</span></div>${altQSber?`<div class="bank-row"><span><b>Сбер</b><br/><small>24% · ${altQSber.early?altQSber.termAfter+" мес. вместо "+altQSber.term+" · досрочное не меняет платёж":altQSber.termAfter+" мес."} · переплата ~${rub(Math.round(altQSber.over))}</small></span><span class="pay">${rub(Math.round(altQSber.pay))} ₽</span></div>`:""}<div class="bank-row"><span>${useTi?"Флит + трейд-ин":"Флит"}${altSub?" · субсидия −"+rub(altSub):""}</span><span class="pay">${rub(altFleetPrice)}</span></div>${altQ&&typeof fleetBodyRows==="function"?fleetBodyRows(altQ):`<div class="bank-row"><span>Тело кредита</span><span class="pay">${rub(altFleetCredit)}</span></div>`}${altQ&&altQ.early?`<div class="bank-row"><span>Досрочно · сокращает срок</span><span class="pay">${rub(altQ.early)}</span></div>`:""}<p class="calc-note">${wantPlus?"Панго нет. ":""}${altQ?fleetSubNote(altQ):"ПВ "+rub(altDown)+" · каско и Д/О из взноса."}</p></div>`;
         }
       }
       const ob=typeof kmBand==="function"?kmBand(kmVin, useTi, false, m):{lo:m.kmMin, hi:m.kmMax};
@@ -343,8 +345,9 @@
         const rb=prioInStock&&prioDeal.banks?prioDeal.banks[i]:null;
         return `<div class="pay-cell">${kmBankCell(b)}</div>`+(rb?`<div class="pay-cell prio">${kmBankCell(rb)}</div>`:"");
       }).join("");
-      const qFleetPrio=(m.id==="t7a" && typeof fleetSubQuote==="function")?fleetSubQuote(Math.max(0, 2333000-tiMpt), subAmt, down, addons, pack||0, months, !!(showSub && subAmt), fleetRateOf(m)):null;
-      const banksMptPrio=qFleetPrio?[{id:"sovcom", name:"Совкомбанк", rate:qFleetPrio.rate, term:qFleetPrio.termAfter, capped:!qFleetPrio.early && qFleetPrio.term!==months, termNote:qFleetPrio.early?(qFleetPrio.termAfter+" мес. вместо "+qFleetPrio.term+" · досрочное не меняет платёж"):"", payMpt:qFleetPrio.pay, overMpt:qFleetPrio.over}]:[];
+      const qFleetPrio=(m.id==="t7a" && typeof fleetSubQuote==="function")?fleetSubQuote(Math.max(0, 2333000-tiMpt), subAmt, down, addons, pack||0, months, !!(showSub && subAmt), 22.5):null;
+      const qFleetPrioSber=qFleetPrio?fleetSubQuote(Math.max(0, 2333000-tiMpt), subAmt, down, addons, pack||0, months, !!(showSub && subAmt), 24):null;
+      const banksMptPrio=qFleetPrio&&typeof fleetBanksFrom==="function"?fleetBanksFrom(qFleetPrio, qFleetPrioSber, months):[];
       const prioKmTxt=useTi?"−100 тыс. с трейд-ин":"0 тыс. без трейд-ин";
       const fleetWarn=(showSub||showFleet)?pvMinBox(fleetPvHave(qFleet), qFleet&&qFleet.base, 20, "свои + субсидия"):{low:false,html:""};
       const fleetPrioWarn=qFleetPrio?pvMinBox(fleetPvHave(qFleetPrio), qFleetPrio.base, 20, "свои + субсидия"):{low:false,html:""};
@@ -429,7 +432,7 @@
           <div class="pay-col ${showSub?"sub":"mpt"} km-pay${qFleetPrio?" fleet-pair":""}">
             ${qFleetPrio?`<div class="km-contrast">
               <div class="pay-cell${fleetWarn.low?" pv-low":""}">
-                <p class="eyebrow">${showFleet||isPlus?"Флит · Совкомбанк "+fleetRateTxt(qFleet.rate)+"%":showSub?"Флит · субсидия бренда":"Флит · Совкомбанк "+fleetRateTxt(qFleet.rate)+"%"}</p>
+                <p class="eyebrow">${showFleet||isPlus?"Флит · Совкомбанк 22,5% · Сбер 24%":showSub?"Флит · субсидия бренда":"Флит · Совкомбанк 22,5% · Сбер 24%"}</p>
                 ${fleetWarn.html}
                 ${typeof fleetBodyTop==="function"?fleetBodyTop(qFleet):""}
               </div>
@@ -453,7 +456,7 @@
                 </details>
               </div>
               <div class="pay-cell prio"><p class="calc-note">${qFleet.price>qFleetPrio.price?"Дешевле обычного флита на "+rub(qFleet.price-qFleetPrio.price)+".":""}</p></div>
-            </div>`:`<p class="eyebrow">${showFleet||isPlus?"Флит · Совкомбанк "+fleetRateTxt(qFleet.rate)+"%":showSub?"Флит · субсидия бренда":"Флит · Совкомбанк "+fleetRateTxt(qFleet.rate)+"%"}</p>
+            </div>`:`<p class="eyebrow">${showFleet||isPlus?"Флит · Совкомбанк 22,5% · Сбер 24%":showSub?"Флит · субсидия бренда":"Флит · Совкомбанк 22,5% · Сбер 24%"}</p>
             ${fleetWarn.html}
             ${typeof fleetBodyTop==="function"?fleetBodyTop(qFleet):""}
             ${kmPayRows(banksMpt,"payMpt","overMpt")}
@@ -488,7 +491,7 @@
             ${useLoan?`<div class="card">
               <p class="eyebrow">Кредит · ${escape(m.name)}</p>
               <p class="calc-note">ПВ от цены авто ${rub(price)} ₽, без Д/О и каско. В кредит входят авто − ПВ, Д/О, каско расширенное и комиссия банка.</p>
-              ${showMpt||showSub||showFleet?`<p class="eyebrow" style="margin-top:16px">${showFleet||isPlus?"Флит · Совкомбанк "+fleetRateTxt(qFleet.rate)+"%":showSub?"Флит · субсидия бренда":"Флит · Совкомбанк "+fleetRateTxt(qFleet.rate)+"%"}</p>
+              ${showMpt||showSub||showFleet?`<p class="eyebrow" style="margin-top:16px">${showFleet||isPlus?"Флит · Совкомбанк 22,5% · Сбер 24%":showSub?"Флит · субсидия бренда":"Флит · Совкомбанк 22,5% · Сбер 24%"}</p>
               ${typeof fleetBodyTop==="function"?fleetBodyTop(qFleet):""}
               ${kmPayRows(banksMpt,"payMpt","overMpt")}
               ${typeof fleetBodyRows==="function"?fleetBodyRows(qFleet):`<div class="bank-row"><span>Тело кредита</span><span class="pay">${rub(creditMpt)}</span></div>`}
