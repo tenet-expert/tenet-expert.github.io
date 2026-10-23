@@ -353,7 +353,6 @@ PLUS_CARS = [
     {"vin": "EFEDB21B2T3000637", "model": "pl4", "name": "L4", "trim": "Стайл", "color": "Белый", "status": "in", "note": "В салоне · с 30.09.2026", "rrc": 2540000},
     {"vin": "EFEDB21B2T3000394", "model": "pl4", "name": "L4", "trim": "Стайл", "color": "Белый", "status": "in", "note": "В салоне · с 28.09.2026", "rrc": 2540000},
     {"vin": "EFEDB21B0T3000135", "model": "pl4", "name": "L4", "trim": "Элегант", "color": "Чёрный", "status": "in", "note": "В салоне · с 28.09.2026", "rrc": 2690000},
-    {"vin": "EFEDB21B1T3001374", "model": "pl4", "name": "L4", "trim": "Стайл", "color": "Серый", "status": "in", "note": "В салоне · с 14.10.2026", "rrc": 2540000},
     {"vin": "EFEDB21B2T3002128", "model": "pl4", "name": "L4", "trim": "Элегант", "color": "Красный", "status": "in", "note": "В салоне · с 08.10.2026", "rrc": 2690000},
     {"vin": "EFEDB21B1T3001911", "model": "pl4", "name": "L4", "trim": "Стайл", "color": "Белый", "status": "in", "note": "В салоне · с 09.10.2026", "rrc": 2540000},
     {"vin": "EFEDB21B2T3001755", "model": "pl4", "name": "L4", "trim": "Элегант", "color": "Чёрный", "status": "in", "note": "В салоне · с 12.10.2026", "rrc": 2690000},
