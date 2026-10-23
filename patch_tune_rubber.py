@@ -59,6 +59,12 @@ PAIRS = [
     # Drive 21.10.2026: T4 R17 / L4 — Lanvigator Ice Spider II убран из файла
     ('["T4 R17 / L4",[["Fortune 215/60R17 100T Polaro Ice TL, шип.",11000,44000,"3"],["Formula Ice Friction 215/60 R17 100T XL, липучка",9600,38400,"1"],["Lanvigator Ice Spider II 215/60 R17 100T шип XL",13500,54000,"1"]]]',
      '["T4 R17 / L4",[["Fortune 215/60R17 100T Polaro Ice TL, шип.",11000,44000,"3"],["Formula Ice Friction 215/60 R17 100T XL, липучка",9600,38400,"1"]]]'),
+    # Drive 22.10.2026: T4L / L6 — Fortune 225/60 R18 убран из файла
+    ('["T4L / L6",[["Fortune 225/60 R18 104T Polaro Ice TL, шип.",12500,50000,"2"],["Pirelli Formula 225/60 R18',
+     '["T4L / L6",[["Pirelli Formula 225/60 R18'),
+    # Drive 22.10.2026: шиномонтаж комплексный R16 5600, R17-R19 6600, R20 8600
+    ('mount:[["R16",6800],["R17, R18, R19",8300],["R20",10600]]',
+     'mount:[["R16",5600],["R17, R18, R19",6600],["R20",8600]]'),
 ]
 
 # Drive «Прайс тюнинг.xlsx» 19.10.2026: колонки L4 / L6 (TENET PLUS) в TUNE_DO.
