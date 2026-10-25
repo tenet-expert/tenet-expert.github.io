@@ -101,6 +101,45 @@ def ensure_t9(text):
     return text
 
 
+PLUS_ROW = re.compile(r'\{model:"(L4|L6)",trim:"([^"]*)"[^{}]*\}')
+
+
+def move_plus_specs(text):
+    """TENET+ specials (L4/L6) belong in TERMS_INV_PLUS ("Спец · TENET+"), not in
+    TERMS_INV ("Спец · TENET"). The canonical source lists e.g. L4 Style in TERMS_INV,
+    so after each sync move such rows over (canonical price wins for the same trim).
+    PANGO_FIX is untouched, so the PANGO calculator keeps the same price."""
+    s_inv = span(text, "TERMS_INV")
+    s_plus = span(text, "TERMS_INV_PLUS")
+    if not s_inv or not s_plus:
+        return text
+    inv = text[s_inv[0]:s_inv[1]]
+    rows = [m.group(0) for m in PLUS_ROW.finditer(inv)]
+    if not rows:
+        return text
+    inv_lines = [l for l in inv.split("\n") if not PLUS_ROW.search(l)]
+    for k in range(len(inv_lines) - 1, -1, -1):
+        if inv_lines[k].strip().startswith("{"):
+            inv_lines[k] = inv_lines[k].rstrip().rstrip(",")
+            break
+    new_inv = "\n".join(inv_lines)
+    plus = text[s_plus[0]:s_plus[1]]
+    keep = [m.group(0) for m in PLUS_ROW.finditer(plus)]
+    have = {PLUS_ROW.match(r).group(1) + "|" + PLUS_ROW.match(r).group(2): r for r in keep}
+    for r in rows:
+        key = PLUS_ROW.match(r).group(1) + "|" + PLUS_ROW.match(r).group(2)
+        if key in have:
+            keep[keep.index(have[key])] = r
+        else:
+            keep.insert(0, r)
+        have[key] = r
+    keep.sort(key=lambda r: (PLUS_ROW.match(r).group(1), 0))
+    new_plus = "    const TERMS_INV_PLUS = [\n" + ",\n".join("      " + r for r in keep) + "\n    ];"
+    a, b = (s_inv, s_plus) if s_inv[0] < s_plus[0] else (s_plus, s_inv)
+    na, nb = (new_inv, new_plus) if s_inv[0] < s_plus[0] else (new_plus, new_inv)
+    return text[:a[0]] + na + text[a[1]:b[0]] + nb + text[b[1]:]
+
+
 def ensure_local(text):
     text = ensure_t9(text)
     text = text.replace(
@@ -114,6 +153,7 @@ def ensure_local(text):
             "tt9u:{cash:3800000,ti:3500000},\n      l4e:{cash:2350000,ti:2250000},\n      l6u:{cash:2600000,ti:2450000}",
             1,
         )
+    text = move_plus_specs(text)
     return text
 
 

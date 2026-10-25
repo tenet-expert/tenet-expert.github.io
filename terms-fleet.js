@@ -354,7 +354,7 @@
           <div class="card km-disc">
             <p class="eyebrow">BFS Совкомбанк лизинг · ${escape(f.name)}</p>
             ${car?`<p class="calc-note">${escape(car.vin)} · ${escape(car.color||"")} · ${escape(car.trim||"")}${carIsCorp(car)?" · корп":""}</p>`:""}
-            <div class="note-box">Сбер / Альфа / Т-Банк на этот VIN нельзя. По центру — директ той же комплектации. Справа — ${useSub?"флит с субсидией бренда":"флит: Совкомбанк 22,5% и Сбер 24%"}.</div>
+            <div class="note-box">Директ нельзя. По центру — директ той же комплектации. Справа — ${useSub?"флит с субсидией бренда":"флит: Совкомбанк 22,5% и Сбер 24%"}.</div>
             <label class="check-row"><input id="kmFleetDisc" type="checkbox" ${useFleet?"checked":""} /> <span>Флит скидка ${rub(fleetCut)} · макс. выгода ${rub(f.an)}</span></label>
             <label class="check-row"><input id="kmUseTi" type="checkbox" ${useTi?"checked":""} /> <span>Трейд-ин ${rub(FLEET_TI)}</span></label>
             ${!useMpt&&canSub?`<label class="check-row"><input id="kmFleetSub" type="checkbox" ${useSub?"checked":""} /> <span>Субсидия бренда ${rub(subCut)}</span></label>`:""}

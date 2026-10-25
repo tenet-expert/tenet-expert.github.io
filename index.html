@@ -2925,7 +2925,6 @@ async function pingTelegram(body){
     const TERMS_INV = [
       {model:"T4L",trim:"Active",price:"2 150 нал, 2 100 ТИ"},
       {model:"T4L",trim:"Prime",price:"2 250 нал, 2 200 ТИ"},
-      {model:"L4",trim:"Style",price:"2 200 нал, 2 100 ТИ"},
       {model:"T7",trim:"Active 2WD",price:"2 450 нал, 2 350 ТИ"},
       {model:"T7",trim:"Prime 2WD",price:"2 550 нал, 2 450 ТИ"},
       {model:"T8",trim:"Active 2WD",price:"2 800 нал, 2 700 ТИ"},
@@ -2936,6 +2935,7 @@ async function pingTelegram(body){
       {model:"T9",trim:"Ultra 5 мест 4WD",price:"3 800 нал, 3 500 ТИ"}
     ];
     const TERMS_INV_PLUS = [
+      {model:"L4",trim:"Style",price:"2 200 нал, 2 100 ТИ"},
       {model:"L4",trim:"Elegant",price:"2 350 нал, 2 250 ТИ"},
       {model:"L6",trim:"Ultra",price:"2 600 нал, 2 450 ТИ"}
     ];
@@ -3761,7 +3761,7 @@ async function pingTelegram(body){
           <div class="card km-disc">
             <p class="eyebrow">BFS Совкомбанк лизинг · ${escape(f.name)}</p>
             ${car?`<p class="calc-note">${escape(car.vin)} · ${escape(car.color||"")} · ${escape(car.trim||"")}${carIsCorp(car)?" · корп":""}</p>`:""}
-            <div class="note-box">Сбер / Альфа / Т-Банк на этот VIN нельзя. По центру — директ той же комплектации. Справа — ${useSub?"флит с субсидией бренда":"флит Совкомбанк "+fleetRateTxt(fleetRateOf(m))+"%"}.</div>
+            <div class="note-box">Директ нельзя. По центру — директ той же комплектации. Справа — ${useSub?"флит с субсидией бренда":"флит Совкомбанк "+fleetRateTxt(fleetRateOf(m))+"%"}.</div>
             <label class="check-row"><input id="kmFleetDisc" type="checkbox" ${useFleet?"checked":""} /> <span>Флит скидка ${rub(fleetCut)} · макс. выгода ${rub(f.an)}</span></label>
             <label class="check-row"><input id="kmUseTi" type="checkbox" ${useTi?"checked":""} /> <span>Трейд-ин ${rub(FLEET_TI)}</span></label>
             ${!useMpt&&canSub?`<label class="check-row"><input id="kmFleetSub" type="checkbox" ${useSub?"checked":""} /> <span>Субсидия бренда ${rub(subCut)}</span></label>`:""}

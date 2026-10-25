@@ -69,7 +69,7 @@ OLD_FLEET = '''      const subCut=f.sub||0;
 NEW_FLEET = '''      const subCut=f.sub||0;
       const fleetBox=(useMpt||useSub)?fleetCreditBox(price, m, f, useFleet, useTi, useMpt?"mpt":"sub"):null;
       return banner("Калькулятор","Флит · BFS Совкомбанк лизинг","TENET")+`
-        <p class="lead">${fleetBox?(useSub?"Три блока: скидки флита, стандартный кредит той же комплектации и справа флит с субсидией бренда — машина не под МПТ.":"Три блока: скидки флита, стандартный кредит и МПТ."):"Корпоративный VIN. Сбер / Альфа / Т-Банк на этот VIN нельзя."}</p>
+        <p class="lead">${fleetBox?(useSub?"Три блока: скидки флита, стандартный кредит той же комплектации и справа флит с субсидией бренда — машина не под МПТ.":"Три блока: скидки флита, стандартный кредит и МПТ."):"Корпоративный VIN. Директ нельзя."}</p>
         ${kmChipGroups(m.id)}
         <div class="km-layout${fleetBox?" km-3":""}">
           <div class="card km-disc">
@@ -143,8 +143,8 @@ def patch_text(text):
     if OLD_KM_COL in text:
         text = text.replace(OLD_KM_COL, NEW_KM_COL)
         n += 1
-    old_note = '<div class="note-box">Сбер / Альфа / Т-Банк на этот VIN нельзя. Сравнение справа — платёж обычной машины этой комплектации.</div>'
-    new_note = '<div class="note-box">Сбер / Альфа / Т-Банк на этот VIN нельзя. По центру — стандартный кредит той же комплектации. Справа — ${useSub?"флит с субсидией бренда, не МПТ":useMpt?"МПТ":"лист флита"}.</div>'
+    old_note = '<div class="note-box">Директ нельзя. Сравнение справа — платёж обычной машины этой комплектации.</div>'
+    new_note = '<div class="note-box">Директ нельзя. По центру — стандартный кредит той же комплектации. Справа — ${useSub?"флит с субсидией бренда, не МПТ":useMpt?"МПТ":"лист флита"}.</div>'
     if old_note in text:
         text = text.replace(old_note, new_note)
         n += 1
