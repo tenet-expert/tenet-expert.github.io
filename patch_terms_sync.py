@@ -165,6 +165,61 @@ def ensure_prio_sold(text):
     return text
 
 
+def sold_vins(text):
+    out = set(PRIO_SOLD)
+    sp = span(text, "TERMS_PRIO")
+    if sp:
+        for m in re.finditer(r'\{model:"[^"]*",vin:"([A-Z0-9]{17})"[^}]*\}', text[sp[0]:sp[1]]):
+            if "sold:true" in m.group(0):
+                out.add(m.group(1))
+    return out
+
+
+def _drop_lines(block, pred):
+    lines = block.split("\n")
+    keep = [l for l in lines if not pred(l)]
+    if len(keep) == len(lines):
+        return block
+    for k in range(len(keep) - 1, -1, -1):
+        st = keep[k].strip()
+        if st.startswith("{") or st.startswith('"'):
+            keep[k] = keep[k].rstrip().rstrip(",")
+            break
+    return "\n".join(keep)
+
+
+def drop_sold_vin_specs(text):
+    """A VIN-specific special (TERMS_INV row "… · VIN X", PANGO_VIN["X"], PANGO_ONLY["X"])
+    is removed once that VIN is sold (Александр 26.10.2026: T8 EDXGD34B6TE031162
+    3 100/3 000 продан -> убрать). The Sheet row stays, so the canonical sync may bring
+    it back; this keeps it off the site. Model-level specials are untouched."""
+    vins = sold_vins(text)
+    for name in ("TERMS_INV", "PANGO_VIN"):
+        sp = span(text, name)
+        if not sp:
+            continue
+        blk = text[sp[0]:sp[1]]
+        if name == "TERMS_INV":
+            pred = lambda l: any(v in l for v in vins)
+        else:
+            pred = lambda l: any(l.strip().startswith('"' + v + '"') for v in vins)
+        nb = _drop_lines(blk, pred)
+        if nb != blk:
+            print("drop sold VIN specials from", name)
+            text = text[:sp[0]] + nb + text[sp[1]:]
+    sp = span(text, "PANGO_ONLY")
+    if sp:
+        blk = text[sp[0]:sp[1]]
+        nb = blk
+        for v in vins:
+            nb = re.sub(r'"' + v + r'":"(?:[^"\\]|\\.)*",?\s*', "", nb)
+        nb = re.sub(r",\s*\}", "}", nb)
+        if nb != blk:
+            print("drop sold VIN from PANGO_ONLY")
+            text = text[:sp[0]] + nb + text[sp[1]:]
+    return text
+
+
 def ensure_local(text):
     text = ensure_t9(text)
     text = ensure_prio_sold(text)
@@ -180,6 +235,7 @@ def ensure_local(text):
             1,
         )
     text = move_plus_specs(text)
+    text = drop_sold_vin_specs(text)
     return text
 
 
