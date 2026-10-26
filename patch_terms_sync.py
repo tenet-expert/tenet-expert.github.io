@@ -140,8 +140,34 @@ def move_plus_specs(text):
     return text[:a[0]] + na + text[a[1]:b[0]] + nb + text[b[1]:]
 
 
+# Priority VINs marked sold (green fill) in Sheet «Торговые условия АВГУСТ»; the
+# values-only Sheet sync cannot see fill colour, so keep them sold here too.
+PRIO_SOLD = {
+    "EDXGD34B6TE031162": "Сидоров",
+    "EDXGB32B3TE076049": "",
+    "EDEDD24B2SG003755": "Спицын",
+}
+
+
+def ensure_prio_sold(text):
+    for vin, seller in PRIO_SOLD.items():
+        m = re.search(r'\{model:"[^"]*",vin:"' + vin + r'"[^}]*\}', text)
+        if not m or "sold:true" in m.group(0):
+            continue
+        row = re.sub(r",reserved:true", "", m.group(0))
+        if seller and ",seller:" not in row:
+            row = row[:-1] + ',sold:true,seller:"' + seller + '"}'
+        elif ",seller:" in row:
+            row = row.replace(",seller:", ",sold:true,seller:", 1)
+        else:
+            row = row[:-1] + ",sold:true}"
+        text = text[:m.start()] + row + text[m.end():]
+    return text
+
+
 def ensure_local(text):
     text = ensure_t9(text)
+    text = ensure_prio_sold(text)
     text = text.replace(
         'vin:"EDEDD24B2SG003755",trim:"Ультра 4WD",year:"2025",color:"Светло-серый",extra:"",pay:500,bonus:3000,reserved:true,seller:"Спицын"',
         'vin:"EDEDD24B2SG003755",trim:"Ультра 4WD",year:"2025",color:"Светло-серый",extra:"",pay:500,bonus:3000,sold:true,seller:"Спицын"',
