@@ -84,7 +84,21 @@ def _set(row, key, val):
     return re.sub(r"(\b" + key + r":)(-?\d+(?:\.\d+)?)", lambda m: m.group(1) + str(val), row, count=1)
 
 
+T9_PIN = re.compile(r'(\{model:"T9",trim:"[^"]*",km:")[−\-–]\s*30\s*/\s*0(")')
+
+
+def pin_t9(text):
+    """27.10.2026 22:18: T9 КМ без ТИ 0 -> 50 (фикс −30 / 50). Sheet C12 и канон уже −30 / 50;
+    если синк принесёт старое «−30 / 0» — поправить. A8 не трогается."""
+    sp = _span(text, "KM_CORRIDOR")
+    if not sp:
+        return text
+    blk = T9_PIN.sub(lambda m: m.group(1) + "−30 / 50" + m.group(2), text[sp[0]:sp[1]])
+    return text[:sp[0]] + blk + text[sp[1]:]
+
+
 def fix_data(text):
+    text = pin_t9(text)
     sp = _span(text, "KM_MODELS")
     if not sp:
         return text
@@ -138,10 +152,10 @@ CODE = [
 
 # 27.10.2026 21:43 (Александр): «За нал фикс км такой же, как с кредитом».
 # Нал: скидка ДЦ подбирается под фикс КМ той же формулой (kmDcCrFit/kmDcCrMin), что и кредитная,
-# по умолчанию включена. Потолок: T9 — вся скидка не больше 30% РРЦ; если фикс недостижим — пометка.
+# по умолчанию ВЫКЛЮЧЕНА (22:18: «можем не давать её, сделай через галочку»). Потолок: T9 — вся скидка не больше 30% РРЦ; если фикс недостижим — пометка.
 CASH = [
     ('const useDcCr=useLoan && kmVal("kmUseDcCr", false);',
-     'const useDcCr=useLoan?kmVal("kmUseDcCr", false):kmVal("kmUseDcCash", true);/*km-cash-fix*/'),
+     'const useDcCr=useLoan?kmVal("kmUseDcCr", false):kmVal("kmUseDcCash", false);/*km-cash-fix*/'),
     ('        dcCr=Math.max(0, Math.round(dcCr));\n      }\n      const discount=tiAmt+spec+dcTi+dcCr+crAmt;',
      '        dcCr=Math.max(0, Math.round(dcCr));\n      }\n'
      '      const dcCap=(m.stock==="tt9"||/^T9 /.test(m.name||""))?Math.max(0, Math.floor((rrc*0.3-(tiAmt+spec+dcTi+crAmt))/1000)*1000):Infinity;\n'
