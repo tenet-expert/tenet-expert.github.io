@@ -167,13 +167,25 @@
       const d=src||dutyRead();
       const p=dutyCount(d);
       const pct=p.tot?Math.round(p.on*100/p.tot):0;
-      const W=1240, H=1754;
+      const plus=(typeof dutyIsPlus==="function")&&dutyIsPlus();
+      const brand=plus?"TENET+":"TENET";
+      const cars=(typeof dutyCars==="function")?dutyCars():DUTY_CARS;
+      const avitoPack=(typeof window.avitoPhotosForPrint==="function")?window.avitoPhotosForPrint():null;
+      const avitoRows=(avitoPack&&Array.isArray(avitoPack.rows))?avitoPack.rows:[];
+      const W=1240;
+      const pad=36, gap=14;
+      const carH=348, footH=268;
+      const avitoRowH=function(row){ return (row&&row.vins&&row.vins.length)?44:28; };
+      let avitoH=16;
+      if(!avitoRows.length) avitoH+=28;
+      else avitoRows.forEach(function(row){ avitoH+=avitoRowH(row); });
+      const carRows=Math.max(1, Math.ceil((cars&&cars.length)||1)/3);
+      const H=Math.max(1754, 154+carRows*(carH+gap)+footH+20+avitoH+64);
       const c=document.createElement("canvas");
       c.width=W; c.height=H;
       const ctx=c.getContext("2d");
       ctx.fillStyle="#f4f1ea";
       ctx.fillRect(0,0,W,H);
-      const pad=36, gap=14;
       function rr(x,y,w,h,r){
         const rad=Math.max(0, Math.min(r, w/2, h/2));
         ctx.beginPath();
@@ -226,7 +238,7 @@
       panel(pad,28,hw,112);
       ctx.fillStyle="#c81e2b"; rr(pad+18,46,36,36,10); ctx.fill();
       ctx.fillStyle="#fff"; ctx.font="800 20px Inter, Arial, sans-serif"; ctx.fillText("T", pad+28, 71);
-      ctx.fillStyle="#8a6840"; ctx.font="700 12px Inter, Arial, sans-serif"; ctx.fillText("TENET  ·  ОТДЕЛ ПРОДАЖ", pad+66, 52);
+      ctx.fillStyle="#8a6840"; ctx.font="700 12px Inter, Arial, sans-serif"; ctx.fillText(brand+"  ·  ОТДЕЛ ПРОДАЖ", pad+66, 52);
       ctx.fillStyle="#161618"; ctx.font="800 28px Inter, Arial, sans-serif"; ctx.fillText("Чек-лист дежурного", pad+66, 86);
       ctx.textAlign="right";
       ctx.fillStyle="#1c1a17"; ctx.font="700 16px Inter, Arial, sans-serif";
@@ -241,8 +253,7 @@
       ctx.fillStyle="#2e7d32"; rr(bx,by,Math.max(bh,bw*pct/100),bh,8); ctx.fill();
       let y=154;
       const colW=(hw-gap*2)/3;
-      const carH=348;
-      DUTY_CARS.forEach((car,i)=>{
+      cars.forEach((car,i)=>{
         const col=i%3, row=Math.floor(i/3);
         const x=pad+col*(colW+gap);
         const cy=y+row*(carH+gap);
@@ -282,8 +293,8 @@
         ctx.fillStyle="#7a7166"; ctx.font="500 12px Inter, Arial, sans-serif";
         ctx.fillText(note?("Заметка: "+note.slice(0,46)):"Заметка —", x+16, iy+8);
       });
-      y+=Math.ceil(DUTY_CARS.length/3)*(carH+gap);
-      const footW=(hw-gap)/2, footH=268;
+      y+=Math.ceil(cars.length/3)*(carH+gap);
+      const footW=(hw-gap)/2;
       function box(x,title,keys,note){
         panel(x,y,footW,footH);
         ctx.fillStyle="#161618"; ctx.font="800 16px Inter, Arial, sans-serif";
@@ -296,8 +307,48 @@
       }
       box(pad,"Дилерский центр",[["dc_light","Свет"],["dc_music","Музыка"],["dc_price_hold","Прайсхолдеры"],["dc_desk","Столы"]], d.dc_note);
       box(pad+footW+gap,"Шоурум",[["dm_body","Кузов"],["dm_mats","Коврики"],["dm_trunk","Багажник"],["dm_dust","Нет пыли"],["dm_wheel","Колёса"],["dm_bat","АКБ"]], d.note);
+      y+=footH+20;
+      ctx.fillStyle="#8a7d6e"; ctx.font="800 13px Inter, Arial, sans-serif";
+      ctx.fillText("ФОТО ДЛЯ АВИТО: В НАЛИЧИИ, НЕТ ФОТО", pad, y);
+      ctx.strokeStyle="#eadfcf"; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(pad+340, y-4); ctx.lineTo(W-pad, y-4); ctx.stroke();
+      y+=16;
+      function fitLine(s, maxW){
+        s=String(s||"");
+        if(ctx.measureText(s).width<=maxW) return s;
+        while(s.length>1 && ctx.measureText(s+"…").width>maxW) s=s.slice(0,-1);
+        return s+"…";
+      }
+      function boxCheck(x,yy,on){
+        rr(x,yy,16,16,3);
+        ctx.fillStyle=on?"#e8f5e9":"#ffffff";
+        ctx.fill();
+        ctx.lineWidth=1.6; ctx.strokeStyle=on?"#1b5e20":"#8d7f6a";
+        rr(x,yy,16,16,3); ctx.stroke();
+        if(on){
+          ctx.fillStyle="#145a1f"; ctx.font="800 13px Inter, Arial, sans-serif";
+          ctx.fillText("✓", x+2, yy+13);
+        }
+      }
+      if(!avitoRows.length){
+        ctx.fillStyle="#7a7166"; ctx.font="500 13px Inter, Arial, sans-serif";
+        ctx.fillText(avitoPack&&avitoPack.ready===false?"Список загружается…":"Сейчас таких автомобилей нет.", pad, y+16);
+        y+=28;
+      }else{
+        avitoRows.forEach(function(row){
+          boxCheck(pad, y, !!row.on);
+          ctx.fillStyle="#1c1a17"; ctx.font="700 14px Inter, Arial, sans-serif";
+          ctx.fillText(fitLine(row.title, W-pad*2-28), pad+24, y+13);
+          if(row.vins&&row.vins.length){
+            ctx.fillStyle="#6d6458"; ctx.font="500 12px Inter, Arial, sans-serif";
+            ctx.fillText(fitLine(row.vins.join("   "), W-pad*2-28), pad+24, y+32);
+          }
+          y+=avitoRowH(row);
+        });
+      }
+      y+=18;
       ctx.fillStyle="#9a9186"; ctx.font="500 12px Inter, Arial, sans-serif";
-      ctx.fillText("TENET · Отдел продаж · Эксперт Авто Самара", pad, H-22);
+      ctx.fillText(brand+" · Отдел продаж · Эксперт Авто Самара", pad, Math.min(H-22, y));
       dutyFileSave(c, d);
     }
     window.__dutyPagePdf=dutyPdf;
@@ -311,7 +362,16 @@
       });
       return out;
     }
-    const DUTY_CARS=[
+    function dutyIsPlus(){
+      let blob="";
+      try{
+        const sn=(typeof state!=="undefined" && state)?((state.surname||"")+" "+(state.display||"")):"";
+        blob=(typeof norm==="function")?norm(sn):String(sn||"").toLowerCase();
+      }catch(e){ blob=""; }
+      return blob.indexOf("назарян")>=0 || blob.indexOf("бикулов")>=0;
+    }
+    try{ window.dutyIsPlus=dutyIsPlus; }catch(e){}
+    const DUTY_CARS_TENET=[
       {id:"t4l",title:"T4L"},
       {id:"t7",title:"T7"},
       {id:"t82",title:"Т8 2WD"},
@@ -319,6 +379,12 @@
       {id:"t9",title:"Т9"},
       {id:"a8",title:"А8"}
     ];
+    const DUTY_CARS_PLUS=[
+      {id:"l4",title:"L4"},
+      {id:"l6",title:"L6"}
+    ];
+    const DUTY_CARS=DUTY_CARS_TENET;
+    function dutyCars(){ return dutyIsPlus()?DUTY_CARS_PLUS:DUTY_CARS_TENET; }
     function dutyTri(v){
       if(v==="ok" || v==="bad") return v;
       if(v===true || v==="true") return "ok";
@@ -328,7 +394,8 @@
     function dutyOk(v){ return dutyTri(v)==="ok"; }
     function dutyCount(d){
       let tot=0, on=0;
-      DUTY_CARS.forEach(car=>{
+      const cars=(typeof dutyCars==="function")?dutyCars():DUTY_CARS;
+      cars.forEach(car=>{
         ["_wash","_mats","_err","_dust","_trunk","_body"].forEach(s=>{ tot++; if(dutyOk(d[car.id+s])) on++; });
         tot+=2; if(d[car.id+"_km"]) on++; if(d[car.id+"_fuel"]) on++;
       });
@@ -369,9 +436,12 @@
       const who=(typeof state!=="undefined" && state && state.display)?state.display:"";
       const name=String(d.manager||who||"").trim().split(/\s+/).filter(Boolean).filter((p,i,a)=>a.findIndex(x=>x.toLowerCase()===p.toLowerCase())===i).join(" ");
       if(!d._archive) d.manager=name;
+      const plus=(typeof dutyIsPlus==="function")?!!dutyIsPlus():false;
+      try{ window.__dutyPlus=plus; }catch(e){}
+      const cars=(typeof dutyCars==="function")?dutyCars():DUTY_CARS;
       const prog=dutyCount(d);
       const pct=prog.tot?Math.round(prog.on*100/prog.tot):0;
-      const cards=DUTY_CARS.map(car=>{
+      const cards=cars.map(car=>{
         return `<article class="cl-car">
           <h3>${car.title}</h3>
           ${dutyItem(car.id+"_wash","Омывающая", d[car.id+"_wash"])}
@@ -389,8 +459,8 @@
           </label>
         </article>`;
       }).join("");
-      return banner("Чек-лист дежурного", prog.on+" из "+prog.tot,"TENET")+`
-        <div class="cl">
+      return banner("Чек-лист дежурного", prog.on+" из "+prog.tot, plus?"TENET+":"TENET")+`
+        <div class="cl" data-duty-variant="${plus?"plus":"tenet"}">
           <div class="cl-bar">
             <input data-duty="manager" placeholder="Менеджер" value="${escape(d.manager||"")}" />
             <input data-duty="date" readonly value="${escape(d.date||dutyToday())}" style="width:96px" />

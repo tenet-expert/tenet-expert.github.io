@@ -35,11 +35,16 @@
     const d=src||(typeof dutyRead==="function"?dutyRead():{});
     const p=typeof dutyCount==="function"?dutyCount(d):{on:0,tot:0};
     const pct=p.tot?Math.round(p.on*100/p.tot):0;
-    const cars=(typeof DUTY_CARS!=="undefined")?DUTY_CARS:[
+    const plus=(typeof dutyIsPlus==="function")&&dutyIsPlus();
+    const brand=plus?"TENET+":"TENET";
+    const cars=(typeof dutyCars==="function")?dutyCars():((typeof DUTY_CARS!=="undefined")?DUTY_CARS:[
       {id:"t4l",title:"T4L"},{id:"t7",title:"T7"},{id:"t82",title:"Т8 2WD"},
       {id:"t8",title:"Т8 4WD"},{id:"t9",title:"Т9"},{id:"a8",title:"А8"}
-    ];
-    const W=1240, H=1754;
+    ]);
+    const avitoPack=(typeof window.avitoPhotosForPrint==="function")?window.avitoPhotosForPrint():null;
+    const avitoRows=(avitoPack&&Array.isArray(avitoPack.rows))?avitoPack.rows:[];
+    const W=1240;
+    const H=Math.max(2200, 280+cars.length*224+560+Math.max(avitoRows.length,1)*40+80);
     const c=document.createElement("canvas");
     c.width=W; c.height=H;
     const ctx=c.getContext("2d");
@@ -167,9 +172,44 @@
     ]);
     ctx.fillStyle="#5c5346"; ctx.font="500 16px Inter, Arial, sans-serif";
     ctx.fillText("\u0417\u0430\u043c\u0435\u0442\u043a\u0430: "+(d.note||"\u2014"), pad, y+8);
+    y+=28;
+    ctx.fillStyle="#8a7d6e"; ctx.font="800 13px Inter, Arial, sans-serif";
+    ctx.fillText("\u0424\u041e\u0422\u041e \u0414\u041b\u042f \u0410\u0412\u0418\u0422\u041e: \u0412 \u041d\u0410\u041b\u0418\u0427\u0418\u0418, \u041d\u0415\u0422 \u0424\u041e\u0422\u041e", pad, y);
+    ctx.strokeStyle="#eadfcf"; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(pad+360, y-4); ctx.lineTo(pad+inner, y-4); ctx.stroke();
+    y+=18;
+    function fitLine(s, maxW){
+      s=String(s||"");
+      if(ctx.measureText(s).width<=maxW) return s;
+      while(s.length>1 && ctx.measureText(s+"\u2026").width>maxW) s=s.slice(0,-1);
+      return s+"\u2026";
+    }
+    if(!avitoRows.length){
+      ctx.fillStyle="#5c5346"; ctx.font="500 16px Inter, Arial, sans-serif";
+      ctx.fillText(avitoPack&&avitoPack.ready===false?"\u0421\u043f\u0438\u0441\u043e\u043a \u0437\u0430\u0433\u0440\u0443\u0436\u0430\u0435\u0442\u0441\u044f\u2026":"\u0421\u0435\u0439\u0447\u0430\u0441 \u0442\u0430\u043a\u0438\u0445 \u0430\u0432\u0442\u043e\u043c\u043e\u0431\u0438\u043b\u0435\u0439 \u043d\u0435\u0442.", pad, y+8);
+      y+=28;
+    }else{
+      avitoRows.forEach(function(row){
+        tick(pad, y+14, !!row.on);
+        ctx.fillStyle="#111"; ctx.font="700 16px Inter, Arial, sans-serif";
+        ctx.fillText(fitLine(row.title, inner-36), pad+28, y+14);
+        if(row.vins&&row.vins.length){
+          ctx.fillStyle="#5c5346"; ctx.font="500 13px Inter, Arial, sans-serif";
+          ctx.fillText(fitLine(row.vins.join("   "), inner-36), pad+28, y+34);
+          y+=44;
+        }else{
+          y+=30;
+        }
+      });
+    }
+    y+=16;
     ctx.fillStyle="#9a9186"; ctx.font="500 13px Inter, Arial, sans-serif";
-    ctx.fillText("TENET \u00b7 \u041e\u0442\u0434\u0435\u043b \u043f\u0440\u043e\u0434\u0430\u0436 \u00b7 \u042d\u043a\u0441\u043f\u0435\u0440\u0442 \u0410\u0432\u0442\u043e \u0421\u0430\u043c\u0430\u0440\u0430", pad, H-28);
-    dutyPdfOpen(c.toDataURL("image/png"));
+    ctx.fillText(brand+" \u00b7 \u041e\u0442\u0434\u0435\u043b \u043f\u0440\u043e\u0434\u0430\u0436 \u00b7 \u042d\u043a\u0441\u043f\u0435\u0440\u0442 \u0410\u0432\u0442\u043e \u0421\u0430\u043c\u0430\u0440\u0430", pad, Math.min(H-28, y));
+    var used=Math.min(H, Math.max(y+36, 400));
+    var out=document.createElement("canvas");
+    out.width=W; out.height=used;
+    out.getContext("2d").drawImage(c, 0, 0);
+    dutyPdfOpen(out.toDataURL("image/png"));
   };
 })();
 

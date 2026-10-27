@@ -1,6 +1,7 @@
 /* Фото для Авито в чек-листе дежурного.
    Список не зашит: каждое утро файл photos-needed.json подменяют пушем,
-   страница читает его заново. Один выбор группы на календарный день Самары. */
+   страница читает его заново. Несколько групп на календарный день Самары.
+   TENET+ (Назарян, Бикулов) видит только L4/L6, остальные — все прочие группы. */
 (function(){
   if (window.__avitoPhotosBoot) return;
   window.__avitoPhotosBoot = true;
@@ -23,24 +24,37 @@
     return t.getUTCFullYear() + "-" + p(t.getUTCMonth() + 1) + "-" + p(t.getUTCDate());
   }
 
-  function loadPick(){
+  function loadPicks(){
     try {
       var x = JSON.parse(localStorage.getItem(KEY) || "null");
-      if (!x || typeof x !== "object") return null;
-      if (x.date !== samaraDate() || !x.groupId) return null;
-      return { date: String(x.date), groupId: String(x.groupId) };
+      if (!x || typeof x !== "object") return [];
+      if (x.date !== samaraDate()) return [];
+      var ids = [];
+      if (Array.isArray(x.groupIds)) ids = x.groupIds;
+      else if (x.groupId) ids = [x.groupId];
+      var out = [];
+      ids.forEach(function(id){
+        id = String(id || "");
+        if (id && out.indexOf(id) < 0) out.push(id);
+      });
+      return out;
     } catch (e) {
-      return null;
+      return [];
     }
   }
 
-  function savePick(groupId){
+  function savePicks(ids){
     try {
-      if (!groupId) {
+      var list = [];
+      (ids || []).forEach(function(id){
+        id = String(id || "");
+        if (id && list.indexOf(id) < 0) list.push(id);
+      });
+      if (!list.length) {
         localStorage.removeItem(KEY);
         return;
       }
-      localStorage.setItem(KEY, JSON.stringify({ date: samaraDate(), groupId: String(groupId) }));
+      localStorage.setItem(KEY, JSON.stringify({ date: samaraDate(), groupIds: list }));
     } catch (e) {}
   }
 
@@ -59,6 +73,29 @@
     return color ? left + ", " + color : left;
   }
 
+  function wantPlus(){
+    if (typeof window.dutyIsPlus === "function") {
+      try { return !!window.dutyIsPlus(); } catch (e) {}
+    }
+    var cl = document.querySelector("#app .cl");
+    if (cl && cl.getAttribute("data-duty-variant") === "plus") return true;
+    return !!window.__dutyPlus;
+  }
+
+  function isPlusGroup(g){
+    var brand = String(g && g.brand || "").toUpperCase().replace(/Ё/g, "Е");
+    var model = String(g && g.model || "").toUpperCase().replace(/Ё/g, "Е").replace(/\s+/g, "");
+    if (brand.indexOf("TENET") >= 0 && (brand.indexOf("+") >= 0 || brand.indexOf("PLUS") >= 0 || brand.indexOf("ПЛЮС") >= 0)) return true;
+    if (model === "L4" || model === "L6" || model === "PL4" || model === "PL6") return true;
+    return false;
+  }
+
+  function visibleGroups(data){
+    var groups = data && Array.isArray(data.groups) ? data.groups : [];
+    var plus = wantPlus();
+    return groups.filter(function(g){ return isPlusGroup(g) === plus; });
+  }
+
   function ensureCss(){
     if (document.getElementById("avitoPhotosCss")) return;
     var st = document.createElement("style");
@@ -72,7 +109,6 @@
       ".cl-avito-empty{margin:0;font-size:13px;color:#7a7166}",
       ".cl-avito-row{background:#fff;border:1px solid #eadfcf;border-radius:14px;padding:10px;display:flex;flex-wrap:wrap;gap:8px 12px;align-items:flex-start;justify-content:space-between}",
       ".cl-avito-row.is-on{background:#e8f5e9;border-color:#1b5e20}",
-      ".cl-avito-row.is-off{opacity:.55}",
       ".cl-avito-main{min-width:0;flex:1}",
       ".cl-avito-main b{display:block;font-size:14px;letter-spacing:-.02em;line-height:1.3}",
       ".cl-avito-vins{margin-top:4px;display:flex;flex-wrap:wrap;gap:4px 8px}",
@@ -80,8 +116,22 @@
       ".cl-avito-check{display:flex;align-items:center;gap:8px;font:600 12px/1.3 Inter,Arial,sans-serif;cursor:pointer;flex:none;margin:0}",
       ".cl-avito-check input{appearance:none;-webkit-appearance:none;width:18px;height:18px;margin:0;flex:none;border:1.5px solid #8d7f6a;border-radius:4px;background:#fff;cursor:pointer}",
       ".cl-avito-check input:checked{background-color:#e8f5e9;border-color:#1b5e20;background-image:url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18'><path d='M4 9.2 7.2 12.4 14 5.6' fill='none' stroke='%23145a1f' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/></svg>\");background-size:18px 18px;background-repeat:no-repeat;background-position:center}",
-      ".cl-avito-check input:disabled{cursor:not-allowed}",
-      ".cl-avito-row.is-off .cl-avito-check{cursor:not-allowed}"
+      ".cl-avito-tick{display:none}",
+      "@media print{",
+      "html,body,.wrap,#app{height:auto!important;overflow:visible!important}",
+      ".cl,.cl *{visibility:visible!important}",
+      ".cl-log,.cl-log *{display:none!important;visibility:hidden!important}",
+      ".cl-avito{display:block!important;visibility:visible!important;overflow:visible!important;height:auto!important;max-height:none!important;break-inside:auto;page-break-inside:auto;position:static!important}",
+      ".cl-avito,.cl-avito-list,.cl-avito-row,.cl-avito-main{overflow:visible!important;height:auto!important;max-height:none!important}",
+      ".cl-avito-row{break-inside:avoid;page-break-inside:avoid;-webkit-print-color-adjust:exact;print-color-adjust:exact}",
+      ".cl-avito-row.is-on{background:#e8f5e9!important;border-color:#1b5e20!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}",
+      ".cl-avito-check input{-webkit-appearance:checkbox!important;appearance:auto!important;opacity:1!important;position:static!important;width:3.6mm!important;height:3.6mm!important;print-color-adjust:exact;-webkit-print-color-adjust:exact}",
+      ".cl-avito-tick{display:inline-flex!important;align-items:center;justify-content:center;width:3.6mm;height:3.6mm;border:1.5px solid #8d7f6a;border-radius:1px;font:800 11px/1 Inter,Arial,sans-serif;color:transparent;background:#fff}",
+      ".cl-avito-row.is-on .cl-avito-tick{color:#145a1f!important;background:#e8f5e9!important;border-color:#1b5e20!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}",
+      "#dutyPdfView,#dutyPdfView *{visibility:visible!important}",
+      "#dutyPdfView{height:auto!important;overflow:visible!important}",
+      "#dutyPdfView img{height:auto!important;max-height:none!important;object-fit:unset!important}",
+      "}"
     ].join("");
     document.head.appendChild(st);
   }
@@ -91,19 +141,19 @@
     var upd = document.getElementById("avitoPhotosUpd");
     var today = document.getElementById("avitoPhotosToday");
     if (!list) return;
-    var groups = data && Array.isArray(data.groups) ? data.groups : [];
+    var groups = visibleGroups(data);
     if (upd) upd.textContent = data && data.updated ? ("обновлено " + data.updated) : "";
-    var pick = loadPick();
-    var picked = null;
-    if (pick) {
+    var picks = loadPicks();
+    var titles = [];
+    picks.forEach(function(id){
       for (var i = 0; i < groups.length; i++) {
-        if (String(groups[i] && groups[i].id) === pick.groupId) { picked = groups[i]; break; }
+        if (String(groups[i] && groups[i].id) === id) { titles.push(rowTitle(groups[i])); break; }
       }
-    }
+    });
     if (today) {
-      if (pick) {
+      if (titles.length) {
         today.hidden = false;
-        today.textContent = "Сегодня выбрано: " + (picked ? rowTitle(picked) : pick.groupId);
+        today.textContent = "Сегодня выбрано: " + titles.join("; ");
       } else {
         today.hidden = true;
         today.textContent = "";
@@ -115,17 +165,16 @@
     }
     list.innerHTML = groups.map(function(g){
       var id = String(g && g.id || "");
-      var on = !!(pick && pick.groupId === id);
-      var off = !!(pick && !on);
+      var on = picks.indexOf(id) >= 0;
       var cars = g && Array.isArray(g.cars) ? g.cars : [];
       var vins = cars.map(function(c){
         var vin = c && c.vin ? String(c.vin) : "";
         return vin ? "<code>" + esc(vin) + "</code>" : "";
       }).filter(Boolean).join("");
-      return '<article class="cl-avito-row' + (on ? " is-on" : "") + (off ? " is-off" : "") + '">' +
+      return '<article class="cl-avito-row' + (on ? " is-on" : "") + '">' +
         '<div class="cl-avito-main"><b>' + esc(rowTitle(g)) + '</b><div class="cl-avito-vins">' + vins + "</div></div>" +
         '<label class="cl-avito-check"><input type="checkbox" autocomplete="off" data-avito-group="' + esc(id) + '"' +
-        (on ? " checked" : "") + (off ? " disabled" : "") + ' /><span>Готовлю фото для Авито</span></label></article>';
+        (on ? " checked" : "") + ' /><span class="cl-avito-tick" aria-hidden="true">✓</span><span>Готовлю фото для Авито</span></label></article>';
     }).join("");
   }
 
@@ -154,18 +203,37 @@
     if (!inp || !inp.getAttribute) return;
     var id = inp.getAttribute("data-avito-group");
     if (!id) return;
-    var pick = loadPick();
+    var picks = loadPicks();
+    var i = picks.indexOf(id);
     if (inp.checked) {
-      if (pick && pick.groupId !== id) {
-        inp.checked = false;
-        return;
-      }
-      savePick(id);
-    } else if (pick && pick.groupId === id) {
-      savePick("");
+      if (i < 0) picks.push(id);
+    } else if (i >= 0) {
+      picks.splice(i, 1);
     }
+    savePicks(picks);
     if (window.__avitoPhotosData) renderList(window.__avitoPhotosData);
   }
+
+  window.avitoPhotosForPrint = function(){
+    var data = window.__avitoPhotosData;
+    if (!data || !Array.isArray(data.groups)) return { ready: false, rows: [] };
+    var groups = visibleGroups(data);
+    var picks = loadPicks();
+    return {
+      ready: true,
+      rows: groups.map(function(g){
+        var id = String(g && g.id || "");
+        var cars = g && Array.isArray(g.cars) ? g.cars : [];
+        return {
+          id: id,
+          title: rowTitle(g),
+          vins: cars.map(function(c){ return c && c.vin ? String(c.vin) : ""; }).filter(Boolean),
+          on: picks.indexOf(id) >= 0
+        };
+      })
+    };
+  };
+  window.avitoPhotosIsPlusGroup = isPlusGroup;
 
   function mount(){
     var cl = document.querySelector("#app .cl");

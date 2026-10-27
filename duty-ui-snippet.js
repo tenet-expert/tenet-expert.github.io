@@ -6,9 +6,12 @@
       const who=(typeof state!=="undefined" && state && state.display)?state.display:"";
       const name=String(d.manager||who||"").trim().split(/\s+/).filter(Boolean).filter((p,i,a)=>a.findIndex(x=>x.toLowerCase()===p.toLowerCase())===i).join(" ");
       if(!d._archive) d.manager=name;
+      const plus=(typeof dutyIsPlus==="function")?!!dutyIsPlus():false;
+      try{ window.__dutyPlus=plus; }catch(e){}
+      const cars=(typeof dutyCars==="function")?dutyCars():DUTY_CARS;
       const prog=dutyCount(d);
       const pct=prog.tot?Math.round(prog.on*100/prog.tot):0;
-      const cards=DUTY_CARS.map(car=>{
+      const cards=cars.map(car=>{
         const body=d[car.id+"_body"]||"ok";
         return `<article class="cl-car">
           <h3>${car.title}</h3>
@@ -33,8 +36,8 @@
           </label>
         </article>`;
       }).join("");
-      return banner("Чек-лист дежурного", prog.on+" из "+prog.tot,"TENET")+`
-        <div class="cl">
+      return banner("Чек-лист дежурного", prog.on+" из "+prog.tot, plus?"TENET+":"TENET")+`
+        <div class="cl" data-duty-variant="${plus?"plus":"tenet"}">
           <div class="cl-bar">
             <input data-duty="manager" placeholder="Менеджер" value="${escape(d.manager||"")}" />
             <input data-duty="date" readonly value="${escape(d.date||dutyToday())}" style="width:96px" />
