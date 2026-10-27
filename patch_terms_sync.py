@@ -236,6 +236,13 @@ def ensure_local(text):
         )
     text = move_plus_specs(text)
     text = drop_sold_vin_specs(text)
+    # 27.10.2026: T7 Prime 2WD без «Выгодного кредита» 50 000 / 30 000 (синк из «Цены и поддержки»
+    # возвращает cr:50000,crBack:30000) и КМ «A / B» из Sheet = фикс A с ТИ / B без ТИ строго по позиции.
+    try:
+        import patch_km_fix
+        text = patch_km_fix.fix_data(text)
+    except Exception as e:
+        print("terms sync: km-fix skipped:", e)
     return text
 
 

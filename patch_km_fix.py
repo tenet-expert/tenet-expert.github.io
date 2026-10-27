@@ -1,0 +1,185 @@
+#!/usr/bin/env python3
+"""КМ — фиксы, не коридор; без кредитной скидки 50/30 на T7 Prime 2WD (Александр, 27.10.2026 16:32).
+
+1. KM из Sheet вида «A / B» = две фиксированные суммы: A — с трейд-ином, B — без трейд-ина
+   (T7 «30 / 80» = 30 тыс. с ТИ, 80 тыс. без ТИ). Строго по позиции, без min/max.
+   Данные: KM_MODELS.kmMin = A (с ТИ), kmMax = B (без ТИ); prioMin/prioMax так же.
+   Значения KM_CORRIDOR (сырьё Sheet) раскладываются по позиции и перекрывают kmMin/kmMax
+   соответствующих моделей TENET — даже если синк записал их в другом порядке.
+   Код: kmBand() отдаёт одно число (lo = hi), тексты «коридор/до/от» -> «КМ … с трейд-ином / … без трейд-ина».
+   VIN-фиксы KM_FORK, приоритет −100/0 и TENET+ 0/0 не меняются (они уже фиксы).
+2. T7 Prime 2WD (id t7p): cr/crBack («Выгодный кредит» 50 000 / возмещение 30 000) = 0.
+   Строка приходит из «Цены и поддержки» через terms-calc-data.js (ту-google-08/14), поэтому
+   обнуляется на каждой сборке. Другие T7 не трогаются.
+
+Вызывается из patch_terms_sync.py (после синка) и в конце patch_issue.py (последний шаг сборки).
+Идемпотентен. Любое сомнение -> файл не пишется.
+"""
+import re, shutil, subprocess, tempfile, os
+from pathlib import Path
+
+TARGETS = [Path("index.html"), Path("_site/index.html")]
+NO_CREDIT = {"t7p"}
+NUM = r"((?:[−\-–]\s*)?\d+(?:[.,]\d+)?)"
+PAIR = re.compile(NUM + r"\s*/\s*" + NUM)
+
+
+def _num(s):
+    s = s.replace("−", "-").replace("–", "-").replace(" ", "").replace(",", ".")
+    v = float(s)
+    return int(v) if v == int(v) else v
+
+
+def _span(text, name):
+    m = re.search(r"^\s*const " + name + r" = ", text, re.M)
+    if not m:
+        return None
+    i, depth, q = m.end(), 0, None
+    while i < len(text):
+        ch = text[i]
+        if q:
+            if ch == "\\":
+                i += 2
+                continue
+            if ch == q:
+                q = None
+        elif ch in "\"'`":
+            q = ch
+        elif ch in "([{":
+            depth += 1
+        elif ch in ")]}":
+            depth -= 1
+        elif ch == ";" and depth == 0:
+            return m.start(), i + 1
+        i += 1
+    return None
+
+
+def corridor_fixes(text):
+    """[(model, kind, ti, cash)] from KM_CORRIDOR, positional: first = с ТИ, second = без ТИ."""
+    sp = _span(text, "KM_CORRIDOR")
+    out = []
+    if not sp:
+        return out
+    for m in re.finditer(r'\{model:"([^"]+)",trim:"([^"]*)",km:"([^"]*)"', text[sp[0]:sp[1]]):
+        p = PAIR.search(m.group(3))
+        if not p:
+            continue
+        kind = "prio" if "приоритет" in m.group(2).lower() else "km"
+        out.append((m.group(1).strip(), kind, _num(p.group(1)), _num(p.group(2))))
+    return out
+
+
+def _model_match(sheet_model, row):
+    name = re.search(r'name:"([^"]*)"', row)
+    brand = re.search(r'brand:"([^"]*)"', row)
+    if not name or not brand or brand.group(1) != "TENET":
+        return False
+    return name.group(1).split(" ")[0].upper() == sheet_model.upper()
+
+
+def _set(row, key, val):
+    return re.sub(r"(\b" + key + r":)(-?\d+(?:\.\d+)?)", lambda m: m.group(1) + str(val), row, count=1)
+
+
+def fix_data(text):
+    sp = _span(text, "KM_MODELS")
+    if not sp:
+        return text
+    blk = text[sp[0]:sp[1]]
+    fixes = corridor_fixes(text)
+    lines = blk.split("\n")
+    for k, line in enumerate(lines):
+        m = re.search(r'\{id:"([^"]+)"', line)
+        if not m:
+            continue
+        row = line
+        if m.group(1) in NO_CREDIT:
+            row = _set(_set(row, "cr", 0), "crBack", 0)
+        for model, kind, ti, cash in fixes:
+            if _model_match(model, row):
+                a, b = ("prioMin", "prioMax") if kind == "prio" else ("kmMin", "kmMax")
+                row = _set(_set(row, a, ti), b, cash)
+                if kind == "km" and not any(f[0] == model and f[1] == "prio" for f in fixes):
+                    row = _set(_set(row, "prioMin", ti), "prioMax", cash)
+        lines[k] = row
+    nb = "\n".join(lines)
+    return text[:sp[0]] + nb + text[sp[1]:]
+
+
+CODE = [
+    # kmBand: одно число вместо коридора
+    ('      return {lo:m.kmMin, hi:m.kmMax, lock:false};\n    }\n    function kmBandTxt(',
+     '      { const t=useTi?m.kmMin:m.kmMax; return {lo:t, hi:t, lock:false, fix:true}; }\n    }\n'
+     '    function kmFixRaw(s){ return String(s||"").replace(/((?:[−\\-–]\\s*)?\\d+(?:[.,]\\d+)?)\\s*\\/\\s*((?:[−\\-–]\\s*)?\\d+(?:[.,]\\d+)?)/g, (x,a,b)=>a.replace(/\\s/g,"")+" с ТИ / "+b.replace(/\\s/g,"")+" без ТИ"); }\n'
+     '    function kmFixPair(vin, prio, m){ const a=kmBand(vin, true, prio, m), b=kmBand(vin, false, prio, m); return a.lo===b.lo?(a.lo+" тыс. с трейд-ином и без"):(a.lo+" тыс. с трейд-ином / "+b.lo+" тыс. без трейд-ина"); }\n'
+     '    function kmBandTxt('),
+    ('word:k+0.05<lo?"ниже коридора":(k-0.05>hi?"выше коридора":"в коридоре")',
+     'word:k+0.05<lo?"ниже фикса":(k-1>hi?"выше фикса":"по фиксу")'),
+    ('Скидка от ДЦ за кредит${dcFit?` · до ${rub(dcFit)} в коридоре`:""}',
+     'Скидка от ДЦ за кредит${dcFit?` · ${rub(dcFit)} под КМ ${lo} тыс.`:""}'),
+    ('Сумма скидки ДЦ за кредит, ₽ · коридор от ${lo} тыс.',
+     'Сумма скидки ДЦ за кредит, ₽ · КМ ${lo} тыс. ${useTi?"с трейд-ином":"без трейд-ина"}'),
+    ('Приоритетный VIN ${escape(kmVin)}. Коридор ${kmBandTxt(lo,hi)}${useTi?" · с трейд-ин":" · без трейд-ин"}.',
+     'Приоритетный VIN ${escape(kmVin)}. КМ ${kmBandTxt(lo,hi)}${useTi?" с трейд-ином":" без трейд-ина"}.'),
+    ('Для VIN ${escape(kmVin)} коридор ${kmBandTxt(lo,hi)}${useTi?" · с трейд-ин":" · без трейд-ин"}.',
+     'Для VIN ${escape(kmVin)} КМ ${kmBandTxt(lo,hi)}${useTi?" с трейд-ином":" без трейд-ина"}.'),
+    ('<p class="calc-note">Коридор ${prioKmTxt}.', '<p class="calc-note">КМ ${prioKmTxt}.'),
+    ('КМ ${Math.round(ordDeal.km/1000)} тыс. · коридор ${typeof kmBandTxt==="function"?kmBandTxt(ob.lo,ob.hi):ob.lo+" … "+ob.hi}',
+     'КМ ${Math.round(ordDeal.km/1000)} тыс. · фикс ${typeof kmBandTxt==="function"?kmBandTxt(ob.lo,ob.hi):ob.lo+" тыс."}${useTi?" с трейд-ином":" без трейд-ина"}'),
+    ('<p class="calc-note">Коридор ${kmBandTxt(lo,hi)} · сейчас',
+     '<p class="calc-note">КМ ${typeof kmFixPair==="function"?kmFixPair(kmVin, prio, m):kmBandTxt(lo,hi)} · сейчас'),
+    ('termGroup(KM_CORRIDOR,"km")',
+     'termGroup((typeof kmFixRaw==="function"?KM_CORRIDOR.map(r=>Object.assign({},r,{km:kmFixRaw(r.km),note:kmFixRaw(r.note)})):KM_CORRIDOR),"km")'),
+]
+
+
+def fix_code(text):
+    for old, new in CODE:
+        if new in text:
+            continue
+        n = text.count(old)
+        if n == 0:
+            print("km-fix: anchor not found:", old[:70])
+            continue
+        text = text.replace(old, new)
+    return text
+
+
+def js_ok(html):
+    node = shutil.which("node")
+    if not node:
+        return True
+    for m in re.finditer(r"<script>(.*?)</script>", html, re.S):
+        with tempfile.NamedTemporaryFile("w", suffix=".js", delete=False, encoding="utf-8") as f:
+            f.write(m.group(1))
+        r = subprocess.run([node, "--check", f.name], capture_output=True, text=True)
+        os.unlink(f.name)
+        if r.returncode:
+            print("km-fix: node --check failed:", r.stderr[:400])
+            return False
+    return True
+
+
+def apply(text):
+    return fix_code(fix_data(text))
+
+
+def main():
+    for p in TARGETS:
+        if not p.exists() or p.stat().st_size < 100000:
+            continue
+        src = p.read_text(encoding="utf-8")
+        out = apply(src)
+        if out == src:
+            print("km-fix:", p, "already fixed")
+            continue
+        if not js_ok(out):
+            print("km-fix:", p, "JS check failed -> not written")
+            continue
+        p.write_text(out, encoding="utf-8")
+        print("km-fix:", p, "patched")
+
+
+if __name__ == "__main__":
+    main()

@@ -107,3 +107,11 @@ if __name__ == "__main__":
             runpy.run_path("patch_spec_invoice.py", run_name="__main__")
     except BaseException as e:  # never fail the Pages build because of the label
         print("spec-invoice: skipped:", e)
+    # КМ — фиксы (A с ТИ / B без ТИ) и T7 Prime 2WD без кредитной скидки 50/30 (27.10.2026).
+    try:
+        import runpy
+        from pathlib import Path as _P
+        if _P("patch_km_fix.py").exists():
+            runpy.run_path("patch_km_fix.py", run_name="__main__")
+    except BaseException as e:  # never fail the Pages build because of this step
+        print("km-fix: skipped:", e)
