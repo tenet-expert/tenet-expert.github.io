@@ -12,6 +12,8 @@
    Строка приходит из «Цены и поддержки» через terms-calc-data.js (ту-google-08/14), поэтому
    обнуляется на каждой сборке. Другие T7 не трогаются.
 
+3. Нал (27.10 21:43): скидка ДЦ под тот же фикс КМ, что и в кредите; потолок T9 30% РРЦ; КП переносит скидку.
+
 Вызывается из patch_terms_sync.py (после синка) и в конце patch_issue.py (последний шаг сборки).
 Идемпотентен. Любое сомнение -> файл не пишется.
 """
@@ -132,6 +134,40 @@ CODE = [
     ('termGroup(KM_CORRIDOR,"km")',
      'termGroup((typeof kmFixRaw==="function"?KM_CORRIDOR.map(r=>Object.assign({},r,{km:kmFixRaw(r.km),note:kmFixRaw(r.note)})):KM_CORRIDOR),"km")'),
 ]
+
+
+# 27.10.2026 21:43 (Александр): «За нал фикс км такой же, как с кредитом».
+# Нал: скидка ДЦ подбирается под фикс КМ той же формулой (kmDcCrFit/kmDcCrMin), что и кредитная,
+# по умолчанию включена. Потолок: T9 — вся скидка не больше 30% РРЦ; если фикс недостижим — пометка.
+CASH = [
+    ('const useDcCr=useLoan && kmVal("kmUseDcCr", false);',
+     'const useDcCr=useLoan?kmVal("kmUseDcCr", false):kmVal("kmUseDcCash", true);/*km-cash-fix*/'),
+    ('        dcCr=Math.max(0, Math.round(dcCr));\n      }\n      const discount=tiAmt+spec+dcTi+dcCr+crAmt;',
+     '        dcCr=Math.max(0, Math.round(dcCr));\n      }\n'
+     '      const dcCap=(m.stock==="tt9"||/^T9 /.test(m.name||""))?Math.max(0, Math.floor((rrc*0.3-(tiAmt+spec+dcTi+crAmt))/1000)*1000):Infinity;\n'
+     '      const dcCapped=useDcCr && dcCr>dcCap;\n'
+     '      if(dcCapped) dcCr=dcCap;\n'
+     '      const discount=tiAmt+spec+dcTi+dcCr+crAmt;'),
+    ('ordDc=Math.max(0, Math.round(ordDc));',
+     'ordDc=Math.max(0, Math.round(ordDc)); if(typeof dcCap==="number" && ordDc>dcCap) ordDc=dcCap;'),
+    ('<input id="kmDcCr" inputmode="numeric" value="${dcCr}" /></label>`:""}',
+     '<input id="kmDcCr" inputmode="numeric" value="${dcCr}" /></label>`:""}'
+     '\n            ${!useLoan?`<label class="check-row"><input id="kmUseDcCash" type="checkbox" ${useDcCr?"checked":""} /> <span>Скидка от ДЦ под фикс КМ ${lo} тыс. ${useTi?"с трейд-ином":"без трейд-ина"}</span></label>`:""}'
+     '\n            ${!useLoan&&useDcCr?`<label class="field" style="max-width:none"><span>Скидка ДЦ (нал), ₽ · подобрана под КМ ${lo} тыс.</span><input id="kmDcCr" inputmode="numeric" value="${dcCr}" /></label>`:""}'
+     '\n            ${dcCapped?`<div class="note-box">Фикс КМ ${lo} тыс. недостижим: потолок скидки T9 — 30% от РРЦ (${rub(Math.round(rrc*0.3))}). Скидка ДЦ ограничена ${rub(dcCap)}.</div>`:""}'
+     '\n            ${useDcCr&&!dcCapped&&dcCr===0&&kmK+0.05<lo?`<div class="note-box">КМ ниже фикса ${lo} тыс. уже без скидки ДЦ — скидку ДЦ не даём.</div>`:""}'),
+    ('useDcCr:useLoan && on("kmUseDcCr"),',
+     'useDcCr:useLoan?on("kmUseDcCr"):on("kmUseDcCash"),'),
+    ('const useDcCr=useLoan && (S?!!S.useDcCr:offerOn("ofDcCr"));',
+     'const useDcCr=(S?!!S.useDcCr:offerOn("ofDcCr"));/*km-cash-fix*/'),
+    ('if(dcCr) discs.push(["Скидка ДЦ за кредит", dcCr]);',
+     'if(dcCr) discs.push([useLoan?"Скидка ДЦ за кредит":"Скидка ДЦ", dcCr]);'),
+    ('${d.useLoan?`<label class="check-row"><input id="ofDcCr" type="checkbox" ${d.useDcCr?"checked":""} /> <span>Скидка ДЦ за кредит</span></label>`:""}',
+     '<label class="check-row"><input id="ofDcCr" type="checkbox" ${d.useDcCr?"checked":""} /> <span>${d.useLoan?"Скидка ДЦ за кредит":"Скидка ДЦ"}</span></label>'),
+    ('${d.useLoan&&d.useDcCr?offerField("Скидка ДЦ за кредит, ₽", `<input id="ofDcCrAmt"',
+     '${d.useDcCr?offerField(d.useLoan?"Скидка ДЦ за кредит, ₽":"Скидка ДЦ, ₽", `<input id="ofDcCrAmt"'),
+]
+CODE.extend(CASH)
 
 
 def fix_code(text):
