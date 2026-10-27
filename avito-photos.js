@@ -102,13 +102,13 @@
     st.id = "avitoPhotosCss";
     st.textContent = [
       ".cl-avito{margin:2px 0 10px}",
-      ".cl-avito-card{background:#fff;border:1px solid #eadfcf;border-radius:14px;overflow:hidden}",
-      ".cl-avito-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px 8px;font:600 12px/1.3 Inter,Arial,sans-serif;color:#6d6458}",
+      ".cl-avito-card{background:#f3eee4;border:1px dashed #d9cbb6;border-radius:16px;overflow:hidden}",
+      ".cl-avito-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px 8px;font:700 12px/1.3 Inter,Arial,sans-serif;color:#5c5346}",
       ".cl-avito-count{font:800 11px/1 Inter,Arial,sans-serif;letter-spacing:.02em;color:#1c1a17;background:#fbf7f0;border:1px solid #eadfcf;border-radius:999px;padding:4px 8px;white-space:nowrap}",
       ".cl-avito-list{display:grid;grid-template-columns:1fr}",
       "@media(min-width:900px){.cl-avito-list{grid-template-columns:1fr 1fr}}",
       ".cl-avito-empty{margin:0;padding:12px;font-size:13px;color:#7a7166}",
-      ".cl-avito-row{display:flex;align-items:flex-start;gap:10px;margin:0;padding:9px 12px;border-top:1px solid #f3eee4;cursor:pointer;background:#fff}",
+      ".cl-avito-row{display:flex;align-items:flex-start;gap:10px;margin:0;padding:9px 12px;border-top:1px solid #eadfcf;cursor:pointer;background:#fff}",
       ".cl-avito-row:first-child{border-top:0}",
       "@media(min-width:900px){.cl-avito-row:nth-child(odd){border-right:1px solid #f3eee4}.cl-avito-row:nth-child(-n+2){border-top:0}}",
       ".cl-avito-row.is-on{background:#e8f5e9}",
@@ -253,7 +253,7 @@
     sec.innerHTML =
       '<h2 class="cl-sec-title">Фото для Авито</h2>' +
       '<div class="cl-avito-card">' +
-        '<div class="cl-avito-head"><span>В наличии, нет фото</span><span class="cl-avito-count" id="avitoPhotosCount"></span></div>' +
+        '<div class="cl-avito-head"><span>В наличии · нет фото на Drive</span><span class="cl-avito-count" id="avitoPhotosCount"></span></div>' +
         '<div class="cl-avito-list" id="avitoPhotosList"><p class="cl-avito-empty">Загрузка…</p></div>' +
         '<p class="cl-avito-today" id="avitoPhotosToday" hidden></p>' +
         '<p class="cl-avito-upd" id="avitoPhotosUpd"></p>' +

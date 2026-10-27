@@ -12,13 +12,14 @@ from pathlib import Path
 import shutil
 
 ROOT = Path(__file__).resolve().parent
-TAG = '<script src="avito-photos.js?v=3"></script>'
+TAG = '<script src="avito-photos.js?v=4"></script>'
 MARKER = "avito-photos.js"
 
 
 def ensure_script(html: str) -> str:
     html = html.replace('<script src="avito-photos.js?v=1"></script>', TAG)
     html = html.replace('<script src="avito-photos.js?v=2"></script>', TAG)
+    html = html.replace('<script src="avito-photos.js?v=3"></script>', TAG)
     if MARKER in html:
         return html
     if "</body>" in html:
