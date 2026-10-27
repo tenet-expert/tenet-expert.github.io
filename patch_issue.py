@@ -115,3 +115,13 @@ if __name__ == "__main__":
             runpy.run_path("patch_km_fix.py", run_name="__main__")
     except BaseException as e:  # never fail the Pages build because of this step
         print("km-fix: skipped:", e)
+    # «Фото для Авито» в чек-листе дежурного. duty() подменяется patch_duty_vert,
+    # а pages.yml этим токеном не правится — шаг живёт здесь, в конце сборки.
+    # Список читается в рантайме из photos-needed.json (утренний пуш заменяет файл).
+    try:
+        import runpy
+        from pathlib import Path as _P
+        if _P("patch_avito_photos.py").exists():
+            runpy.run_path("patch_avito_photos.py", run_name="__main__")
+    except BaseException as e:  # never fail the Pages build because of this step
+        print("avito-photos: skipped:", e)
