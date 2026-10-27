@@ -734,7 +734,7 @@ input,textarea{width:100%;background:#fff;border:1px solid var(--border);color:v
 @media print{
   @page{size:A4 portrait;margin:6mm}
   html,body{background:#fff!important}
-  header,.top,nav,.bot,.banner,.who-line,.hub-grid,.cl-bar .btn,.cl-log,.cl-prog,.lead{display:none!important}
+  header,.top,nav,.bot,.banner,.who-line,.hub-grid,.cl-bar .btn,.cl-print,.cl-log,.cl-prog,.lead{display:none!important}
   .wrap{max-width:none!important;width:auto!important;padding:0!important;margin:0!important}
   .cl{gap:3mm!important}
   .cl-cars{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:2.5mm!important}
@@ -9008,6 +9008,6 @@ async function confirmCloud(rec){
     if(state.authed && state.surname && userRun() && !done && !paper.length) resumeExam(userRun());
   </script>
 <script src="duty-overlay.js?v=d6"></script>
-<script src="avito-photos.js?v=4"></script>
+<script src="avito-photos.js?v=5"></script>
 </body>
 </html>

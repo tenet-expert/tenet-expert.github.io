@@ -101,6 +101,11 @@
     var st = document.createElement("style");
     st.id = "avitoPhotosCss";
     st.textContent = [
+      ".cl-print{margin:6px 0 4px;display:flex;flex-direction:column;align-items:stretch;gap:6px}",
+      ".cl-print .btn{width:100%;min-height:46px;font-size:15px}",
+      ".cl-print .btn:disabled{opacity:.45;cursor:not-allowed}",
+      ".cl-print-hint{margin:0;text-align:center;font:500 12px/1.3 Inter,Arial,sans-serif;color:#7a7166}",
+      ".cl-print.is-ready .cl-print-hint{display:none}",
       ".cl-avito{margin:2px 0 10px}",
       ".cl-avito-card{background:#f3eee4;border:1px dashed #d9cbb6;border-radius:16px;overflow:hidden}",
       ".cl-avito-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px 8px;font:700 12px/1.3 Inter,Arial,sans-serif;color:#5c5346}",
@@ -142,6 +147,21 @@
     document.head.appendChild(st);
   }
 
+  function avitoPicked(){
+    var pack = (typeof window.avitoPhotosForPrint === "function") ? window.avitoPhotosForPrint() : null;
+    return !!(pack && Array.isArray(pack.rows) && pack.rows.some(function(r){ return r && r.on; }));
+  }
+
+  function syncPrint(){
+    var btn = document.getElementById("dutyPrint");
+    var bar = document.getElementById("dutyPrintBar");
+    var hint = document.getElementById("dutyPrintHint");
+    var on = avitoPicked();
+    if (btn) btn.disabled = !on;
+    if (bar) bar.classList.toggle("is-ready", on);
+    if (hint) hint.hidden = on;
+  }
+
   function renderList(data){
     var list = document.getElementById("avitoPhotosList");
     var upd = document.getElementById("avitoPhotosUpd");
@@ -169,6 +189,7 @@
     }
     if (!groups.length) {
       list.innerHTML = '<p class="cl-avito-empty">Сейчас таких автомобилей нет.</p>';
+      syncPrint();
       return;
     }
     list.innerHTML = groups.map(function(g){
@@ -184,6 +205,7 @@
         '<span class="cl-avito-tick" aria-hidden="true">✓</span>' +
         '<span class="cl-avito-main"><b>' + esc(rowTitle(g)) + '</b><span class="cl-avito-vins">' + vins + "</span></span></label>";
     }).join("");
+    syncPrint();
   }
 
   function load(){
@@ -259,9 +281,10 @@
         '<p class="cl-avito-upd" id="avitoPhotosUpd"></p>' +
       '</div>';
     sec.addEventListener("change", onChange);
-    var log = cl.querySelector(".cl-log");
-    if (log) cl.insertBefore(sec, log);
+    var anchor = cl.querySelector("#dutyPrintBar") || cl.querySelector(".cl-log");
+    if (anchor) cl.insertBefore(sec, anchor);
     else cl.appendChild(sec);
+    syncPrint();
     load();
   }
 

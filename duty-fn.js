@@ -488,7 +488,6 @@
             <input data-duty="date" readonly value="${escape(d.date||dutyToday())}" style="width:96px" />
             <div class="cl-prog"><i style="width:${pct}%"></i><span>${pct}%</span></div>
             <button type="button" class="btn ivory" id="dutySave">Сохранить</button>
-            <button type="button" class="btn ghost" id="dutyPrint">Скачать</button>
             <button type="button" class="btn ghost" id="dutyClear">Сброс</button>
           </div>
           <div class="cl-cars">${cards}</div>
@@ -512,6 +511,10 @@
             </div>
             <input data-duty="note" placeholder="Заметка: помыть T7, T4L" value="${escape(d.note||"")}" style="width:100%;margin-top:8px;min-height:34px" />
             </div>
+          </div>
+          <div class="cl-print" id="dutyPrintBar">
+            <button type="button" class="btn ivory" id="dutyPrint" disabled>Печать / сохранить</button>
+            <p class="cl-print-hint" id="dutyPrintHint">Отметьте хотя бы одну машину для фото</p>
           </div>
           <div class="cl-log">
             <h3>Сохранённые чек-листы</h3>
@@ -769,7 +772,14 @@
           dutyPaintProg();
           if(typeof render==="function") render();
         }
-        if(t.id==="dutyPrint"){ ev.preventDefault(); const cur=dutyRead(); dutySave(cur); dutyPdf(cur); }
+        if(t.id==="dutyPrint"){
+          ev.preventDefault();
+          if(t.disabled) return;
+          var pack=(typeof window.avitoPhotosForPrint==="function")?window.avitoPhotosForPrint():null;
+          var picked=pack&&Array.isArray(pack.rows)&&pack.rows.some(function(r){ return r&&r.on; });
+          if(!picked) return;
+          const cur=dutyRead(); dutySave(cur); dutyPdf(cur);
+        }
         if(t.id==="dutyClear"){ ev.preventDefault(); localStorage.removeItem("tenet-duty-v1"); if(typeof render==="function") render(); }
       });
     }

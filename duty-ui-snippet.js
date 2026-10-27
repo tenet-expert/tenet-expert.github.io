@@ -43,7 +43,6 @@
             <input data-duty="date" readonly value="${escape(d.date||dutyToday())}" style="width:96px" />
             <div class="cl-prog"><i style="width:${pct}%"></i><span>${pct}%</span></div>
             <button type="button" class="btn ivory" id="dutySave">Сохранить</button>
-            <button type="button" class="btn ghost" id="dutyPrint">Скачать</button>
             <button type="button" class="btn ghost" id="dutyClear">Сброс</button>
           </div>
           <section class="cl-sec">
@@ -74,6 +73,10 @@
             </div>
             </div>
           </section>
+          <div class="cl-print" id="dutyPrintBar">
+            <button type="button" class="btn ivory" id="dutyPrint" disabled>Печать / сохранить</button>
+            <p class="cl-print-hint" id="dutyPrintHint">Отметьте хотя бы одну машину для фото</p>
+          </div>
           <div class="cl-log">
             <h3>Сохранённые чек-листы</h3>
             ${dutyLogLoad().length?dutyLogLoad().map(x=>`
