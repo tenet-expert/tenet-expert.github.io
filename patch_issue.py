@@ -98,3 +98,12 @@ def main():
 
 if __name__ == "__main__":
     main()
+    # «Спец инвойс» по цене закупки LS: patch_issue.py — последний шаг сборки (после
+    # patch_stock_src / patch_fleet_dcti), токен без scope workflow не может править pages.yml.
+    try:
+        import runpy
+        from pathlib import Path as _P
+        if _P("patch_spec_invoice.py").exists():
+            runpy.run_path("patch_spec_invoice.py", run_name="__main__")
+    except BaseException as e:  # never fail the Pages build because of the label
+        print("spec-invoice: skipped:", e)
