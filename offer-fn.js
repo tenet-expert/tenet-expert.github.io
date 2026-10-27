@@ -139,17 +139,18 @@
       if(!k) return [];
       return [1,2,3,4].map(n=>"cars/kp-"+k+"-"+n+".jpg");
     }
+    function offerAdvRows(cmp){
+      return (cmp&&cmp.rows||[]).filter(row=>row && row.win==="us");
+    }
     function offerCmpHtml(cmp){
-      const rows=cmp.rows||[];
+      const rows=offerAdvRows(cmp);
       const body=rows.map(row=>{
-        const cls=row.win==="us"?"win":row.win==="them"?"lose":"tie";
-        const tag=row.win==="them"?`<em>сильнее конкурент</em>`:"";
-        return `<div class="op-vs ${cls}"><div class="k">${escape(row.k)}${tag}</div><div class="us"><small>${escape(cmp.ours||"Мы")}</small><b>${escape(row.us)}</b></div><div class="them"><small>${escape(cmp.them||"Конкурент")}</small><b>${escape(row.them)}</b></div></div>`;
+        return `<article class="op-adv"><span class="k">${escape(row.k)}</span><b>${escape(row.us)}</b><em>у них ${escape(row.them)}</em></article>`;
       }).join("");
       const only=(cmp.only||[]);
       const onlyHtml=only.length?`<div class="op-vs-only"><b>В нашем прайсе есть, у них в прайсе нет</b><ul>${only.map(t=>`<li>${escape(t)}</li>`).join("")}</ul></div>`:"";
       const pay=`<div class="op-vs-pay"><b>Кредит · ${escape(cmp.them||"")}</b><span>${cmp.rate}% · ${cmp.term} мес. · взнос ${rub(cmp.down)} ₽ (${cmp.pct}%) · тело ${rub(cmp.credit)} ₽</span><span class="big">${rub(cmp.pay)} ₽ <small style="letter-spacing:0;font-size:13px;opacity:1">/ мес.</small></span><span class="sub">Наша ставка ${cmp.ourRate}%${cmp.ourName?" · "+escape(cmp.ourName):""}${cmp.ourPay?" · наш платёж "+rub(cmp.ourPay)+" ₽":""}. У конкурента на 2,5 п.п. выше. Цена без наших скидок и допов.</span></div>`;
-      return `<div class="op-vs-card"><div class="op-vs-top"><div><small>наш автомобиль</small><b>${escape(cmp.ours||"")}</b></div><div><small>конкурент</small><b>${escape(cmp.them||"")}</b></div></div>${body}${onlyHtml}<p class="op-vs-src">${escape(cmp.trim||"")} · ${escape(cmp.src||"")}</p>${pay}</div>`;
+      return `<div class="op-vs-card"><div class="op-adv-head"><div><small>наши преимущества</small><b>${escape(cmp.ours||"")}</b></div><div><small>против</small><b>${escape(cmp.them||"")}</b></div></div><div class="op-adv-list">${body}</div>${onlyHtml}<p class="op-vs-src">${escape(cmp.trim||"")} · ${escape(cmp.src||"")}</p>${pay}</div>`;
     }
     function offerPreview(doc){
       const meta=(doc.meta||[]).map(([k,v])=>`<div class="op-line"><span>${escape(k)}</span><b>${escape(offerDash(v))}</b></div>`).join("");
@@ -179,11 +180,10 @@
         if(sec.cmp){
           const c=sec.cmp;
           lines.push((c.ours||"Мы")+" против "+(c.them||""));
-          (c.rows||[]).forEach(row=>{
-            const mark=row.win==="us"?" — мы сильнее":row.win==="them"?" — сильнее конкурент":"";
-            lines.push(row.k+mark);
+          (c.rows||[]).filter(row=>row.win==="us").forEach(row=>{
+            lines.push(row.k+" — мы сильнее");
             lines.push("  мы: "+row.us);
-            lines.push("  они: "+row.them);
+            lines.push("  у них: "+row.them);
           });
           if((c.only||[]).length){
             lines.push("В нашем прайсе есть, у них в прайсе нет:");
@@ -399,6 +399,15 @@
 .of-rival small{color:#7a7166;font-size:12px;line-height:1.3;}
 @media(max-width:720px){.of-rivals{grid-template-columns:1fr;}}
 .op-vs-card{margin:6px 0 4px;border:1px solid #eadfcf;border-radius:18px;background:#fffdf9;overflow:hidden;}
+.op-adv-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-end;padding:16px 16px 8px}
+.op-adv-head small{display:block;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#8a6840;font-weight:800}
+.op-adv-head b{font-size:20px;line-height:1.2;color:#161618}
+.op-adv-list{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 12px 12px}
+.op-adv{display:flex;flex-direction:column;gap:3px;background:#f3faf6;border-radius:14px;padding:10px 12px 11px}
+.op-adv .k{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#135c34}
+.op-adv b{font-size:15px;line-height:1.35;color:#10281a}
+.op-adv em{font-style:normal;color:#6d7a72;font-size:12px;line-height:1.35}
+@media(max-width:720px){.op-adv-head{flex-direction:column;align-items:flex-start}.op-adv-list{grid-template-columns:1fr}}
 .op-vs-top{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px 14px 4px;}
 .op-vs-top small{display:block;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#8a6840;font-weight:700;}
 .op-vs-top b{font-size:18px;line-height:1.25;color:#161618;}
@@ -708,7 +717,7 @@
         ${offerField("Цвет", `<input id="ofColor" value="${escape(d.color)}" placeholder="не указан" />`)}
         ${offerField("РРЦ, ₽", `<input id="ofPrice" inputmode="numeric" value="${d.price}" />`)}
         <p class="eyebrow">Конкуренты</p>
-        <p class="calc-note">Галочка кладёт в PDF сравнение: зелёным, где мы сильнее, красным, где конкурент слабее. Плюс кредит на 2,5 п.п. выше нашей ставки.</p>
+        <p class="calc-note">В PDF только наши преимущества. Где конкурент сильнее — не пишем. Плюс кредит на 2,5 п.п. выше нашей ставки.</p>
         ${offerRivalChecks(d.m)}
         <p class="eyebrow">Скидки</p>
         <label class="check-row"><input id="ofTi" type="checkbox" ${d.useTi?"checked":""} /> <span>Трейд-ин ${d.m.ti?rub(d.m.ti):"нет в базе"}</span></label>
@@ -836,7 +845,7 @@
         y+=8;
         font("800", 20);
         ctx.fillStyle="#161618";
-        ctx.fillText("Сравнение", pad, y);
+        ctx.fillText("Преимущества", pad, y);
         y+=22;
         const wide=W-pad*2;
         function sideBar(label, lines, fill, color, bold){
@@ -854,23 +863,19 @@
           });
           y+=h+5;
         }
-        (cmp.rows||[]).forEach(row=>{
-          const win=row.win==="us";
-          const tag=row.win==="them"?"    ·  сильнее конкурент":"";
-          need(16);
+        (cmp.rows||[]).filter(row=>row.win==="us").forEach(row=>{
           font("800", 12);
-          ctx.fillStyle="#8a6840";
-          ctx.fillText(String(row.k||"").toUpperCase()+tag, pad, y);
+          ctx.fillStyle="#135c34";
+          need(16);
+          ctx.fillText(String(row.k||"").toUpperCase(), pad, y);
           y+=8;
-          font(win?"800":"600", 16);
+          font("800", 16);
           const L=offerWrap(ctx, row.us||"", wide-28);
-          font("600", 16);
-          const R=offerWrap(ctx, row.them||"", wide-28);
-          const usFill=win?"#e3f6ea":"#f6f3ec";
-          const themFill=win?"#fde8ea":"#f6f3ec";
-          sideBar(String(cmp.ours||"МЫ").toUpperCase(), L.length?L:[""], usFill, win?"#135c34":"#3d3832", win);
-          sideBar(String(cmp.them||"КОНКУРЕНТ").toUpperCase(), R.length?R:[""], themFill, win?"#8f1d2a":"#3d3832", false);
-          y+=4;
+          font("500", 13);
+          const R=offerWrap(ctx, "у них "+(row.them||""), wide-28);
+          sideBar(String(cmp.ours||"МЫ").toUpperCase(), L.length?L:[""], "#e3f6ea", "#135c34", true);
+          sideBar("У НИХ", R.length?R:[""], "#f7f4ee", "#6d6458", false);
+          y+=2;
         });
         const only=cmp.only||[];
         if(only.length){
