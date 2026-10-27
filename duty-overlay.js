@@ -173,36 +173,56 @@
     ctx.fillStyle="#5c5346"; ctx.font="500 16px Inter, Arial, sans-serif";
     ctx.fillText("\u0417\u0430\u043c\u0435\u0442\u043a\u0430: "+(d.note||"\u2014"), pad, y+8);
     y+=28;
-    ctx.fillStyle="#8a7d6e"; ctx.font="800 13px Inter, Arial, sans-serif";
-    ctx.fillText("\u0424\u041e\u0422\u041e \u0414\u041b\u042f \u0410\u0412\u0418\u0422\u041e: \u0412 \u041d\u0410\u041b\u0418\u0427\u0418\u0418, \u041d\u0415\u0422 \u0424\u041e\u0422\u041e", pad, y);
-    ctx.strokeStyle="#eadfcf"; ctx.lineWidth=1;
-    ctx.beginPath(); ctx.moveTo(pad+360, y-4); ctx.lineTo(pad+inner, y-4); ctx.stroke();
-    y+=18;
     function fitLine(s, maxW){
       s=String(s||"");
       if(ctx.measureText(s).width<=maxW) return s;
       while(s.length>1 && ctx.measureText(s+"\u2026").width>maxW) s=s.slice(0,-1);
       return s+"\u2026";
     }
+    const cardX=pad, cardW=inner, cardY=y;
+    const headH=56, cellH=52, cellGap=8, inset=16;
+    const gridRows=avitoRows.length?Math.ceil(avitoRows.length/2):1;
+    const cardH=headH+(avitoRows.length?gridRows*(cellH+cellGap)-cellGap:36)+inset;
+    roundRect(cardX, cardY, cardW, cardH, 18);
+    ctx.fillStyle="#f3eee4"; ctx.fill();
+    ctx.lineWidth=1.6; ctx.strokeStyle="#c4b49a";
+    roundRect(cardX, cardY, cardW, cardH, 18); ctx.stroke();
+    ctx.fillStyle="#1b5e20";
+    ctx.fillRect(cardX, cardY+16, 5, cardH-32);
+    ctx.fillStyle="#1c1a17"; ctx.font="800 18px Inter, Arial, sans-serif";
+    ctx.fillText("\u0424\u041e\u0422\u041e \u0414\u041b\u042f \u0410\u0412\u0418\u0422\u041e", cardX+22, cardY+26);
+    ctx.fillStyle="#6d6458"; ctx.font="500 12px Inter, Arial, sans-serif";
+    ctx.fillText("\u0432 \u043d\u0430\u043b\u0438\u0447\u0438\u0438, \u043d\u0435\u0442 \u0444\u043e\u0442\u043e", cardX+22, cardY+44);
+    const count=avitoRows.length?String(avitoRows.length)+" \u0448\u0442.":"\u2014";
+    ctx.font="800 12px Inter, Arial, sans-serif";
+    const countW=ctx.measureText(count).width+18;
+    const countX=cardX+cardW-inset-countW, countY=cardY+16;
+    ctx.fillStyle="#ffffff"; roundRect(countX, countY, countW, 22, 11); ctx.fill();
+    ctx.strokeStyle="#eadfcf"; ctx.lineWidth=1; roundRect(countX, countY, countW, 22, 11); ctx.stroke();
+    ctx.fillStyle="#1c1a17"; ctx.fillText(count, countX+9, countY+15);
     if(!avitoRows.length){
-      ctx.fillStyle="#5c5346"; ctx.font="500 16px Inter, Arial, sans-serif";
-      ctx.fillText(avitoPack&&avitoPack.ready===false?"\u0421\u043f\u0438\u0441\u043e\u043a \u0437\u0430\u0433\u0440\u0443\u0436\u0430\u0435\u0442\u0441\u044f\u2026":"\u0421\u0435\u0439\u0447\u0430\u0441 \u0442\u0430\u043a\u0438\u0445 \u0430\u0432\u0442\u043e\u043c\u043e\u0431\u0438\u043b\u0435\u0439 \u043d\u0435\u0442.", pad, y+8);
-      y+=28;
+      ctx.fillStyle="#7a7166"; ctx.font="500 13px Inter, Arial, sans-serif";
+      ctx.fillText(avitoPack&&avitoPack.ready===false?"\u0421\u043f\u0438\u0441\u043e\u043a \u0437\u0430\u0433\u0440\u0443\u0436\u0430\u0435\u0442\u0441\u044f\u2026":"\u0421\u0435\u0439\u0447\u0430\u0441 \u0442\u0430\u043a\u0438\u0445 \u0430\u0432\u0442\u043e\u043c\u043e\u0431\u0438\u043b\u0435\u0439 \u043d\u0435\u0442.", cardX+22, cardY+headH+18);
     }else{
-      avitoRows.forEach(function(row){
-        tick(pad, y+14, !!row.on);
-        ctx.fillStyle="#111"; ctx.font="700 16px Inter, Arial, sans-serif";
-        ctx.fillText(fitLine(row.title, inner-36), pad+28, y+14);
+      const colW=(cardW-inset*2-cellGap)/2;
+      avitoRows.forEach(function(row, i){
+        const col=i%2, r=Math.floor(i/2);
+        const x=cardX+inset+col*(colW+cellGap);
+        const ry=cardY+headH+r*(cellH+cellGap);
+        ctx.fillStyle=row.on?"#e8f5e9":"#ffffff";
+        roundRect(x, ry, colW, cellH, 10); ctx.fill();
+        ctx.lineWidth=1; ctx.strokeStyle=row.on?"#1b5e20":"#eadfcf";
+        roundRect(x, ry, colW, cellH, 10); ctx.stroke();
+        tick(x+10, ry+18, !!row.on);
+        ctx.fillStyle="#1c1a17"; ctx.font="700 13px Inter, Arial, sans-serif";
+        ctx.fillText(fitLine(row.title, colW-46), x+34, ry+22);
         if(row.vins&&row.vins.length){
-          ctx.fillStyle="#5c5346"; ctx.font="500 13px Inter, Arial, sans-serif";
-          ctx.fillText(fitLine(row.vins.join("   "), inner-36), pad+28, y+34);
-          y+=44;
-        }else{
-          y+=30;
+          ctx.fillStyle="#6d6458"; ctx.font="500 11px ui-monospace, Menlo, Consolas, monospace";
+          ctx.fillText(fitLine(row.vins.join("  "), colW-46), x+34, ry+40);
         }
       });
     }
-    y+=16;
+    y=cardY+cardH+18;
     ctx.fillStyle="#9a9186"; ctx.font="500 13px Inter, Arial, sans-serif";
     ctx.fillText(brand+" \u00b7 \u041e\u0442\u0434\u0435\u043b \u043f\u0440\u043e\u0434\u0430\u0436 \u00b7 \u042d\u043a\u0441\u043f\u0435\u0440\u0442 \u0410\u0432\u0442\u043e \u0421\u0430\u043c\u0430\u0440\u0430", pad, Math.min(H-28, y));
     var used=Math.min(H, Math.max(y+36, 400));

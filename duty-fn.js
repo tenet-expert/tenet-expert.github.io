@@ -175,10 +175,10 @@
       const W=1240;
       const pad=36, gap=14;
       const carH=348, footH=268;
-      const avitoRowH=function(row){ return (row&&row.vins&&row.vins.length)?44:28; };
-      let avitoH=16;
-      if(!avitoRows.length) avitoH+=28;
-      else avitoRows.forEach(function(row){ avitoH+=avitoRowH(row); });
+      const avitoRowH=52;
+      const avitoHead=56;
+      const avitoGrid=avitoRows.length?Math.ceil(avitoRows.length/2):1;
+      const avitoH=18+avitoHead+(avitoRows.length?avitoGrid*(avitoRowH+8):40)+28;
       const carRows=Math.max(1, Math.ceil((cars&&cars.length)||1)/3);
       const H=Math.max(1754, 154+carRows*(carH+gap)+footH+20+avitoH+64);
       const c=document.createElement("canvas");
@@ -308,11 +308,6 @@
       box(pad,"Дилерский центр",[["dc_light","Свет"],["dc_music","Музыка"],["dc_price_hold","Прайсхолдеры"],["dc_desk","Столы"]], d.dc_note);
       box(pad+footW+gap,"Шоурум",[["dm_body","Кузов"],["dm_mats","Коврики"],["dm_trunk","Багажник"],["dm_dust","Нет пыли"],["dm_wheel","Колёса"],["dm_bat","АКБ"]], d.note);
       y+=footH+20;
-      ctx.fillStyle="#8a7d6e"; ctx.font="800 13px Inter, Arial, sans-serif";
-      ctx.fillText("ФОТО ДЛЯ АВИТО: В НАЛИЧИИ, НЕТ ФОТО", pad, y);
-      ctx.strokeStyle="#eadfcf"; ctx.lineWidth=1;
-      ctx.beginPath(); ctx.moveTo(pad+340, y-4); ctx.lineTo(W-pad, y-4); ctx.stroke();
-      y+=16;
       function fitLine(s, maxW){
         s=String(s||"");
         if(ctx.measureText(s).width<=maxW) return s;
@@ -320,33 +315,60 @@
         return s+"…";
       }
       function boxCheck(x,yy,on){
-        rr(x,yy,16,16,3);
-        ctx.fillStyle=on?"#e8f5e9":"#ffffff";
+        rr(x,yy,16,16,4);
+        ctx.fillStyle=on?"#2e7d32":"#ffffff";
         ctx.fill();
-        ctx.lineWidth=1.6; ctx.strokeStyle=on?"#1b5e20":"#8d7f6a";
-        rr(x,yy,16,16,3); ctx.stroke();
+        ctx.lineWidth=1.5; ctx.strokeStyle=on?"#2e7d32":"#8d7f6a";
+        rr(x,yy,16,16,4); ctx.stroke();
         if(on){
-          ctx.fillStyle="#145a1f"; ctx.font="800 13px Inter, Arial, sans-serif";
-          ctx.fillText("✓", x+2, yy+13);
+          ctx.fillStyle="#ffffff"; ctx.font="800 13px Inter, Arial, sans-serif";
+          ctx.fillText("✓", x+3, yy+13);
         }
       }
+      const cardX=pad, cardW=W-pad*2, cardY=y;
+      const headH=56, cellH=52, cellGap=8, inset=16;
+      const gridRows=avitoRows.length?Math.ceil(avitoRows.length/2):1;
+      const cardH=headH+(avitoRows.length?gridRows*(cellH+cellGap)-cellGap:36)+inset;
+      ctx.fillStyle="#f3eee4";
+      rr(cardX, cardY, cardW, cardH, 18); ctx.fill();
+      ctx.lineWidth=1.6; ctx.strokeStyle="#c4b49a";
+      rr(cardX, cardY, cardW, cardH, 18); ctx.stroke();
+      ctx.fillStyle="#1b5e20";
+      ctx.fillRect(cardX, cardY+16, 5, cardH-32);
+      ctx.fillStyle="#1c1a17"; ctx.font="800 18px Inter, Arial, sans-serif";
+      ctx.fillText("ФОТО ДЛЯ АВИТО", cardX+22, cardY+26);
+      ctx.fillStyle="#6d6458"; ctx.font="500 12px Inter, Arial, sans-serif";
+      ctx.fillText("в наличии, нет фото", cardX+22, cardY+44);
+      const count=avitoRows.length?String(avitoRows.length)+" шт.":"—";
+      ctx.font="800 12px Inter, Arial, sans-serif";
+      const countW=ctx.measureText(count).width+18;
+      const countX=cardX+cardW-inset-countW, countY=cardY+16;
+      ctx.fillStyle="#ffffff"; rr(countX, countY, countW, 22, 11); ctx.fill();
+      ctx.strokeStyle="#eadfcf"; ctx.lineWidth=1; rr(countX, countY, countW, 22, 11); ctx.stroke();
+      ctx.fillStyle="#1c1a17"; ctx.fillText(count, countX+9, countY+15);
       if(!avitoRows.length){
         ctx.fillStyle="#7a7166"; ctx.font="500 13px Inter, Arial, sans-serif";
-        ctx.fillText(avitoPack&&avitoPack.ready===false?"Список загружается…":"Сейчас таких автомобилей нет.", pad, y+16);
-        y+=28;
+        ctx.fillText(avitoPack&&avitoPack.ready===false?"Список загружается…":"Сейчас таких автомобилей нет.", cardX+22, cardY+headH+18);
       }else{
-        avitoRows.forEach(function(row){
-          boxCheck(pad, y, !!row.on);
-          ctx.fillStyle="#1c1a17"; ctx.font="700 14px Inter, Arial, sans-serif";
-          ctx.fillText(fitLine(row.title, W-pad*2-28), pad+24, y+13);
+        const colW=(cardW-inset*2-cellGap)/2;
+        avitoRows.forEach(function(row, i){
+          const col=i%2, r=Math.floor(i/2);
+          const x=cardX+inset+col*(colW+cellGap);
+          const ry=cardY+headH+r*(cellH+cellGap);
+          ctx.fillStyle=row.on?"#e8f5e9":"#ffffff";
+          rr(x, ry, colW, cellH, 10); ctx.fill();
+          ctx.lineWidth=1; ctx.strokeStyle=row.on?"#1b5e20":"#eadfcf";
+          rr(x, ry, colW, cellH, 10); ctx.stroke();
+          boxCheck(x+10, ry+18, !!row.on);
+          ctx.fillStyle="#1c1a17"; ctx.font="700 13px Inter, Arial, sans-serif";
+          ctx.fillText(fitLine(row.title, colW-46), x+34, ry+22);
           if(row.vins&&row.vins.length){
-            ctx.fillStyle="#6d6458"; ctx.font="500 12px Inter, Arial, sans-serif";
-            ctx.fillText(fitLine(row.vins.join("   "), W-pad*2-28), pad+24, y+32);
+            ctx.fillStyle="#6d6458"; ctx.font="500 11px ui-monospace, Menlo, Consolas, monospace";
+            ctx.fillText(fitLine(row.vins.join("  "), colW-46), x+34, ry+40);
           }
-          y+=avitoRowH(row);
         });
       }
-      y+=18;
+      y=cardY+cardH+18;
       ctx.fillStyle="#9a9186"; ctx.font="500 12px Inter, Arial, sans-serif";
       ctx.fillText(brand+" · Отдел продаж · Эксперт Авто Самара", pad, Math.min(H-22, y));
       dutyFileSave(c, d);
