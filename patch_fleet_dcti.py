@@ -326,6 +326,7 @@ PLUS_CARS = [
     {"vin": "EDEMB31B1TE137072", "model": "pl6", "name": "L6", "trim": "Элегант", "color": "Чёрный", "status": "way", "note": "На заводе (Калуга) · отгрузка 27.10.2026", "rrc": 2890000},
     {"vin": "EDEMB31B1TE137153", "model": "pl6", "name": "L6", "trim": "Элегант", "color": "Чёрный", "status": "way", "note": "На заводе (Калуга) · отгрузка 27.10.2026", "rrc": 2890000},
     {"vin": "EDEMB31B9TE126658", "model": "pl6", "name": "L6", "trim": "Элегант", "color": "Оранжевый", "status": "way", "note": "На заводе (Калуга) · отгрузка 28.10.2026", "rrc": 2890000},
+    {"vin": "EDEMB31B0TE139542", "model": "pl6", "name": "L6", "trim": "Ультра", "color": "Оранжевый", "status": "way", "note": "На заводе (Калуга) · отгрузка 31.10.2026", "rrc": 3040000},
     {"vin": "EFEDB21B0T3003360", "model": "pl4", "name": "L4", "trim": "Стайл", "color": "Серый", "status": "way", "note": "На заводе (СПб Сестрорецк) · отгрузка 27.10.2026", "rrc": 2540000},
     {"vin": "EFEDB21B0T3002547", "model": "pl4", "name": "L4", "trim": "Элегант", "color": "Белый", "status": "way", "note": "На заводе (СПб Сестрорецк) · отгрузка 18.10.2026", "rrc": 2690000},
     {"vin": "EFEDB21B0T3003665", "model": "pl4", "name": "L4", "trim": "Стайл", "color": "Белый", "status": "way", "note": "На заводе (СПб Сестрорецк) · отгрузка 27.10.2026", "rrc": 2540000},
@@ -344,7 +345,6 @@ PLUS_CARS = [
     {"vin": "EFEDB21B1T3002041", "model": "pl4", "name": "L4", "trim": "Элегант", "color": "Белый", "status": "in", "note": "В салоне · с 01.10.2026", "rrc": 2690000},
     {"vin": "EFEDB21B2T3002176", "model": "pl4", "name": "L4", "trim": "Элегант", "color": "Серый", "status": "in", "note": "В салоне · с 01.10.2026", "rrc": 2690000},
     {"vin": "EFEDB21B0T3001351", "model": "pl4", "name": "L4", "trim": "Стайл", "color": "Серый", "status": "in", "note": "В салоне · с 01.10.2026", "rrc": 2540000},
-    {"vin": "EDEMB31B9TE119337", "model": "pl6", "name": "L6", "trim": "Ультра", "color": "Оранжевый", "status": "in", "note": "В салоне · с 19.10.2026", "rrc": 3040000},
     {"vin": "EDEMB31B7TE100589", "model": "pl6", "name": "L6", "trim": "Ультра", "color": "Белый", "status": "in", "note": "В салоне · с 28.09.2026", "rrc": 3040000},
     {"vin": "EDEMB31B4TE100291", "model": "pl6", "name": "L6", "trim": "Ультра", "color": "Чёрный", "status": "in", "note": "В салоне · с 30.09.2026", "rrc": 3040000},
     {"vin": "EDEMB31B3TE113985", "model": "pl6", "name": "L6", "trim": "Ультра", "color": "Белый", "status": "in", "note": "В салоне · с 30.09.2026", "rrc": 3040000},
@@ -355,6 +355,7 @@ PLUS_CARS = [
     {"vin": "EFEDB21B1T3001911", "model": "pl4", "name": "L4", "trim": "Стайл", "color": "Белый", "status": "in", "note": "В салоне · с 09.10.2026", "rrc": 2540000},
     {"vin": "EFEDB21B2T3001755", "model": "pl4", "name": "L4", "trim": "Элегант", "color": "Чёрный", "status": "in", "note": "В салоне · с 12.10.2026", "rrc": 2690000},
     {"vin": "EDEMB31B1TE126640", "model": "pl6", "name": "L6", "trim": "Элегант", "color": "Оранжевый", "status": "in", "note": "В салоне · с 13.10.2026", "rrc": 2890000},
+    {"vin": "EDEMB31B9TE119337", "model": "pl6", "name": "L6", "trim": "Ультра", "color": "Оранжевый", "status": "in", "note": "В салоне · с 25.10.2026", "rrc": 3040000},
     {"vin": "EFEDB21B0T3002466", "model": "pl4", "name": "L4", "trim": "Элегант", "color": "Чёрный", "status": "in", "note": "В салоне · с 24.10.2026", "rrc": 2690000},
     {"vin": "EFEDB21B0T3002595", "model": "pl4", "name": "L4", "trim": "Элегант", "color": "Белый", "status": "in", "note": "В салоне · с 23.10.2026", "rrc": 2690000},
 ]
