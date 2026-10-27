@@ -139,6 +139,20 @@ PAIRS += [
      'Столбец Tiggo 9 — это Tenet T9 из прайса. L4 и L6 — TENET PLUS L4 / L6. Прочерк'),
 ]
 
+# Drive 27.10.2026: убраны «Автошина» в названиях Ikon, убран Fortune T7 R18, T4 R17 / L4 — Triangle вместо Fortune, Formula Ice переименован
+PAIRS += [
+    ('["Автошина Ikon Tyres 235/50 R19 103T XL Autograph Snow 3 SUV TL лип",',
+     '["Ikon Tyres 235/50 R19 103T XL Autograph Snow 3 SUV TL лип",'),
+    ('["Автошина Ikon Tyres 225/55 R18 Ikon Character Ice 7 SUV 102T XL (шип.)",',
+     '["Ikon Tyres 225/55 R18 Ikon Character Ice 7 SUV 102T XL (шип.)",'),
+    ('["Sailun RoadX 225/55 R18 98T RXFrost WH12 TL, шип.",12500,50000,"2"],["Fortune 225/55R18 102T Polaro Ice TL, 220 шип.",11500,46000,"1"]]]',
+     '["Sailun RoadX 225/55 R18 98T RXFrost WH12 TL, шип.",12500,50000,"2"]]]'),
+    ('["Автошина 225/60 R18 Ikon 104T XL Character Ice 7 SUV TL /шипованная/",',
+     '["225/60 R18 Ikon 104T XL Character Ice 7 SUV TL /шипованная/",'),
+    ('["T4 R17 / L4",[["Fortune 215/60R17 100T Polaro Ice TL, шип.",11000,44000,"3"],["Formula Ice Friction 215/60 R17 100T XL, липучка",9600,38400,"1"]]]',
+     '["T4 R17 / L4",[["Triangle 215/60R17 100T XL IcelynX TI501 TL M+S 3PMSF (шип.)",11500,46000,"2"],["Formula Ice 215/60 17  липучка",9600,38400,"1"]]]'),
+]
+
 def patch(path: Path) -> bool:
     if not path.exists():
         return False
