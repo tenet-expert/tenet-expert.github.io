@@ -98,9 +98,9 @@
       const paid=Math.max(0, Math.round((q&&q.early)||0)+Math.round((q&&q.earlyOver)||0));
       return {deal, after:Math.max(0, deal-paid), pv:Math.max(0, Math.round((q&&q.pv)||0))};
     }
-    function fleetPvHave(q, ti){
+    function fleetPvHave(q){
       if(!q) return 0;
-      return Math.max(0, Math.round(Number(q.pv)||0)+Math.round(Number(q.early)||0)+Math.round(Number(q.earlyOver)||0)+Math.round(Number(q.sub)||0)+Math.max(0, Math.round(Number(ti)||0)));
+      return Math.max(0, Math.round(Number(q.pvCar)||0)+Math.round(Number(q.early)||0)+Math.round(Number(q.earlyOver)||0)+Math.round(Number(q.sub)||0));
     }
     function pvMinBox(have, base, minPct, how){
       base=Math.max(0, Math.round(Number(base)||0));
@@ -215,8 +215,8 @@
       const finDelta=(addons-70000)+(pack-150000);
       const q=fleetSubQuote(base, subAmt, down, addons, pack, months, isSub, 22.5);
       const qSber=fleetSubQuote(base, subAmt, down, addons, pack, months, isSub, 24);
-      const fleetNeed=(f&&f.rrc)||(q.base+tiCut);
-      const fleetWarn=pvMinBox(fleetPvHave(q, tiCut), fleetNeed, 20, "деньги клиента + ТИ + субсидия");
+      const fleetNeed=q.base;
+      const fleetWarn=pvMinBox(fleetPvHave(q), fleetNeed, 20, "ПВ в авто + субсидия");
       const creditMpt=q.credit;
       const banksMpt=fleetBanksFrom(q, qSber, months);
       const priceReg=Math.max(0, (m&&m.rrc?m.rrc:f.rrc)-(useTi&&m&&m.ti?m.ti:0));

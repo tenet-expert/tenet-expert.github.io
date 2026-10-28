@@ -349,10 +349,10 @@
       const qFleetPrioSber=qFleetPrio?fleetSubQuote(Math.max(0, 2333000-tiMpt), subAmt, down, addons, pack||0, months, !!(showSub && subAmt), 24):null;
       const banksMptPrio=qFleetPrio&&typeof fleetBanksFrom==="function"?fleetBanksFrom(qFleetPrio, qFleetPrioSber, months):[];
       const prioKmTxt=useTi?"−100 тыс. с трейд-ин":"0 тыс. без трейд-ин";
-      const fleetNeed=(fMpt&&fMpt.rrc)||m.rrc||((qFleet&&qFleet.base)||0)+tiMpt;
+      const fleetNeed=(qFleet&&qFleet.base)||0;
       const fleetOn=showSub||showFleet||isPlus;
-      const fleetWarn=fleetOn?pvMinBox(fleetPvHave(qFleet, tiMpt), fleetNeed, 20, "деньги клиента + ТИ + субсидия"):{low:false,html:""};
-      const fleetPrioWarn=qFleetPrio?pvMinBox(fleetPvHave(qFleetPrio, tiMpt), 2333000, 20, "деньги клиента + ТИ + субсидия"):{low:false,html:""};
+      const fleetWarn=fleetOn?pvMinBox(fleetPvHave(qFleet), fleetNeed, 20, "ПВ в авто + субсидия"):{low:false,html:""};
+      const fleetPrioWarn=qFleetPrio?pvMinBox(fleetPvHave(qFleetPrio), qFleetPrio.base||2333000, 20, "ПВ в авто + субсидия"):{low:false,html:""};
       const pangoWarn=(_pg&&pFix>0)?pvMinBox(pDownP, pFix, 10, "первый взнос"):{low:false,html:""};
       return banner("Калькулятор","КМ и платёж · база "+TERMS_DATE,"TENET")+`
         <p class="lead">${pangoOnly?"Только спеццена PANGO. Директ и флит для этого VIN не считаем.":pShow?"Три расчёта рядом: директ, флит с субсидией бренда и спеццена PANGO.":"Сначала комплектация. Кредит и СЖ открываются галочкой «Кредит»."}</p>
@@ -460,7 +460,7 @@
               <div class="pay-cell prio"><p class="calc-note">${qFleet.price>qFleetPrio.price?"Дешевле обычного флита на "+rub(qFleet.price-qFleetPrio.price)+".":""}</p></div>
             </div>`:`<p class="eyebrow">${showFleet||isPlus?"Флит · Совкомбанк 22,5% · Сбер 24%":showSub?"Флит · субсидия бренда":"Флит · Совкомбанк 22,5% · Сбер 24%"}</p>
             ${fleetWarn.low
-              ? fleetWarn.html+`<p class="calc-note">Флит не считаем. Деньги клиента + ТИ + субсидия должны быть не меньше 20% РРЦ.</p>`
+              ? fleetWarn.html+`<p class="calc-note">Флит не считаем. В 20% идут только ПВ в авто и субсидия, каско и Д/О не считаются.</p>`
               : `${fleetWarn.html}
             ${typeof fleetBodyTop==="function"?fleetBodyTop(qFleet):""}
             ${kmPayRows(banksMpt,"payMpt","overMpt")}
