@@ -215,7 +215,8 @@
       const finDelta=(addons-70000)+(pack-150000);
       const q=fleetSubQuote(base, subAmt, down, addons, pack, months, isSub, 22.5);
       const qSber=fleetSubQuote(base, subAmt, down, addons, pack, months, isSub, 24);
-      const fleetWarn=pvMinBox(fleetPvHave(q, tiCut), q.base+tiCut, 20, "деньги клиента + ТИ + субсидия");
+      const fleetNeed=(f&&f.rrc)||(q.base+tiCut);
+      const fleetWarn=pvMinBox(fleetPvHave(q, tiCut), fleetNeed, 20, "деньги клиента + ТИ + субсидия");
       const creditMpt=q.credit;
       const banksMpt=fleetBanksFrom(q, qSber, months);
       const priceReg=Math.max(0, (m&&m.rrc?m.rrc:f.rrc)-(useTi&&m&&m.ti?m.ti:0));

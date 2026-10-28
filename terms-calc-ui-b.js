@@ -349,8 +349,10 @@
       const qFleetPrioSber=qFleetPrio?fleetSubQuote(Math.max(0, 2333000-tiMpt), subAmt, down, addons, pack||0, months, !!(showSub && subAmt), 24):null;
       const banksMptPrio=qFleetPrio&&typeof fleetBanksFrom==="function"?fleetBanksFrom(qFleetPrio, qFleetPrioSber, months):[];
       const prioKmTxt=useTi?"−100 тыс. с трейд-ин":"0 тыс. без трейд-ин";
-      const fleetWarn=(showSub||showFleet)?pvMinBox(fleetPvHave(qFleet, tiMpt), (qFleet&&qFleet.base||0)+tiMpt, 20, "деньги клиента + ТИ + субсидия"):{low:false,html:""};
-      const fleetPrioWarn=qFleetPrio?pvMinBox(fleetPvHave(qFleetPrio, tiMpt), (qFleetPrio.base||0)+tiMpt, 20, "деньги клиента + ТИ + субсидия"):{low:false,html:""};
+      const fleetNeed=(fMpt&&fMpt.rrc)||m.rrc||((qFleet&&qFleet.base)||0)+tiMpt;
+      const fleetOn=showSub||showFleet||isPlus;
+      const fleetWarn=fleetOn?pvMinBox(fleetPvHave(qFleet, tiMpt), fleetNeed, 20, "деньги клиента + ТИ + субсидия"):{low:false,html:""};
+      const fleetPrioWarn=qFleetPrio?pvMinBox(fleetPvHave(qFleetPrio, tiMpt), 2333000, 20, "деньги клиента + ТИ + субсидия"):{low:false,html:""};
       const pangoWarn=(_pg&&pFix>0)?pvMinBox(pDownP, pFix, 10, "первый взнос"):{low:false,html:""};
       return banner("Калькулятор","КМ и платёж · база "+TERMS_DATE,"TENET")+`
         <p class="lead">${pangoOnly?"Только спеццена PANGO. Директ и флит для этого VIN не считаем.":pShow?"Три расчёта рядом: директ, флит с субсидией бренда и спеццена PANGO.":"Сначала комплектация. Кредит и СЖ открываются галочкой «Кредит»."}</p>
@@ -392,7 +394,7 @@
                 ?`<label class="field" style="max-width:none"><span>Первый взнос, ₽</span><input id="cDown" inputmode="numeric" value="${down}" /></label>`
                 :`<label class="field" style="max-width:none"><span>Первый взнос, %</span><input id="cDownPct" inputmode="decimal" value="${downPct}" /></label>`}
               <p class="calc-note">${rub(down)} ₽ · ${downPct}% от цены авто${(showMpt||showSub||showFleet)?` · ${showFleet?"флит":"субс. бренда"}: ${rub(priceMpt)} − ПВ в авто ${rub(downMptCar)} = тело ${rub(creditMpt)}`:""}</p>
-              ${(showSub||showFleet)?fleetWarn.html:""}${qFleetPrio&&fleetPrioWarn.low&&!(fleetWarn.low&&fleetWarn.html===fleetPrioWarn.html)?fleetPrioWarn.html:""}${pShow?pangoWarn.html:""}
+              ${fleetOn?fleetWarn.html:""}${qFleetPrio&&fleetPrioWarn.low&&!(fleetWarn.low&&fleetWarn.html===fleetPrioWarn.html)?fleetPrioWarn.html:""}${pShow?pangoWarn.html:""}
               <label class="field" style="max-width:none"><span>Срок, мес.</span><input id="cMonths" inputmode="numeric" value="${months}" /></label>`:""}
             <button type="button" class="btn ivory" id="kmToOffer" style="margin-top:16px;width:100%">Сформировать КП</button>
           </div>
@@ -429,7 +431,7 @@
             <p class="calc-note">${isPlus?"Ставки TENET PLUS, ИП 1938/И.":"Ставки TENET ФИНАНС, ИП 1890/И."}</p>
             ${plusAltDirect}
           </div>
-          <div class="pay-col ${showSub?"sub":"mpt"} km-pay${qFleetPrio?" fleet-pair":""}">
+          <div class="pay-col ${showSub?"sub":"mpt"} km-pay${fleetWarn.low?" pv-low":""}${qFleetPrio?" fleet-pair":""}">
             ${qFleetPrio?`<div class="km-contrast">
               <div class="pay-cell${fleetWarn.low?" pv-low":""}">
                 <p class="eyebrow">${showFleet||isPlus?"Флит · Совкомбанк 22,5% · Сбер 24%":showSub?"Флит · субсидия бренда":"Флит · Совкомбанк 22,5% · Сбер 24%"}</p>
@@ -457,7 +459,9 @@
               </div>
               <div class="pay-cell prio"><p class="calc-note">${qFleet.price>qFleetPrio.price?"Дешевле обычного флита на "+rub(qFleet.price-qFleetPrio.price)+".":""}</p></div>
             </div>`:`<p class="eyebrow">${showFleet||isPlus?"Флит · Совкомбанк 22,5% · Сбер 24%":showSub?"Флит · субсидия бренда":"Флит · Совкомбанк 22,5% · Сбер 24%"}</p>
-            ${fleetWarn.html}
+            ${fleetWarn.low
+              ? fleetWarn.html+`<p class="calc-note">Флит не считаем: деньги клиента + ТИ + субсидия ниже 20% РРЦ.</p>`
+              : `${fleetWarn.html}
             ${typeof fleetBodyTop==="function"?fleetBodyTop(qFleet):""}
             ${kmPayRows(banksMpt,"payMpt","overMpt")}
             ${typeof fleetBodyRows==="function"?fleetBodyRows(qFleet):`<div class="bank-row"><span>Тело кредита</span><span class="pay">${rub(creditMpt)}</span></div>`}
@@ -466,7 +470,7 @@
               <summary>Подробности расчёта</summary>
               <p class="calc-note">${typeof fleetSubNote==="function"?fleetSubNote(qFleet):""}</p>
               ${mptBreak}
-            </details>`}
+            </details>`}`}
             ${plusAltFleet}
           </div>`}
           ${pShow?`<div class="pay-col pango km-pay${pangoWarn.low?" pv-low":""}">
