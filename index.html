@@ -3537,9 +3537,9 @@ async function pingTelegram(body){
       const paid=Math.max(0, Math.round((q&&q.early)||0)+Math.round((q&&q.earlyOver)||0));
       return {deal, after:Math.max(0, deal-paid), pv:Math.max(0, Math.round((q&&q.pv)||0))};
     }
-    function fleetPvHave(q){
+    function fleetPvHave(q, ti){
       if(!q) return 0;
-      return Math.max(0, Math.round(Number(q.pv)||0)+Math.round(Number(q.early)||0)+Math.round(Number(q.earlyOver)||0)+Math.round(Number(q.sub)||0));
+      return Math.max(0, Math.round(Number(q.pv)||0)+Math.round(Number(q.early)||0)+Math.round(Number(q.earlyOver)||0)+Math.round(Number(q.sub)||0)+Math.max(0, Math.round(Number(ti)||0)));
     }
     function pvMinBox(have, base, minPct, how){
       base=Math.max(0, Math.round(Number(base)||0));
@@ -3660,7 +3660,7 @@ async function pingTelegram(body){
       const finDelta=(addons-70000)+(pack-150000);
       const fx=typeof fleetDoCasco==="function"?fleetDoCasco(m, addons, pack):{doAmt:addons, cascoAmt:pack};
       const q=fleetSubQuote(base, subAmt, down, fx.doAmt, fx.cascoAmt, months, isSub, fleetRateOf(m));
-      const fleetWarn=pvMinBox(fleetPvHave(q), q.base, 20, "свои + субсидия");
+      const fleetWarn=pvMinBox(fleetPvHave(q, tiCut), q.base+tiCut, 20, "деньги клиента + ТИ + субсидия");
       const creditMpt=q.credit;
       const banksMpt=[{id:"sovcom", name:"Совкомбанк", rate:q.rate, term:q.termAfter, capped:!q.early && q.term!==months, termNote:q.early?(q.termAfter+" мес. вместо "+q.term+" · досрочное не меняет платёж"):"", payMpt:q.pay, overMpt:q.over}];
       const priceReg=Math.max(0, (m&&m.rrc?m.rrc:f.rrc)-(useTi&&m&&m.ti?m.ti:0));
@@ -3822,7 +3822,7 @@ async function pingTelegram(body){
               ${useMpt
                 ? `<div class="bank-row"><span>МПТ −10%</span><span class="pay">${rub(mptCut)} ₽</span></div>`
                 : (useSub?`<div class="bank-row"><span>Субсидия бренда AQ</span><span class="pay">${rub(subCut)} ₽</span></div>`:`<div class="bank-row"><span>Субсидия TENET</span><span class="pay">${rub(f.sub||0)} ₽</span></div>`)}
-              <p class="calc-note">${useSub?"Порядок: флит"+(useTi?" + трейд-ин":"")+" → субсидия бренда. ПВ + субсидия не больше 49%. Остаток до 25% сокращает срок, не платёж.":"Порядок: флит"+(useTi?" + трейд-ин":"")+"."}</p>
+              <p class="calc-note">${useSub?"Порядок: флит"+(useTi?" + трейд-ин":"")+" → субсидия бренда. Мин. ПВ 20% = деньги клиента + ТИ + субсидия. ПВ + субсидия не больше 49%. Остаток до 25% сокращает срок, не платёж.":"Порядок: флит"+(useTi?" + трейд-ин":"")+". Мин. ПВ 20% = деньги клиента + ТИ + субсидия."}</p>
             </div>
         <div class="km-bottom">
           <div class="card dc-result ok">
@@ -3995,7 +3995,7 @@ async function pingTelegram(body){
       }).join("");
       return `<details class="fleet-board">
         <summary>Флит цены</summary>
-        <p class="fleet-note">Цена без учёта тюнинга, уже со скидкой ДЦ. Можно вычесть субсидию из колонки и ТИ −100.</p>
+        <p class="fleet-note">Цена без учёта тюнинга, уже со скидкой ДЦ. Можно вычесть субсидию из колонки и ТИ −100. Мин. ПВ 20% = деньги клиента + ТИ + субсидия.</p>
         <div class="fleet-cats">
           <p><b>RF</b><br>Лизинг ИП/ООО через лизинговые компании, не входящие в топ-список справа<br>ИП по полной безналичной прямой оплате<br>H - сотрудники дилерских центров и ключевых корпоративных клиентов</p>
           <p><b>BF</b><br>ООО по полной безналичной прямой оплате (не для лизинга и не для ИП)<br>Гос. органы</p>
@@ -4560,8 +4560,8 @@ async function pingTelegram(body){
       const qFleetPrio=(m.id==="t7a" && typeof fleetSubQuote==="function")?fleetSubQuote(Math.max(0, 2389000-tiMpt), subAmt, down, addons, pack||0, months, !!(showSub && subAmt), fleetRateOf(m)):null;
       const banksMptPrio=qFleetPrio?[{id:"sovcom", name:"Совкомбанк", rate:qFleetPrio.rate, term:qFleetPrio.termAfter, capped:!qFleetPrio.early && qFleetPrio.term!==months, termNote:qFleetPrio.early?(qFleetPrio.termAfter+" мес. вместо "+qFleetPrio.term+" · досрочное не меняет платёж"):"", payMpt:qFleetPrio.pay, overMpt:qFleetPrio.over}]:[];
       const prioKmTxt=useTi?"−100 тыс. с трейд-ин":"0 тыс. без трейд-ин";
-      const fleetWarn=(showSub||showFleet)?pvMinBox(fleetPvHave(qFleet), qFleet&&qFleet.base, 20, "свои + субсидия"):{low:false,html:""};
-      const fleetPrioWarn=qFleetPrio?pvMinBox(fleetPvHave(qFleetPrio), qFleetPrio.base, 20, "свои + субсидия"):{low:false,html:""};
+      const fleetWarn=(showSub||showFleet)?pvMinBox(fleetPvHave(qFleet, tiMpt), (qFleet&&qFleet.base||0)+tiMpt, 20, "деньги клиента + ТИ + субсидия"):{low:false,html:""};
+      const fleetPrioWarn=qFleetPrio?pvMinBox(fleetPvHave(qFleetPrio, tiMpt), (qFleetPrio.base||0)+tiMpt, 20, "деньги клиента + ТИ + субсидия"):{low:false,html:""};
       const pangoWarn=(_pg&&pFix>0)?pvMinBox(pDownP, pFix, 10, "первый взнос"):{low:false,html:""};
       return banner("Калькулятор","КМ и платёж · база "+TERMS_DATE,"TENET")+`
         <p class="lead">${pangoOnly?"Только спеццена PANGO. Директ и флит для этого VIN не считаем.":pShow?"Три расчёта рядом: директ, флит с субсидией бренда и спеццена PANGO.":"Сначала комплектация. Кредит и СЖ открываются галочкой «Кредит»."}</p>

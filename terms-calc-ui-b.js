@@ -349,8 +349,8 @@
       const qFleetPrioSber=qFleetPrio?fleetSubQuote(Math.max(0, 2333000-tiMpt), subAmt, down, addons, pack||0, months, !!(showSub && subAmt), 24):null;
       const banksMptPrio=qFleetPrio&&typeof fleetBanksFrom==="function"?fleetBanksFrom(qFleetPrio, qFleetPrioSber, months):[];
       const prioKmTxt=useTi?"−100 тыс. с трейд-ин":"0 тыс. без трейд-ин";
-      const fleetWarn=(showSub||showFleet)?pvMinBox(fleetPvHave(qFleet), qFleet&&qFleet.base, 20, "свои + субсидия"):{low:false,html:""};
-      const fleetPrioWarn=qFleetPrio?pvMinBox(fleetPvHave(qFleetPrio), qFleetPrio.base, 20, "свои + субсидия"):{low:false,html:""};
+      const fleetWarn=(showSub||showFleet)?pvMinBox(fleetPvHave(qFleet, tiMpt), (qFleet&&qFleet.base||0)+tiMpt, 20, "деньги клиента + ТИ + субсидия"):{low:false,html:""};
+      const fleetPrioWarn=qFleetPrio?pvMinBox(fleetPvHave(qFleetPrio, tiMpt), (qFleetPrio.base||0)+tiMpt, 20, "деньги клиента + ТИ + субсидия"):{low:false,html:""};
       const pangoWarn=(_pg&&pFix>0)?pvMinBox(pDownP, pFix, 10, "первый взнос"):{low:false,html:""};
       return banner("Калькулятор","КМ и платёж · база "+TERMS_DATE,"TENET")+`
         <p class="lead">${pangoOnly?"Только спеццена PANGO. Директ и флит для этого VIN не считаем.":pShow?"Три расчёта рядом: директ, флит с субсидией бренда и спеццена PANGO.":"Сначала комплектация. Кредит и СЖ открываются галочкой «Кредит»."}</p>

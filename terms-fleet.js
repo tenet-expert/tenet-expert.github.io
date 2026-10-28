@@ -98,9 +98,9 @@
       const paid=Math.max(0, Math.round((q&&q.early)||0)+Math.round((q&&q.earlyOver)||0));
       return {deal, after:Math.max(0, deal-paid), pv:Math.max(0, Math.round((q&&q.pv)||0))};
     }
-    function fleetPvHave(q){
+    function fleetPvHave(q, ti){
       if(!q) return 0;
-      return Math.max(0, Math.round(Number(q.pv)||0)+Math.round(Number(q.early)||0)+Math.round(Number(q.earlyOver)||0)+Math.round(Number(q.sub)||0));
+      return Math.max(0, Math.round(Number(q.pv)||0)+Math.round(Number(q.early)||0)+Math.round(Number(q.earlyOver)||0)+Math.round(Number(q.sub)||0)+Math.max(0, Math.round(Number(ti)||0)));
     }
     function pvMinBox(have, base, minPct, how){
       base=Math.max(0, Math.round(Number(base)||0));
@@ -215,7 +215,7 @@
       const finDelta=(addons-70000)+(pack-150000);
       const q=fleetSubQuote(base, subAmt, down, addons, pack, months, isSub, 22.5);
       const qSber=fleetSubQuote(base, subAmt, down, addons, pack, months, isSub, 24);
-      const fleetWarn=pvMinBox(fleetPvHave(q), q.base, 20, "свои + субсидия");
+      const fleetWarn=pvMinBox(fleetPvHave(q, tiCut), q.base+tiCut, 20, "деньги клиента + ТИ + субсидия");
       const creditMpt=q.credit;
       const banksMpt=fleetBanksFrom(q, qSber, months);
       const priceReg=Math.max(0, (m&&m.rrc?m.rrc:f.rrc)-(useTi&&m&&m.ti?m.ti:0));
@@ -376,7 +376,7 @@
               ${useMpt
                 ? `<div class="bank-row"><span>МПТ −10%</span><span class="pay">${rub(mptCut)} ₽</span></div>`
                 : (useSub?`<div class="bank-row"><span>Субсидия бренда AQ</span><span class="pay">${rub(subCut)} ₽</span></div>`:`<div class="bank-row"><span>Субсидия TENET</span><span class="pay">${rub(f.sub||0)} ₽</span></div>`)}
-              <p class="calc-note">${useSub?"Порядок: флит"+(useTi?" + трейд-ин":"")+" → субсидия бренда. ПВ + субсидия не больше 49%. Остаток до 25% сокращает срок, не платёж.":"Порядок: флит"+(useTi?" + трейд-ин":"")+"."}</p>
+              <p class="calc-note">${useSub?"Порядок: флит"+(useTi?" + трейд-ин":"")+" → субсидия бренда. Мин. ПВ 20% = деньги клиента + ТИ + субсидия. ПВ + субсидия не больше 49%. Остаток до 25% сокращает срок, не платёж.":"Порядок: флит"+(useTi?" + трейд-ин":"")+". Мин. ПВ 20% = деньги клиента + ТИ + субсидия."}</p>
             </div>
         <div class="km-bottom">
           <div class="card dc-result ok">
