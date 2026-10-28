@@ -161,7 +161,7 @@
       const notes=[];
       if(typeof PANGO_ONLY!=="undefined"&&PANGO_ONLY[r.vin]) notes.push("спеццена · сотрудник · 1 хоз ГИБДД · 500 км · только PANGO");
       if(superOn) notes.push("СУПЕРСПЕЦ "+Math.round(EXCL_FIX[r.vin].cash/1000)+" нал / "+Math.round(EXCL_FIX[r.vin].ti/1000)+" с ТИ");
-      if(typeof KM_FORK!=="undefined"&&KM_FORK[r.vin]) notes.push("КМ 50 тыс. с трейд-ин · 100 без");
+      if(typeof KM_FORK!=="undefined"&&KM_FORK[r.vin]) notes.push("КМ "+KM_FORK[r.vin].ti+" тыс. с трейд-ин · "+KM_FORK[r.vin].cash+" без");
       if(r.note) notes.push(r.note);
       return `<article class="st-row${tone?" "+tone:""}${reservedCls}${r.invoice?" is-invoice":""}" data-st-card>
         <div class="st-swatch" aria-hidden="true"></div>
