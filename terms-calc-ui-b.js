@@ -460,7 +460,7 @@
               <div class="pay-cell prio"><p class="calc-note">${qFleet.price>qFleetPrio.price?"Дешевле обычного флита на "+rub(qFleet.price-qFleetPrio.price)+".":""}</p></div>
             </div>`:`<p class="eyebrow">${showFleet||isPlus?"Флит · Совкомбанк 22,5% · Сбер 24%":showSub?"Флит · субсидия бренда":"Флит · Совкомбанк 22,5% · Сбер 24%"}</p>
             ${fleetWarn.low
-              ? fleetWarn.html+`<p class="calc-note">Флит не считаем: деньги клиента + ТИ + субсидия ниже 20% РРЦ.</p>`
+              ? fleetWarn.html+`<p class="calc-note">Флит не считаем. Деньги клиента + ТИ + субсидия должны быть не меньше 20% РРЦ.</p>`
               : `${fleetWarn.html}
             ${typeof fleetBodyTop==="function"?fleetBodyTop(qFleet):""}
             ${kmPayRows(banksMpt,"payMpt","overMpt")}

@@ -4054,37 +4054,37 @@ async function pingTelegram(body){
       const v=String(el.value||"").trim();
       return v||def;
     }
-    let kmDownKeep={sum:null,pct:null,price:null};
+    let kmDownKeep={sum:null,pct:null,price:null,mode:null};
     function kmDownRead(price, fresh, persist){
-      const downMode=kmStr("cDownMode","pct");
+      const modeEl=document.getElementById("cDownMode");
+      const downMode=modeEl?kmStr("cDownMode","pct"):(kmDownKeep.mode||"pct");
       const priceN=Math.max(0, Number(price)||0);
       const pctEl=document.getElementById("cDownPct");
       const sumEl=document.getElementById("cDown");
       const keep=kmDownKeep;
+      const sticky=keep.sum;
       let downPct, down, exactSum=false;
       if(fresh){
         downPct=20;
         down=Math.round(priceN*0.2);
-      }else if(sumEl && !pctEl){
-        down=kmVal("cDown", keep.sum!=null?keep.sum:Math.round(priceN*0.2));
-        exactSum=keep.sum===down && keep.pct!=null && keep.price===priceN;
+      }else if(downMode==="sum" || (sumEl && !pctEl)){
+        const typed=sumEl?kmVal("cDown", NaN):NaN;
+        down=Number.isFinite(typed)?typed:(sticky!=null?sticky:Math.round(priceN*0.2));
+        exactSum=sticky===down && keep.pct!=null && keep.price===priceN;
         downPct=exactSum?keep.pct:(priceN>0?Math.round(down*1000/priceN)/10:0);
       }else if(pctEl && !sumEl){
         downPct=kmVal("cDownPct", keep.pct!=null?keep.pct:20);
-        exactSum=keep.pct===downPct && keep.sum!=null && keep.price===priceN;
-        down=exactSum?keep.sum:Math.round(priceN*Math.max(0,downPct)/100);
-      }else if(downMode==="pct"){
-        downPct=keep.pct!=null?keep.pct:20;
-        exactSum=keep.pct===downPct && keep.sum!=null && keep.price===priceN;
-        down=exactSum?keep.sum:Math.round(priceN*Math.max(0,downPct)/100);
+        exactSum=keep.pct===downPct && sticky!=null && keep.price===priceN;
+        down=exactSum?sticky:Math.round(priceN*Math.max(0,downPct)/100);
       }else{
-        down=keep.sum!=null?keep.sum:Math.round(priceN*0.2);
-        exactSum=keep.sum===down && keep.price===priceN && keep.pct!=null;
-        downPct=exactSum?keep.pct:(priceN>0?Math.round(down*1000/priceN)/10:0);
+        downPct=keep.pct!=null?keep.pct:20;
+        exactSum=keep.pct===downPct && sticky!=null && keep.price===priceN;
+        down=exactSum?sticky:Math.round(priceN*Math.max(0,downPct)/100);
       }
-      down=Math.max(0, Math.min(priceN, down));
-      if(exactSum) down=keep.sum;
-      if(persist!==false) kmDownKeep={sum:down, pct:downPct, price:priceN};
+      down=Math.max(0, Math.round(Number(down)||0));
+      if(priceN>0) down=Math.min(priceN, down);
+      if(exactSum && sticky!=null) down=sticky;
+      if(persist!==false) kmDownKeep={sum:down, pct:downPct, price:priceN, mode:downMode};
       return {downMode, down, downPct};
     }
     function kmChipGroups(active){
@@ -4673,7 +4673,7 @@ async function pingTelegram(body){
               <div class="pay-cell prio"><p class="calc-note">${qFleet.price>qFleetPrio.price?"Дешевле обычного флита на "+rub(qFleet.price-qFleetPrio.price)+".":""}</p></div>
             </div>`:`<p class="eyebrow">${showFleet||isPlus?"Флит · Совкомбанк "+fleetRateTxt(qFleet.rate)+"%":showSub?"Флит · субсидия бренда":"Флит · Совкомбанк "+fleetRateTxt(qFleet.rate)+"%"}</p>
             ${fleetWarn.low
-              ? fleetWarn.html+`<p class="calc-note">Флит не считаем: деньги клиента + ТИ + субсидия ниже 20% РРЦ.</p>`
+              ? fleetWarn.html+`<p class="calc-note">Флит не считаем. Деньги клиента + ТИ + субсидия должны быть не меньше 20% РРЦ.</p>`
               : `${fleetWarn.html}
             ${typeof fleetBodyTop==="function"?fleetBodyTop(qFleet):""}
             ${kmPayRows(banksMpt,"payMpt","overMpt")}
@@ -8791,7 +8791,13 @@ async function confirmCloud(rec){
       if(kmVinFind) kmVinFind.onkeydown=(e)=>{ if(e.key==="Enter"){ e.preventDefault(); kmApplyVin(kmVinFind.value); } };
       ["kmRrc","kmInv","kmUseTi","kmUseLoyal","kmFleetDisc","kmFleetMpt","kmUseLoyal","kmFleetDisc","kmFleetMpt","kmUseLoyal","kmFleetDisc","kmFleetMpt","kmUseLoyal","kmFleetDisc","kmFleetMpt","kmUseLoyal","kmFleetDisc","kmFleetMpt","kmUseLoyal","kmFleetDisc","kmFleetMpt","kmUseLoyal","kmFleetDisc","kmFleetMpt","kmUseLoyal","kmFleetDisc","kmFleetMpt","kmUseLoyal","kmFleetDisc","kmFleetMpt","kmUseLoyal","kmFleetDisc","kmFleetMpt","kmUseLoyal","kmFleetDisc","kmFleetMpt","kmUseLoyal","kmFleetDisc","kmFleetMpt","kmUseLoyal","kmFleetDisc","kmFleetMpt","kmUseLoyal","kmFleetDisc","kmFleetMpt","cDownMode","cDown","cDownPct","cMonths","kmUseLoan","kmUseCr","kmSpec","kmUseDcTi","kmUseDcCr","kmDcTi","kmDcCr","kmDo","kmPack","kmCasco","kmAltId","kmAltLoyal","kmAltDcTi","kmFleetSub"].forEach(id=>{
         const el=document.getElementById(id);
-        if(el) el.addEventListener("change", ()=>{ view="calc"; render(); });
+        if(el) el.addEventListener("change", ()=>{
+          if(id==="cDown" && typeof kmDownKeep==="object"){
+            const n=Number(String(el.value||"").replace(/\s+/g,""));
+            if(Number.isFinite(n)) kmDownKeep.sum=n;
+          }
+          view="calc"; render();
+        });
       });
       const cPreset=document.getElementById("cPreset");
       if(cPreset) cPreset.onchange=()=>{
@@ -8802,7 +8808,7 @@ async function confirmCloud(rec){
         if(down) down.value=String(Math.round(p*0.2));
         view="calc"; render();
       };
-      ["cPrice","cDown","cMonths","cRate"].forEach(id=>{
+      ["cPrice","cMonths","cRate"].forEach(id=>{
         const el=document.getElementById(id);
         if(el) el.addEventListener("change", ()=>{ view="calc"; render(); });
       });

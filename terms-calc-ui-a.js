@@ -164,37 +164,37 @@
       const v=String(el.value||"").trim();
       return v||def;
     }
-    let kmDownKeep={sum:null,pct:null,price:null};
+    let kmDownKeep={sum:null,pct:null,price:null,mode:null};
     function kmDownRead(price, fresh, persist){
-      const downMode=kmStr("cDownMode","pct");
+      const modeEl=document.getElementById("cDownMode");
+      const downMode=modeEl?kmStr("cDownMode","pct"):(kmDownKeep.mode||"pct");
       const priceN=Math.max(0, Number(price)||0);
       const pctEl=document.getElementById("cDownPct");
       const sumEl=document.getElementById("cDown");
       const keep=kmDownKeep;
+      const sticky=keep.sum;
       let downPct, down, exactSum=false;
       if(fresh){
         downPct=20;
         down=Math.round(priceN*0.2);
-      }else if(sumEl && !pctEl){
-        down=kmVal("cDown", keep.sum!=null?keep.sum:Math.round(priceN*0.2));
-        exactSum=keep.sum===down && keep.pct!=null && keep.price===priceN;
+      }else if(downMode==="sum" || (sumEl && !pctEl)){
+        const typed=sumEl?kmVal("cDown", NaN):NaN;
+        down=Number.isFinite(typed)?typed:(sticky!=null?sticky:Math.round(priceN*0.2));
+        exactSum=sticky===down && keep.pct!=null && keep.price===priceN;
         downPct=exactSum?keep.pct:(priceN>0?Math.round(down*1000/priceN)/10:0);
       }else if(pctEl && !sumEl){
         downPct=kmVal("cDownPct", keep.pct!=null?keep.pct:20);
-        exactSum=keep.pct===downPct && keep.sum!=null && keep.price===priceN;
-        down=exactSum?keep.sum:Math.round(priceN*Math.max(0,downPct)/100);
-      }else if(downMode==="pct"){
-        downPct=keep.pct!=null?keep.pct:20;
-        exactSum=keep.pct===downPct && keep.sum!=null && keep.price===priceN;
-        down=exactSum?keep.sum:Math.round(priceN*Math.max(0,downPct)/100);
+        exactSum=keep.pct===downPct && sticky!=null && keep.price===priceN;
+        down=exactSum?sticky:Math.round(priceN*Math.max(0,downPct)/100);
       }else{
-        down=keep.sum!=null?keep.sum:Math.round(priceN*0.2);
-        exactSum=keep.sum===down && keep.price===priceN && keep.pct!=null;
-        downPct=exactSum?keep.pct:(priceN>0?Math.round(down*1000/priceN)/10:0);
+        downPct=keep.pct!=null?keep.pct:20;
+        exactSum=keep.pct===downPct && sticky!=null && keep.price===priceN;
+        down=exactSum?sticky:Math.round(priceN*Math.max(0,downPct)/100);
       }
-      down=Math.max(0, Math.min(priceN, down));
-      if(exactSum) down=keep.sum;
-      if(persist!==false) kmDownKeep={sum:down, pct:downPct, price:priceN};
+      down=Math.max(0, Math.round(Number(down)||0));
+      if(priceN>0) down=Math.min(priceN, down);
+      if(exactSum && sticky!=null) down=sticky;
+      if(persist!==false) kmDownKeep={sum:down, pct:downPct, price:priceN, mode:downMode};
       return {downMode, down, downPct};
     }
     function kmChipGroups(active){
