@@ -185,6 +185,11 @@ def main():
         changed = patch(p) or changed
     if not changed:
         print("no file changed")
+    try:
+        import runpy
+        runpy.run_path(str(Path(__file__).with_name("patch_tune_debt.py")), run_name="__main__")
+    except Exception as e:
+        print("patch_tune_debt failed:", e)
 
 if __name__ == "__main__":
     main()
