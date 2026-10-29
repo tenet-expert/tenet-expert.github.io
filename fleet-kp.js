@@ -183,6 +183,7 @@
   };
   const _offer = offer;
   offer = function(){
+    if (offerTab==="lease") offerTab="fleet";
     if (offerTab==="fleet" && !(typeof needAuth==="function" && needAuth())) {
       try { return offerFleet(); } catch(e) { console.warn("fleet-kp", e); }
     }
