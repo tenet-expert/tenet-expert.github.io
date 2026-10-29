@@ -174,3 +174,19 @@ def patch_scans():
         s=s.replace('<p class="eyebrow">Скан прайса</p>','<p class="eyebrow">Официальный документ · стр. 1</p>')
         if s!=o: open(f,"w",encoding="utf-8").write(s)
 if __name__=="__main__": patch_scans()
+
+# --- 29.10: Tiggo 9 table from chery.ru/models/tiggo9/ (prices "с учетом всех выгод", актуальны на 01.10.2026) ---
+T9_SRC="https://www.chery.ru/models/tiggo9/"
+def patch_t9():
+    import re
+    f="docs/t9-price.html"; s=open(f,encoding="utf-8").read(); o=s
+    lead=('<p class="lead">Цены с сайта <a href="%s" target="_blank" rel="noopener">chery.ru</a>, актуальны на 01.10.2026. '
+          'Это «максимальная цена перепродажи с учётом всех выгод / маркетинговых акций» — цен без выгоды на сайте нет. '
+          'Все версии 2.0 TGDI 245 л.с., 8АКПП.</p>')%T9_SRC
+    s=re.sub(r'<p class="lead">[^\n]*?</p>',lead,s,count=1)
+    rows=[("Прайм / Prime","2024","3 635 000"),("Ультра / Ultra","2024","3 940 000"),("Прайм / Prime","2025","3 785 000"),("Ультра / Ultra","2025","4 190 000")]
+    tb='<h2>Tiggo 9</h2><table><thead><tr><th>Комплектация</th><th>Год выпуска</th><th>Цена с учётом выгод, от</th></tr></thead><tbody>'+''.join(
+       '<tr><td>%s</td><td>%s</td><td class="num">%s ₽</td></tr>'%r for r in rows)+'</tbody></table><p class="src">Источник: <a href="%s" target="_blank" rel="noopener">%s</a> · цена на 01.10.2026 · не оферта.</p>'%(T9_SRC,T9_SRC)
+    s=re.sub(r'<h2>Tiggo 9</h2><table>.*?</table>(<p class="src">.*?</p>)?',lambda m:tb,s,count=1,flags=re.S)
+    if s!=o: open(f,"w",encoding="utf-8").write(s)
+if __name__=="__main__": patch_t9()
