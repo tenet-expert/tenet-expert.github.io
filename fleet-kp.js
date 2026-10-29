@@ -157,9 +157,17 @@
     return {mid: v("ofModel", null), cat: v("flCat","c1"), ti: v("flTi","1")==="1",
       tuning: Number(String(v("flTune","0")).replace(/\s+/g,""))||0, lessor: v("flLessor", FLEET_KP_LESSORS[0]), client: v("flClient","")};
   }
+  // Tiggo 9 и Arrizo 8 во флит-КП не продаются (решение 29.10.2026).
+  const FLEET_KP_SKIP = {t9:1, a8:1};
+  const fleetOk = m => m && !FLEET_KP_SKIP[m.stock];
   function offerFleet(){
     const o = fleetOpts();
-    const d = offerDeal();
+    let d = offerDeal();
+    if (!fleetOk(d.m)) {
+      const first = (d.models||[]).find(fleetOk), sel = document.getElementById("ofModel");
+      if (first && sel) { if (![...sel.options].some(x=>x.value===first.id)) sel.add(new Option("", first.id)); sel.value = first.id; d = offerDeal(); }
+    }
+    d.models = (d.models||[]).filter(fleetOk);
     o.mid = d.m.id;
     const doc = fleetKpDoc(o);
     const opt = (id, cur, list) => `<select id="${id}" class="of-select">${list.map(([k,l])=>`<option value="${escape(k)}"${k===cur?" selected":""}>${escape(l)}</option>`).join("")}</select>`;
