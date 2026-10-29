@@ -79,14 +79,39 @@
       if(s.includes("7 мест")) r+=1;
       return r;
     }
+
+    function stockTrimName(t){
+      const s=String(t||"").trim();
+      return s||"Без комплектации";
+    }
+    function stockVinTail(vin){
+      const v=String(vin||"").toUpperCase();
+      if(!v) return "";
+      return v.length<=8?v:v.slice(-8);
+    }
+    function stockStay(r){
+      const note=String(r&&r.note||"");
+      const m=note.match(/(\d{2})\.(\d{2})\.(\d{4})/);
+      let days=null;
+      if(m){
+        const dt=new Date(Number(m[3]), Number(m[2])-1, Number(m[1]));
+        const now=new Date();
+        const a=new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const b=new Date(dt.getFullYear(), dt.getMonth(), dt.getDate());
+        if(!isNaN(b.getTime())) days=Math.max(0, Math.round((a-b)/86400000));
+      }
+      const way=!!(r&&r.status==="way");
+      const label=way?"в пути":(m?("в салоне с "+m[1]+"."+m[2]):"в салоне");
+      const daysTxt=days==null?"":(days+" дн.");
+      return {label:label, daysTxt:daysTxt, line:[label, daysTxt].filter(Boolean).join(" · ")};
+    }
     function stockCmp(a,b){
       const dir=(typeof stockSortDir==="number"?stockSortDir:1)||1;
       const key=(typeof stockSort==="string"&&stockSort)||"trim";
       let d=0;
       if(key==="price") d=stockRrc(a)-stockRrc(b);
       else if(key==="color") d=String(a.color||"").localeCompare(String(b.color||""),"ru");
-      else if(key==="year") d=stockYear(a)-stockYear(b);
-      else d=stockTrimRank(a.trim)-stockTrimRank(b.trim)||String(a.trim||"").localeCompare(String(b.trim||""),"ru");
+      else d=stockTrimName(a.trim).localeCompare(stockTrimName(b.trim),"ru");
       if(!d) d=String(a.color||"").localeCompare(String(b.color||""),"ru");
       if(!d) d=String(a.vin||"").localeCompare(String(b.vin||""));
       return d*dir;
@@ -102,9 +127,8 @@
       const key=(typeof stockSort==="string"&&stockSort)||"trim";
       groups.sort((A,B)=>{
         if(key==="price") return (Math.min.apply(null,A.rows.map(stockRrc))-Math.min.apply(null,B.rows.map(stockRrc)))*dir;
-        if(key==="year") return (Math.max.apply(null,A.rows.map(stockYear))-Math.max.apply(null,B.rows.map(stockYear)))*dir;
         if(key==="color") return String((A.rows[0]&&A.rows[0].color)||"").localeCompare(String((B.rows[0]&&B.rows[0].color)||""),"ru")*dir;
-        return (stockTrimRank(A.trim)-stockTrimRank(B.trim)||A.trim.localeCompare(B.trim,"ru"))*dir;
+        return stockTrimName(A.trim).localeCompare(stockTrimName(B.trim),"ru")*dir;
       });
       return groups;
     }
@@ -150,10 +174,9 @@
       return "";
     }
     function stockCard(r){
-      const salon=salonLabel(r.salon);
       const price=stockRrc(r);
-      const year=stockYear(r);
-      const meta=[r.color, year?String(year):"", salon].filter(Boolean).join(" · ");
+      const stay=stockStay(r);
+      const tail=stockVinTail(r.vin);
       const reservedCls=r.reserved?" is-reserved":"";
       const reservedBadge=r.reserved?`<span class="st reserved">Забронирован</span>`:"";
       const tone=stockTone(r.color);
@@ -163,21 +186,31 @@
       if(superOn) notes.push("СУПЕРСПЕЦ "+Math.round(EXCL_FIX[r.vin].cash/1000)+" нал / "+Math.round(EXCL_FIX[r.vin].ti/1000)+" с ТИ");
       if(typeof KM_FORK!=="undefined"&&KM_FORK[r.vin]) notes.push("КМ "+KM_FORK[r.vin].ti+" тыс. с трейд-ин · "+KM_FORK[r.vin].cash+" без");
       if(r.note) notes.push(r.note);
-      return `<article class="st-row${tone?" "+tone:""}${reservedCls}${r.invoice?" is-invoice":""}" data-st-card>
+      const open=(typeof stockCardVin==="string" && stockCardVin && stockCardVin===r.vin)?" open":"";
+      const priceTxt=price?rub(price)+" ₽":"—";
+      const model=r.name||"";
+      const trim=r.trim||"";
+      return `<article class="st-row${tone?" "+tone:""}${reservedCls}${r.invoice?" is-invoice":""}${open}" data-st-card data-vin="${escape(r.vin||"")}">
         <div class="st-swatch" aria-hidden="true"></div>
         <div class="st-face">
-          <b class="st-name">${escape(r.name||"")}${superOn?" · СУПЕРСПЕЦ":""}</b>
-          <small class="st-color">${escape(r.color||"—")}${year?" · "+year:""}</small>
-          <b class="st-price">${price?rub(price)+" ₽":"—"}</b>
+          <b class="st-name">${escape(model)}${superOn?" · СУПЕРСПЕЦ":""}</b>
+          <span class="st-trim">${escape(trim||"—")}</span>
+          <span class="st-tail">${tail?escape(tail):""}</span>
+          <span class="st-when">${escape(stay.line)}</span>
+          <b class="st-price">${priceTxt}</b>
           <div class="st-flags-mini">${stockBadges(r)}${reservedBadge}</div>
         </div>
         <div class="st-more">
-          <small>${escape(meta)}</small>
-          <small class="st-vin">${escape(r.vin||"")}${notes.length?" · "+escape(notes.join(" · ")):""}</small>
+          <p class="st-keep"><b>${escape(model)}</b>${trim?" · "+escape(trim):""}</p>
+          <p class="st-keep-price">${priceTxt}</p>
+          <div class="st-flags-mini">${stockBadges(r)}${reservedBadge}</div>
+          <p class="st-vin">${escape(r.vin||"")}</p>
+          ${notes.length?`<p class="st-notes">${escape(notes.join(" · "))}</p>`:""}
           <button type="button" class="chip st-calc" data-km-vin="${escape(r.vin)}">Калькулятор</button>
         </div>
       </article>`;
     }
+
     const TEST_SALE = [
       {id:"tst8", short:"Tiggo 8 Pro Max", model:"CHERY Tiggo 8 Pro Max", vin:"LVTDD24B5RD409189", rrc:3885000, tune:212000, year:2024, km:3700, fix:2750000},
       {id:"tst4", short:"Tiggo 4", model:"CHERY Tiggo 4", vin:"LVVDB21B8RC106478", rrc:2395000, tune:164200, year:2024, km:4983, fix:2150000},
@@ -206,28 +239,39 @@
     }
     function stock(){
       if(needAuth()) return login();
-      if(typeof stockSort!=="string") stockSort="trim";
+      if(typeof stockSort!=="string" || stockSort==="year") stockSort="trim";
       if(typeof stockSortDir!=="number") stockSortDir=1;
       if(typeof stockOpen!=="object" || !stockOpen) stockOpen={};
+      if(typeof stockInv!=="string") stockInv="all";
+      if(typeof stockCardVin!=="string") stockCardVin="";
       const meta=typeof STOCK_META==="object"?STOCK_META:{updated:"11.09.2026"};
       const sale=(typeof STOCK!=="undefined"?STOCK:[]);
       const q=stockVinNorm(typeof stockVin==="string"?stockVin:"");
+      const invOk=x=>stockInv==="inv"?!!x.invoice:(stockInv==="direct"?!x.invoice:true);
       const list=sale.filter(x=>{
         if(q) return stockVinNorm(x.vin).indexOf(q)>=0;
         if(stockFilter!=="all" && x.model!==stockFilter) return false;
+        if(stockStatus==="test") return false;
         if(stockStatus!=="all" && x.status!==stockStatus) return false;
+        if(!invOk(x)) return false;
         return true;
       });
-      const scoped=stockFilter==="all"?sale:sale.filter(x=>x.model===stockFilter);
-      const nIn=scoped.filter(x=>x.status==="in").length;
-      const nWay=scoped.filter(x=>x.status==="way").length;
+      const modelScoped=stockFilter==="all"?sale:sale.filter(x=>x.model===stockFilter);
+      const statusScoped=modelScoped.filter(invOk);
+      const scoped=statusScoped;
+      const nIn=statusScoped.filter(x=>x.status==="in").length;
+      const nWay=statusScoped.filter(x=>x.status==="way").length;
+      const invScoped=modelScoped.filter(x=>stockStatus==="all"||stockStatus==="test"||x.status===stockStatus);
+      const nInv=invScoped.filter(x=>!!x.invoice).length;
+      const nDir=invScoped.filter(x=>!x.invoice).length;
       const byModel={};
       list.forEach(r=>{ (byModel[r.model]=byModel[r.model]||[]).push(r); });
       const ids=stockIds(byModel);
-      const sorts=[["price","Цена"],["color","Цвет"],["year","Год"],["trim","Комплектация"]];
+      const sorts=[["price","Цена"],["color","Цвет"],["trim","Комплектация"]];
       const sortBtns=sorts.map(([k,lab])=>{
         const on=stockSort===k;
-        const arrow=on?(stockSortDir<0?" ↓":" ↑"):"";
+        const dir=on?stockSortDir:1;
+        const arrow=dir<0?" ↓":" ↑";
         return `<button type="button" class="chip ${on?"on":""}" data-stock-sort="${k}">${lab}${arrow}</button>`;
       }).join("");
       const testOn=stockStatus==="test" && !q;
@@ -243,16 +287,6 @@
             const bits=[];
             if(inn) bits.push(inn+" в наличии");
             if(way) bits.push(way+" в пути");
-            if(stockSort==="price"){
-              const prices=rows.map(stockRrc).filter(Boolean);
-              if(prices.length) bits.unshift("от "+rub(Math.min.apply(null,prices))+" ₽");
-            }else if(stockSort==="year"){
-              const years=rows.map(stockYear).filter(Boolean);
-              if(years.length) bits.unshift(String(Math.max.apply(null,years)));
-            }else if(stockSort==="color"){
-              const color=((rows.slice().sort(stockCmp)[0])||{}).color;
-              if(color) bits.unshift(color);
-            }
             const opened = stockOpened("m:"+id, !!q || stockFilter===id || ids.length===1);
             const groups=stockTrimGroups(rows);
             const trims=groups.map(g=>{
@@ -269,7 +303,8 @@
               </details>`;
             }).join("");
             const tone=m.brand==="CHERY"?" chery":"";
-            return `<details class="st-acc${tone}" data-acc="m:${id}" ${opened?"open":""}>
+            const few=rows.length<=4?" is-few":"";
+            return `<details class="st-acc${tone}${few}" data-acc="m:${id}" ${opened?"open":""}>
               <summary>
                 <span class="st-id"><small>${escape(m.brand)}</small><b>${escape(m.name)}</b></span>
                 <span class="st-meta"><span class="st-count">${rows.length}${bits.length?" · "+bits.join(" · "):""}</span><i class="st-chev" aria-hidden="true"></i></span>
@@ -283,13 +318,17 @@
       const typed=escape(typeof stockVin==="string"?stockVin:"");
       return banner("Склад", `Logicstars · ${meta.updated}`, "TENET")+`
         <p class="lead">${q?"Поиск по VIN по складу и тестам. Хвост номера тоже подходит.":(testOn?"Четыре теста. Цена в последней колонке фиксированная, продажа только через PANGO.":"Сначала модель, внутри — комплектация. Сортировка меняет порядок машин и групп.")}</p>
-        <input id="stockVin" class="st-vin-search" type="search" inputmode="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Поиск по VIN" value="${typed}">
+        <div class="st-sticky"><input id="stockVin" class="st-vin-search" type="search" inputmode="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Поиск по VIN" value="${typed}"></div>
         <div class="study-pick st-filters">
           <button class="chip ${stockStatus==="all"?"on":""}" data-stock-st="all">Все · ${scoped.length}</button>
           <button class="chip ${stockStatus==="in"?"on":""}" data-stock-st="in">В наличии · ${nIn}</button>
           <button class="chip ${stockStatus==="way"?"on":""}" data-stock-st="way">В пути · ${nWay}</button>
           <button class="chip ${stockStatus==="test"?"on":""}" data-stock-st="test">Тесты в продаже · ${(typeof TEST_SALE!=="undefined"?TEST_SALE.length:0)}</button>
         </div>
+        ${testOn?"":`<div class="study-pick st-filters st-inv">
+          <button type="button" class="chip ${stockInv==="inv"?"on":""}" data-stock-inv="inv">Спец инвойс · ${nInv}</button>
+          <button type="button" class="chip ${stockInv==="direct"?"on":""}" data-stock-inv="direct">Директ · ${nDir}</button>
+        </div>`}
         ${testOn?"":`<div class="study-pick st-filters st-sorts">
           <span class="st-sort-lab">Сортировка</span>
           ${sortBtns}

@@ -12,7 +12,7 @@
       const prog=dutyCount(d);
       const pct=prog.tot?Math.round(prog.on*100/prog.tot):0;
       const cards=cars.map(car=>{
-        const body=d[car.id+"_body"]||"ok";
+        const body=d[car.id+"_body"]||"";
         return `<article class="cl-car">
           <h3>${car.title}</h3>
           ${dutyItem(car.id+"_wash","Омывающая", d[car.id+"_wash"])}
@@ -22,6 +22,7 @@
           ${dutyItem(car.id+"_trunk","Багажник", d[car.id+"_trunk"])}
           <label class="cl-item" style="display:block">Кузов
             <select data-duty="${car.id}_body">
+              <option value="" ${body?"":"selected"}>—</option>
               <option value="ok" ${body==="ok"?"selected":""}>чистый</option>
               <option value="pm" ${body==="pm"?"selected":""}>±</option>
               <option value="no" ${body==="no"?"selected":""}>грязный</option>

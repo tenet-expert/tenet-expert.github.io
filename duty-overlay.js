@@ -38,8 +38,8 @@
     const plus=(typeof dutyIsPlus==="function")&&dutyIsPlus();
     const brand=plus?"TENET+":"TENET";
     const cars=(typeof dutyCars==="function")?dutyCars():((typeof DUTY_CARS!=="undefined")?DUTY_CARS:[
-      {id:"t4l",title:"T4L"},{id:"t7",title:"T7"},{id:"t82",title:"Т8 2WD"},
-      {id:"t8",title:"Т8 4WD"},{id:"t9",title:"Т9"},{id:"a8",title:"А8"}
+      {id:"t4l",title:"T4L"},{id:"t7",title:"T7"},{id:"t82",title:"T8 2WD"},
+      {id:"t8",title:"T8 4WD"},{id:"t9",title:"T9"},{id:"a8",title:"А8"}
     ]);
     const avitoPack=(typeof window.avitoPhotosForPrint==="function")?window.avitoPhotosForPrint():null;
     const avitoRows=(avitoPack&&Array.isArray(avitoPack.rows))?avitoPack.rows:[];

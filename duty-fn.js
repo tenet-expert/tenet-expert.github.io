@@ -396,9 +396,9 @@
     const DUTY_CARS_TENET=[
       {id:"t4l",title:"T4L"},
       {id:"t7",title:"T7"},
-      {id:"t82",title:"Т8 2WD"},
-      {id:"t8",title:"Т8 4WD"},
-      {id:"t9",title:"Т9"},
+      {id:"t82",title:"T8 2WD"},
+      {id:"t8",title:"T8 4WD"},
+      {id:"t9",title:"T9"},
       {id:"a8",title:"А8"}
     ];
     const DUTY_CARS_PLUS=[
@@ -419,7 +419,7 @@
       const cars=(typeof dutyCars==="function")?dutyCars():DUTY_CARS;
       cars.forEach(car=>{
         ["_wash","_mats","_err","_dust","_trunk","_body"].forEach(s=>{ tot++; if(dutyOk(d[car.id+s])) on++; });
-        tot+=2; if(d[car.id+"_km"]) on++; if(d[car.id+"_fuel"]) on++;
+        tot+=2; if(String(d[car.id+"_km"]==null?"":d[car.id+"_km"]).trim()) on++; { const fv=d[car.id+"_fuel"]; const fn=Number(fv); if(fv!=null && String(fv).trim()!=="" && Number.isFinite(fn) && fn>0) on++; }
       });
       ["dc_light","dc_music","dc_price_hold","dc_desk","dm_body","dm_mats","dm_trunk","dm_dust","dm_wheel","dm_bat"].forEach(k=>{ tot++; if(dutyOk(d[k])) on++; });
       return {on, tot};
@@ -431,6 +431,8 @@
       const lab=document.querySelector(".cl-prog span");
       if(bar) bar.style.width=pct+"%";
       if(lab) lab.textContent=pct+"%";
+      const eye=document.querySelector(".banner .eyebrow");
+      if(eye && document.querySelector(".cl")) eye.textContent=p.on+" из "+p.tot;
     }
     function dutyItem(k, label, raw){
       const st=dutyTri(raw);
