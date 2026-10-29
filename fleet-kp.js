@@ -136,6 +136,47 @@
     doc.calc = c;
     return doc;
   }
+  // Тестовые авто «Тесты в продаже» (TEST_SALE): цена фикс, без субсидии и без скидок флит/ТИ; итог = фикс + тюнинг.
+  const FLEET_KP_TEST_TRIM = {tst9:"t9u", tsa8:"a8u", tst4:null};
+  function fleetTests(){ return (typeof TEST_SALE!=="undefined" && Array.isArray(TEST_SALE)) ? TEST_SALE : []; }
+  function fleetKpTestDoc(opts){
+    const t = fleetTests().find(x=>x.id===opts.test);
+    if (!t) throw new Error("fleet-kp: no test car "+opts.test);
+    const cat = FLEET_KP_CATS[opts.cat] ? opts.cat : "c1";
+    const label = FLEET_KP_CATS[cat][0];
+    const tuning = Math.max(0, Math.round(Number(opts.tuning)||0));
+    const base = FLEET_KP_TEST_TRIM[t.id];
+    let doc;
+    const sel = document.getElementById("ofModel");
+    if (base && sel) {
+      const prev = sel.value;
+      if (![...sel.options].some(o=>o.value===base)) sel.add(new Option("", base));
+      sel.value = base;
+      try { const d = offerDeal(); doc = d.m && d.m.id===base ? offerDocNew(d) : null; } catch(e) { doc = null; }
+      sel.value = prev;
+      if (doc) doc.sections = (doc.sections||[]).filter(s=>!s.deals && !s.cmp);
+    }
+    if (!doc) doc = {title:"Коммерческое предложение", meta:[], sections:[], photos:[], note:""};
+    const total = ["Цена с уч. тюнинга", rubP(t.fix+tuning)];
+    const rows = [["Цена фикс (тестовый автомобиль)", rubP(t.fix)], ["Тюнинг", rubP(tuning)]];
+    const lessor = cat==="c1" ? (opts.lessor || FLEET_KP_LESSORS[0]) : null;
+    const client = String(opts.client||"").trim();
+    doc.kicker = "Флит · "+label+" · тестовый автомобиль";
+    doc.headline = t.model+" · VIN "+t.vin;
+    doc.rows = rows; doc.total = total;
+    doc.fleet = {rows, total, sub:null, contact: FLEET_KP_MGR[0]+", "+FLEET_KP_MGR[1]};
+    doc.file = "КП флит тест "+t.short+" "+t.vin.slice(-6)+(lessor?" "+lessor:"");
+    doc.meta = (lessor?[["Лизинговая компания", lessor]]:(client?[["Клиент", client]]:[])).concat([
+      ["Категория", label], ["VIN", t.vin], ["Год / пробег", t.year+" · "+rub(t.km)+" км"], ["Дата", new Date().toLocaleDateString("ru-RU")]]);
+    const notes = ["Тестовый автомобиль "+t.year+" г., пробег "+rub(t.km)+" км. Цена фикс — скидки флита и трейд-ина не применяются, субсидии нет.",
+      "Цена с уч. тюнинга = цена фикс + тюнинг.",
+      "Справочно: РРЦ нового "+rubP(t.rrc)+", на автомобиле установлено доп. оборудования на "+rubP(t.tune)+"."];
+    if (cat==="c1"||cat==="c2") notes.push("Ориентир ставки лизинга: Совкомбанк лизинг 22,5%, Сбер 24% годовых. Не оферта.");
+    if (!base) notes.push("Оснащение — по данным автомобиля в салоне; лист оснащения этой модели на сайте не ведётся.");
+    doc.sections.unshift({title:"Условия флита", lines:notes});
+    doc.calc = {test:t.id, vin:t.vin, fix:t.fix, tuning, total:t.fix+tuning, rrc:t.rrc, fleet:0, ti:0, sub:0, subOn:false, notes:[]};
+    return doc;
+  }
   async function fleetKpBytes(doc){
     const imgs = await offerLoadImgs(doc.photos||[]);
     const pages = offerPaint(doc, imgs).map(cv=>({w:cv.width,h:cv.height,jpeg:offerJpeg(cv)}));
@@ -144,6 +185,12 @@
   }
   // для бота: base64 PDF по параметрам (требует открытого раздела КП с выбранной комплектацией)
   async function fleetKpBase64(opts){
+    if (opts.test) {
+      const doc = fleetKpTestDoc(opts);
+      const u8 = await fleetKpBytes(doc);
+      let s=""; for (let i=0;i<u8.length;i+=0x8000) s+=String.fromCharCode.apply(null, u8.subarray(i,i+0x8000));
+      return {b64: btoa(s), file: offerFileName(doc), calc: doc.calc, meta: doc.meta};
+    }
     const sel = document.getElementById("ofModel");
     if (sel && sel.value!==opts.mid) { sel.value=opts.mid; sel.dispatchEvent(new Event("change",{bubbles:true})); await new Promise(r=>setTimeout(r,500)); }
     const doc = fleetKpDoc(opts);
@@ -155,7 +202,7 @@
   function fleetOpts(){
     const v = (id, def) => offerVal(id, def);
     return {mid: v("ofModel", null), cat: v("flCat","c1"), ti: v("flTi","1")==="1",
-      tuning: Number(String(v("flTune","0")).replace(/\s+/g,""))||0, lessor: v("flLessor", FLEET_KP_LESSORS[0]), client: v("flClient","")};
+      test: v("flTest",""), tuning: Number(String(v("flTune","0")).replace(/\s+/g,""))||0, lessor: v("flLessor", FLEET_KP_LESSORS[0]), client: v("flClient","")};
   }
   // Tiggo 9 и Arrizo 8 во флит-КП не продаются (решение 29.10.2026).
   const FLEET_KP_SKIP = {t9:1, a8:1};
@@ -169,14 +216,16 @@
     }
     d.models = (d.models||[]).filter(fleetOk);
     o.mid = d.m.id;
-    const doc = fleetKpDoc(o);
+    const doc = o.test ? fleetKpTestDoc(o) : fleetKpDoc(o);
     const opt = (id, cur, list) => `<select id="${id}" class="of-select">${list.map(([k,l])=>`<option value="${escape(k)}"${k===cur?" selected":""}>${escape(l)}</option>`).join("")}</select>`;
+    const tests = fleetTests();
     const form = `
-      ${offerField("Комплектация", offerModelSelect("ofModel", d.models, d.mid))}
+      ${tests.length ? offerField("Автомобиль", opt("flTest", o.test, [["","Новый (выбрать комплектацию)"]].concat(tests.map(t=>[t.id, "Тест: "+t.model+" · "+t.vin+" · фикс "+rub(t.fix)+" ₽"])))) : ""}
+      <div style="${o.test?"display:none":""}">${offerField("Комплектация", offerModelSelect("ofModel", d.models, d.mid))}</div>
       ${offerField("Категория", opt("flCat", o.cat, Object.keys(FLEET_KP_CATS).map(k=>[k, FLEET_KP_CATS[k][0]+" · "+FLEET_KP_CATS[k][1]])))}
       ${o.cat==="c1" ? offerField("Лизинговая компания (партнёр С1)", opt("flLessor", o.lessor, FLEET_KP_LESSORS.map(x=>[x,x])))
                      : offerField("Клиент", `<input id="flClient" value="${escape(o.client)}" />`)}
-      ${offerField("Трейд-ин", opt("flTi", o.ti?"1":"0", [["1","С трейд-ином"],["0","Без трейд-ина"]]))}
+      ${o.test ? "" : offerField("Трейд-ин", opt("flTi", o.ti?"1":"0", [["1","С трейд-ином"],["0","Без трейд-ина"]]))}
       ${offerField("Тюнинг, ₽", `<input id="flTune" inputmode="numeric" value="${o.tuning}" />`)}
       <p class="calc-note">Субсидия (только С1) не вычитается из цены — идёт в первый взнос. Менеджер по флиту: ${escape(FLEET_KP_MGR[0])}, ${escape(FLEET_KP_MGR[1])}.</p>`;
     return offerScreen("КП Флит", form, doc);
@@ -200,7 +249,7 @@
   const _bind = offerBind;
   offerBind = function(){
     _bind();
-    ["flCat","flLessor","flClient","flTi","flTune"].forEach(id=>{ const el=document.getElementById(id); if(el) el.addEventListener("change", ()=>{ view="offer"; render(); }); });
+    ["flTest","flCat","flLessor","flClient","flTi","flTune"].forEach(id=>{ const el=document.getElementById(id); if(el) el.addEventListener("change", ()=>{ view="offer"; render(); }); });
   };
   window.fleetKpDoc = fleetKpDoc; window.fleetKpBytes = fleetKpBytes; window.fleetKpBase64 = fleetKpBase64;
   window.FLEET_KP_LESSORS = FLEET_KP_LESSORS; window.FLEET_KP_CATS = FLEET_KP_CATS;
