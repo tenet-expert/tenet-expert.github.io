@@ -23,6 +23,17 @@ def load_manual_reserved():
             out.add(v.strip().upper())
     return out
 
+def normalize_t7_color(car):
+    """T7 only: colour «Голубой» is stored as «Сине-зелёный». Other cars and colours are left as-is."""
+    if not isinstance(car, dict):
+        return car
+    model = str(car.get("model") or "").strip().lower()
+    name = str(car.get("name") or "").strip()
+    if (model == "t7" or name == "T7") and car.get("color") == "Голубой":
+        car["color"] = "Сине-зелёный"
+    return car
+
+
 def add_payload(payload):
     global upd, cars
     if not isinstance(payload, dict):
@@ -135,6 +146,9 @@ for vin, stub in EXCL_CARS.items():
         else:
             car["note"] = note
         print("excl invoice", vin)
+
+for c in uniq:
+    normalize_t7_color(c)
 
 if len(uniq) < 40:
     print("skip stock inject, only", len(uniq), "cars")

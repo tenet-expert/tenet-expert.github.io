@@ -29,6 +29,17 @@ def load_manual():
     return out
 
 
+def normalize_t7_color(car):
+    """T7 only: colour «Голубой» is stored as «Сине-зелёный». Other cars and colours are left as-is."""
+    if not isinstance(car, dict):
+        return car
+    model = str(car.get("model") or "").strip().lower()
+    name = str(car.get("name") or "").strip()
+    if (model == "t7" or name == "T7") and car.get("color") == "Голубой":
+        car["color"] = "Сине-зелёный"
+    return car
+
+
 def main():
     pretty = "--pretty" in sys.argv[1:]
     cars, seen, upd, dealer = [], set(), "", "ООО «ЭКСПЕРТ АВТО САМАРА»"
@@ -40,6 +51,7 @@ def main():
             v = c.get("vin")
             if v and v not in seen:
                 seen.add(v)
+                normalize_t7_color(c)
                 cars.append(c)
     if len(cars) < 40:
         raise SystemExit(f"too few cars: {len(cars)}")
