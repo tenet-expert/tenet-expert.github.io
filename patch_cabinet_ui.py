@@ -265,10 +265,10 @@ DOC_HINT_FN = r'''
 
 
 def sub(text, old, new, label, optional=False):
+    if new in text:
+        print("already", label)
+        return text
     if old not in text:
-        if new in text:
-            print("already", label)
-            return text
         if optional:
             print("skip", label)
             return text
