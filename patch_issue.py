@@ -133,3 +133,11 @@ if __name__ == "__main__":
             runpy.run_path("patch_photo_links.py", run_name="__main__")
     except BaseException as e:
         print("photo-links: skipped:", e)
+    # Прайсы с официальных сайтов: DOCS + блоки в docs/*-price.html (patch_prices.py).
+    try:
+        import runpy
+        from pathlib import Path as _P
+        if _P("patch_prices.py").exists():
+            runpy.run_path("patch_prices.py", run_name="__main__")
+    except BaseException as e:
+        print("prices: skipped:", e)
