@@ -216,6 +216,88 @@ PRIO = [
 CODE.extend(PRIO)
 
 
+# 29.10.2026 (Александр): отображаемые названия комплектаций — по справочнику CM.Expert
+# (trim-dictionary.csv, тот же, что у Склада): модель латиницей, комплектация по-русски.
+# Только отображение: KM_MODELS.name, TERMS_INV / TERMS_INV_PLUS / TERMS_PRIO {model,trim}.
+# Ключи id, суммы, КМ, скидки не меняются. Старое имя модели КМ сохраняется в nm0
+# (по нему offer-логика ищет «4WD»). Применяется в apply() — после синка ТУ, в т.ч. 08/14.
+OFFER_4WD = [
+    ('if(/4wd/i.test((m&&m.name)||"") && r.price4)',
+     'if(/4wd/i.test((m&&(m.nm0||m.name))||"") && r.price4)'),
+]
+CODE.extend(OFFER_4WD)
+TRIM_MISS = []
+
+
+def _trim_dict():
+    import csv
+    out = {}
+    p = Path("trim-dictionary.csv")
+    if not p.exists():
+        return out
+    with p.open(encoding="utf-8-sig", newline="") as f:
+        for r in csv.DictReader(f):
+            o, n = (r.get("old") or "").strip(), (r.get("new") or "").strip()
+            if o and n:
+                out[o] = n
+    return out
+
+
+def rename_trims(text):
+    d = _trim_dict()
+    if not d:
+        return text
+    n_done = 0
+    sp = _span(text, "KM_MODELS")
+    if sp:
+        blk = text[sp[0]:sp[1]]
+
+        def km(m):
+            nonlocal n_done
+            row = m.group(0)
+            name = re.search(r'name:"([^"]*)"', row)
+            if not name or "nm0:" in row:
+                return row
+            new = d.get(name.group(1))
+            if not new:
+                TRIM_MISS.append("KM_MODELS " + name.group(1))
+                return row
+            if new == name.group(1):
+                return row
+            n_done += 1
+            return row.replace('name:"%s"' % name.group(1), 'name:"%s",nm0:"%s"' % (new, name.group(1)), 1)
+        blk = re.sub(r'\{id:"[^"]+"[^\n]*', km, blk)
+        text = text[:sp[0]] + blk + text[sp[1]:]
+    for blkname in ("TERMS_INV", "TERMS_INV_PLUS", "TERMS_PRIO"):
+        sp = _span(text, blkname)
+        if not sp:
+            continue
+        blk = text[sp[0]:sp[1]]
+
+        def mt(m):
+            nonlocal n_done
+            model, mid, trim = m.group(1), m.group(2), m.group(3)
+            new = d.get(model + " " + trim)
+            if not new:
+                TRIM_MISS.append(blkname + " " + model + " " + trim)
+                return m.group(0)
+            nm = d.get(model, model)
+            if new.startswith(nm + " "):
+                nmod, ntrim = nm, new[len(nm) + 1:]
+            elif new.startswith(model + " "):
+                nmod, ntrim = model, new[len(model) + 1:]
+            else:
+                nmod, ntrim = new.rsplit(" ", 1)
+            if (nmod, ntrim) == (model, trim):
+                return m.group(0)
+            n_done += 1
+            return 'model:"%s"%strim:"%s"' % (nmod, mid, ntrim)
+        blk = re.sub(r'model:"([^"]+)"(,(?:vin:"[^"]*",)?)trim:"([^"]*)"', mt, blk)
+        text = text[:sp[0]] + blk + text[sp[1]:]
+    print("km-fix: trims renamed", n_done, "| not in dictionary:", "; ".join(TRIM_MISS) or "—")
+    return text
+
+
 def fix_code(text):
     for old, new in CODE:
         if new in text:
@@ -244,7 +326,7 @@ def js_ok(html):
 
 
 def apply(text):
-    return fix_code(fix_data(text))
+    return rename_trims(fix_code(fix_data(text)))
 
 
 def main():
