@@ -117,3 +117,22 @@ def patch_rivals():
 if __name__ == "__main__":
     try: patch_rivals(); print("prices: rivals ok")
     except Exception as e: print("prices: rivals", e)
+
+# Раздел «Документы»: официальные брошюры tenet.ru (>10 МБ — ссылкой) и прайс-лифлет T4L 09.10.
+def patch_docs():
+    p = Path("index.html"); s = p.read_text(encoding="utf-8"); o = s
+    s = s.replace('{file:"docs/t4l-product.pdf", title:"T4L — карточка", kind:"Материал", pages:"PDF", note:"Краткий файл по модели"}',
+                  '{file:"docs/t4l-product.pdf", title:"Прайс-лифлет T4L · 09.10.2026", kind:"Прайс", pages:"2 стр. PDF tenet.ru", note:"Официальный лифлет: цены и оснащение Актив / Прайм. Прежний файл 02.07 заменён"}')
+    s = re.sub(r'\{file:"docs/t4l-pricelist\.pdf"[^}]*\},\s*', '', s)
+    add = [
+     ('docs/t7-pricelist.pdf', TCDN % "d3jm6n2to5r56gptk98g", '{file:"%s", title:"Брошюра T7 · tenet.ru", kind:"Материал", pages:"PDF 4,3 МБ", note:"Официальный лифлет A5 (08.10.2025) с сайта tenet.ru"},\n        '),
+     ('docs/t8-training.pdf', TCDN % "d5scj82to5ra7i054nu0", '{file:"%s", title:"Каталог T8 · 27.01.2026", kind:"Материал", pages:"PDF tenet.ru · 14 МБ", note:"Официальный каталог T8 с сайта tenet.ru"},\n        '),
+    ]
+    for anchor, url, tpl in add:
+        if url not in s:
+            s = s.replace('{file:"%s"' % anchor, (tpl % url) + '{file:"%s"' % anchor, 1)
+    if s != o: p.write_text(s, encoding="utf-8")
+
+if __name__ == "__main__":
+    try: patch_docs(); print("prices: docs ok")
+    except Exception as e: print("prices: docs", e)
