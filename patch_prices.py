@@ -169,5 +169,7 @@ def patch_scans():
         s=re.sub(r'<img class="scan" src="prices/((?!off-)[^"]+)"[^>]*>',rep,s)
         s=re.sub(r'<p class="eyebrow">Скан прайса</p>(?=\s*(?:<h2|</div>|<p|$))','',s)
         s=s.replace("Скан ниже — прайс 01.09, его клиенту не называть.","Ниже — первая страница официального прайса.")
+        s=re.sub(r'<h2>[^<]*соседние модели</h2><table>.*?</table>','',s,flags=re.S)
+        s=s.replace('<p class="eyebrow">Скан прайса</p>','<p class="eyebrow">Официальный документ · стр. 1</p>')
         if s!=o: open(f,"w",encoding="utf-8").write(s)
 if __name__=="__main__": patch_scans()
