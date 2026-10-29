@@ -141,3 +141,11 @@ if __name__ == "__main__":
             runpy.run_path("patch_prices.py", run_name="__main__")
     except BaseException as e:
         print("prices: skipped:", e)
+    # Флит-КП: вкладка «КП Флит» + флит-PDF + T4L «Технологии и мультимедиа» (patch_fleet_kp.py).
+    try:
+        import runpy
+        from pathlib import Path as _P
+        if _P("patch_fleet_kp.py").exists():
+            runpy.run_path("patch_fleet_kp.py", run_name="__main__")
+    except BaseException as e:
+        print("fleet-kp: skipped:", e)
