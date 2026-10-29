@@ -149,3 +149,25 @@ def patch_ta8():
 if __name__ == "__main__":
     try: patch_ta8(); print("prices: ta8 ok")
     except Exception as e: print("prices: ta8", e)
+
+# --- 29.10: replace stray photos (phone shots of screens) with page 1 of official PDFs ---
+SCAN_MAP={"tenet-2026-09-01.jpg@t4l-price":"off-tenet-t4l.jpg|Прайс TENET T4L · 08.10.2026, стр. 1",
+ "tenet-2026-09-01.jpg@t8-price":"off-tenet-t8.jpg|Прайс TENET T8 · 10.09.2026, стр. 1",
+ "haval-jolion.jpg":"off-haval-jolion.jpg|Прайс Haval Jolion, стр. 1","haval-m6.jpg":"off-haval-m6.jpg|Прайс Haval M6, стр. 1",
+ "haval-h3.jpg":"off-haval-h3.jpg|Прайс Haval H3, стр. 1","haval-f7.jpg":"off-haval-f7.jpg|Прайс Haval F7, стр. 1",
+ "haval-h5.jpg":"off-haval-h5.jpg|Прайс Haval H5, стр. 1","haval-h7.jpg":"off-haval-h7.jpg|Прайс Haval H7, стр. 1",
+ "haval-dargo.jpg":"off-haval-dargo.jpg|Прайс Haval Dargo, стр. 1","haval-h9.jpg":"off-haval-h9.jpg|Прайс Haval H9, стр. 1",
+ "chery-tiggo9-2026-09-01.jpg":"off-chery-tiggo9.jpg|Спецификация Tiggo 9 (chery.ru), стр. 1"}
+def patch_scans():
+    import re,glob,os
+    for f in glob.glob("docs/*.html"):
+        s=open(f,encoding="utf-8").read(); o=s; page=os.path.basename(f)[:-5]
+        def rep(m):
+            src=m.group(1); v=SCAN_MAP.get(src+"@"+page) or SCAN_MAP.get(src)
+            if not v: return ""
+            n,a=v.split("|"); return '<img class="scan" src="prices/%s" alt="%s" loading="lazy">'%(n,a)
+        s=re.sub(r'<img class="scan" src="prices/((?!off-)[^"]+)"[^>]*>',rep,s)
+        s=re.sub(r'<p class="eyebrow">Скан прайса</p>(?=\s*(?:<h2|</div>|<p|$))','',s)
+        s=s.replace("Скан ниже — прайс 01.09, его клиенту не называть.","Ниже — первая страница официального прайса.")
+        if s!=o: open(f,"w",encoding="utf-8").write(s)
+if __name__=="__main__": patch_scans()
