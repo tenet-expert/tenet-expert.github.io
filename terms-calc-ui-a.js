@@ -44,7 +44,7 @@
         const sold=!!r.sold;
         const hold=!sold && !!r.reserved;
         const n=r.seller?soldBy[r.seller]||0:0;
-        const mark=sold&&r.seller?`<span class="sold-mark">Продано · ${escape(r.seller)} <i>${n}</i></span>`:(hold&&r.seller?`<span class="hold-mark">Бронь · ${escape(r.seller)}</span>`:"");
+        const mark=sold?(r.seller?`<span class="sold-mark">Продано · ${escape(r.seller)} <i>${n}</i></span>`:`<span class="sold-mark">Продано</span>`):(hold&&r.seller?`<span class="hold-mark">Бронь · ${escape(r.seller)}</span>`:"");
         const extra=r.extra?` · ${escape(r.extra)}`:"";
         return `<li class="prio-item${sold?" sold":hold?" hold":""}">
           <div class="prio-top"><b>${i+1}. ${escape(r.model)} · ${escape(r.trim)}</b>${mark}</div>
@@ -236,7 +236,8 @@
       const downSum=d.downMode==="sum"?Math.max(0, Number(d.down)||0):null;
       const finDelta=d.useLoan?Number(d.finDelta)||0:0;
       const refPay=typeof calcPay==="function"?calcPay(price0+extra, Math.round(price0*pct/100), term, 10):0;
-      return list.filter(c=>PRIO_VINS.has(c.vin) && c.vin!==kmVin && !(typeof stockIsDemo==="function"?stockIsDemo(c):c.demo)).map(c=>{
+      const prioOff=new Set((typeof TERMS_PRIO!=="undefined"?TERMS_PRIO:[]).filter(r=>r.sold||r.reserved).map(r=>r.vin));
+      return list.filter(c=>PRIO_VINS.has(c.vin) && c.vin!==kmVin && !c.reserved && !c.sold && !prioOff.has(c.vin) && !(typeof stockIsDemo==="function"?stockIsDemo(c):c.demo)).map(c=>{
         const id=typeof kmIdFromCar==="function"?kmIdFromCar(c):"";
         const mm=KM_MODELS.find(x=>x.id===id);
         const rrc=mm?mm.rrc:(Number(c.price)||price0);
