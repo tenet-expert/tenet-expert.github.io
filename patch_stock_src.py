@@ -34,6 +34,40 @@ def normalize_t7_color(car):
     return car
 
 
+_TRIM_DICT = None
+
+
+def normalize_trim(car):
+    """Display-only: trim names from CM.Expert dictionary (trim-dictionary.csv: old,new,count).
+    Keys may be "<model> <trim>" or bare "<trim>". Applied at build time only; stock parts/feed untouched."""
+    global _TRIM_DICT
+    if not isinstance(car, dict):
+        return car
+    if _TRIM_DICT is None:
+        import csv
+        _TRIM_DICT = {}
+        p = Path("trim-dictionary.csv")
+        if p.exists():
+            try:
+                with p.open(encoding="utf-8-sig", newline="") as f:
+                    for r in csv.DictReader(f):
+                        o, n = (r.get("old") or "").strip(), (r.get("new") or "").strip()
+                        if o and n:
+                            _TRIM_DICT[o] = n
+            except Exception as e:
+                print("trim-dictionary.csv unreadable", e)
+    trim = str(car.get("trim") or "").strip()
+    name = str(car.get("name") or "").strip()
+    if not trim:
+        return car
+    full = _TRIM_DICT.get(f"{name} {trim}") if name else None
+    if full and full.startswith(name + " "):
+        car["trim"] = full[len(name) + 1:]
+    elif trim in _TRIM_DICT:
+        car["trim"] = _TRIM_DICT[trim]
+    return car
+
+
 def add_payload(payload):
     global upd, cars
     if not isinstance(payload, dict):
@@ -149,6 +183,7 @@ for vin, stub in EXCL_CARS.items():
 
 for c in uniq:
     normalize_t7_color(c)
+    normalize_trim(c)
 
 if len(uniq) < 40:
     print("skip stock inject, only", len(uniq), "cars")
