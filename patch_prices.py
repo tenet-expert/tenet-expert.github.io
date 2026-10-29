@@ -94,3 +94,26 @@ if __name__ == "__main__":
     except Exception as e: print("prices: t8", e)
     patch_index()
     print("prices: ok")
+
+# OFFER_RIVALS (КП): только модели с официальным PDF haval.ru и датой. Решение Александра 29.10.2026.
+RIVAL_FIX = [
+ ('price:2499000,src:"haval.ru, Оптимум 2WD, каталог с 17.08.2026"',
+  'price:2499000,src:"haval.ru, прайс-лист Jolion от 14.08.2026, МЦП Оптимум 2WD"'),
+ ('price:2749000,price4:3099000,trim4:"Оптимум 4WD",src:"haval.ru: от 2 549 000 с лояльным трейд-ином 200 000, здесь РРЦ без него"',
+  'price:2749000,price4:3099000,trim4:"Оптимум 4WD",src:"haval.ru, прайс-лист H3 от 17.08.2026, МЦП без лояльного трейд-ина 200 000"'),
+ ('price:2899000,price4:3399000,trim4:"Оптимум 2.0 4WD",src:"haval.ru от 2 899 000 Оптимум 1.5 2WD; Оптимум 4WD 3 399 000"',
+  'price:2999000,price4:3399000,trim4:"Оптимум 2.0 4WD",src:"haval.ru, прайс-лист F7 от 11.08.2026, МЦП: Оптимум 1.5 2WD 2 999 000; Оптимум 2.0 4WD 3 399 000"'),
+ ('price:3799000,src:"haval.ru, Премиум от 3 799 000 уже с лояльным трейд-ином 200 000"',
+  'price:3999000,src:"haval.ru, прайс-лист H7 от 27.10.2026, МЦП Премиум 3 999 000 (с лояльным трейд-ином −200 000)"'),
+]
+def patch_rivals():
+    for fn in ("offer-fn.js", "index.html"):
+        p = Path(fn)
+        if not p.exists(): continue
+        s = p.read_text(encoding="utf-8"); o = s
+        for a, b in RIVAL_FIX: s = s.replace(a, b)
+        if s != o: p.write_text(s, encoding="utf-8")
+
+if __name__ == "__main__":
+    try: patch_rivals(); print("prices: rivals ok")
+    except Exception as e: print("prices: rivals", e)
