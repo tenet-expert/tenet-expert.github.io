@@ -129,8 +129,8 @@
     doc.rows = rows; doc.total = total;
     doc.fleet = {rows, total, sub, contact: FLEET_KP_MGR[0]+", "+FLEET_KP_MGR[1]};
     doc.file = "КП флит "+m.name+" "+label+(lessor?" "+lessor:"");
-    doc.meta = [lessor?["Лизинговая компания", lessor]:["Клиент", opts.client||"—"], ["Категория", label],
-      ["Трейд-ин", opts.ti?"да":"нет"], ["Дата", today]];
+    doc.meta = (lessor?[["Лизинговая компания", lessor]]:(String(opts.client||"").trim()?[["Клиент", String(opts.client).trim()]]:[])).concat([["Категория", label],
+      ["Трейд-ин", opts.ti?"да":"нет"], ["Дата", today]]);
     doc.sections = (doc.sections||[]).filter(s=>!s.deals && !s.cmp);
     doc.sections.unshift({title:"Условия флита", lines:notes});
     doc.calc = c;
