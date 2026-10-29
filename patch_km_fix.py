@@ -184,6 +184,26 @@ CASH = [
 CODE.extend(CASH)
 
 
+# 29.10.2026 (Александр): «КМ ровный». Расчётный КМ (формула доход/НДС − цена×fee, скидка ДЦ
+# округляется до 1000 ₽) даёт дроби 30,8 / 80,3 / −29,8. Отображаемый КМ = ровно фикс A (с ТИ) или
+# B (без ТИ) из Sheet / KM_FORK / приоритета. Цвет и слово «по фиксу / ниже фикса» считаются по
+# расчётному значению (честный контроль), скидки, потолок T9 30% и галочки не меняются.
+ROUND = [
+    ('      const kmK=km/1000;\n',
+     '      const kmK=km/1000;\n'
+     '      const kmFixK=raw=>(band&&(band.fix||band.lock)&&Number.isFinite(Number(lo)))?Number(lo):Math.round(raw);/*km-round*/\n'),
+    ('<div class="calc-out">${rub(Math.round(kmPango?pKm:km))} ₽</div>',
+     '<div class="calc-out">${rub(kmFixK((kmPango?pKm:km)/1000)*1000)} ₽</div>'),
+    ('· сейчас ${(kmPango?pKmK:kmK).toFixed(1)} тыс. ·',
+     '· сейчас ${kmFixK(kmPango?pKmK:kmK)} тыс. ·'),
+    ('<p class="calc-note">КМ ${Math.round(ordDeal.km/1000)} тыс. · фикс',
+     '<p class="calc-note">КМ ${kmFixK(ordDeal.km/1000)} тыс. · фикс'),
+    ('<p class="calc-note">КМ ${Math.round(prioDeal.km/1000)} тыс.${',
+     '<p class="calc-note">КМ ${(KM_FORK[kmVin]?(useTi?KM_FORK[kmVin].ti:KM_FORK[kmVin].cash):(useTi?-100:0))} тыс.${'),
+]
+CODE.extend(ROUND)
+
+
 def fix_code(text):
     for old, new in CODE:
         if new in text:
