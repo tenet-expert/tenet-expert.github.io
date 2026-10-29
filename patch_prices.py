@@ -136,3 +136,16 @@ def patch_docs():
 if __name__ == "__main__":
     try: patch_docs(); print("prices: docs ok")
     except Exception as e: print("prices: docs", e)
+
+# Вкладка TENET A8 в «Документах» (ключ ta8; «a8» — это Chery Arrizo 8, не трогаем).
+def patch_ta8():
+    p = Path("index.html"); s = p.read_text(encoding="utf-8")
+    if "docs/ta8-pricelist.pdf" in s: return
+    entry = ('      ta8: [\n        {file:"docs/ta8-pricelist.pdf", title:"Прайс TENET A8 · 28.09.2026", kind:"Прайс", pages:"PDF tenet.ru", '
+             'note:"Официальный: Прайм 1.6T 150 DCT7 — 2 999 000 · Ультра 2.0T 197 AT8 — 3 499 000. С выгодами 2 899 000 / 3 399 000"}\n      ],\n')
+    s2 = s.replace("    const DOCS = {\n", "    const DOCS = {\n" + entry, 1)
+    if s2 != s: p.write_text(s2, encoding="utf-8")
+
+if __name__ == "__main__":
+    try: patch_ta8(); print("prices: ta8 ok")
+    except Exception as e: print("prices: ta8", e)
