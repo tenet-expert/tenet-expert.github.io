@@ -153,6 +153,14 @@ PAIRS += [
      '["T4 R17 / L4",[["Triangle 215/60R17 100T XL IcelynX TI501 TL M+S 3PMSF (шип.)",11500,46000,"2"],["Formula Ice 215/60 17  липучка",9600,38400,"1"]]]'),
 ]
 
+# Drive 29.10.2026: T4L / L6 — Triangle TRIN PL01 липучка вместо Pirelli Formula 225/60 R18; шиномонтаж R16 6600, R17-R19 7250, R20 9850
+PAIRS += [
+    ('["T4L / L6",[["Pirelli Formula 225/60 R18 104T XL Ice TL, шип.",15500,62000,"1"],',
+     '["T4L / L6",[["Автошины Triangle TRIN PL01 225/60 R18 104R липучка",11500,46000,"2"],'),
+    ('mount:[["R16",5600],["R17, R18, R19",6600],["R20",8600]]',
+     'mount:[["R16",6600],["R17, R18, R19",7250],["R20",9850]]'),
+]
+
 def patch(path: Path) -> bool:
     if not path.exists():
         return False
