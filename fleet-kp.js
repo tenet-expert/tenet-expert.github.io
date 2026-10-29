@@ -12,7 +12,7 @@
     "2 USB-разъема спереди","1 USB-разъем сзади","Телематика",
     "Система “Свободные руки” (Hands free) с Bluetooth-связью с мобильным телефоном"]];
   try {
-    ["t4la","t4lp"].forEach(id=>{
+    if (!window.__offerOfficial) ["t4la","t4lp"].forEach(id=>{
       const g = (typeof OFFER_FULL!=="undefined") && OFFER_FULL[id];
       if (Array.isArray(g) && !g.some(x=>x && x[0]===T4L_MM[0])) g.push([T4L_MM[0], T4L_MM[1].slice()]);
     });

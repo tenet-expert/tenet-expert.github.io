@@ -23,7 +23,9 @@ def drop_lease(html):
     return html
 
 def main():
-    js = (ROOT / "fleet-kp.js").read_text(encoding="utf-8").replace("</script", "<\\/script")
+    off = ROOT / "offer-official.js"  # оснащение/ТТХ КП по официальным прайсам — до fleet-kp.js
+    js = ((off.read_text(encoding="utf-8") + "\n") if off.exists() else "") + (ROOT / "fleet-kp.js").read_text(encoding="utf-8")
+    js = js.replace("</script", "<\\/script")
     block = f"{START}<script>\n{js}\n</script>{END}"
     for rel in ("_site/index.html", "index.html"):
         p = ROOT / rel
