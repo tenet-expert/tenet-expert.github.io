@@ -432,7 +432,7 @@ def patch_index(html):
                "lets", optional=True)
     if "function stockReadStore(" not in html:
         html = sub(html, "    function nav(active){", STATE_FNS + "    function nav(active){", "state fns")
-    html = sub(html, NAV_OLD, NAV_NEW, "nav")
+    html = sub(html, NAV_OLD, NAV_NEW, "nav", optional=True)
     html = sub(html, GO_OLD, GO_NEW, "go")
     html = patch_stock_logic(html, "index")
     html = sub(html,
