@@ -125,3 +125,11 @@ if __name__ == "__main__":
             runpy.run_path("patch_avito_photos.py", run_name="__main__")
     except BaseException as e:  # never fail the Pages build because of this step
         print("avito-photos: skipped:", e)
+    # Кнопка «Фото» в карточках склада (photo-links.json читается в рантайме).
+    try:
+        import runpy
+        from pathlib import Path as _P
+        if _P("patch_photo_links.py").exists():
+            runpy.run_path("patch_photo_links.py", run_name="__main__")
+    except BaseException as e:
+        print("photo-links: skipped:", e)
