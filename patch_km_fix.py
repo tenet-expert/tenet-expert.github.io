@@ -204,6 +204,18 @@ ROUND = [
 CODE.extend(ROUND)
 
 
+# 29.10.2026 (Склад): в «Приоритете» строки, проданные без менеджера в Sheet (зелёная заливка,
+# колонка «Менеджер» пустая), были зелёными без подписи -> показываем «Продано».
+# «Рекомендуем» не показывает проданные (TERMS_PRIO.sold) и брони (STOCK.reserved).
+PRIO = [
+    ('const mark=sold&&r.seller?`<span class="sold-mark">Продано · ${escape(r.seller)} <i>${n}</i></span>`:',
+     'const mark=sold?(r.seller?`<span class="sold-mark">Продано · ${escape(r.seller)} <i>${n}</i></span>`:`<span class="sold-mark">Продано</span>`):'),
+    ('return list.filter(c=>PRIO_VINS.has(c.vin) && c.vin!==kmVin && !(typeof stockIsDemo==="function"?stockIsDemo(c):c.demo)).map(c=>{',
+     'const prioOff=new Set((typeof TERMS_PRIO!=="undefined"?TERMS_PRIO:[]).filter(r=>r.sold||r.reserved).map(r=>r.vin));\n      return list.filter(c=>PRIO_VINS.has(c.vin) && c.vin!==kmVin && !c.reserved && !c.sold && !prioOff.has(c.vin) && !(typeof stockIsDemo==="function"?stockIsDemo(c):c.demo)).map(c=>{'),
+]
+CODE.extend(PRIO)
+
+
 def fix_code(text):
     for old, new in CODE:
         if new in text:
