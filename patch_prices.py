@@ -187,6 +187,7 @@ def patch_t9():
     rows=[("Прайм / Prime","2024","3 635 000"),("Ультра / Ultra","2024","3 940 000"),("Прайм / Prime","2025","3 785 000"),("Ультра / Ultra","2025","4 190 000")]
     tb='<h2>Tiggo 9</h2><table><thead><tr><th>Комплектация</th><th>Год выпуска</th><th>Цена с учётом выгод, от</th></tr></thead><tbody>'+''.join(
        '<tr><td>%s</td><td>%s</td><td class="num">%s ₽</td></tr>'%r for r in rows)+'</tbody></table><p class="src">Источник: <a href="%s" target="_blank" rel="noopener">%s</a> · цена на 01.10.2026 · не оферта.</p>'%(T9_SRC,T9_SRC)
+    s=s.replace('CHERY · прайс 01.09.2026','CHERY · chery.ru · 01.10.2026')
     s=re.sub(r'<h2>Tiggo 9</h2><table>.*?</table>(<p class="src">.*?</p>)?',lambda m:tb,s,count=1,flags=re.S)
     if s!=o: open(f,"w",encoding="utf-8").write(s)
 if __name__=="__main__": patch_t9()
