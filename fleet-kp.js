@@ -383,6 +383,7 @@
       w2.__mpt = true; window.fleetPricesHtml = w2;
     }
   } catch(e) { console.warn("fleet-mpt", e); }
+  window.fleetMptFor = fleetMptFor; window.fleetMptAmt = fleetMptAmt;
   window.fleetKpDoc = fleetKpDoc; window.fleetKpBytes = fleetKpBytes; window.fleetKpBase64 = fleetKpBase64; window.fleetKpDocx = fleetKpDocx;
   window.FLEET_KP_LESSORS = FLEET_KP_LESSORS; window.FLEET_KP_CATS = FLEET_KP_CATS;
 })();

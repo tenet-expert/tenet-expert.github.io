@@ -193,7 +193,9 @@
       const tiMpt=useTi?(typeof FLEET_TI==="number"?FLEET_TI:100000):0;
       const fleetPin=(typeof FLEET_PIN!=="undefined" && FLEET_PIN[kmVin])||0;
       const fleetBase=Math.max(0, mptTidy-tiMpt);
-      const subAmt=(showSub && fMpt && fMpt.sub)||0;
+      let subAmt=(showSub && fMpt && fMpt.sub)||0;
+      const mptVin=typeof fleetMptFor==="function" && fleetMptFor(m.id, kmVin);
+      if(mptVin) subAmt=typeof fleetMptAmt==="function"?fleetMptAmt(fleetBase):Math.round(fleetBase/10);
       const qFleet=typeof fleetSubQuote==="function"?fleetSubQuote(fleetBase, subAmt, down, addons, pack||0, months, !!(showSub && subAmt), 22.5):{price:fleetBase, pv:down, pvCar:down, credit:Math.max(0,fleetBase-down), term:Math.min(months,84), termAfter:Math.min(months,84), rate:22.5, pay:0, over:0, doCasco:(addons||0)+(pack||0), pvExtras:0, extrasCredit:0, early:0, earlyOver:0, limited:false, sub:subAmt, base:fleetBase, cap49:0, earlyCap:0};
       const priceMpt=qFleet.price;
       const downMptShow=qFleet.pv;
@@ -441,7 +443,7 @@
           <div class="pay-col ${showSub?"sub":"mpt"} km-pay${fleetWarn.low?" pv-low":""}${qFleetPrio?" fleet-pair":""}">
             ${qFleetPrio?`<div class="km-contrast">
               <div class="pay-cell${fleetWarn.low?" pv-low":""}">
-                <p class="eyebrow">${showFleet||isPlus?"Флит · Совкомбанк 22,5% · Сбер 24%":showSub?"Флит · субсидия бренда":"Флит · Совкомбанк 22,5% · Сбер 24%"}</p>
+                <p class="eyebrow">${showFleet||isPlus?"Флит · Совкомбанк 22,5% · Сбер 24%":showSub?(mptVin?"Флит · МПТ 10%":"Флит · субсидия бренда"):"Флит · Совкомбанк 22,5% · Сбер 24%"}</p>
                 ${fleetWarn.html}
                 ${typeof fleetBodyTop==="function"?fleetBodyTop(qFleet):""}
               </div>
@@ -465,7 +467,7 @@
                 </details>
               </div>
               <div class="pay-cell prio"><p class="calc-note">${qFleet.price>qFleetPrio.price?"Дешевле обычного флита на "+rub(qFleet.price-qFleetPrio.price)+".":""}</p></div>
-            </div>`:`<p class="eyebrow">${showFleet||isPlus?"Флит · Совкомбанк 22,5% · Сбер 24%":showSub?"Флит · субсидия бренда":"Флит · Совкомбанк 22,5% · Сбер 24%"}</p>
+            </div>`:`<p class="eyebrow">${showFleet||isPlus?"Флит · Совкомбанк 22,5% · Сбер 24%":showSub?(mptVin?"Флит · МПТ 10%":"Флит · субсидия бренда"):"Флит · Совкомбанк 22,5% · Сбер 24%"}</p>
             ${fleetWarn.low
               ? fleetWarn.html+`<p class="calc-note">Флит не считаем. В 20% идут только ПВ в авто и субсидия, каско и Д/О не считаются.</p>`
               : `${fleetWarn.html}
@@ -502,7 +504,7 @@
             ${useLoan?`<div class="card">
               <p class="eyebrow">Кредит · ${escape(m.name)}</p>
               <p class="calc-note">ПВ от цены авто ${rub(price)} ₽, без Д/О и каско. В кредит входят авто − ПВ, Д/О, каско расширенное и комиссия банка.</p>
-              ${showMpt||showSub||showFleet?`<p class="eyebrow" style="margin-top:16px">${showFleet||isPlus?"Флит · Совкомбанк 22,5% · Сбер 24%":showSub?"Флит · субсидия бренда":"Флит · Совкомбанк 22,5% · Сбер 24%"}</p>
+              ${showMpt||showSub||showFleet?`<p class="eyebrow" style="margin-top:16px">${showFleet||isPlus?"Флит · Совкомбанк 22,5% · Сбер 24%":showSub?(mptVin?"Флит · МПТ 10%":"Флит · субсидия бренда"):"Флит · Совкомбанк 22,5% · Сбер 24%"}</p>
               ${typeof fleetBodyTop==="function"?fleetBodyTop(qFleet):""}
               ${kmPayRows(banksMpt,"payMpt","overMpt")}
               ${typeof fleetBodyRows==="function"?fleetBodyRows(qFleet):`<div class="bank-row"><span>Тело кредита</span><span class="pay">${rub(creditMpt)}</span></div>`}
