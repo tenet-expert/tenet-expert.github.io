@@ -191,7 +191,7 @@ CODE.extend(CASH)
 ROUND = [
     ('      const kmK=km/1000;\n',
      '      const kmK=km/1000;\n'
-     '      const kmFixK=raw=>(Number(spec)>0)?Math.round(raw):((band&&(band.fix||band.lock)&&Number.isFinite(Number(lo)))?Number(lo):Math.round(raw));/*km-round*/\n'),
+     '      const kmFixK=raw=>Math.round(raw);/*km-round real*/\n'),
     ('<div class="calc-out">${rub(Math.round(kmPango?pKm:km))} ₽</div>',
      '<div class="calc-out">${rub(kmFixK((kmPango?pKm:km)/1000)*1000)} ₽</div>'),
     ('· сейчас ${(kmPango?pKmK:kmK).toFixed(1)} тыс. ·',
