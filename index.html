@@ -4508,6 +4508,9 @@ async function pingTelegram(body){
         dcCr=Math.max(0, Math.round(dcCr));
         kmDcKeep=dcCr;
       }
+      const dcCap=(m.stock==="tt9"||/^T9 /.test(m.name||""))?Math.max(0, Math.floor((rrc*0.3-(tiAmt+spec+dcTi+crAmt))/1000)*1000):Infinity;
+      const dcCapped=useDcCr && dcCr>dcCap;
+      if(dcCapped) dcCr=dcCap;
       const discount=tiAmt+spec+dcTi+dcCr+crAmt;
       const bonus=invoice>0?(invoice/m.vat)*m.bonus:0;
       const margin=rrc-invoice;

@@ -156,8 +156,8 @@ CODE = [
 CASH = [
     ('const useDcCr=useLoan && kmVal("kmUseDcCr", false);',
      'const useDcCr=useLoan?kmVal("kmUseDcCr", false):kmVal("kmUseDcCash", false);/*km-cash-fix*/'),
-    ('        dcCr=Math.max(0, Math.round(dcCr));\n      }\n      const discount=tiAmt+spec+dcTi+dcCr+crAmt;',
-     '        dcCr=Math.max(0, Math.round(dcCr));\n      }\n'
+    ('        dcCr=Math.max(0, Math.round(dcCr));\n        kmDcKeep=dcCr;\n      }\n      const discount=tiAmt+spec+dcTi+dcCr+crAmt;',
+     '        dcCr=Math.max(0, Math.round(dcCr));\n        kmDcKeep=dcCr;\n      }\n'
      '      const dcCap=(m.stock==="tt9"||/^T9 /.test(m.name||""))?Math.max(0, Math.floor((rrc*0.3-(tiAmt+spec+dcTi+crAmt))/1000)*1000):Infinity;\n'
      '      const dcCapped=useDcCr && dcCr>dcCap;\n'
      '      if(dcCapped) dcCr=dcCap;\n'
