@@ -139,9 +139,11 @@
       if(useDcCr){
         const typedEl=document.getElementById("kmDcCr");
         const typed=typedEl?kmVal("kmDcCr", NaN):NaN;
-        const want=(fresh || !typedEl || !Number.isFinite(typed))?dcDef:typed;
+        const kept=(typeof kmDcKeep==="number")?kmDcKeep:NaN;
+        const want=Number.isFinite(typed)?typed:(Number.isFinite(kept)?kept:(fresh?dcFit:dcFit));
         dcCr=Math.min(Math.max(0, want, dcMin), dcFit);
         dcCr=Math.max(0, Math.round(dcCr));
+        kmDcKeep=dcCr;
       }
       const discount=tiAmt+spec+dcTi+dcCr+crAmt;
       const bonus=invoice>0?(invoice/m.vat)*m.bonus:0;
@@ -370,7 +372,8 @@
             ${useTi?`<label class="check-row"><input id="kmUseDcTi" type="checkbox" ${useDcTi?"checked":""} /> <span>Скидка от ДЦ за трейд-ин ${rub(KM_DC_DEF)}</span></label>`:""}
             ${useTi&&useDcTi?`<label class="field" style="max-width:none"><span>Сумма скидки ДЦ за трейд-ин, ₽</span><input id="kmDcTi" inputmode="numeric" value="${dcTi||KM_DC_DEF}" /></label>`:""}
             ${useLoan?`<label class="check-row"><input id="kmUseDcCr" type="checkbox" ${useDcCr?"checked":""} /> <span>Скидка от ДЦ за кредит${dcFit?` · до ${rub(dcFit)} в коридоре`:""}</span></label>`:""}
-            ${useLoan&&useDcCr?`<label class="field" style="max-width:none"><span>Сумма скидки ДЦ за кредит, ₽ · коридор от ${lo} тыс.</span><input id="kmDcCr" inputmode="numeric" value="${dcCr}" /></label>`:""}`}
+            ${useLoan&&useDcCr?`<label class="field" style="max-width:none"><span>Сумма скидки ДЦ за кредит, ₽ · догоняет план</span><input id="kmDcCr" inputmode="numeric" value="${dcCr}" /></label>`:""}
+            <p class="calc-note">Трейд-ин и скидка за кредит держат плановый КМ. Спецпредложение кладётся сверху и снижает.</p>`}
             <label class="field" style="max-width:none"><span>Д/О, ₽</span><input id="kmDo" inputmode="numeric" value="${addons}" /></label>
             ${pangoOnly?`<div class="note-box" style="margin-top:14px"><p class="eyebrow" style="margin:0 0 6px">Цена PANGO</p><div class="calc-out">${rub(pFix)} ₽</div><p class="calc-note">${_pg.cash===_pg.ti?"При любых условиях. Трейд-ин цену не меняет.":(useTi?"С трейд-ин.":"Без трейд-ин.")} Директ и флит не считаем.</p></div><div class="note-box">${escape(PANGO_ONLY[kmVin])}</div>`:`<div class="note-box" style="margin-top:14px">
               <p class="eyebrow" style="margin:0 0 6px">Итоговая цена для клиента</p>
