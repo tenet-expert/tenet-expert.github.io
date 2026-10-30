@@ -91,7 +91,7 @@
     if (f && f.name) { const bn=key(f.name); c = c.filter(r=>bn.startsWith(key(r[0]))||key(r[0]).startsWith(bn)).length ? c.filter(r=>bn.startsWith(key(r[0]))||key(r[0]).startsWith(bn)) : c; }
     return c.length===1 ? c[0] : null;
   }
-  function fleetCalc(m, cat, ti, tuning){
+  function fleetCalc(m, cat, ti, tuning, dc){
     const code = FLEET_KP_CATS[cat][1], notes=[], row=fleetRow(m), f=(typeof FLEET_BFS!=="undefined"&&FLEET_BFS[m.id])||null;
     const rrc = m.rrc||0; let price, src;
     if (row) { price=row[FLEET_KP_COL[code]]; src="FLEET_CAT · "+code; }
@@ -102,7 +102,8 @@
     const subRef = (row && row[5]) || 0;
     const subOn = cat==="c1" && subRef>0 && !!row;
     if (cat==="c1" && !subRef) notes.push("Субсидии для этой комплектации на сайте нет.");
-    return {rrc, tuning, fleet, ti:tiAmt, sub:subOn?subRef:0, subOn, total: rrc+tuning-fleet-tiAmt, code, src, notes};
+    dc = Math.max(0, Math.round(Number(dc)||0));
+    return {rrc, tuning, fleet, ti:tiAmt, dc, sub:subOn?subRef:0, subOn, total: rrc+tuning-fleet-tiAmt-dc, code, src, notes};
   }
   // opts: {mid, cat, ti, tuning, lessor, client}
   function fleetKpDoc(opts){
@@ -112,14 +113,15 @@
     const cat = FLEET_KP_CATS[opts.cat] ? opts.cat : "c1";
     const label = FLEET_KP_CATS[cat][0];
     const tuning = Math.max(0, Math.round(Number(opts.tuning)||0));
-    const c = fleetCalc(m, cat, !!opts.ti, tuning);
+    const c = fleetCalc(m, cat, !!opts.ti, tuning, opts.dc);
     const doc = offerDocNew(d);
     const rows = [["РРЦ", rubP(c.rrc)], ["Тюнинг", rubP(c.tuning)],
       ["Скидка флит ("+c.code+")", (c.fleet?"− ":"")+rubP(c.fleet)], ["Скидка ТИ", (c.ti?"− ":"")+rubP(c.ti)]];
+    if (c.dc) rows.push(["Скидка ДЦ", "− "+rubP(c.dc)]);
     const total = ["Цена с уч. скидок и тюнинга", rubP(c.total)];
     const sub = c.subOn ? "+"+rubP(c.sub)+" субсидия — идёт в первый взнос" : null;
     const notes = ["Флит, категория "+label+" (ценовая категория "+c.code+" по политике корпоративных продаж TENET от 08.10.2026).",
-      "Цена с уч. скидок и тюнинга = РРЦ + тюнинг − скидка флит − скидка ТИ."];
+      "Цена с уч. скидок и тюнинга = РРЦ + тюнинг − скидка флит − скидка ТИ"+(c.dc?" − скидка ДЦ":"")+"."];
     if (c.subOn) notes.push("Субсидия из цены не вычитается — она идёт в первый взнос.");
     if (cat==="c1"||cat==="c2") notes.push("Ориентир ставки лизинга: Совкомбанк лизинг 22,5%, Сбер 24% годовых. Не оферта.");
     c.notes.forEach(n=>notes.push(n));
@@ -133,6 +135,8 @@
       ["Трейд-ин", opts.ti?"да":"нет"], ["Дата", today]]);
     doc.sections = (doc.sections||[]).filter(s=>!s.deals && !s.cmp);
     doc.sections.unshift({title:"Условия флита", lines:notes});
+    const st = fleetStockSection(m);
+    if (st) doc.sections.splice(1, 0, st);
     doc.calc = c;
     return doc;
   }
@@ -157,8 +161,10 @@
       if (doc) doc.sections = (doc.sections||[]).filter(s=>!s.deals && !s.cmp);
     }
     if (!doc) doc = {title:"Коммерческое предложение", meta:[], sections:[], photos:[], note:""};
-    const total = ["Цена с уч. тюнинга", rubP(t.fix+tuning)];
+    const dc = Math.max(0, Math.round(Number(opts.dc)||0));
+    const total = [dc ? "Цена с уч. скидок и тюнинга" : "Цена с уч. тюнинга", rubP(t.fix+tuning-dc)];
     const rows = [["Цена фикс (тестовый автомобиль)", rubP(t.fix)], ["Тюнинг", rubP(tuning)]];
+    if (dc) rows.push(["Скидка ДЦ", "− "+rubP(dc)]);
     const lessor = cat==="c1" ? (opts.lessor || FLEET_KP_LESSORS[0]) : null;
     const client = String(opts.client||"").trim();
     doc.kicker = "Флит · "+label+" · тестовый автомобиль";
@@ -169,14 +175,96 @@
     doc.meta = (lessor?[["Лизинговая компания", lessor]]:(client?[["Клиент", client]]:[])).concat([
       ["Категория", label], ["VIN", t.vin], ["Год / пробег", t.year+" · "+rub(t.km)+" км"], ["Дата", new Date().toLocaleDateString("ru-RU")]]);
     const notes = ["Тестовый автомобиль "+t.year+" г., пробег "+rub(t.km)+" км. Цена фикс — скидки флита и трейд-ина не применяются, субсидии нет.",
-      "Цена с уч. тюнинга = цена фикс + тюнинг.",
+      dc ? "Цена с уч. скидок и тюнинга = цена фикс + тюнинг − скидка ДЦ." : "Цена с уч. тюнинга = цена фикс + тюнинг.",
       "Справочно: РРЦ нового "+rubP(t.rrc)+", на автомобиле установлено доп. оборудования на "+rubP(t.tune)+"."];
     if (cat==="c1"||cat==="c2") notes.push("Ориентир ставки лизинга: Совкомбанк лизинг 22,5%, Сбер 24% годовых. Не оферта.");
     if (!base) notes.push("Оснащение — по данным автомобиля в салоне; лист оснащения этой модели на сайте не ведётся.");
     doc.sections.unshift({title:"Условия флита", lines:notes});
-    doc.calc = {test:t.id, vin:t.vin, fix:t.fix, tuning, total:t.fix+tuning, rrc:t.rrc, fleet:0, ti:0, sub:0, subOn:false, notes:[]};
+    doc.sections.splice(1, 0, {title:"В наличии", lines:["VIN "+t.vin+" · "+t.year+" г. · пробег "+rub(t.km)+" км · тестовый автомобиль в салоне"]});
+    doc.calc = {test:t.id, vin:t.vin, fix:t.fix, tuning, dc, total:t.fix+tuning-dc, rrc:t.rrc, fleet:0, ti:0, sub:0, subOn:false, notes:[]};
     return doc;
   }
+  // «В наличии»: только чтение STOCK сайта (kmStockCars — без демо); в салоне и в пути.
+  function fleetStockSection(m){
+    let list = [];
+    try { list = (typeof kmStockCars==="function" ? kmStockCars(m) : []) || []; } catch(e) { list = []; }
+    list = list.filter(c=>c && (c.status==="in" || c.status==="way") && !c.sold && !c.reserved);
+    list.sort((a,b)=>(a.status==="in"?0:1)-(b.status==="in"?0:1));
+    if (!list.length) return {title:"В наличии", lines:["Подходящих автомобилей этой комплектации на складе сейчас нет — срок поставки уточняйте у менеджера."]};
+    const yr = c => { try { if (typeof stockYear==="function") { const y=stockYear(c); if (y) return String(y); } } catch(e){} const p=String(c.prod||"").match(/(\d{4})/); return p?p[1]:""; };
+    const MAX = 15;
+    const lines = list.slice(0, MAX).map(c=>["VIN …"+String(c.vin||"").toUpperCase().slice(-8), c.color||"", yr(c)?yr(c)+" г.":"", c.status==="in"?"в салоне":"в пути"+(c.note?" ("+String(c.note).split("·").pop().trim()+")":"")].filter(Boolean).join(" · "));
+    if (list.length > MAX) lines.push("и ещё "+(list.length-MAX)+" авто — уточняйте у менеджера");
+    lines.unshift("Подходящих автомобилей: "+list.length+" (в салоне "+list.filter(c=>c.status==="in").length+", в пути "+list.filter(c=>c.status==="way").length+").");
+    return {title:"В наличии", lines};
+  }
+  // Word (.docx) без внешних библиотек: ZIP (store) + WordprocessingML.
+  const CRC_T = (()=>{ const t=new Uint32Array(256); for(let n=0;n<256;n++){ let c=n; for(let k=0;k<8;k++) c = c&1 ? 0xEDB88320^(c>>>1) : c>>>1; t[n]=c>>>0; } return t; })();
+  const crc32 = u => { let c=0xFFFFFFFF; for(let i=0;i<u.length;i++) c=CRC_T[(c^u[i])&255]^(c>>>8); return (c^0xFFFFFFFF)>>>0; };
+  function zipStore(files){
+    const enc=new TextEncoder(), parts=[], cen=[]; let off=0;
+    const le=(n,b)=>{ const a=[]; for(let i=0;i<b;i++) a.push((n>>>(8*i))&255); return a; };
+    files.forEach(([name, text])=>{
+      const nm=enc.encode(name), data=enc.encode(text), crc=crc32(data);
+      const loc=new Uint8Array([].concat([0x50,0x4b,3,4],le(20,2),le(0x800,2),le(0,2),le(0,2),le(0x21,2),le(crc,4),le(data.length,4),le(data.length,4),le(nm.length,2),le(0,2)));
+      parts.push(loc, nm, data);
+      cen.push(new Uint8Array([].concat([0x50,0x4b,1,2],le(20,2),le(20,2),le(0x800,2),le(0,2),le(0,2),le(0x21,2),le(crc,4),le(data.length,4),le(data.length,4),le(nm.length,2),le(0,2),le(0,2),le(0,2),le(0,2),le(0,4),le(off,4))), nm);
+      off += loc.length+nm.length+data.length;
+    });
+    const cs = cen.reduce((a,x)=>a+x.length,0);
+    const end=new Uint8Array([].concat([0x50,0x4b,5,6],le(0,2),le(0,2),le(files.length,2),le(files.length,2),le(cs,4),le(off,4),le(0,2)));
+    const all=parts.concat(cen,[end]), out=new Uint8Array(all.reduce((a,x)=>a+x.length,0)); let p=0;
+    all.forEach(x=>{ out.set(x,p); p+=x.length; });
+    return out;
+  }
+  function fleetKpDocx(doc){
+    const x = s => String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+    const run = (t,o={}) => `<w:r><w:rPr>${o.b?"<w:b/>":""}${o.color?`<w:color w:val="${o.color}"/>`:""}<w:sz w:val="${(o.sz||10)*2}"/></w:rPr><w:t xml:space="preserve">${x(t)}</w:t></w:r>`;
+    const para = (runs,o={}) => `<w:p><w:pPr>${o.shd?`<w:shd w:val="clear" w:color="auto" w:fill="${o.shd}"/>`:""}${o.jc?`<w:jc w:val="${o.jc}"/>`:""}<w:spacing w:before="${o.before||0}" w:after="${o.after==null?60:o.after}"/>${o.ind?`<w:ind w:left="${o.ind}"/>`:""}</w:pPr>${runs}</w:p>`;
+    const P = (t,o={}) => para(run(t,o), o);
+    const cell = (inner,w,fill) => `<w:tc><w:tcPr><w:tcW w:w="${w}" w:type="dxa"/>${fill?`<w:shd w:val="clear" w:color="auto" w:fill="${fill}"/>`:""}</w:tcPr>${inner}</w:tc>`;
+    const table = (rows, ws, opt={}) => `<w:tbl><w:tblPr><w:tblW w:w="${ws.reduce((a,b)=>a+b,0)}" w:type="dxa"/><w:tblBorders>${["top","left","bottom","right","insideH","insideV"].map(b=>`<w:${b} w:val="single" w:sz="4" w:color="${opt.border||"C9AB7C"}"/>`).join("")}</w:tblBorders><w:tblCellMar><w:left w:w="100" w:type="dxa"/><w:right w:w="100" w:type="dxa"/></w:tblCellMar></w:tblPr><w:tblGrid>${ws.map(w=>`<w:gridCol w:w="${w}"/>`).join("")}</w:tblGrid>${rows.map(r=>`<w:tr>${r}</w:tr>`).join("")}</w:tbl>`;
+    const b = [];
+    const F = doc.fleet;
+    b.push(P(F ? "TENET  ·  КОРПОРАТИВНЫЙ МЕНЕДЖЕР ПАВЛОВА ОКСАНА  ·  "+FLEET_KP_MGR[1] : "TENET  ·  ОТДЕЛ ПРОДАЖ", {sz:9, color:"8A8178"}));
+    b.push(P("ЭКСПЕРТ АВТО САМАРА", {b:1, sz:16}));
+    if (doc.kicker) b.push(P(String(doc.kicker).toUpperCase(), {b:1, sz:9, color:"C8102E", before:120}));
+    b.push(P(doc.title||"Коммерческое предложение", {b:1, sz:22}));
+    if (doc.headline) b.push(P(doc.headline, {sz:12}));
+    if ((doc.meta||[]).length) b.push(table(doc.meta.map(([k,v])=>cell(P(k,{sz:10,color:"6B645C"}),3200)+cell(P(v==null||v===""?"—":v,{b:1,sz:10}),6400)), [3200,6400], {border:"E5DED3"}));
+    if (F) {
+      b.push(P("КОНТАКТ ПО ФЛИТУ: "+F.contact, {b:1, sz:11, color:"FFFFFF", shd:"1D2B3A", before:160}));
+      const rr = F.rows.map(([k,v],i)=>cell(P(k,{b:i===0,sz:i===0?12:11}),6000,"FBF6EC")+cell(P(v,{b:1,sz:i===0?13:11,jc:"right"}),3600,"FBF6EC"));
+      rr.push(cell(P(F.total[0],{b:1,sz:12}),6000,"EFE4CF")+cell(P(F.total[1],{b:1,sz:14,jc:"right"}),3600,"EFE4CF"));
+      if (F.sub) rr.push(cell(P("БОНУС",{b:1,sz:10,color:"FFFFFF"}),6000,"1F8A4C")+cell(P(F.sub,{b:1,sz:11,color:"FFFFFF",jc:"right"}),3600,"1F8A4C"));
+      b.push(P("", {after:40})); b.push(table(rr, [6000,3600]));
+    } else {
+      (doc.rows||[]).forEach(([k,v])=>b.push(P(k+": "+v, {sz:11})));
+      if (doc.total) b.push(P(doc.total[0]+": "+doc.total[1], {b:1, sz:13}));
+    }
+    (doc.sections||[]).forEach(sec=>{
+      if (sec.deals || sec.cmp) return;
+      b.push(P(String(sec.title||"").toUpperCase(), {b:1, sz:11, color:"C8102E", before:220}));
+      (sec.lines||[]).forEach(l=>b.push(P("• "+l, {sz:10, ind:200})));
+      if (sec.pairs) b.push(table(sec.pairs.map(([k,v])=>cell(P(k,{sz:10,color:"6B645C"}),3600)+cell(P(v,{sz:10}),6000)), [3600,6000], {border:"E5DED3"}));
+      (sec.groups||[]).forEach(([g, items])=>{ b.push(P(g, {b:1, sz:11, before:100})); (items||[]).forEach(it=>b.push(P("• "+it, {sz:10, ind:200, after:20}))); });
+      (sec.items||[]).forEach(it=>b.push(P("• "+(Array.isArray(it)?it.join(" — "):it), {sz:10, ind:200})));
+    });
+    if (doc.note) b.push(P(doc.note, {sz:9, color:"6B645C", before:120}));
+    if (F) b.push(P("ВАШ КОРПОРАТИВНЫЙ МЕНЕДЖЕР: "+F.contact, {b:1, sz:12, color:"FFFFFF", shd:"1D2B3A", before:240}));
+    b.push(P("Не оферта · ООО «ЭКСПЕРТ АВТО САМАРА»", {sz:9, color:"8A8178", before:200}));
+    const W = 'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"';
+    const docXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document ${W}><w:body>${b.join("")}<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1000" w:right="1000" w:bottom="1000" w:left="1100" w:header="500" w:footer="500" w:gutter="0"/></w:sectPr></w:body></w:document>`;
+    const styles = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:styles ${W}><w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial" w:eastAsia="Arial"/><w:lang w:val="ru-RU"/></w:rPr></w:rPrDefault></w:docDefaults></w:styles>`;
+    return zipStore([
+      ["[Content_Types].xml", '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/></Types>'],
+      ["_rels/.rels", '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>'],
+      ["word/_rels/document.xml.rels", '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>'],
+      ["word/styles.xml", styles],
+      ["word/document.xml", docXml]]);
+  }
+  const fleetDocxName = doc => offerFileName(doc).replace(/\.pdf$/i,"")+".docx";
+  const u8b64 = u8 => { let s=""; for (let i=0;i<u8.length;i+=0x8000) s+=String.fromCharCode.apply(null, u8.subarray(i,i+0x8000)); return btoa(s); };
   async function fleetKpBytes(doc){
     const imgs = await offerLoadImgs(doc.photos||[]);
     const pages = offerPaint(doc, imgs).map(cv=>({w:cv.width,h:cv.height,jpeg:offerJpeg(cv)}));
@@ -187,22 +275,18 @@
   async function fleetKpBase64(opts){
     if (opts.test) {
       const doc = fleetKpTestDoc(opts);
-      const u8 = await fleetKpBytes(doc);
-      let s=""; for (let i=0;i<u8.length;i+=0x8000) s+=String.fromCharCode.apply(null, u8.subarray(i,i+0x8000));
-      return {b64: btoa(s), file: offerFileName(doc), calc: doc.calc, meta: doc.meta};
+      return {b64: u8b64(await fleetKpBytes(doc)), docx: u8b64(fleetKpDocx(doc)), docxFile: fleetDocxName(doc), file: offerFileName(doc), calc: doc.calc, meta: doc.meta};
     }
     const sel = document.getElementById("ofModel");
     if (sel && sel.value!==opts.mid) { sel.value=opts.mid; sel.dispatchEvent(new Event("change",{bubbles:true})); await new Promise(r=>setTimeout(r,500)); }
     const doc = fleetKpDoc(opts);
-    const u8 = await fleetKpBytes(doc);
-    let s=""; for (let i=0;i<u8.length;i+=0x8000) s+=String.fromCharCode.apply(null, u8.subarray(i,i+0x8000));
-    return {b64: btoa(s), file: offerFileName(doc), calc: doc.calc, meta: doc.meta};
+    return {b64: u8b64(await fleetKpBytes(doc)), docx: u8b64(fleetKpDocx(doc)), docxFile: fleetDocxName(doc), file: offerFileName(doc), calc: doc.calc, meta: doc.meta};
   }
 
   function fleetOpts(){
     const v = (id, def) => offerVal(id, def);
     return {mid: v("ofModel", null), cat: v("flCat","c1"), ti: v("flTi","1")==="1",
-      test: v("flTest",""), tuning: Number(String(v("flTune","0")).replace(/\s+/g,""))||0, lessor: v("flLessor", FLEET_KP_LESSORS[0]), client: v("flClient","")};
+      test: v("flTest",""), tuning: Number(String(v("flTune","0")).replace(/\s+/g,""))||0, dc: Math.max(0, Number(String(v("flDc","0")).replace(/\s+/g,""))||0), lessor: v("flLessor", FLEET_KP_LESSORS[0]), client: v("flClient","")};
   }
   // Tiggo 9 и Arrizo 8 во флит-КП не продаются (решение 29.10.2026).
   const FLEET_KP_SKIP = {t9:1, a8:1};
@@ -227,8 +311,11 @@
                      : offerField("Клиент", `<input id="flClient" value="${escape(o.client)}" />`)}
       ${o.test ? "" : offerField("Трейд-ин", opt("flTi", o.ti?"1":"0", [["1","С трейд-ином"],["0","Без трейд-ина"]]))}
       ${offerField("Тюнинг, ₽", `<input id="flTune" inputmode="numeric" value="${o.tuning}" />`)}
+      ${offerField("Скидка ДЦ, ₽", `<input id="flDc" inputmode="numeric" value="${o.dc}" />`)}
       <p class="calc-note">Субсидия (только С1) не вычитается из цены — идёт в первый взнос. Менеджер по флиту: ${escape(FLEET_KP_MGR[0])}, ${escape(FLEET_KP_MGR[1])}.</p>`;
-    return offerScreen("КП Флит", form, doc);
+    const _act = offerActions;
+    offerActions = function(){ const h=_act(); return h.replace('data-offer-pdf>Скачать PDF</button>', 'data-offer-pdf>Скачать PDF</button><button type="button" class="btn ghost" data-fleet-docx>Скачать Word</button>'); };
+    try { return offerScreen("КП Флит", form, doc); } finally { offerActions = _act; }
   }
   const _nav = offerNav;
   offerNav = function(){
@@ -249,8 +336,14 @@
   const _bind = offerBind;
   offerBind = function(){
     _bind();
-    ["flTest","flCat","flLessor","flClient","flTi","flTune"].forEach(id=>{ const el=document.getElementById(id); if(el) el.addEventListener("change", ()=>{ view="offer"; render(); }); });
+    const wb=document.querySelector("[data-fleet-docx]");
+    if (wb) wb.addEventListener("click", ()=>{ try {
+      const doc=offerDocCurrent, blob=new Blob([fleetKpDocx(doc)], {type:"application/vnd.openxmlformats-officedocument.wordprocessingml.document"});
+      const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=fleetDocxName(doc); document.body.appendChild(a); a.click();
+      setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+    } catch(e) { console.warn("fleet-kp docx", e); alert("Не удалось собрать Word: "+e.message); } });
+    ["flTest","flCat","flLessor","flClient","flTi","flTune","flDc"].forEach(id=>{ const el=document.getElementById(id); if(el) el.addEventListener("change", ()=>{ view="offer"; render(); }); });
   };
-  window.fleetKpDoc = fleetKpDoc; window.fleetKpBytes = fleetKpBytes; window.fleetKpBase64 = fleetKpBase64;
+  window.fleetKpDoc = fleetKpDoc; window.fleetKpBytes = fleetKpBytes; window.fleetKpBase64 = fleetKpBase64; window.fleetKpDocx = fleetKpDocx;
   window.FLEET_KP_LESSORS = FLEET_KP_LESSORS; window.FLEET_KP_CATS = FLEET_KP_CATS;
 })();
