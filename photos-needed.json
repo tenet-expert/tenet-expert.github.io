@@ -1,5 +1,5 @@
 {
- "updated": "29.10.2026",
+ "updated": "30.10.2026",
  "note": "В наличии (в салоне), фото на Drive нет",
  "groups": [
   {
@@ -28,51 +28,6 @@
    "cars": [
     {
      "vin": "EDEHD24B6TE122133",
-     "state": "в салоне"
-    }
-   ]
-  },
-  {
-   "id": "edehd24b2te112036",
-   "queue": 1,
-   "brand": "TENET",
-   "model": "T9",
-   "trim": "Ультра",
-   "drive": "4WD, 5 мест",
-   "color": "светло-серый",
-   "cars": [
-    {
-     "vin": "EDEHD24B2TE112036",
-     "state": "в салоне"
-    }
-   ]
-  },
-  {
-   "id": "edefd32b4te136144",
-   "queue": 1,
-   "brand": "TENET",
-   "model": "T7",
-   "trim": "Прайм",
-   "drive": "4WD",
-   "color": "голубой",
-   "cars": [
-    {
-     "vin": "EDEFD32B4TE136144",
-     "state": "в салоне"
-    }
-   ]
-  },
-  {
-   "id": "edefd32b0te136092",
-   "queue": 1,
-   "brand": "TENET",
-   "model": "T7",
-   "trim": "Прайм",
-   "drive": "4WD",
-   "color": "серый",
-   "cars": [
-    {
-     "vin": "EDEFD32B0TE136092",
      "state": "в салоне"
     }
    ]
@@ -108,67 +63,6 @@
    ]
   },
   {
-   "id": "edefb32b7te122342",
-   "queue": 1,
-   "brand": "TENET",
-   "model": "T7",
-   "trim": "Актив",
-   "drive": "2WD",
-   "color": "серый",
-   "cars": [
-    {
-     "vin": "EDEFB32B7TE122342",
-     "state": "в салоне"
-    },
-    {
-     "vin": "EDEFB32B8TE122317",
-     "state": "в салоне"
-    }
-   ]
-  },
-  {
-   "id": "edelb31b7te120188",
-   "queue": 1,
-   "brand": "TENET",
-   "model": "T4L",
-   "trim": "Актив",
-   "drive": "2WD",
-   "color": "светло-серый",
-   "cars": [
-    {
-     "vin": "EDELB31B7TE120188",
-     "state": "в салоне"
-    },
-    {
-     "vin": "EDELB31B5TE120142",
-     "state": "в салоне"
-    },
-    {
-     "vin": "EDELB31B1TE129419",
-     "state": "в салоне"
-    },
-    {
-     "vin": "EDELB31B3TE129597",
-     "state": "в салоне"
-    }
-   ]
-  },
-  {
-   "id": "edelb31b4te121993",
-   "queue": 1,
-   "brand": "TENET",
-   "model": "T4L",
-   "trim": "Прайм",
-   "drive": "2WD",
-   "color": "красный",
-   "cars": [
-    {
-     "vin": "EDELB31B4TE121993",
-     "state": "в салоне"
-    }
-   ]
-  },
-  {
    "id": "ededb21b7sd723791",
    "queue": 1,
    "brand": "Chery",
@@ -179,21 +73,6 @@
    "cars": [
     {
      "vin": "EDEDB21B7SD723791",
-     "state": "в салоне"
-    }
-   ]
-  },
-  {
-   "id": "edemb31b9te126658",
-   "queue": 1,
-   "brand": "TENET PLUS",
-   "model": "L6",
-   "trim": "Элегант",
-   "drive": "2WD",
-   "color": "оранжевый",
-   "cars": [
-    {
-     "vin": "EDEMB31B1TE126640",
      "state": "в салоне"
     }
    ]
@@ -247,29 +126,6 @@
     },
     {
      "vin": "EFEDB21B1T3004257",
-     "state": "в салоне"
-    }
-   ]
-  },
-  {
-   "id": "efedb21b0t3000135",
-   "queue": 1,
-   "brand": "TENET PLUS",
-   "model": "L4",
-   "trim": "Элегант",
-   "drive": "2WD",
-   "color": "чёрный",
-   "cars": [
-    {
-     "vin": "EFEDB21B0T3000135",
-     "state": "в салоне"
-    },
-    {
-     "vin": "EFEDB21B2T3001755",
-     "state": "в салоне"
-    },
-    {
-     "vin": "EFEDB21B0T3002466",
      "state": "в салоне"
     }
    ]
