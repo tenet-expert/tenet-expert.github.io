@@ -136,7 +136,7 @@
     doc.sections = (doc.sections||[]).filter(s=>!s.deals && !s.cmp);
     doc.sections.unshift({title:"Условия флита", lines:notes});
     const st = fleetStockSection(m);
-    if (st) doc.sections.splice(1, 0, st);
+    if (st) { st.lines = st.lines.concat(FLEET_STOCK_FOOT); doc.sections.push(st); }
     doc.calc = c;
     return doc;
   }
@@ -180,10 +180,11 @@
     if (cat==="c1"||cat==="c2") notes.push("Ориентир ставки лизинга: Совкомбанк лизинг 22,5%, Сбер 24% годовых. Не оферта.");
     if (!base) notes.push("Оснащение — по данным автомобиля в салоне; лист оснащения этой модели на сайте не ведётся.");
     doc.sections.unshift({title:"Условия флита", lines:notes});
-    doc.sections.splice(1, 0, {title:"В наличии", lines:["VIN "+t.vin+" · "+t.year+" г. · пробег "+rub(t.km)+" км · тестовый автомобиль в салоне"]});
+    doc.sections.push({title:"В наличии", lines:["VIN "+t.vin+" · "+t.year+" г. · пробег "+rub(t.km)+" км · тестовый автомобиль в салоне"].concat(FLEET_STOCK_FOOT)});
     doc.calc = {test:t.id, vin:t.vin, fix:t.fix, tuning, dc, total:t.fix+tuning-dc, rrc:t.rrc, fleet:0, ti:0, sub:0, subOn:false, notes:[]};
     return doc;
   }
+  const FLEET_STOCK_FOOT = ["Уточняйте доступность автомобилей у менеджера, некоторые автомобили могут быть забронированы", "Уточняйте список установленных аксессуаров у менеджера"];
   // «В наличии»: только чтение STOCK сайта (kmStockCars — без демо); в салоне и в пути.
   function fleetStockSection(m){
     let list = [];
@@ -245,7 +246,7 @@
     (doc.sections||[]).forEach(sec=>{
       if (sec.deals || sec.cmp) return;
       b.push(P(String(sec.title||"").toUpperCase(), {b:1, sz:11, color:"C8102E", before:220}));
-      (sec.lines||[]).forEach(l=>b.push(P("• "+l, {sz:10, ind:200})));
+      (sec.lines||[]).forEach(l=>b.push(FLEET_STOCK_FOOT.indexOf(l)>=0 ? P(l, {sz:9, color:"6B645C", before:60}) : P("• "+l, {sz:10, ind:200})));
       if (sec.pairs) b.push(table(sec.pairs.map(([k,v])=>cell(P(k,{sz:10,color:"6B645C"}),3600)+cell(P(v,{sz:10}),6000)), [3600,6000], {border:"E5DED3"}));
       (sec.groups||[]).forEach(([g, items])=>{ b.push(P(g, {b:1, sz:11, before:100})); (items||[]).forEach(it=>b.push(P("• "+it, {sz:10, ind:200, after:20}))); });
       (sec.items||[]).forEach(it=>b.push(P("• "+(Array.isArray(it)?it.join(" — "):it), {sz:10, ind:200})));
