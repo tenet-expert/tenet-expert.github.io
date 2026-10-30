@@ -91,7 +91,18 @@
     if (f && f.name) { const bn=key(f.name); c = c.filter(r=>bn.startsWith(key(r[0]))||key(r[0]).startsWith(bn)).length ? c.filter(r=>bn.startsWith(key(r[0]))||key(r[0]).startsWith(bn)) : c; }
     return c.length===1 ? c[0] : null;
   }
-  function fleetCalc(m, cat, ti, tuning, dc){
+  // МПТ 10% (Сбер Лизинг) вместо субсидии бренда на 3 VIN T8 2WD — по 31.10.2026 включительно.
+  const FLEET_MPT_VINS = {"EDXGB32B1TE110196":"t8p","EDXGB32B8TE110275":"t8p","EDXGB32B0TE089261":"t8a"};
+  const FLEET_MPT_NOTE = "МПТ 10% на VIN 110196, 110275, 089261 до 31.10";
+  const fleetMptOn = () => Date.now() < new Date(2026, 10, 1).getTime();
+  function fleetMptFor(mid, vin){
+    if (!fleetMptOn()) return false;
+    const v = String(vin||"").toUpperCase();
+    if (v) return FLEET_MPT_VINS[v]===mid;
+    return Object.values(FLEET_MPT_VINS).indexOf(mid)>=0;
+  }
+  const fleetMptAmt = base => Math.round(Math.max(0, base)/10);
+  function fleetCalc(m, cat, ti, tuning, dc, vin){
     const code = FLEET_KP_CATS[cat][1], notes=[], row=fleetRow(m), f=(typeof FLEET_BFS!=="undefined"&&FLEET_BFS[m.id])||null;
     const rrc = m.rrc||0; let price, src;
     if (row) { price=row[FLEET_KP_COL[code]]; src="FLEET_CAT · "+code; }
@@ -103,7 +114,9 @@
     const subOn = cat==="c1" && subRef>0 && !!row;
     if (cat==="c1" && !subRef) notes.push("Субсидии для этой комплектации на сайте нет.");
     dc = Math.max(0, Math.round(Number(dc)||0));
-    return {rrc, tuning, fleet, ti:tiAmt, dc, sub:subOn?subRef:0, subOn, total: rrc+tuning-fleet-tiAmt-dc, code, src, notes};
+    const mpt = cat==="c1" && !!row && fleetMptFor(m.id, vin);
+    if (mpt) notes.push(FLEET_MPT_NOTE+" — 10% от цены С1 после ТИ (Сбер Лизинг).");
+    return {rrc, tuning, fleet, ti:tiAmt, dc, sub:mpt?fleetMptAmt(price-tiAmt):(subOn?subRef:0), subOn:mpt||subOn, mpt, total: rrc+tuning-fleet-tiAmt-dc, code, src, notes};
   }
   // opts: {mid, cat, ti, tuning, lessor, client}
   function fleetKpDoc(opts){
@@ -113,13 +126,13 @@
     const cat = FLEET_KP_CATS[opts.cat] ? opts.cat : "c1";
     const label = FLEET_KP_CATS[cat][0];
     const tuning = Math.max(0, Math.round(Number(opts.tuning)||0));
-    const c = fleetCalc(m, cat, !!opts.ti, tuning, opts.dc);
+    const c = fleetCalc(m, cat, !!opts.ti, tuning, opts.dc, opts.vin);
     const doc = offerDocNew(d);
     const rows = [["РРЦ", rubP(c.rrc)], ["Тюнинг", rubP(c.tuning)],
       ["Скидка флит ("+c.code+")", (c.fleet?"− ":"")+rubP(c.fleet)], ["Скидка ТИ", (c.ti?"− ":"")+rubP(c.ti)]];
     if (c.dc) rows.push(["Скидка ДЦ", "− "+rubP(c.dc)]);
     const total = ["Цена с уч. скидок и тюнинга", rubP(c.total)];
-    const sub = c.subOn ? "+"+rubP(c.sub)+" субсидия — идёт в первый взнос" : null;
+    const sub = c.subOn ? "+"+rubP(c.sub)+(c.mpt?" субсидия МПТ 10%":" субсидия")+" — идёт в первый взнос" : null;
     const notes = ["Флит, категория "+label+" (ценовая категория "+c.code+" по политике корпоративных продаж TENET от 08.10.2026).",
       "Цена с уч. скидок и тюнинга = РРЦ + тюнинг − скидка флит − скидка ТИ"+(c.dc?" − скидка ДЦ":"")+"."];
     if (c.subOn) notes.push("Субсидия из цены не вычитается — она идёт в первый взнос.");
@@ -287,7 +300,7 @@
   function fleetOpts(){
     const v = (id, def) => offerVal(id, def);
     return {mid: v("ofModel", null), cat: v("flCat","c1"), ti: v("flTi","1")==="1",
-      test: v("flTest",""), tuning: Number(String(v("flTune","0")).replace(/\s+/g,""))||0, dc: Math.max(0, Number(String(v("flDc","0")).replace(/\s+/g,""))||0), lessor: v("flLessor", FLEET_KP_LESSORS[0]), client: v("flClient","")};
+      test: v("flTest",""), tuning: Number(String(v("flTune","0")).replace(/\s+/g,""))||0, dc: Math.max(0, Number(String(v("flDc","0")).replace(/\s+/g,""))||0), lessor: v("flLessor", FLEET_KP_LESSORS[0]), client: v("flClient",""), vin: (typeof kmVin==="string"?kmVin:"")};
   }
   // Tiggo 9 и Arrizo 8 во флит-КП не продаются (решение 29.10.2026).
   const FLEET_KP_SKIP = {t9:1, a8:1};
@@ -345,6 +358,31 @@
     } catch(e) { console.warn("fleet-kp docx", e); alert("Не удалось собрать Word: "+e.message); } });
     ["flTest","flCat","flLessor","flClient","flTi","flTune","flDc"].forEach(id=>{ const el=document.getElementById(id); if(el) el.addEventListener("change", ()=>{ view="offer"; render(); }); });
   };
+  // Флит-калькулятор (fleetCreditBox) и таблица «Флит цены»: МПТ 10% вместо f.sub на те же VIN.
+  try {
+    if (typeof window.fleetCreditBox==="function" && !window.fleetCreditBox.__mpt) {
+      const orig = window.fleetCreditBox;
+      const wrapped = function(price, m, f, useFleet, useTi, mode){
+        const vin = typeof kmVin==="string" ? kmVin : "";
+        if (m && f && fleetMptFor(m.id, vin)) {
+          const pin=(typeof FLEET_PIN!=="undefined" && vin && FLEET_PIN[vin])||0;
+          const tiCut=useTi?(typeof FLEET_TI==="number"?FLEET_TI:100000):0;
+          const base=pin?Math.max(0,pin-tiCut):Math.max(0,Math.round((useFleet?(f.tidy||f.rrc):(f.rrc||0))-tiCut));
+          f = Object.assign({}, f, {sub: fleetMptAmt(base)});
+          const r = orig.call(this, price, m, f, useFleet, useTi, mode);
+          try { if (r && mode==="sub") ["stdCol","altCol"].forEach(k=>{ if (typeof r[k]==="string" && r[k].indexOf("Субсидия бренда")>=0) r[k] = r[k].split("Субсидия бренда").join("Субсидия МПТ 10%").replace(/<\/div>\s*$/, '<p class="calc-note">'+FLEET_MPT_NOTE+(vin?"":" (VIN не выбран)")+'</p></div>'); }); } catch(e) {}
+          return r;
+        }
+        return orig.apply(this, arguments);
+      };
+      wrapped.__mpt = true; window.fleetCreditBox = wrapped;
+    }
+    if (typeof window.fleetPricesHtml==="function" && !window.fleetPricesHtml.__mpt) {
+      const op = window.fleetPricesHtml;
+      const w2 = function(){ const h = op.apply(this, arguments); return fleetMptOn() ? h.replace("</summary>", '</summary><p class="fleet-note"><b>'+FLEET_MPT_NOTE+'</b> (Сбер Лизинг, С1): вместо субсидии 130 000 — 10% от цены BFS после ТИ.</p>') : h; };
+      w2.__mpt = true; window.fleetPricesHtml = w2;
+    }
+  } catch(e) { console.warn("fleet-mpt", e); }
   window.fleetKpDoc = fleetKpDoc; window.fleetKpBytes = fleetKpBytes; window.fleetKpBase64 = fleetKpBase64; window.fleetKpDocx = fleetKpDocx;
   window.FLEET_KP_LESSORS = FLEET_KP_LESSORS; window.FLEET_KP_CATS = FLEET_KP_CATS;
 })();
