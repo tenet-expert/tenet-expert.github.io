@@ -1,3 +1,4 @@
+    let kmDcKeep=NaN;
     function kmProfit(p){
       const discount=(p.tiAmt||0)+(p.spec||0)+(p.dcTi||0)+(p.dcCr||0)+(p.crAmt||0);
       const bonusAmt=p.invoice>0?(p.invoice/p.vat)*p.bonus:0;
@@ -139,8 +140,8 @@
       if(useDcCr){
         const typedEl=document.getElementById("kmDcCr");
         const typed=typedEl?kmVal("kmDcCr", NaN):NaN;
-        const kept=(typeof kmDcKeep==="number")?kmDcKeep:NaN;
-        const want=Number.isFinite(typed)?typed:(Number.isFinite(kept)?kept:(fresh?dcFit:dcFit));
+        if(typeof kmDcKeep!=="number") kmDcKeep=NaN;
+        const want=Number.isFinite(typed)?typed:(Number.isFinite(kmDcKeep)?kmDcKeep:dcFit);
         dcCr=Math.min(Math.max(0, want, dcMin), dcFit);
         dcCr=Math.max(0, Math.round(dcCr));
         kmDcKeep=dcCr;
