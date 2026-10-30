@@ -131,7 +131,7 @@
       const crBack=useCr?m.crBack:0;
       const band=typeof kmBand==="function"?kmBand(kmVin, useTi, prio, m):{lo:prio?m.prioMin:m.kmMin, hi:prio?m.prioMax:m.kmMax, lock:false};
       const lo=band.lo, hi=band.hi;
-      const dcPack={rrc,invoice,vat:m.vat,fee:m.fee,bonus:m.bonus,tiAmt,tiBack,spec,dcTi,crAmt,crBack,addons,casco,card};
+      const dcPack={rrc,invoice,vat:m.vat,fee:m.fee,bonus:m.bonus,tiAmt,tiBack,spec:0,dcTi,crAmt,crBack,addons,casco,card};
       const dcFit=typeof kmDcCrFit==="function"?kmDcCrFit(dcPack, lo):(typeof KM_DC_DEF==="number"?KM_DC_DEF:100000);
       const dcMin=typeof kmDcCrMin==="function"?kmDcCrMin(dcPack, hi):0;
       const dcDef=typeof KM_DC_DEF==="number"?KM_DC_DEF:100000;
@@ -366,7 +366,7 @@
             <label class="check-row"><input id="kmUseTi" type="checkbox" ${useTi?"checked":""} /> <span>Трейд-ин ${m.ti?rub(m.ti)+" / возмещение "+rub(m.tiBack):"нет в базе"}</span></label>
             <label class="check-row"><input id="kmUseLoan" type="checkbox" ${useLoan?"checked":""} /> <span>Кредит</span></label>
             ${showDealCr?`<label class="check-row"><input id="kmUseCr" type="checkbox" ${useCr?"checked":""} /> <span>${dealCrLabel} · ${rub(m.cr)}${m.crBack?` / возмещение ${rub(m.crBack)}`:""}</span></label>`:""}
-            ${pangoOnly?"":`<label class="field" style="max-width:none"><span>Спецпредложение, ₽</span><input id="kmSpec" inputmode="numeric" value="${spec}" /></label>
+            ${pangoOnly?"":`<label class="field" style="max-width:none"><span>Спецпредложение, ₽ · уводит КМ ниже плана</span><input id="kmSpec" inputmode="numeric" value="${spec}" /></label>
             ${useTi?`<label class="check-row"><input id="kmUseDcTi" type="checkbox" ${useDcTi?"checked":""} /> <span>Скидка от ДЦ за трейд-ин ${rub(KM_DC_DEF)}</span></label>`:""}
             ${useTi&&useDcTi?`<label class="field" style="max-width:none"><span>Сумма скидки ДЦ за трейд-ин, ₽</span><input id="kmDcTi" inputmode="numeric" value="${dcTi||KM_DC_DEF}" /></label>`:""}
             ${useLoan?`<label class="check-row"><input id="kmUseDcCr" type="checkbox" ${useDcCr?"checked":""} /> <span>Скидка от ДЦ за кредит${dcFit?` · до ${rub(dcFit)} в коридоре`:""}</span></label>`:""}
