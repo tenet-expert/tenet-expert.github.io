@@ -393,7 +393,7 @@
               ${downMode==="sum"
                 ?`<label class="field" style="max-width:none"><span>Первый взнос, ₽</span><input id="cDown" inputmode="numeric" value="${down}" /></label>`
                 :`<label class="field" style="max-width:none"><span>Первый взнос, %</span><input id="cDownPct" inputmode="decimal" value="${downPct}" /></label>`}
-              <p class="calc-note">${rub(down)} ₽ · ${downPct}% от цены авто${(showMpt||showSub||showFleet)?` · ${showFleet?"флит":"субс. бренда"}: ${rub(priceMpt)} − ПВ в авто ${rub(downMptCar)} = тело ${rub(creditMpt)}`:""}</p>
+              <p class="calc-note">${rub(down)} ₽ · ${downPct}% от цены авто ${rub(price)}${(showMpt||showSub||showFleet)?` · ${showFleet?"флит":"субс. бренда"}: ${rub(priceMpt)} − ПВ в авто ${rub(downMptCar)} = тело ${rub(creditMpt)}`:""}</p>
               ${fleetOn?fleetWarn.html:""}${qFleetPrio&&fleetPrioWarn.low&&!(fleetWarn.low&&fleetWarn.html===fleetPrioWarn.html)?fleetPrioWarn.html:""}${pShow?pangoWarn.html:""}
               <label class="field" style="max-width:none"><span>Срок, мес.</span><input id="cMonths" inputmode="numeric" value="${months}" /></label>`:""}
             <button type="button" class="btn ivory" id="kmToOffer" style="margin-top:16px;width:100%">Сформировать КП</button>
@@ -411,7 +411,7 @@
             <label class="field"><span>Срок, мес.</span><input id="cMonths" inputmode="numeric" value="${months}" /></label>
           </div>
           <input type="hidden" id="cDownMode" value="${downMode==="sum"?"sum":"pct"}" />
-          <p class="calc-note">${rub(down)} ₽ · ${downPct}% от цены авто${(showMpt||showSub||showFleet)?` · ${showFleet?"флит":"субс. бренда"}: ${rub(priceMpt)} − ПВ в авто ${rub(downMptCar)} = тело ${rub(creditMpt)}`:""}</p>
+          <p class="calc-note">${rub(down)} ₽ · ${downPct}% от цены авто ${rub(price)}${(showMpt||showSub||showFleet)?` · ${showFleet?"флит":"субс. бренда"}: ${rub(priceMpt)} − ПВ в авто ${rub(downMptCar)} = тело ${rub(creditMpt)}`:""}</p>
           ${(showSub||showFleet)?fleetWarn.html:""}${qFleetPrio&&fleetPrioWarn.low&&!(fleetWarn.low&&fleetWarn.html===fleetPrioWarn.html)?fleetPrioWarn.html:""}${pShow?pangoWarn.html:""}
         </div>${pangoOnly?"":altPick}<div class="km-pays">
           ${pangoOnly?"":`<div class="pay-col std km-pay">

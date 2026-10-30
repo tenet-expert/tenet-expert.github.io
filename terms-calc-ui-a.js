@@ -180,8 +180,7 @@
       }else if(downMode==="sum" || (sumEl && !pctEl)){
         const typed=sumEl?kmVal("cDown", NaN):NaN;
         down=Number.isFinite(typed)?typed:(sticky!=null?sticky:Math.round(priceN*0.2));
-        exactSum=sticky===down && keep.pct!=null && keep.price===priceN;
-        downPct=exactSum?keep.pct:(priceN>0?Math.round(down*1000/priceN)/10:0);
+        downPct=priceN>0?Math.round(down*1000/priceN)/10:0;
       }else if(pctEl && !sumEl){
         downPct=kmVal("cDownPct", keep.pct!=null?keep.pct:20);
         exactSum=keep.pct===downPct && sticky!=null && keep.price===priceN;
