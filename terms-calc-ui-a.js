@@ -247,7 +247,7 @@
         const down=downSum!=null?Math.max(0, Math.min(sale, downSum)):Math.round(sale*Math.max(0,pct)/100);
         const pctUsed=sale>0?Math.round(down*1000/sale)/10:pct;
         const group=typeof kmRateGroup==="function"?kmRateGroup(mm||cur):"t4l_t7";
-        const look=typeof kmBankRate==="function"?kmBankRate("sber", group, term, pctUsed):{rate:10, term};
+        const look=typeof kmBankRate==="function"?(function(l){return l&&l.na?kmBankRate("sovcom", group, term, pctUsed):l;})(kmBankRate("sber", group, term, pctUsed)):{rate:10, term};/*chery-t7l*/
         const pay=typeof calcPay==="function"?calcPay(sale+extra, down, look.term||term, look.rate):0;
         const f=mm && typeof fleetOf==="function"?fleetOf(mm.id):null;
         const canSub=!!(f && (f.sub||0)>0 && mm);

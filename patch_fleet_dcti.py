@@ -420,10 +420,112 @@ PLUS_UI_SUBS = [
 ]
 
 
+# --- Chery TIGGO 7 rates for t7l (ИП 7652/И от 21.08.2026, CHERY ФИНАНС) ---
+CHERY_MARK = "/*chery-t7l*/"
+CHERY_CONST = """    const KM_BANK_RATES_TIGGO7 = {/*chery-t7l: ИП 7652/И от 21.08.2026, CHERY ФИНАНС, TIGGO 7; нет строки = недоступно*/
+      sber:{
+        80:[0.01,0.01,0.01,0.01,0.01,0.01,0.01,1.00,4.00,6.00],
+        70:[0.01,0.01,0.01,0.01,3.60,5.50,6.10,7.30,9.00,10.00],
+        60:[0.01,0.01,2.10,5.60,7.20,8.70,9.60,10.50,12.20,13.30],
+        50:[0.01,0.01,5.90,7.90,9.80,10.80,11.80,12.50,13.40,14.30],
+        40:[0.01,3.90,7.80,10.00,11.40,12.40,13.20,13.80,14.30,15.00],
+        30:[0.01,6.30,9.50,11.40,12.60,13.50,14.20,14.70,14.90,15.50],
+        20:[0.01,8.00,10.80,12.70,13.60,14.40,14.90,15.40,15.70,15.90],
+        10:[2.20,9.40,11.90,13.80,14.30,15.30,15.50,15.80,16.00,16.20]
+      },
+      sovcom:{
+        80:[0.01,0.01,0.01,0.01,0.01,0.95,2.20],
+        70:[0.01,0.01,0.01,0.70,2.80,5.10,6.05],
+        60:[0.01,0.01,1.50,4.40,6.00,7.45,8.20],
+        50:[0.01,2.70,5.50,8.10,9.00,10.80,10.70],
+        40:[0.01,4.55,8.00,9.90,10.80,11.90,12.00],
+        30:[0.01,6.20,9.20,11.50,12.00,12.90,13.10],
+        20:[2.80,9.00,10.70,12.90,13.20,14.00,14.00],
+        10:[4.60,10.25,12.00,13.50,14.00,14.50,null],
+        0:[5.70,10.55,12.85,14.10,14.40,14.95,null]
+      },
+      tbank:{
+        80:[0.01,0.01,0.01,0.01,0.01,1.20,1.80,2.60],
+        70:[0.01,0.01,0.01,1.20,3.30,4.70,5.10,5.50],
+        60:[0.01,0.01,2.30,5.10,6.10,7.10,7.90,8.40],
+        50:[0.01,1.20,5.10,7.10,8.40,9.20,9.80,10.30],
+        40:[0.01,4.10,6.90,8.90,10.00,10.70,11.20,11.60],
+        30:[0.01,5.80,8.60,10.30,11.20,11.80,12.20,12.50],
+        20:[0.60,7.50,9.80,11.30,12.10,12.60,13.00,13.20],
+        10:[2.90,8.80,10.80,12.10,12.80,13.20,13.60,13.80],
+        0:[4.70,9.90,11.60,12.70,13.40,13.80,14.10,14.30]
+      },
+      alfa:{
+        80:[0.01,0.01,0.10,0.20,0.30,1.70,2.80,6.10],
+        70:[0.01,0.01,0.10,1.90,4.00,6.00,7.50,9.30],
+        60:[0.01,0.01,2.80,5.30,7.00,8.60,9.80,11.30],
+        50:[0.01,0.90,5.60,7.70,9.10,10.40,11.50,12.70],
+        40:[0.01,3.30,7.60,9.30,10.60,11.70,12.60,13.60],
+        30:[0.01,5.70,9.20,10.80,11.90,12.90,13.70,14.50],
+        20:[1.80,7.60,10.60,12.00,12.90,13.90,14.50,15.30],
+        10:[4.20,9.20,11.80,12.90,13.80,14.50,15.20,15.90]
+      },
+      vtb:{
+        80:[0.01,0.01,0.01,0.01,0.01,0.01,0.01],
+        70:[0.01,0.01,0.01,0.01,1.00,3.00,4.30],
+        60:[0.01,0.01,0.01,3.50,5.80,7.00,8.30],
+        50:[0.01,0.01,4.00,7.00,8.60,10.00,10.60],
+        40:[0.01,2.00,6.80,9.00,10.50,11.50,12.20],
+        30:[0.01,5.00,8.80,10.70,12.00,12.50,13.30],
+        20:[0.01,7.00,10.20,12.00,12.80,13.50,14.10],
+        10:[0.01,8.50,11.50,13.00,13.70,14.30,14.80]
+      }
+    };
+"""
+CHERY_MONTHS = {"sber": [12,24,36,48,60,72,84,96,108,120], "sovcom": [12,24,36,48,60,72,84],
+                "tbank": [12,24,36,48,60,72,84,96], "alfa": [12,24,36,48,60,72,84,96], "vtb": [12,24,36,48,60,72,84]}
+CHERY_GROUP_OLD = 'if(s==="t4l"||s==="t7"||s==="t7l") return "t4l_t7";'
+CHERY_GROUP_NEW = 'if(s==="t7l") return "tiggo7";' + CHERY_MARK + '\n      if(s==="t4l"||s==="t7") return "t4l_t7";'
+CHERY_BAND = "      const band=kmDownBand(downPct);\n"
+CHERY_RATE = ('      if(group==="tiggo7"){' + CHERY_MARK + '\n'
+              '        const ct=(typeof KM_BANK_RATES_TIGGO7!=="undefined" && KM_BANK_RATES_TIGGO7[bankId])||null;\n'
+              '        const cr=ct&&ct[band];\n'
+              '        if(!cr) return {rate:0, term:n, band, capped:false, na:true};\n'
+              '        let cRate=cr[idx], cTerm=terms[idx];\n'
+              '        if(cRate==null){ for(let i=idx;i>=0;i--){ if(cr[i]!=null){ cRate=cr[i]; cTerm=terms[i]; break; } } }\n'
+              '        return {rate:Number(cRate)||0, term:cTerm, band, capped:cTerm!==n};\n'
+              '      }\n')
+CHERY_SBER_OLD = 'kmBankRate("sber", group, term, pctUsed):{rate:10, term};'
+CHERY_SBER_NEW = ('(function(l){return l&&l.na?kmBankRate("sovcom", group, term, pctUsed):l;})'
+                  '(kmBankRate("sber", group, term, pctUsed)):{rate:10, term};' + CHERY_MARK)
+
+
+def chery_t7l(text):
+    """Idempotent: separate Chery TIGGO 7 table for t7l (survives patch_terms_sync,
+    which only replaces KM_BANK_RATES), kmRateGroup t7l -> tiggo7, and kmBankRate
+    returns na for bank/ПВ cells Chery has not got (no fallback to T7)."""
+    if "const KM_BANK_RATES_TIGGO7 = {" not in text:
+        i = text.find("    function kmRateGroup(m){")
+        if i >= 0:
+            text = text[:i] + CHERY_CONST + text[i:]
+    text = text.replace(CHERY_GROUP_OLD, CHERY_GROUP_NEW)
+    if 'if(group==="tiggo7")' not in text and "function kmBankRate(" in text:
+        j = text.find(CHERY_BAND, text.find("function kmBankRate("))
+        if j >= 0:
+            j += len(CHERY_BAND)
+            text = text[:j] + CHERY_RATE + text[j:]
+    text = text.replace(CHERY_SBER_OLD, CHERY_SBER_NEW)
+    return text
+
+
 def main():
-    for p in (Path("terms-calc-data.js"), Path("_site/terms-calc-data.js")):
+    for p in (Path("terms-calc-data.js"), Path("_site/terms-calc-data.js"),
+              Path("terms-calc-loan.js"), Path("terms-calc-ui-a.js"), Path("terms-calc-fn.js"),
+              Path("_site/terms-calc-fn.js")):
         if p.exists():
             src = p.read_text(encoding="utf-8")
+            c = chery_t7l(src)
+            if c != src and js_ok(c):
+                p.write_text(c, encoding="utf-8")
+                print(p, "chery-t7l: patched")
+                src = c
+            if "terms-calc-data" not in p.name:
+                continue
             out = drop_excl(src)
             if out != src:
                 p.write_text(out, encoding="utf-8")
@@ -432,7 +534,7 @@ def main():
         if not p.exists() or p.stat().st_size < 100000:
             continue
         src = p.read_text(encoding="utf-8")
-        out = patch(src)
+        out = chery_t7l(patch(src))
         if out == src:
             print(p, "fleet-dcti: nothing to do")
             continue

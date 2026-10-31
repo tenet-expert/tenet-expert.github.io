@@ -15,6 +15,14 @@
         }
       }
       const band=kmDownBand(downPct);
+      if(group==="tiggo7"){/*chery-t7l*/
+        const ct=(typeof KM_BANK_RATES_TIGGO7!=="undefined" && KM_BANK_RATES_TIGGO7[bankId])||null;
+        const cr=ct&&ct[band];
+        if(!cr) return {rate:0, term:n, band, capped:false, na:true};
+        let cRate=cr[idx], cTerm=terms[idx];
+        if(cRate==null){ for(let i=idx;i>=0;i--){ if(cr[i]!=null){ cRate=cr[i]; cTerm=terms[i]; break; } } }
+        return {rate:Number(cRate)||0, term:cTerm, band, capped:cTerm!==n};
+      }
       const table=(KM_BANK_RATES[bankId]||{})[group]||(KM_BANK_RATES[bankId]||{}).t4l_t7||{};
       const row=table[band]||table[10]||table[20]||[];
       let rate=row[idx];

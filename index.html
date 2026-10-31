@@ -3474,9 +3474,64 @@ async function pingTelegram(body){
         }
       }
     };
+    const KM_BANK_RATES_TIGGO7 = {/*chery-t7l: ИП 7652/И от 21.08.2026, CHERY ФИНАНС, TIGGO 7; нет строки = недоступно*/
+      sber:{
+        80:[0.01,0.01,0.01,0.01,0.01,0.01,0.01,1.00,4.00,6.00],
+        70:[0.01,0.01,0.01,0.01,3.60,5.50,6.10,7.30,9.00,10.00],
+        60:[0.01,0.01,2.10,5.60,7.20,8.70,9.60,10.50,12.20,13.30],
+        50:[0.01,0.01,5.90,7.90,9.80,10.80,11.80,12.50,13.40,14.30],
+        40:[0.01,3.90,7.80,10.00,11.40,12.40,13.20,13.80,14.30,15.00],
+        30:[0.01,6.30,9.50,11.40,12.60,13.50,14.20,14.70,14.90,15.50],
+        20:[0.01,8.00,10.80,12.70,13.60,14.40,14.90,15.40,15.70,15.90],
+        10:[2.20,9.40,11.90,13.80,14.30,15.30,15.50,15.80,16.00,16.20]
+      },
+      sovcom:{
+        80:[0.01,0.01,0.01,0.01,0.01,0.95,2.20],
+        70:[0.01,0.01,0.01,0.70,2.80,5.10,6.05],
+        60:[0.01,0.01,1.50,4.40,6.00,7.45,8.20],
+        50:[0.01,2.70,5.50,8.10,9.00,10.80,10.70],
+        40:[0.01,4.55,8.00,9.90,10.80,11.90,12.00],
+        30:[0.01,6.20,9.20,11.50,12.00,12.90,13.10],
+        20:[2.80,9.00,10.70,12.90,13.20,14.00,14.00],
+        10:[4.60,10.25,12.00,13.50,14.00,14.50,null],
+        0:[5.70,10.55,12.85,14.10,14.40,14.95,null]
+      },
+      tbank:{
+        80:[0.01,0.01,0.01,0.01,0.01,1.20,1.80,2.60],
+        70:[0.01,0.01,0.01,1.20,3.30,4.70,5.10,5.50],
+        60:[0.01,0.01,2.30,5.10,6.10,7.10,7.90,8.40],
+        50:[0.01,1.20,5.10,7.10,8.40,9.20,9.80,10.30],
+        40:[0.01,4.10,6.90,8.90,10.00,10.70,11.20,11.60],
+        30:[0.01,5.80,8.60,10.30,11.20,11.80,12.20,12.50],
+        20:[0.60,7.50,9.80,11.30,12.10,12.60,13.00,13.20],
+        10:[2.90,8.80,10.80,12.10,12.80,13.20,13.60,13.80],
+        0:[4.70,9.90,11.60,12.70,13.40,13.80,14.10,14.30]
+      },
+      alfa:{
+        80:[0.01,0.01,0.10,0.20,0.30,1.70,2.80,6.10],
+        70:[0.01,0.01,0.10,1.90,4.00,6.00,7.50,9.30],
+        60:[0.01,0.01,2.80,5.30,7.00,8.60,9.80,11.30],
+        50:[0.01,0.90,5.60,7.70,9.10,10.40,11.50,12.70],
+        40:[0.01,3.30,7.60,9.30,10.60,11.70,12.60,13.60],
+        30:[0.01,5.70,9.20,10.80,11.90,12.90,13.70,14.50],
+        20:[1.80,7.60,10.60,12.00,12.90,13.90,14.50,15.30],
+        10:[4.20,9.20,11.80,12.90,13.80,14.50,15.20,15.90]
+      },
+      vtb:{
+        80:[0.01,0.01,0.01,0.01,0.01,0.01,0.01],
+        70:[0.01,0.01,0.01,0.01,1.00,3.00,4.30],
+        60:[0.01,0.01,0.01,3.50,5.80,7.00,8.30],
+        50:[0.01,0.01,4.00,7.00,8.60,10.00,10.60],
+        40:[0.01,2.00,6.80,9.00,10.50,11.50,12.20],
+        30:[0.01,5.00,8.80,10.70,12.00,12.50,13.30],
+        20:[0.01,7.00,10.20,12.00,12.80,13.50,14.10],
+        10:[0.01,8.50,11.50,13.00,13.70,14.30,14.80]
+      }
+    };
     function kmRateGroup(m){
       const s=(m&&m.stock)||"";
-      if(s==="t4l"||s==="t7"||s==="t7l") return "t4l_t7";
+      if(s==="t7l") return "tiggo7";/*chery-t7l*/
+      if(s==="t4l"||s==="t7") return "t4l_t7";
       if(s==="t4"||s==="t8") return "t4_t8";
       if(s==="a8"||s==="ta8"||s==="t9") return "a8";
       if(s==="pl4") return "plusL4";
@@ -3512,6 +3567,14 @@ async function pingTelegram(body){
         }
       }
       const band=kmDownBand(downPct);
+      if(group==="tiggo7"){/*chery-t7l*/
+        const ct=(typeof KM_BANK_RATES_TIGGO7!=="undefined" && KM_BANK_RATES_TIGGO7[bankId])||null;
+        const cr=ct&&ct[band];
+        if(!cr) return {rate:0, term:n, band, capped:false, na:true};
+        let cRate=cr[idx], cTerm=terms[idx];
+        if(cRate==null){ for(let i=idx;i>=0;i--){ if(cr[i]!=null){ cRate=cr[i]; cTerm=terms[i]; break; } } }
+        return {rate:Number(cRate)||0, term:cTerm, band, capped:cTerm!==n};
+      }
       const bankT=KM_BANK_RATES[bankId]||{};/*plus-banks*/
       if(bankId==="vtb" && !bankT[group]) return {rate:0, term:n, band, capped:false, na:true};
       const table=bankT[group]||bankT.t4l_t7||{};
@@ -4296,7 +4359,7 @@ async function pingTelegram(body){
         const down=downSum!=null?Math.max(0, Math.min(sale, downSum)):Math.round(sale*Math.max(0,pct)/100);
         const pctUsed=sale>0?Math.round(down*1000/sale)/10:pct;
         const group=typeof kmRateGroup==="function"?kmRateGroup(mm||cur):"t4l_t7";
-        const look=typeof kmBankRate==="function"?kmBankRate("sber", group, term, pctUsed):{rate:10, term};
+        const look=typeof kmBankRate==="function"?(function(l){return l&&l.na?kmBankRate("sovcom", group, term, pctUsed):l;})(kmBankRate("sber", group, term, pctUsed)):{rate:10, term};/*chery-t7l*/
         const pay=typeof calcPay==="function"?calcPay(sale+extra, down, look.term||term, look.rate):0;
         const f=mm && typeof fleetOf==="function"?fleetOf(mm.id):null;
         const canSub=!!(f && (f.sub||0)>0 && mm);
