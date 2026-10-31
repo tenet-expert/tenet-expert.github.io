@@ -1,22 +1,7 @@
 {
- "updated": "30.10.2026",
+ "updated": "31.10.2026",
  "note": "В наличии (в салоне), фото на Drive нет",
  "groups": [
-  {
-   "id": "edehd24b8te106287",
-   "queue": 1,
-   "brand": "TENET",
-   "model": "T9",
-   "trim": "Ультра",
-   "drive": "4WD, 5 мест",
-   "color": "зелёный",
-   "cars": [
-    {
-     "vin": "EDEHD24B8TE106287",
-     "state": "в салоне"
-    }
-   ]
-  },
   {
    "id": "edehd24b6te122133",
    "queue": 1,
@@ -28,21 +13,6 @@
    "cars": [
     {
      "vin": "EDEHD24B6TE122133",
-     "state": "в салоне"
-    }
-   ]
-  },
-  {
-   "id": "edehd24b2te128303",
-   "queue": 1,
-   "brand": "TENET",
-   "model": "T9",
-   "trim": "Ультра",
-   "drive": "4WD, 7 мест",
-   "color": "зелёный",
-   "cars": [
-    {
-     "vin": "EDEHD24B2TE128303",
      "state": "в салоне"
     }
    ]
