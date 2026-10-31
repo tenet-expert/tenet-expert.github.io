@@ -54,8 +54,8 @@ html{scroll-padding-top:84px}
 .terms-top .terms-fold:nth-child(2)>summary{color:#1e5c24}
 .fleet-board.terms-fold>summary{color:#6d4c2a}
 @media(max-width:430px){
-  html,body{overflow-x:clip;max-width:100%}
-  .wrap{overflow-x:clip;max-width:100%}
+  html,body{overflow-x:hidden;max-width:100%}
+  .wrap{overflow-x:hidden;max-width:100%}
   header.top,nav.desk{max-width:100%}
   nav.desk{width:100%;border-radius:16px}
   nav.desk button{padding:8px 10px}
@@ -73,9 +73,12 @@ html{scroll-padding-top:84px}
   .study-pick{overflow:visible;max-width:100%}
   .model-row{display:grid;grid-template-columns:1fr 1fr;overflow:visible}
   .model-row .card{flex:none;width:auto;min-width:0}
-  .tune-scroll,.fleet-wrap,.lb-scroll{overflow:visible;max-width:100%}
-  .tune-table,.fleet-sheet,.lb-mini{width:100%;table-layout:fixed}
-  .tune-table th,.tune-table td,.fleet-sheet th,.fleet-sheet td,.lb-mini th,.lb-mini td{white-space:normal;word-break:break-word}
+  .tune-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%;touch-action:pan-x pan-y}
+  .tune-table{width:max-content;min-width:720px;table-layout:auto}
+  .tune-table th,.tune-table td{white-space:nowrap;word-break:normal}
+  .fleet-wrap,.lb-scroll{overflow:visible;max-width:100%}
+  .fleet-sheet,.lb-mini{width:100%;table-layout:fixed}
+  .fleet-sheet th,.fleet-sheet td,.lb-mini th,.lb-mini td{white-space:normal;word-break:break-word}
   .check-row{align-items:flex-start}
   .check-row span{min-width:0}
   input,textarea,select,button{max-width:100%}
