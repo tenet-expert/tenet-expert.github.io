@@ -198,7 +198,7 @@
     }
     function kmChipGroups(active){
       const groups={};
-      const off={t9p:1,a8a:1,a8u:1};
+      const off={t7l:1,t9p:1,a8a:1,a8u:1};
       KM_MODELS.forEach(x=>{
         if(off[x.id]) return;
         const g=kmLineOf(x.id);

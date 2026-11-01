@@ -95,7 +95,7 @@
     function calcKm(){
       const testHit=typeof testSaleOf==="function"?testSaleOf(kmId):null;
       if(testHit) return calcTestSale(testHit);
-      const kmOff={t9p:1,a8a:1,a8u:1};
+      const kmOff={t7l:1,t9p:1,a8a:1,a8u:1};
       if(typeof kmId!=="string" || !KM_MODELS.some(x=>x.id===kmId && !kmOff[x.id])) kmId=(KM_MODELS.find(x=>!kmOff[x.id])||KM_MODELS[0]).id;
       if(typeof kmVin!=="string") kmVin="";
       const m=KM_MODELS.find(x=>x.id===kmId)||KM_MODELS[0];
