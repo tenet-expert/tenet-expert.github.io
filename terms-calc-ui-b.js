@@ -371,14 +371,18 @@
             <p class="eyebrow">Калькулятор КМ · ${escape(m.name)}</p>
             <label class="field" style="max-width:none;margin-top:8px"><span>РРЦ, ₽ · из условий ${TERMS_DATE}</span><input id="kmRrc" inputmode="numeric" value="${rrc}" /></label>
             <label class="field" style="max-width:none"><span>Сумма счёта, ₽ · из условий ${TERMS_DATE}</span><input id="kmInv" inputmode="numeric" value="${invoice}" /></label>
-            <label class="check-row"><input id="kmUseTi" type="checkbox" ${useTi?"checked":""} /> <span>Трейд-ин ${m.ti?rub(m.ti)+" / возмещение "+rub(m.tiBack):"нет в базе"}</span></label>
-            <label class="check-row"><input id="kmUseLoan" type="checkbox" ${useLoan?"checked":""} /> <span>Кредит</span></label>
+            <div class="check-pair">
+              <label class="check-row"><input id="kmUseTi" type="checkbox" ${useTi?"checked":""} /> <span>ТИ бренда ${m.ti?rub(m.ti):""}</span></label>
+              <label class="check-row"><input id="kmUseDcTi" type="checkbox" ${useDcTi?"checked":""} /> <span>ТИ от ДЦ ${rub(KM_DC_DEF)}</span></label>
+            </div>
+            <div class="check-pair">
+              <label class="check-row"><input id="kmUseLoan" type="checkbox" ${useLoan?"checked":""} /> <span>Кредит</span></label>
+              <label class="check-row"><input id="kmUseDcCr" type="checkbox" ${useDcCr?"checked":""} /> <span>Кредит от ДЦ${dcFit?` · до ${rub(dcFit)}`:""}</span></label>
+            </div>
             ${showDealCr?`<label class="check-row"><input id="kmUseCr" type="checkbox" ${useCr?"checked":""} /> <span>${dealCrLabel} · ${rub(m.cr)}${m.crBack?` / возмещение ${rub(m.crBack)}`:""}</span></label>`:""}
             ${pangoOnly?"":`<label class="field" style="max-width:none"><span>Спецпредложение, ₽ · уводит КМ ниже плана</span><input id="kmSpec" inputmode="numeric" value="${spec}" /></label>
-            ${useTi?`<label class="check-row"><input id="kmUseDcTi" type="checkbox" ${useDcTi?"checked":""} /> <span>Скидка от ДЦ за трейд-ин ${rub(KM_DC_DEF)}</span></label>`:""}
-            ${useTi&&useDcTi?`<label class="field" style="max-width:none"><span>Сумма скидки ДЦ за трейд-ин, ₽</span><input id="kmDcTi" inputmode="numeric" value="${dcTi||KM_DC_DEF}" /></label>`:""}
-            ${useLoan?`<label class="check-row"><input id="kmUseDcCr" type="checkbox" ${useDcCr?"checked":""} /> <span>Скидка от ДЦ за кредит${dcFit?` · до ${rub(dcFit)} в коридоре`:""}</span></label>`:""}
-            ${useLoan&&useDcCr?`<label class="field" style="max-width:none"><span>Сумма скидки ДЦ за кредит, ₽ · догоняет план</span><input id="kmDcCr" inputmode="numeric" value="${dcCr}" /></label>`:""}
+            ${useDcTi?`<label class="field" style="max-width:none"><span>Сумма скидки ДЦ за трейд-ин, ₽</span><input id="kmDcTi" inputmode="numeric" value="${dcTi||KM_DC_DEF}" /></label>`:""}
+            ${useDcCr?`<label class="field" style="max-width:none"><span>Сумма скидки ДЦ за кредит, ₽ · догоняет план</span><input id="kmDcCr" inputmode="numeric" value="${dcCr}" /></label>`:""}
             <p class="calc-note">Трейд-ин и скидка за кредит держат плановый КМ. Спецпредложение кладётся сверху и снижает.</p>`}
             <label class="field" style="max-width:none"><span>Д/О, ₽</span><input id="kmDo" inputmode="numeric" value="${addons}" /></label>
             ${pangoOnly?`<div class="note-box" style="margin-top:14px"><p class="eyebrow" style="margin:0 0 6px">Цена PANGO</p><div class="calc-out">${rub(pFix)} ₽</div><p class="calc-note">${_pg.cash===_pg.ti?"При любых условиях. Трейд-ин цену не меняет.":(useTi?"С трейд-ин.":"Без трейд-ин.")} Директ и флит не считаем.</p></div><div class="note-box">${escape(PANGO_ONLY[kmVin])}</div>`:`<div class="note-box" style="margin-top:14px">
