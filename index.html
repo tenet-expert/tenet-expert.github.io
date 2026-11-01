@@ -4536,7 +4536,7 @@ async function pingTelegram(body){
       const rrc=fresh?m.rrc:kmVal("kmRrc", m.rrc);
       const invoice=fresh?m.dealer:kmVal("kmInv", m.dealer);
       const useTi=kmVal("kmUseTi", false);
-      const useLoan=kmVal("kmUseLoan", false);
+      const useLoan=true;
       const hasDealCr=m.cr>0;
       const dealCrLabel=m.id==="t7p"?"Выгодный кредит":"Прямая скидка";
       const dealCrNeedsLoan=m.id==="t7p";
@@ -4815,15 +4815,13 @@ async function pingTelegram(body){
             <label class="field" style="max-width:none;margin-top:8px"><span>РРЦ, ₽ · из условий ${TERMS_DATE}</span><input id="kmRrc" inputmode="numeric" value="${rrc}" /></label>
             <label class="field" style="max-width:none"><span>Сумма счёта, ₽ · из условий ${TERMS_DATE}</span><input id="kmInv" inputmode="numeric" value="${invoice}" /></label>
             <div class="check-pair">
-              <label class="check-row"><input id="kmUseTi" type="checkbox" ${useTi?"checked":""} /> <span>ТИ бренда ${m.ti?rub(m.ti):""}</span></label>
+              <label class="check-row"><input id="kmUseTi" type="checkbox" ${useTi?"checked":""} /> <span>ТИ ${m.ti?rub(m.ti):""}</span></label>
               <label class="check-row"><input id="kmUseDcTi" type="checkbox" ${useDcTi?"checked":""} /> <span>ТИ от ДЦ ${rub(KM_DC_DEF)}</span></label>
             </div>
             ${(m.stock==="pl4"||m.stock==="pl6")?`<label class="check-row"><input id="kmUseLoyal" type="checkbox" ${useLoyal?"checked":""} /> <span>Лояльный ТИ · Elegant (Mazda / KIA / Hyundai) ${rub(100000)}</span></label>`:""}
-            <label class="check-row"><input id="kmUseLoan" type="checkbox" ${useLoan?"checked":""} /> <span>Кредит</span></label>
-            ${showDealCr?`<label class="check-row"><input id="kmUseCr" type="checkbox" ${useCr?"checked":""} /> <span>${dealCrLabel} · ${rub(m.cr)}</span></label>`:""}
-            ${pangoOnly?"":`<label class="field" style="max-width:none"><span>Спецпредложение, ₽ · уводит КМ ниже плана</span><input id="kmSpec" inputmode="numeric" value="${spec}" /></label>
+            ${pangoOnly?"":`<label class="field" style="max-width:none"><span>Произвольная скидка, ₽</span><input id="kmSpec" inputmode="numeric" value="${spec}" /></label>
             ${useDcTi?`<label class="field" style="max-width:none"><span>Сумма скидки ДЦ за трейд-ин, ₽</span><input id="kmDcTi" inputmode="numeric" value="${dcTi||KM_DC_DEF}" /></label>`:""}
-            <p class="calc-note">Трейд-ин и скидка за кредит держат плановый КМ. Спецпредложение кладётся сверху и снижает.</p>`}
+            <p class="calc-note">ТИ и ТИ от ДЦ держат плановый КМ. Произвольная скидка снижает.</p>`}
             <label class="field" style="max-width:none"><span>Д/О, ₽</span><input id="kmDo" inputmode="numeric" value="${addons}" /></label>
             ${pangoOnly?`<div class="note-box" style="margin-top:14px"><p class="eyebrow" style="margin:0 0 6px">Цена PANGO</p><div class="calc-out">${rub(pFix)} ₽</div><p class="calc-note">${_pg.cash===_pg.ti?"При любых условиях. Трейд-ин цену не меняет.":(useTi?"С трейд-ин.":"Без трейд-ин.")} Директ и флит не считаем.</p></div><div class="note-box">${escape(PANGO_ONLY[kmVin])}</div>`:`<div class="note-box" style="margin-top:14px">
               <p class="eyebrow" style="margin:0 0 6px">Итоговая цена для клиента</p>
