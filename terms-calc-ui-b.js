@@ -255,7 +255,7 @@
         pOk=kmGate(pKmK).ok;
       }
       let plusAltDirect="", plusAltFleet="", altPick="";
-      if(useLoan && (isPlus || m.brand==="TENET")){
+      if(false && useLoan && (isPlus || m.brand==="TENET")){
         const wantPlus=!isPlus;
         const alts=(typeof KM_MODELS!=="undefined"?KM_MODELS:[]).filter(x=>x && x.brand===(wantPlus?"TENET PLUS":"TENET"));
         if(typeof kmAltFor!=="string") kmAltFor="";
@@ -422,7 +422,7 @@
           <input type="hidden" id="cDownMode" value="${downMode==="sum"?"sum":"pct"}" />
           <p class="calc-note">${rub(down)} ₽ · ${downPct}% от цены авто ${rub(price)}${(showMpt||showSub||showFleet)?` · ${showFleet?"флит":"субс. бренда"}: ${rub(priceMpt)} − ПВ в авто ${rub(downMptCar)} = тело ${rub(creditMpt)}`:""}</p>
           ${(showSub||showFleet)?fleetWarn.html:""}${qFleetPrio&&fleetPrioWarn.low&&!(fleetWarn.low&&fleetWarn.html===fleetPrioWarn.html)?fleetPrioWarn.html:""}${pShow?pangoWarn.html:""}
-        </div>${pangoOnly?"":altPick}<div class="km-pays">
+        </div><div class="km-pays">
           ${pangoOnly?"":`<div class="pay-col std km-pay">
             <div class="km-contrast${prioInStock?"":" solo"}">
               <div class="pay-cell">
@@ -438,7 +438,7 @@
               ${prioInStock?`<div class="pay-cell prio"><p class="calc-note">КМ ${Math.round(prioDeal.km/1000)} тыс.${prioDeal.price<ordDeal.price?" · дешевле на "+rub(ordDeal.price-prioDeal.price):""}</p></div>`:""}
             </div>
             <p class="calc-note">${isPlus?"Ставки TENET PLUS, ИП 1938/И.":"Ставки TENET ФИНАНС, ИП 1890/И."}</p>
-            ${plusAltDirect}
+            
           </div>
           <div class="pay-col ${showSub?"sub":"mpt"} km-pay${fleetWarn.low?" pv-low":""}${qFleetPrio?" fleet-pair":""}">
             ${qFleetPrio?`<div class="km-contrast">
@@ -480,7 +480,7 @@
               <p class="calc-note">${typeof fleetSubNote==="function"?fleetSubNote(qFleet):""}</p>
               ${mptBreak}
             </details>`}`}
-            ${plusAltFleet}
+            
           </div>`}
           ${pShow?`<div class="pay-col pango km-pay${pangoWarn.low?" pv-low":""}">
             <p class="eyebrow">Спеццена · PANGO</p>
