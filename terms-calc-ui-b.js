@@ -113,7 +113,7 @@
       const useCr=showDealCr && kmVal("kmUseCr", false);
       const spec=kmVal("kmSpec", 0);
       const useDcTi=useTi && kmVal("kmUseDcTi", false);
-      const useDcCr=useLoan && kmVal("kmUseDcCr", false);
+      const useDcCr=false;
       const dcTi=useDcTi?kmVal("kmDcTi", typeof KM_DC_DEF==="number"?KM_DC_DEF:100000):0;
       const addons=kmVal("kmDo", 70000);
       let casco=0, card=0, pack=0;
@@ -126,8 +126,9 @@
         card=0;
       }
       const prio=PRIO_VINS.has(kmVin);
-      const tiAmt=useTi?m.ti:0;
-      const tiBack=useTi?m.tiBack:0;
+      const useLoyal=(m.stock==="pl4"||m.stock==="pl6") && kmVal("kmUseLoyal", false);
+      const tiAmt=(useTi?m.ti:0)+(useLoyal?100000:0);
+      const tiBack=(useTi?m.tiBack:0)+(useLoyal?100000:0);
       const crAmt=useCr?m.cr:0;
       const crBack=useCr?m.crBack:0;
       const band=typeof kmBand==="function"?kmBand(kmVin, useTi, prio, m):{lo:prio?m.prioMin:m.kmMin, hi:prio?m.prioMax:m.kmMax, lock:false};
@@ -375,14 +376,11 @@
               <label class="check-row"><input id="kmUseTi" type="checkbox" ${useTi?"checked":""} /> <span>ТИ бренда ${m.ti?rub(m.ti):""}</span></label>
               <label class="check-row"><input id="kmUseDcTi" type="checkbox" ${useDcTi?"checked":""} /> <span>ТИ от ДЦ ${rub(KM_DC_DEF)}</span></label>
             </div>
-            <div class="check-pair">
-              <label class="check-row"><input id="kmUseLoan" type="checkbox" ${useLoan?"checked":""} /> <span>Кредит</span></label>
-              <label class="check-row"><input id="kmUseDcCr" type="checkbox" ${useDcCr?"checked":""} /> <span>Кредит от ДЦ${dcFit?` · до ${rub(dcFit)}`:""}</span></label>
-            </div>
+            ${(m.stock==="pl4"||m.stock==="pl6")?`<label class="check-row"><input id="kmUseLoyal" type="checkbox" ${useLoyal?"checked":""} /> <span>Лояльный ТИ · Elegant (Mazda / KIA / Hyundai) ${rub(100000)}</span></label>`:""}
+            <label class="check-row"><input id="kmUseLoan" type="checkbox" ${useLoan?"checked":""} /> <span>Кредит</span></label>
             ${showDealCr?`<label class="check-row"><input id="kmUseCr" type="checkbox" ${useCr?"checked":""} /> <span>${dealCrLabel} · ${rub(m.cr)}${m.crBack?` / возмещение ${rub(m.crBack)}`:""}</span></label>`:""}
             ${pangoOnly?"":`<label class="field" style="max-width:none"><span>Спецпредложение, ₽ · уводит КМ ниже плана</span><input id="kmSpec" inputmode="numeric" value="${spec}" /></label>
             ${useDcTi?`<label class="field" style="max-width:none"><span>Сумма скидки ДЦ за трейд-ин, ₽</span><input id="kmDcTi" inputmode="numeric" value="${dcTi||KM_DC_DEF}" /></label>`:""}
-            ${useDcCr?`<label class="field" style="max-width:none"><span>Сумма скидки ДЦ за кредит, ₽ · догоняет план</span><input id="kmDcCr" inputmode="numeric" value="${dcCr}" /></label>`:""}
             <p class="calc-note">Трейд-ин и скидка за кредит держат плановый КМ. Спецпредложение кладётся сверху и снижает.</p>`}
             <label class="field" style="max-width:none"><span>Д/О, ₽</span><input id="kmDo" inputmode="numeric" value="${addons}" /></label>
             ${pangoOnly?`<div class="note-box" style="margin-top:14px"><p class="eyebrow" style="margin:0 0 6px">Цена PANGO</p><div class="calc-out">${rub(pFix)} ₽</div><p class="calc-note">${_pg.cash===_pg.ti?"При любых условиях. Трейд-ин цену не меняет.":(useTi?"С трейд-ин.":"Без трейд-ин.")} Директ и флит не считаем.</p></div><div class="note-box">${escape(PANGO_ONLY[kmVin])}</div>`:`<div class="note-box" style="margin-top:14px">
