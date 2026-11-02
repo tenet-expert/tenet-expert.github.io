@@ -5,10 +5,10 @@
 import json
 from pathlib import Path
 
-# Drive 28.10.2026 18:24 Samara: все непустые строки Лист1 как в файле
-DEBT_COLS = ["ФИО", "Сумма", "% за неделю", "% за месяц"]
+# Drive 02.11.2026 (сверка 10:08 Samara): все непустые строки Лист1 как в файле
+DEBT_COLS = ["ФИО", "Vin", "Сумма", "% за неделю", "% за месяц"]
 DEBT_ROWS = [
-    ["Спицын А", 30000, None, None],
+    ["Спицын А", "T4L № Б/Н VIN EDELB31B4TE133187 Белый", 30000, None, None],
 ]
 MARK = "const TUNE_DEBT ="
 
@@ -18,7 +18,8 @@ def block():
             "    function tuneDebtHtml(){\n"
             "      const c=TUNE_DEBT.cols;\n"
             "      const head=\"<tr>\"+c.map(x=>\"<th>\"+escape(x)+\"</th>\").join(\"\")+\"</tr>\";\n"
-            "      const body=TUNE_DEBT.rows.map(r=>\"<tr>\"+r.map((v,i)=>\"<td>\"+(i===0?escape(String(v==null?\"\":v)):(typeof v===\"number\"?(i===1?tuneMoney(v):escape(String(v))):\"—\"))+\"</td>\").join(\"\")+\"</tr>\").join(\"\");\n"
+            "      const mi=c.indexOf(\"Сумма\");\n"
+            "      const body=TUNE_DEBT.rows.map(r=>\"<tr>\"+r.map((v,i)=>\"<td>\"+(i===0?escape(String(v==null?\"\":v)):(v==null||v===\"\"?\"—\":(typeof v===\"number\"&&i===mi?tuneMoney(v):escape(String(v)))))+\"</td>\").join(\"\")+\"</tr>\").join(\"\");\n"
             "      return `<div class=\"card\"><p class=\"eyebrow\">Должники</p><h3 style=\"margin:4px 0 8px\">Долг по доп. оборудованию</h3><p class=\"tune-note\">Данные как в файле «Долг по доп. об.». Прочерк — в файле пусто.</p><div class=\"tune-scroll\"><table class=\"tune-table\">${head}${body}</table></div></div>`;\n"
             "    }\n")
 
