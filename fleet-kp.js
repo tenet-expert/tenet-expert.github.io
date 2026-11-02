@@ -182,6 +182,7 @@
     }
     if (!doc) doc = {title:"Коммерческое предложение", meta:[], sections:[], photos:[], note:""};
     if (!(doc.photos&&doc.photos.length) && typeof offerPhotoUrls==="function") doc.photos = offerPhotoUrls(t.id);
+    if (opts.retail) return fleetKpTestRetail(t, doc, base);
     const dc = Math.max(0, Math.round(Number(opts.dc)||0));
     const total = [dc ? "Цена с уч. скидок и тюнинга" : "Цена с уч. тюнинга", rubP(t.fix+tuning-dc)];
     const gain = Math.max(0, (t.rrc||0)-t.fix);
@@ -210,6 +211,40 @@
     doc.sections.unshift({title:"Условия флита", lines:notes});
     doc.sections.push({title:"В наличии", lines:["VIN "+t.vin+" · "+t.year+" г. · пробег "+rub(t.km)+" км · тестовый автомобиль в салоне"].concat(FLEET_STOCK_FOOT)});
     doc.calc = {test:t.id, vin:t.vin, fix:t.fix, tuning, dc, total:t.fix+tuning-dc, rrc:t.rrc, gain, fleet:0, ti:0, sub:0, subOn:false, notes:[]};
+    return doc;
+  }
+  // Физлицо, тестовый авто: РРЦ → официальные розничные скидки модели (KM_MODELS: трейд-ин импортёра, программа кредита) → остаток до цены фикс = «Выгода (тестовый автомобиль)». Итог = цена фикс ТУ.
+  function fleetKpTestRetail(t, doc, base){
+    const models = typeof KM_MODELS!=="undefined" ? KM_MODELS : [];
+    const m = base ? models.find(x=>x.id===base) : null;
+    const discs = [];
+    if (m && m.ti) discs.push(["Трейд-ин импортёра", m.ti]);
+    if (m && m.cr) discs.push(["Программа кредита", m.cr]);
+    const off = discs.reduce((a,x)=>a+x[1],0);
+    const rrc = t.rrc||0;
+    const total = Math.max(t.fix, rrc-off);
+    const gain = Math.max(0, rrc-off-total);
+    const rows = [["РРЦ", rubP(rrc)]].concat(discs.map(x=>[x[0], "− "+rubP(x[1])]));
+    if (gain) rows.push(["Выгода (тестовый автомобиль)", "− "+rubP(gain)]);
+    doc.kicker = "Тестовый автомобиль · для физлица";
+    doc.headline = t.model+" · VIN "+t.vin;
+    doc.rows = rows; doc.total = ["Итого клиенту", rubP(total)];
+    doc.fleet = null; doc.sub = null;
+    doc.file = "КП тест "+t.short+" "+t.vin.slice(-6);
+    doc.meta = [["VIN", t.vin], ["Год / пробег", t.year+" · "+rub(t.km)+" км"], ["Дата", new Date().toLocaleDateString("ru-RU")]];
+    const notes = ["Тестовый автомобиль "+t.year+" г., пробег "+rub(t.km)+" км, доп. оборудование на "+rubP(t.tune)+" уже установлено."];
+    if (discs.length) notes.push("Официальные розничные скидки модели ("+(m.name||base)+"): "+discs.map(x=>x[0].toLowerCase()+" "+rubP(x[1])).join(", ")+".");
+    else notes.push("Официальных розничных скидок импортёра для этой модели в прайсе сайта нет.");
+    if (gain) notes.push("Остаток до цены тестового автомобиля "+rubP(t.fix)+" — выгода тестового автомобиля.");
+    const eq = FLEET_TEST_EQUIP[t.id];
+    if (!base && eq) {
+      doc.sections = (doc.sections||[]).filter(s=>s.title!=="Характеристики" && s.title!=="Оснащение");
+      doc.sections.push({title:"Характеристики", pairs:eq.specs});
+      doc.sections.push({title:"Оснащение комплектации "+eq.trim, groups:eq.groups});
+      notes.push("Оснащение комплектации "+eq.trim+" — по данным: "+eq.src+".");
+    }
+    doc.sections.unshift({title:"Условия", lines:notes});
+    doc.calc = {test:t.id, retail:true, rrc, discs, gain, total, fix:t.fix};
     return doc;
   }
   const FLEET_STOCK_FOOT = ["Уточняйте доступность автомобилей у менеджера, некоторые автомобили могут быть забронированы", "Уточняйте список установленных аксессуаров у менеджера"];
