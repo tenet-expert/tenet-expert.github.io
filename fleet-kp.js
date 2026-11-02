@@ -174,6 +174,7 @@
       if (doc) doc.sections = (doc.sections||[]).filter(s=>!s.deals && !s.cmp);
     }
     if (!doc) doc = {title:"Коммерческое предложение", meta:[], sections:[], photos:[], note:""};
+    if (!(doc.photos&&doc.photos.length) && typeof offerPhotoUrls==="function") doc.photos = offerPhotoUrls(t.id);
     const dc = Math.max(0, Math.round(Number(opts.dc)||0));
     const total = [dc ? "Цена с уч. скидок и тюнинга" : "Цена с уч. тюнинга", rubP(t.fix+tuning-dc)];
     const rows = [["Цена фикс (тестовый автомобиль)", rubP(t.fix)], ["Тюнинг", rubP(tuning)]];
