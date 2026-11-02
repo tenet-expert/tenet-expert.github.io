@@ -124,3 +124,6 @@ body:has(.sched-page) .wrap{max-width:1180px;}
 @media(prefers-reduced-motion:reduce){
   .sc-c,.sc-h,.chip,.sc-date{transition:none;}
 }
+
+.sc-months{display:flex;gap:8px;margin:18px 0 8px;}
+.sc-months .chip{border-radius:999px;}

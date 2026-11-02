@@ -4,10 +4,12 @@
    1 смена «1»  e мероприятие «1»  4/2 число в салоне */
 var SCHED_STATE = { day: 0, person: "", group: "all" };
 
-var SCHED = {
+var SCHED_OCT = {
   year: 2026,
   month: 10,
   title: "Октябрь",
+  gen: "октября",
+  short: "ОКТ",
   groups: [
     {
       id: "sales",
@@ -76,6 +78,85 @@ var SCHED = {
   ]
 };
 
+
+var SCHED_NOV = {
+  year: 2026,
+  month: 11,
+  title: "Ноябрь",
+  gen: "ноября",
+  short: "НОЯ",
+  groups: [
+    {
+      id: "sales",
+      title: "TENET",
+      note: "В салоне по графику — 4, 28–29 ноября — 5",
+      floor: "44444444444444444444444444554",
+      people: [
+        { id: "spitsyn", last: "Спицын", first: "Александр", days: "..88888.88888888V.888.88.88888" },
+        { id: "ahmad", last: "Ахмадуллин", first: "Тимур", days: "88.88S..888.888.V.888...8888.." },
+        { id: "volk", last: "Волкодаев", first: "Сергей", days: "..888S.888..88.888..888...888." },
+        { id: "dem", last: "Демьянов", first: "Глеб", days: "888..888T..8....8888....8888.8" },
+        { id: "lav", last: "Лавров", first: "Михаил", days: "8...88..8888..8888...8888....88" },
+        { id: "sid", last: "Сидоров", first: "Вадим", days: ".888.S88..888..8V..888.888..88" },
+        { id: "tal", last: "Тальков", first: "Сергей", days: "88...888T.....88.888..888...88." }
+      ]
+    },
+    {
+      id: "plus",
+      title: "TENET PLUS",
+      note: "В смене один или двое",
+      people: [
+        { id: "bik", last: "Бикулов", first: "Камиль", days: "11..11..11..11..11..11..11111." },
+        { id: "naz", last: "Назарян", first: "Карен", days: "..11..11..11111..11111..11..11" },
+        { id: "deg", last: "Дегтев", first: "", days: "1..11111..11..11..11..11..11..." }
+      ]
+    },
+    {
+      id: "spec",
+      title: "Администратор",
+      note: "Шабакаева и Михалкина чередуют тройки дней",
+      people: [
+        { id: "shab", last: "Шабакаева", first: "Алиса", days: "...888...888...888...888...888" },
+        { id: "mikh", last: "Михалкина", first: "Настя", days: "888...888...888...888...888..." }
+      ]
+    },
+    {
+      id: "office",
+      title: "КСО",
+      note: "",
+      people: [
+        { id: "myas", last: "Мясоедова", first: "", days: "V..888..888..88888...888...888" },
+        { id: "vor", last: "Воронина", first: "", days: "888...888..8888..888....888..." },
+        { id: "nes", last: "Неськина", first: "", days: ".88..888V.........888...888..." },
+        { id: "akh", last: "Ахметов", first: "", days: "8..888...8888..88...8888...888" }
+      ]
+    },
+    {
+      id: "one",
+      title: "Трейд-ин",
+      note: "В клетке графика стоит 1",
+      floor: "211222211112222111222211222221",
+      people: [
+        { id: "ish", last: "Ишмедов", first: "", days: "11..11...11...11..11..111..111" },
+        { id: "nag", last: "Нагриманов", first: "", days: "1..1111....1111....1111..111.." },
+        { id: "kri", last: "Кривцов", first: "", days: "..11..111..111..11..11...1111." }
+      ]
+    },
+    {
+      id: "extra",
+      title: "Техник",
+      note: "",
+      people: [
+        { id: "oso", last: "Осокин", first: "Сергей", days: "..888...888...888...888...888." },
+        { id: "mol", last: "Молчанов", first: "Владимир", days: "88...888...888...888...888...8" }
+      ]
+    }
+  ]
+};
+
+var SCHED = SCHED_NOV;
+var SCHED_MONTHS = { nov: SCHED_NOV, oct: SCHED_OCT };
+
 var SCHED_KIND = {
   ".": { label: "Выходной", short: "", cls: "off" },
   "8": { label: "Смена", short: "8", cls: "s8" },
@@ -90,12 +171,18 @@ var SCHED_KIND = {
   "2": { label: "В салоне", short: "2", cls: "fl" }
 };
 
+function schedDays(){
+  return new Date(SCHED.year, SCHED.month, 0).getDate();
+}
+function schedGen(){
+  return SCHED.gen || SCHED.title.toLowerCase() + "я";
+}
 function schedWd(i){
-  return ["чт","пт","сб","вс","пн","вт","ср"][i % 7];
+  return ["вс","пн","вт","ср","чт","пт","сб"][new Date(SCHED.year, SCHED.month - 1, i + 1).getDay()];
 }
 function schedWeekend(day){
-  var w = (day - 1) % 7;
-  return w === 2 || w === 3;
+  var w = new Date(SCHED.year, SCHED.month - 1, day).getDay();
+  return w === 0 || w === 6;
 }
 function schedPeople(){
   var out = [];
@@ -128,7 +215,7 @@ function schedDayWord(day){
 }
 function schedStats(p){
   var s = { work: 0, duty: 0, event: 0, train: 0, meet: 0, off: 0, vac: 0 };
-  for(var i = 0; i < 31; i++){
+  for(var i = 0; i < schedDays(); i++){
     var c = schedCode(p, i + 1);
     if(c === ".") s.off++;
     else if(c === "D"){ s.work++; s.duty++; }
@@ -168,7 +255,7 @@ function schedNames(rows){
 function schedCopy(day){
   var b = schedRoster(day);
   var lines = [
-    day + " октября, " + schedDayWord(day),
+    day + " " + schedGen() + ", " + schedDayWord(day),
     "Дежурство: " + schedNames(b.duty),
     "Смена: " + schedNames(b.work),
     "Мероприятие: " + schedNames(b.event),
@@ -176,7 +263,7 @@ function schedCopy(day){
     "Собрание: " + schedNames(b.meet),
     "Отпуск: " + schedNames(b.vac),
     "Выходной: " + schedNames(b.off),
-    "В салоне, TENET: 4 · КСО: 2"
+    "В салоне: " + (SCHED.groups[0].note || "")
   ];
   return lines.join("\n");
 }
@@ -192,7 +279,7 @@ function schedCell(code, day, opts){
   if(code === "V"){
     label = "";
   }
-  var title = (opts.name ? opts.name + " · " : "") + day + " октября · " + k.label;
+  var title = (opts.name ? opts.name + " · " : "") + day + " " + schedGen() + " · " + k.label;
   var attrs = " data-sched-day=\"" + day + "\"" + (opts.person ? " data-sched-person=\"" + opts.person + "\"" : "");
   return "<button type=\"button\" class=\"" + cls + "\" title=\"" + title + "\"" + attrs + "><span>" + label + "</span></button>";
 }
@@ -200,7 +287,7 @@ function schedCell(code, day, opts){
 function schedRow(p, today){
   var cells = "";
   var vacOpen = false;
-  for(var d = 1; d <= 31; d++){
+  for(var d = 1; d <= schedDays(); d++){
     var c = schedCode(p, d);
     var start = c === "V" && !vacOpen;
     if(c === "V") vacOpen = true; else vacOpen = false;
@@ -223,7 +310,7 @@ function schedRow(p, today){
 
 function schedFloorRow(title, pattern, today){
   var cells = "";
-  for(var d = 1; d <= 31; d++){
+  for(var d = 1; d <= schedDays(); d++){
     var c = pattern[d - 1];
     cells += schedCell(c, d, { today: d === today, name: title });
   }
@@ -236,7 +323,7 @@ function schedFloorRow(title, pattern, today){
 
 function schedHead(today){
   var days = "";
-  for(var d = 1; d <= 31; d++){
+  for(var d = 1; d <= schedDays(); d++){
     var cls = "sc-h";
     if(schedWeekend(d)) cls += " we";
     if(d === SCHED_STATE.day) cls += " pick";
@@ -297,7 +384,7 @@ function schedPersonCard(p, day){
   var c = schedCode(p, day);
   var k = SCHED_KIND[c] || SCHED_KIND["."];
   var bits = [];
-  for(var d = 1; d <= 31; d++){
+  for(var d = 1; d <= schedDays(); d++){
     var cd = schedCode(p, d);
     var kk = SCHED_KIND[cd] || SCHED_KIND["."];
     var cls = "pip k-" + kk.cls + (d === day ? " pick" : "");
@@ -308,7 +395,7 @@ function schedPersonCard(p, day){
       "<div><p class=\"eyebrow\">Карточка</p><h3>" + schedFull(p) + "</h3><p>" + p.groupTitle + "</p></div>" +
       "<button type=\"button\" class=\"btn ghost\" data-sched-clear>Закрыть</button>" +
     "</div>" +
-    "<div class=\"sc-card-now k-" + k.cls + "\"><b>" + day + " октября</b><span>" + k.label + (k.short ? " · " + k.short : "") + "</span></div>" +
+    "<div class=\"sc-card-now k-" + k.cls + "\"><b>" + day + " " + schedGen() + "</b><span>" + k.label + (k.short ? " · " + k.short : "") + "</span></div>" +
     "<div class=\"sc-metrics\">" +
       "<div><b>" + st.work + "</b><span>смен</span></div>" +
       "<div><b>" + st.duty + "</b><span>дежурств</span></div>" +
@@ -346,8 +433,8 @@ function sched(){
   }).join("");
 
   return "<div class=\"sched-page\">" +
-    "<div class=\"banner\"><div><p class=\"eyebrow\">TENET · отдел продаж</p><b>График сотрудников</b></div><div class=\"banner-name\">ОКТ</div></div>" +
-    "<p class=\"lead\">Октябрь 2026. Нажмите день — увидите, кто в смене, на дежурстве и на собрании. Нажмите фамилию — карточка месяца.</p>" +
+    "<div class=\"banner\"><div><p class=\"eyebrow\">TENET · отдел продаж</p><b>График сотрудников</b></div><div class=\"banner-name\">" + SCHED.short + "</div></div>" +
+    "<p class=\"lead\">" + SCHED.title + " " + SCHED.year + ". Нажмите день — увидите, кто в смене и на собрании. Нажмите фамилию — карточка месяца.</p>" +
     "<div class=\"sc-hero\">" +
       "<div class=\"sc-date\">" +
         "<button type=\"button\" class=\"sc-date-main\" data-sched-day=\"" + (today || day) + "\">" +
@@ -375,14 +462,15 @@ function sched(){
     "</div>" +
     schedPersonCard(focus, day) +
     boards +
-    "<p class=\"sc-foot\">5 октября — собрание. Жёлтая колонка справа у строки: смен и дежурств. Цифра «в салоне» — как в исходном графике, каждый день.</p>" +
+    "<div class=\"sc-months\">" + Object.keys(SCHED_MONTHS).map(function(id){ var m = SCHED_MONTHS[id]; return "<button type=\"button\" class=\"chip" + (SCHED === m ? " on" : "") + "\" data-sched-month=\"" + id + "\">" + m.title + "</button>"; }).join("") + "</div>" +
+    "<p class=\"sc-foot\">Жёлтая колонка справа у строки: смен. Цифра «в салоне» — как в исходном графике.</p>" +
   "</div>";
 }
 
 if(!window.__schedListen){
   window.__schedListen = true;
   document.addEventListener("click", function(ev){
-    var t = ev.target.closest("[data-sched-person],[data-sched-day],[data-sched-group],[data-sched-clear],#schedCopy");
+    var t = ev.target.closest("[data-sched-person],[data-sched-day],[data-sched-group],[data-sched-clear],[data-sched-month],#schedCopy");
     if(!t) return;
     if(t.id === "schedCopy"){
       var text = schedCopy(SCHED_STATE.day || 21);
@@ -394,6 +482,10 @@ if(!window.__schedListen){
     if(t.hasAttribute("data-sched-clear")){ SCHED_STATE.person = ""; }
     if(t.hasAttribute("data-sched-group")) SCHED_STATE.group = t.getAttribute("data-sched-group");
     if(t.hasAttribute("data-sched-day")) SCHED_STATE.day = Number(t.getAttribute("data-sched-day")) || SCHED_STATE.day;
+    if(t.hasAttribute("data-sched-month")){
+      var mid = t.getAttribute("data-sched-month");
+      if(SCHED_MONTHS[mid]){ SCHED = SCHED_MONTHS[mid]; SCHED_STATE.day = schedTodayDay() || 1; SCHED_STATE.person = ""; }
+    }
     if(t.hasAttribute("data-sched-person")) SCHED_STATE.person = t.getAttribute("data-sched-person");
     if(typeof render === "function"){
       var scrolls = [];
