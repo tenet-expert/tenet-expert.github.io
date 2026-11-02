@@ -15,14 +15,11 @@
       const n=Number(String(el.value||"").replace(/\s+/g,""));
       return Number.isFinite(n)?n:def;
     }
-    // стандартные розничные скидки (трейд-ин импортёра, программа кредита) по умолчанию включены, пока менеджер не снимет галочку
-    function offerOnDef(id, def){
-      const el=document.getElementById(id);
-      return el ? !!el.checked : !!def;
-    }
     function offerOn(id){
       const el=document.getElementById(id);
-      return !!(el && el.checked);
+      // стандартные розничные скидки (трейд-ин импортёра, программа кредита) включены по умолчанию, пока менеджер не снимет галочку
+      if(!el) return id==="ofTi"||id==="ofCr";
+      return !!el.checked;
     }
     function offerMgr(){
       return (typeof state!=="undefined" && state.display) ? state.display : "отдел продаж";
@@ -68,10 +65,10 @@
       const color=offerVal("ofColor","");
       let price=S?(Number(S.price)||0):(offerNum("ofPrice", m.rrc)||m.rrc);
       if(!S && prevModel!==mid) price=m.rrc;
-      const useTi=S?!!S.useTi:offerOnDef("ofTi", true);
+      const useTi=S?!!S.useTi:offerOn("ofTi");
       const useLoan=S?!!S.useLoan:offerOn("ofLoan");
       const showDealCr=(m.cr||0)>0 && (m.id!=="t7p" || useLoan);
-      const useCr=showDealCr && (S?!!S.useCr:offerOnDef("ofCr", true));
+      const useCr=showDealCr && (S?!!S.useCr:offerOn("ofCr"));
       const spec=S?(Number(S.spec)||0):(offerNum("ofSpec", 0)||0);
       const useDcTi=useTi && (S?!!S.useDcTi:offerOn("ofDcTi"));
       const useDcCr=useLoan && (S?!!S.useDcCr:offerOn("ofDcCr"));
