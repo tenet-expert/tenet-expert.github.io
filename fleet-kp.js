@@ -222,8 +222,8 @@
     if (m && m.cr) discs.push(["Программа кредита", m.cr]);
     const off = discs.reduce((a,x)=>a+x[1],0);
     const rrc = t.rrc||0;
-    const total = Math.max(t.fix, rrc-off);
-    const gain = Math.max(0, rrc-off-total);
+    const gain = Math.max(0, rrc-off-t.fix);
+    const total = rrc-off-gain;
     const rows = [["РРЦ", rubP(rrc)]].concat(discs.map(x=>[x[0], "− "+rubP(x[1])]));
     if (gain) rows.push(["Выгода (тестовый автомобиль)", "− "+rubP(gain)]);
     doc.kicker = "Тестовый автомобиль · для физлица";
