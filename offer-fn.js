@@ -127,7 +127,7 @@
         t4la:"t4l",t4lp:"t4l",
         t7a:"t7",t7p:"t7",t7a4:"t7",t7p4:"t7",
         t8a:"t8",t8p:"t8",t8p4:"t8",t8u4:"t8",
-        tt9p:"t9",tt9u:"t9",tt9u7:"t9",tt9s7:"t9",tst9:"tiggo9",tsa8:"arrizo",
+        tt9p:"t9",tt9u:"t9",tt9u7:"t9",tt9s7:"t9",tst9:"tiggo9",tsa8:"arrizo",tst4:"tiggo4",
         ta8p:"a8",ta8u:"a8",
         t9p:"tiggo9",t9u:"tiggo9",
         t7l:"t7l",
