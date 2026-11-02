@@ -15,6 +15,11 @@
       const n=Number(String(el.value||"").replace(/\s+/g,""));
       return Number.isFinite(n)?n:def;
     }
+    // стандартные розничные скидки (трейд-ин импортёра, программа кредита) по умолчанию включены, пока менеджер не снимет галочку
+    function offerOnDef(id, def){
+      const el=document.getElementById(id);
+      return el ? !!el.checked : !!def;
+    }
     function offerOn(id){
       const el=document.getElementById(id);
       return !!(el && el.checked);
@@ -63,10 +68,10 @@
       const color=offerVal("ofColor","");
       let price=S?(Number(S.price)||0):(offerNum("ofPrice", m.rrc)||m.rrc);
       if(!S && prevModel!==mid) price=m.rrc;
-      const useTi=S?!!S.useTi:offerOn("ofTi");
+      const useTi=S?!!S.useTi:offerOnDef("ofTi", true);
       const useLoan=S?!!S.useLoan:offerOn("ofLoan");
       const showDealCr=(m.cr||0)>0 && (m.id!=="t7p" || useLoan);
-      const useCr=showDealCr && (S?!!S.useCr:offerOn("ofCr"));
+      const useCr=showDealCr && (S?!!S.useCr:offerOnDef("ofCr", true));
       const spec=S?(Number(S.spec)||0):(offerNum("ofSpec", 0)||0);
       const useDcTi=useTi && (S?!!S.useDcTi:offerOn("ofDcTi"));
       const useDcCr=useLoan && (S?!!S.useDcCr:offerOn("ofDcCr"));
@@ -338,8 +343,9 @@
     }
     function offerDocNew(d){
       const rows=[["РРЦ", rub(d.price)+" ₽"]];
-      if(d.discount) rows.push(["Скидка", "− "+rub(d.discount)+" ₽"]);
-      rows.push(["Автомобиль", rub(d.carPrice)+" ₽"]);
+      const cond={"Трейд-ин импортёра":"Трейд-ин импортёра (при сдаче авто в трейд-ин)","Программа кредита":"Программа кредита (при покупке в кредит)","Выгодный кредит":"Выгодный кредит (при покупке в кредит)"};
+      (d.discs||[]).forEach(x=>rows.push([cond[x[0]]||x[0], "− "+rub(x[1])+" ₽"]));
+      rows.push([d.discount?"Цена со всеми скидками":"Автомобиль", rub(d.carPrice)+" ₽"]);
       if(d.addons) rows.push(["Дополнительное оборудование", rub(d.addons)+" ₽"]);
       if(d.useLoan) rows.push(["Каско расширенное", rub(d.pack)+" ₽"]);
       else if(d.casco) rows.push(["КАСКО", rub(d.casco)+" ₽"]);
