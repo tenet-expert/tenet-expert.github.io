@@ -120,7 +120,7 @@
     function kmBand(vin, useTi, prio, m){
       const fork=KM_FORK[vin];
       if(fork){ const t=useTi?fork.ti:fork.cash; return {lo:t, hi:t, lock:true}; }
-      if(prio){ const t=useTi?-100:0; return {lo:t, hi:t, lock:true}; }
+      if(prio){ const t=useTi?(m.prioMin??m.kmMin):(m.prioMax??m.kmMax); return {lo:t, hi:t, lock:true}; }
       return {lo:m.kmMin, hi:m.kmMax, lock:false};
     }
     function kmBandTxt(lo, hi){ return lo===hi ? (lo+" тыс.") : (lo+" … "+hi+" тыс."); }

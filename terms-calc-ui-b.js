@@ -325,7 +325,7 @@
         ordDc=Math.min(Math.max(0, want, obMin), obFit);
         ordDc=Math.max(0, Math.round(ordDc));
       }
-      const prioDc=Math.max(0, Math.round(typeof kmDcCrAt==="function"?kmDcCrAt(dcPack, (useTi?-100:0)*1000, Math.round):0));
+      const prioDc=Math.max(0, Math.round(typeof kmDcCrAt==="function"?kmDcCrAt(dcPack, kmBand(kmVin, useTi, true, m).lo*1000, Math.round):0));
       function kmDeal(dc){
         const d=Math.max(0, Math.round(dc||0));
         const pr=Math.max(0, Math.round(rrc-(tiAmt+spec+dcTi+d+crAmt)));

@@ -67,9 +67,28 @@ def corridor_fixes(text):
         p = PAIR.search(m.group(3))
         if not p:
             continue
-        kind = "prio" if "приоритет" in m.group(2).lower() else "km"
-        out.append((m.group(1).strip(), kind, _num(p.group(1)), _num(p.group(2))))
+        trim = m.group(2).strip()
+        if re.fullmatch(r"[A-HJ-NPR-Z0-9]{17}", trim):
+            continue  # VIN-фикс живёт в KM_FORK
+        kind = "prio" if "приоритет" in trim.lower() else "km"
+        out.append((m.group(1).strip(), kind, _num(p.group(1)), _num(p.group(2)), trim))
+    # общие строки сначала, строки по комплектации (Prime) поверх
+    out.sort(key=lambda f: 0 if _generic(f[4]) else 1)
     return out
+
+
+def _generic(trim):
+    return trim.lower() in ("", "все", "любые", "приоритет", "остальные")
+
+
+def _trim_match(trim, row):
+    if _generic(trim):
+        return True
+    name = re.search(r'name:"([^"]*)"', row)
+    nm = (name.group(1) if name else "").lower()
+    words = [w for w in re.split(r"[\s/]+", trim.lower()) if w and w not in ("2wd", "4wd")]
+    alias = {"prime": "прайм", "active": "актив", "ultra": "ультра"}
+    return all(w in nm or alias.get(w, "#") in nm for w in words)
 
 
 def _model_match(sheet_model, row):
@@ -112,8 +131,8 @@ def fix_data(text):
         row = line
         if m.group(1) in NO_CREDIT:
             row = _set(_set(row, "cr", 0), "crBack", 0)
-        for model, kind, ti, cash in fixes:
-            if _model_match(model, row):
+        for model, kind, ti, cash, trim in fixes:
+            if _model_match(model, row) and _trim_match(trim, row):
                 a, b = ("prioMin", "prioMax") if kind == "prio" else ("kmMin", "kmMax")
                 row = _set(_set(row, a, ti), b, cash)
                 if kind == "km" and not any(f[0] == model and f[1] == "prio" for f in fixes):
@@ -199,7 +218,7 @@ ROUND = [
     ('<p class="calc-note">КМ ${Math.round(ordDeal.km/1000)} тыс. · фикс',
      '<p class="calc-note">КМ ${kmFixK(ordDeal.km/1000)} тыс. · фикс'),
     ('<p class="calc-note">КМ ${Math.round(prioDeal.km/1000)} тыс.${',
-     '<p class="calc-note">КМ ${(KM_FORK[kmVin]?(useTi?KM_FORK[kmVin].ti:KM_FORK[kmVin].cash):(useTi?-100:0))} тыс.${'),
+     '<p class="calc-note">КМ ${(kmBand(kmVin, useTi, true, m).lo)} тыс.${'),
 ]
 CODE.extend(ROUND)
 
