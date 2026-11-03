@@ -161,6 +161,12 @@ PAIRS += [
      'mount:[["R16",6600],["R17, R18, R19",7250],["R20",9850]]'),
 ]
 
+# Drive 02.11.2026: T4 R17 / L4 — Fortune Polaro Ice шип. вместо Formula Ice липучка
+PAIRS += [
+    ('["Formula Ice 215/60 17  липучка",9600,38400,"1"]]]',
+     '["Автошина Fortune 215/60R17 100T Polaro Ice TL ( шип.)",11000,44000,"1"]]]'),
+]
+
 def patch(path: Path) -> bool:
     if not path.exists():
         return False
