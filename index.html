@@ -2488,8 +2488,8 @@ async function pingTelegram(body){
       return p;
     }
     function boardOctRank(){
-      const list=BOARD_OCT_FIXED.map(boardSepPerson).sort(boardCmp);
-      const people=BOARD_OCT_OTHER.map(boardSepPerson).sort(boardCmp);
+      const list=BOARD_OCT_FIXED.map(boardSepPerson).sort((a,b)=>a.name.localeCompare(b.name,'ru'));
+      const people=BOARD_OCT_OTHER.map(boardSepPerson).sort((a,b)=>a.name.localeCompare(b.name,'ru'));
       const other=boardBlank();
       other.name="Другие"; other.other=true; other.people=people;
       people.forEach(x=>{
