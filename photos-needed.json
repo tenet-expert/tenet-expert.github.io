@@ -18,21 +18,6 @@
    ]
   },
   {
-   "id": "ededb21b7sd723791",
-   "queue": 1,
-   "brand": "Chery",
-   "model": "Tiggo 7L",
-   "trim": "Актив",
-   "drive": "2WD",
-   "color": "серебристый",
-   "cars": [
-    {
-     "vin": "EDEDB21B7SD723791",
-     "state": "в салоне"
-    }
-   ]
-  },
-  {
    "id": "efedb21b1t3003786",
    "queue": 1,
    "brand": "TENET PLUS",
