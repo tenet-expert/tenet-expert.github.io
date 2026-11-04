@@ -167,6 +167,12 @@ PAIRS += [
      '["Автошина Fortune 215/60R17 100T Polaro Ice TL ( шип.)",11000,44000,"1"]]]'),
 ]
 
+# Drive 03.11.2026: T8 R18 Pirelli Formula 235/55 R18 — в наличии «резерв» вместо 1
+PAIRS += [
+    ('["Pirelli Formula 235/55 R18 104T XL Ice TL, шип.",15500,62000,"1"]',
+     '["Pirelli Formula 235/55 R18 104T XL Ice TL, шип.",15500,62000,"резерв"]'),
+]
+
 def patch(path: Path) -> bool:
     if not path.exists():
         return False
