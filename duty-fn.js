@@ -338,7 +338,7 @@
       ctx.fillStyle="#1c1a17"; ctx.font="800 18px Inter, Arial, sans-serif";
       ctx.fillText("ФОТО ДЛЯ АВИТО", cardX+22, cardY+26);
       ctx.fillStyle="#6d6458"; ctx.font="500 12px Inter, Arial, sans-serif";
-      ctx.fillText("в наличии, нет фото", cardX+22, cardY+44);
+      ctx.fillText(avitoRows.length?"в наличии, нет фото":"все фото в наличии", cardX+22, cardY+44);
       const count=avitoRows.length?String(avitoRows.length)+" шт.":"—";
       ctx.font="800 12px Inter, Arial, sans-serif";
       const countW=ctx.measureText(count).width+18;
@@ -348,7 +348,7 @@
       ctx.fillStyle="#1c1a17"; ctx.fillText(count, countX+9, countY+15);
       if(!avitoRows.length){
         ctx.fillStyle="#7a7166"; ctx.font="500 13px Inter, Arial, sans-serif";
-        ctx.fillText(avitoPack&&avitoPack.ready===false?"Список загружается…":"Сейчас таких автомобилей нет.", cardX+22, cardY+headH+18);
+        ctx.fillText(avitoPack&&avitoPack.ready===false?"Список загружается…":"Фотографии не нужны, все фото в наличии.", cardX+22, cardY+headH+18);
       }else{
         const colW=(cardW-inset*2-cellGap)/2;
         avitoRows.forEach(function(row, i){
@@ -516,7 +516,7 @@
           </div>
           <div class="cl-print" id="dutyPrintBar">
             <button type="button" class="btn ivory" id="dutyPrint" disabled>Печать / сохранить</button>
-            <p class="cl-print-hint" id="dutyPrintHint">Отметьте хотя бы одну машину для фото</p>
+            <p class="cl-print-hint" id="dutyPrintHint">Фотографии не нужны, все фото в наличии</p>
           </div>
           <div class="cl-log">
             <h3>Сохранённые чек-листы</h3>
@@ -778,8 +778,9 @@
           ev.preventDefault();
           if(t.disabled) return;
           var pack=(typeof window.avitoPhotosForPrint==="function")?window.avitoPhotosForPrint():null;
+          var none=!!(pack&&pack.ready&&Array.isArray(pack.rows)&&!pack.rows.length);
           var picked=pack&&Array.isArray(pack.rows)&&pack.rows.some(function(r){ return r&&r.on; });
-          if(!picked) return;
+          if(!picked && !none) return;
           const cur=dutyRead(); dutySave(cur); dutyPdf(cur);
         }
         if(t.id==="dutyClear"){ ev.preventDefault(); localStorage.removeItem("tenet-duty-v1"); if(typeof render==="function") render(); }

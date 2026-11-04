@@ -152,14 +152,23 @@
     return !!(pack && Array.isArray(pack.rows) && pack.rows.some(function(r){ return r && r.on; }));
   }
 
+  function avitoNone(){
+    var pack = (typeof window.avitoPhotosForPrint === "function") ? window.avitoPhotosForPrint() : null;
+    return !!(pack && pack.ready && Array.isArray(pack.rows) && !pack.rows.length);
+  }
+
   function syncPrint(){
     var btn = document.getElementById("dutyPrint");
     var bar = document.getElementById("dutyPrintBar");
     var hint = document.getElementById("dutyPrintHint");
-    var on = avitoPicked();
+    var none = avitoNone();
+    var on = none || avitoPicked();
     if (btn) btn.disabled = !on;
     if (bar) bar.classList.toggle("is-ready", on);
-    if (hint) hint.hidden = on;
+    if (hint) {
+      hint.hidden = !none && on;
+      hint.textContent = none ? "Фотографии не нужны, все фото в наличии" : "Отметьте хотя бы одну машину для фото";
+    }
   }
 
   function renderList(data){
@@ -188,7 +197,7 @@
       }
     }
     if (!groups.length) {
-      list.innerHTML = '<p class="cl-avito-empty">Сейчас таких автомобилей нет.</p>';
+      list.innerHTML = '<p class="cl-avito-empty">Фотографии не нужны, все фото в наличии.</p>';
       syncPrint();
       return;
     }
