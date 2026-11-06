@@ -103,16 +103,16 @@ def _set(row, key, val):
     return re.sub(r"(\b" + key + r":)(-?\d+(?:\.\d+)?)", lambda m: m.group(1) + str(val), row, count=1)
 
 
-T9_PIN = re.compile(r'(\{model:"T9",trim:"[^"]*",km:")[−\-–]\s*30\s*/\s*0(")')
+T9_PIN = re.compile(r'(\{model:"T9",trim:"[^"]*",km:")[^"]*(")')
 
 
 def pin_t9(text):
-    """27.10.2026 22:18: T9 КМ без ТИ 0 -> 50 (фикс −30 / 50). Sheet C12 и канон уже −30 / 50;
-    если синк принесёт старое «−30 / 0» — поправить. A8 не трогается."""
+    """03.11.2026: T9 КМ = 0 / 30 (с ТИ / без ТИ). Старое правило −30/50 отменено.
+    Любое значение в коридоре T9 приводится к 0 / 30. A8 не трогается."""
     sp = _span(text, "KM_CORRIDOR")
     if not sp:
         return text
-    blk = T9_PIN.sub(lambda m: m.group(1) + "−30 / 50" + m.group(2), text[sp[0]:sp[1]])
+    blk = T9_PIN.sub(lambda m: m.group(1) + "0 / 30" + m.group(2), text[sp[0]:sp[1]])
     return text[:sp[0]] + blk + text[sp[1]:]
 
 
