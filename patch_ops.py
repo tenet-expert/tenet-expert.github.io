@@ -87,6 +87,9 @@ CSS = """
 """ + HUB_CSS
 
 def patch(html: str) -> str:
+    # Restore the already-existing production helper after legacy stock replacement.
+    if "function offerNav(){" not in html:
+        html = html.replace("    function salonLabel(s){", '    function offerNav(){\n      const tabs=[["home","Разделы"],["new","КП Новый а/м"],["service","Оценка сервиса"],["fleet","КП Флит"]];\n      return `<div class="down-mode" style="margin:0 0 14px">${tabs.map(([id,l])=>`<button type="button" class="chip ${offerTab===id?"on":""}" data-offer-tab="${id}">${l}</button>`).join("")}</div>`;\n    }\n' + "    function salonLabel(s){", 1)
     js = JS.read_text(encoding="utf-8") if JS.exists() else ""
     if js:
         if "function stockBlob(c){" in html:
