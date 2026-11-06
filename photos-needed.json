@@ -1,5 +1,5 @@
 {
- "updated": "04.11.2026",
+ "updated": "06.11.2026",
  "note": "В наличии (в салоне), фото на Drive нет",
  "groups": [
   {
@@ -17,21 +17,6 @@
     },
     {
      "vin": "EFEDB21B3T3003949",
-     "state": "в салоне"
-    }
-   ]
-  },
-  {
-   "id": "efedb21b0t3004119",
-   "queue": 1,
-   "brand": "TENET PLUS",
-   "model": "L4",
-   "trim": "Элегант",
-   "drive": "2WD",
-   "color": "красный",
-   "cars": [
-    {
-     "vin": "EFEDB21B2T3002128",
      "state": "в салоне"
     }
    ]
