@@ -57,6 +57,7 @@
         if(typeof carIsMpt==="function"?carIsMpt(r):r.mpt) bits.push(`<span class="st mpt">МПТ</span>`);
         if(typeof carIsCorp==="function"?carIsCorp(r):(r.corp || (typeof CORP_VINS!=="undefined" && CORP_VINS.has(r.vin)))) bits.push(`<span class="st corp">Корпоративный</span>`);
       }
+      if(r.taxi) bits.push(`<span class="st taxi">ТАКСИ</span>`);
       if(r.demo) bits.push(`<span class="st demo">ДЕМО</span>`);
       return bits.join(" ");
     }
@@ -237,6 +238,32 @@
       </tr>`).join("");
       return `<div class="card"><p class="eyebrow">Тесты в продаже</p><h3 style="margin:4px 0 8px">Цена фикс</h3><p class="tune-note">Как в таблице отдела. Продажа на Авито, только через PANGO. Скидки директа и флита не действуют, тюнинг уже в машине.</p><div class="tune-scroll"><table class="tune-table test-sale"><thead><tr><th>Модель</th><th>VIN</th><th>Цена розница</th><th>Сумма тюнинга</th><th>Год</th><th>Пробег</th><th>Цена фикс</th><th></th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
     }
+    /*stock-taxi-block v1: Logicstars Confirm.svg tooltip «Такси»; red BallRed is separate.*/
+    function stockTaxiBlock(rows){
+      const cars=(rows||[]).filter(r=>r&&r.taxi===true);
+      if(!cars.length || (typeof isAo==="function" && isAo())) return "";
+      const groups={};
+      cars.forEach(r=>{(groups[r.model]||(groups[r.model]=[])).push(r);});
+      const order=["t4","t4l","t7","t8","tt9","t9","t7l","ta8","a8","pl4","pl6"];
+      const titles={t4:"T4",t4l:"T4L",t7:"T7",t8:"T8",tt9:"T9",t9:"Tiggo 9",t7l:"Tiggo 7 L",ta8:"A8",a8:"Arrizo 8",pl4:"L4",pl6:"L6"};
+      const brands={t9:"CHERY",t7l:"CHERY",a8:"CHERY",pl4:"TENET PLUS",pl6:"TENET PLUS"};
+      const ids=Object.keys(groups).sort((a,b)=>(order.indexOf(a)<0?999:order.indexOf(a))-(order.indexOf(b)<0?999:order.indexOf(b)));
+      const models=ids.map(id=>{ /* syntax guard: balanced comparator parentheses */
+        const rows=groups[id].slice().sort((a,b)=>{
+          const trimCmp=String(a.trim||"").localeCompare(String(b.trim||""),"ru");
+          const colorCmp=String(a.color||"").localeCompare(String(b.color||""),"ru");
+          const vinCmp=String(a.vin||"").localeCompare(String(b.vin||""));
+          return trimCmp || colorCmp || vinCmp;
+        });
+        return `<div class="st-taxi-model"><p class="eyebrow">${escape(brands[id]||"TENET")} · ${escape(titles[id]||id.toUpperCase())}</p><div class="st-list">${rows.map(stockCard).join("")}</div></div>`;
+      }).join("");
+      return `<section class="card st-taxi-block" id="taxi-block" data-stock-taxi>
+        <p class="eyebrow">Подходят для работы в такси</p>
+        <h3>Такси</h3>
+        <p class="tune-note">По зелёной метке «Такси» в Logic Star. ${cars.length} авто · ${cars.filter(x=>x.status==="in").length} в наличии · ${cars.filter(x=>x.status==="way").length} в пути.</p>
+        <div id="taxi-stock-list" class="st-taxi-models">${models}</div>
+      </section>`;
+    }
     function stock(){
       if(needAuth()) return login();
       if(typeof stockSort!=="string" || stockSort==="year") stockSort="trim";
@@ -314,6 +341,7 @@
           }).join("")+`</div>`
         : "";
       const tests = q ? stockTestHtml() : "";
+      const taxi=testOn||q?"":stockTaxiBlock(sale.filter(x=>x.taxi===true));
       const body = (stockBody || tests) ? (testOn ? stockBody : stockBody+tests) : `<div class="card" style="margin-top:12px"><p>${q?"VIN не найден.":"По этому фильтру машин нет."}</p></div>`;
       const typed=escape(typeof stockVin==="string"?stockVin:"");
       return banner("Склад", `Logicstars · ${meta.updated}`, "TENET")+`
@@ -333,5 +361,6 @@
           <span class="st-sort-lab">Сортировка</span>
           ${sortBtns}
         </div>`}
+        ${taxi}
         ${body}`;
     }

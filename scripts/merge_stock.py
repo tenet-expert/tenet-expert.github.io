@@ -64,6 +64,15 @@ def main():
             applied.append(c["vin"])
 
     out = {"updated": upd, "dealer": dealer, "cars": cars}
+    taxi_file=Path("taxi-vins.json")
+    if taxi_file.exists():
+        taxis=set(json.loads(taxi_file.read_text(encoding="utf-8")))
+        for c in cars:
+            if str(c.get("vin") or "").strip().upper() in taxis:
+                c["taxi"]=True
+        print("Logicstars taxi flags:",sum(c.get("taxi") is True for c in cars))
+    else:
+        print("taxi-vins.json absent; keep existing taxi flags")
     if pretty:
         text = json.dumps(out, ensure_ascii=False, indent=2) + "\n"
     else:
