@@ -7,7 +7,7 @@
    Значения KM_CORRIDOR (сырьё Sheet) раскладываются по позиции и перекрывают kmMin/kmMax
    соответствующих моделей TENET — даже если синк записал их в другом порядке.
    Код: kmBand() отдаёт одно число (lo = hi), тексты «коридор/до/от» -> «КМ … с трейд-ином / … без трейд-ина».
-   VIN-фиксы KM_FORK, приоритет −100/0 и TENET+ 0/0 не меняются (они уже фиксы).
+   VIN-фиксы KM_FORK (07.11: из KM_CORRIDOR и TERMS_PRIO), приоритет по VIN и TENET+ 0/0 не меняются (они уже фиксы).
 2. T7 Prime 2WD (id t7p): cr/crBack («Выгодный кредит» 50 000 / возмещение 30 000) = 0.
    Строка приходит из «Цены и поддержки» через terms-calc-data.js (ту-google-08/14), поэтому
    обнуляется на каждой сборке. Другие T7 не трогаются.
@@ -116,8 +116,16 @@ def pin_t9(text):
     return text[:sp[0]] + blk + text[sp[1]:]
 
 
+def sync_vin_forks(text):
+    """07.11: VIN > model. Rebuild at runtime from synchronized data, never a trim-wide override."""
+    sp = _span(text, "KM_FORK")
+    if not sp:
+        return text
+    return text[:sp[0]] + "\n    const KM_FORK = " + 'Object.fromEntries([\n      ...KM_CORRIDOR.filter(r=>/^[A-HJ-NPR-Z0-9]{17}$/.test(r.trim)).map(r=>{\n        const pair=r.km.replace(/[−–]/g,"-").split("/").map(Number);\n        return [r.trim,{ti:pair[0],cash:pair[1]}];\n      }),\n      ...TERMS_PRIO.filter(r=>Number.isFinite(r.kmTi)&&Number.isFinite(r.kmCash)).map(r=>[r.vin,{ti:r.kmTi,cash:r.kmCash}])\n    ])' + ";" + text[sp[1]:]
+
+
 def fix_data(text):
-    text = pin_t9(text)
+    text = sync_vin_forks(pin_t9(text))
     sp = _span(text, "KM_MODELS")
     if not sp:
         return text

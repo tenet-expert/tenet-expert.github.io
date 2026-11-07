@@ -4236,12 +4236,15 @@ async function pingTelegram(body){
             </div>
           </button>`).join("")}</div>`;
     }
-    const TERMS_DATE = "06.11.2026";
+    const TERMS_DATE = "07.11.2026";
     const KM_CORRIDOR = [
       {model:"T4L",trim:"Все",km:"0 / 50",note:""},
       {model:"T7",trim:"Все",km:"30 / 80",note:""},
-      {model:"T7",trim:"Prime 2WD/4WD",km:"50 / 100",note:""},
-      {model:"T7",trim:"EDEFD32B4TE136144",km:"100 / 200",note:"VIN"},
+      {model:"T7",trim:"EDEFD32B4TE136144",km:"100 / 200",note:"Prime 4WD"},
+      {model:"T7",trim:"EDEFB32B2TE136648",km:"50 / 100",note:"Prime 2WD"},
+      {model:"T7",trim:"EDEFB32B2TE136567",km:"50 / 100",note:"Prime 2WD"},
+      {model:"T7",trim:"EDEFD32B9TE138147",km:"50 / 100",note:"Active 4WD"},
+      {model:"T7",trim:"EDEFD32B3TE138225",km:"50 / 100",note:"Active 4WD"},
       {model:"T8",trim:"Приоритет",km:"−50 / 0",note:"VIN из списка"},
       {model:"T8",trim:"Остальные",km:"0 / 30",note:""},
       {model:"T9",trim:"Все",km:"0 / 30",note:""},
@@ -4272,17 +4275,20 @@ async function pingTelegram(body){
       ]}
     ];
     const TERMS_INV = [
-      {model:"T4L",trim:"Актив",price:"2 150 нал, 2 100 ТИ"},
-      {model:"T4L",trim:"Прайм",price:"2 250 нал, 2 200 ТИ"},
-      {model:"T7",trim:"Актив 2WD",price:"2 450 нал, 2 350 ТИ"},
-      {model:"T7",trim:"Прайм 2WD",price:"2 600 нал, 2 500 ТИ"},
-      {model:"T7",trim:"Актив 4WD",price:"2 700 нал, 2 600 ТИ"},
-      {model:"T8",trim:"Актив 2WD 5 мест",price:"2 800 нал, 2 700 ТИ"},
-      {model:"T8",trim:"Прайм 4WD 7 мест",price:"3 200 нал, 3 100 ТИ"},
-      {model:"T8",trim:"Ультра 4WD 7 мест",price:"3 300 нал, 3 200 ТИ"},
-      {model:"T9",trim:"Прайм 5 мест",price:"3 500 нал, 3 400 ТИ"},
-      {model:"T9",trim:"Ультра 5 мест",price:"3 800 нал, 3 600 ТИ"},
-      {model:"T9",trim:"Ультра 7 мест",price:"3 900 нал, 3 700 ТИ"}
+      {model:"T4L",trim:"Active",price:"2 150 нал, 2 100 ТИ"},
+      {model:"T4L",trim:"Prime",price:"2 250 нал, 2 200 ТИ"},
+      {model:"T7",trim:"Active 2WD",price:"2 450 нал, 2 350 ТИ"},
+      {model:"T7",trim:"Prime 2WD",price:"2 600 нал, 2 500 ТИ"},
+      {model:"T7",trim:"Active 4WD",price:"2 700 нал, 2 600 ТИ"},
+      {model:"T8",trim:"Active 2WD",price:"2 800 нал, 2 700 ТИ"},
+      {model:"T8",trim:"Prime 4WD",price:"3 200 нал, 3 100 ТИ"},
+      {model:"T8",trim:"Ultra 4WD",price:"3 300 нал, 3 200 ТИ"},
+      {model:"T9",trim:"Prime 5 мест 4WD",price:"3 500 нал, 3 400 ТИ"},
+      {model:"T9",trim:"Ultra 5 мест 4WD",price:"3 800 нал, 3 600 ТИ"},
+      {model:"T9",trim:"Ultra 7 мест 4WD",price:"3 900 нал, 3 700 ТИ"},
+      {model:"L4",trim:"Style",price:"2 200 нал, 2 100 ТИ"},
+      {model:"L4",trim:"Elegant",price:"2 350 нал, 2 250 ТИ"},
+      {model:"L6",trim:"Ultra",price:"2 600 нал, 2 450 ТИ"}
     ];
     const TERMS_INV_PLUS = [
       {model:"L4",trim:"Стайл",price:"2 200 нал, 2 100 ТИ"},
@@ -4319,53 +4325,52 @@ async function pingTelegram(body){
       return (typeof PANGO_FIX!=="undefined" && PANGO_FIX[id]) || null;
     }
     const TERMS_PRIO = [
-      {model:"T8",vin:"EDXGD34B8TE095347",trim:"Прайм 4WD 7 мест",year:"2026",color:"Белый",extra:"",pay:1000},
-      {model:"T8",vin:"EDXGD34B5TE095631",trim:"Прайм 4WD 7 мест",year:"2026",color:"Чёрный",extra:"",pay:1000},
-      {model:"T8",vin:"EDXGB32B8TE110275",trim:"Прайм 2WD 5 мест",year:"2026",color:"Чёрный",extra:"",pay:1000},
-      {model:"T8",vin:"EDXGB32B1TE110196",trim:"Прайм 2WD 5 мест",year:"2026",color:"Белый",extra:"",pay:1000},
-      {model:"T8",vin:"EDXGB32B0TE089261",trim:"Актив 2WD 5 мест",year:"2026",color:"Светло-серый",extra:"",pay:1000},
-      {model:"T7",vin:"EDXFD32B2TE042710",trim:"Актив 4WD",year:"2026",color:"Белый",extra:"",pay:1000},
-      {model:"T7",vin:"EDEFD32B1TE101190",trim:"Прайм 4WD",year:"2026",color:"Белый",extra:"",pay:1000},
-      {model:"T7",vin:"EDEFD32B5TE102522",trim:"Прайм 4WD",year:"2026",color:"Белый",extra:"",pay:1000},
-      {model:"T7",vin:"EDEFB32B8TE099203",trim:"Прайм 2WD",year:"2026",color:"Белый",extra:"",pay:1000},
-      {model:"T7",vin:"EDEFB32BXTE100707",trim:"Актив 2WD",year:"2026",color:"Белый",extra:"",pay:1000},
-      {model:"T7",vin:"EDEFB32B8TE105355",trim:"Актив 2WD",year:"2026",color:"Белый",extra:"",pay:1000},
-      {model:"T7",vin:"EDEFB32B2TE105500",trim:"Актив 2WD",year:"2026",color:"Чёрный",extra:"",pay:1000},
-      {model:"T4",vin:"EDEEB31B8TE003261",trim:"Прайм",year:"2026",color:"Светло-серый",extra:"",pay:1000}
+      {model:"T4",vin:"EDEEB31B8TE003261",trim:"Прайм",year:"2026",color:"Светло-серый",extra:"",pay:1000,kmTi:-50,kmCash:0},
+      {model:"T8",vin:"EDXGD34B5TE095631",trim:"Прайм 7 мест 4WD",year:"2026",color:"Чёрный",extra:"",pay:1000,kmTi:-50,kmCash:0},
+      {model:"T8",vin:"EDXGD34B8TE095347",trim:"Прайм 7 мест 4WD",year:"2026",color:"Белый",extra:"",pay:1000,kmTi:-50,kmCash:0},
+      {model:"T7",vin:"EDEFB32BXTE100707",trim:"Актив",year:"2026",color:"Белый",extra:"",pay:1000,kmTi:0,kmCash:50},
+      {model:"T7",vin:"EDEFB32B8TE099203",trim:"Прайм",year:"2026",color:"Белый",extra:"",pay:1000,kmTi:0,kmCash:50},
+      {model:"T7",vin:"EDEFB32B8TE105355",trim:"Актив",year:"2026",color:"Белый",extra:"",pay:1000,kmTi:0,kmCash:50},
+      {model:"T7",vin:"EDXFD32B2TE042710",trim:"Актив 4WD",year:"2026",color:"Белый",extra:"",pay:1000,kmTi:0,kmCash:50}
     ];
     const KM_MODELS = [
-      {id:"t4p",brand:"TENET",name:"T4 Прайм",nm0:"T4 Prime 2025",stock:"t4",rrc:2449000,dealer:2369000,ti:100000,tiBack:80000,cr:0,crBack:0,bonus:0.03,vat:1.22,fee:0.01,kmMin:-30,kmMax:20,prioMin:-30,prioMax:20},
-      {id:"t4la",brand:"TENET",name:"T4L Актив",nm0:"T4L Active",stock:"t4l",rrc:2344000,dealer:2249000,ti:0,tiBack:0,cr:0,crBack:0,bonus:0.02,vat:1.22,fee:0.01,kmMin:0,kmMax:50,prioMin:0,prioMax:50},
-      {id:"t4lp",brand:"TENET",name:"T4L Прайм",nm0:"T4L Prime",stock:"t4l",rrc:2494000,dealer:2404000,ti:0,tiBack:0,cr:0,crBack:0,bonus:0.02,vat:1.22,fee:0.01,kmMin:0,kmMax:50,prioMin:0,prioMax:50},
-      {id:"t7a",brand:"TENET",name:"T7 Актив 2WD",nm0:"T7 Active 2WD",stock:"t7",rrc:2805000,dealer:2665000,ti:180000,tiBack:130000,cr:0,crBack:0,bonus:0.02,vat:1.22,fee:0.01,kmMin:30,kmMax:80,prioMin:30,prioMax:80},
-      {id:"t7p",brand:"TENET",name:"T7 Прайм 2WD",nm0:"T7 Prime 2WD",stock:"t7",rrc:3005000,dealer:2860000,ti:200000,tiBack:150000,cr:0,crBack:0,bonus:0.02,vat:1.22,fee:0.01,kmMin:50,kmMax:100,prioMin:50,prioMax:100},
-      {id:"t7a4",brand:"TENET",name:"T7 Актив 4WD",nm0:"T7 Active 4WD",stock:"t7",rrc:3010000,dealer:2880000,ti:130000,tiBack:90000,cr:0,crBack:0,bonus:0.02,vat:1.22,fee:0.01,kmMin:30,kmMax:80,prioMin:30,prioMax:80},
-      {id:"t7p4",brand:"TENET",name:"T7 Прайм 4WD",nm0:"T7 Prime 4WD",stock:"t7",rrc:3210000,dealer:3065000,ti:150000,tiBack:110000,cr:0,crBack:0,bonus:0.02,vat:1.22,fee:0.01,kmMin:50,kmMax:100,prioMin:50,prioMax:100},
-      {id:"t8a",brand:"TENET",name:"T8 Актив 2WD 5 мест",nm0:"T8 Active 2WD",stock:"t8",rrc:3099000,dealer:2999000,ti:200000,tiBack:150000,cr:0,crBack:0,bonus:0.02,vat:1.22,fee:0.01,kmMin:0,kmMax:30,prioMin:-50,prioMax:0},
-      {id:"t8p",brand:"TENET",name:"T8 Прайм 2WD 5 мест",nm0:"T8 Prime 2WD",stock:"t8",rrc:3299000,dealer:3149000,ti:200000,tiBack:150000,cr:0,crBack:0,bonus:0.02,vat:1.22,fee:0.01,kmMin:0,kmMax:30,prioMin:-50,prioMax:0},
-      {id:"t8p4",brand:"TENET",name:"T8 Прайм 4WD 7 мест",nm0:"T8 Prime 4WD",stock:"t8",rrc:3630000,dealer:3465000,ti:150000,tiBack:100000,cr:0,crBack:0,bonus:0.02,vat:1.22,fee:0.01,kmMin:0,kmMax:30,prioMin:-50,prioMax:0},
-      {id:"t8u4",brand:"TENET",name:"T8 Ультра 4WD 7 мест",nm0:"T8 Ultra 4WD",stock:"t8",rrc:3885000,dealer:3705000,ti:150000,tiBack:100000,cr:0,crBack:0,bonus:0.02,vat:1.22,fee:0.01,kmMin:0,kmMax:30,prioMin:-50,prioMax:0},
-      {id:"ta8p",brand:"TENET",name:"A8 Прайм",nm0:"A8 Prime 1.6",stock:"ta8",rrc:2999000,dealer:2874000,ti:100000,tiBack:70000,cr:0,crBack:0,bonus:0.02,vat:1.22,fee:0.01,kmMin:0,kmMax:30,prioMin:0,prioMax:30},
-      {id:"ta8u",brand:"TENET",name:"A8 Ультра",nm0:"A8 Ultra 2.0",stock:"ta8",rrc:3499000,dealer:3354000,ti:100000,tiBack:70000,cr:0,crBack:0,bonus:0.02,vat:1.22,fee:0.01,kmMin:0,kmMax:30,prioMin:0,prioMax:30},
-      {id:"tt9p",brand:"TENET",name:"T9 Прайм 5 мест",nm0:"T9 Prime 5-seat",stock:"tt9",rrc:3949000,dealer:3799000,ti:200000,tiBack:130000,cr:0,crBack:0,bonus:0.02,vat:1.22,fee:0.01,kmMin:0,kmMax:30,prioMin:0,prioMax:30},
-      {id:"tt9u",brand:"TENET",name:"T9 Ультра 5 мест",nm0:"T9 Ultra 5-seat",stock:"tt9",rrc:4299000,dealer:4099000,ti:200000,tiBack:130000,cr:0,crBack:0,bonus:0.02,vat:1.22,fee:0.01,kmMin:0,kmMax:30,prioMin:0,prioMax:30},
-      {id:"tt9u7",brand:"TENET",name:"T9 Ультра 7 мест",nm0:"T9 Ultra 7-seat",stock:"tt9",rrc:4449000,dealer:4199000,ti:200000,tiBack:150000,cr:0,crBack:0,bonus:0.02,vat:1.22,fee:0.01,kmMin:0,kmMax:30,prioMin:0,prioMax:30},
-      {id:"tt9s7",brand:"TENET",name:"T9 Престиж 7 мест",nm0:"T9 Prestige 7-seat",stock:"tt9",rrc:4649000,dealer:4299000,ti:200000,tiBack:150000,cr:0,crBack:0,bonus:0.02,vat:1.22,fee:0.01,kmMin:0,kmMax:30,prioMin:0,prioMax:30},
-      {id:"t9p",brand:"CHERY",name:"Tiggo 9 Прайм",nm0:"Tiggo 9 Prime 4WD",stock:"t9",rrc:4335000,dealer:3895000,ti:300000,tiBack:250000,cr:0,crBack:0,bonus:0.02,vat:1.2,fee:0.02,kmMin:-30,kmMax:0,prioMin:-30,prioMax:0},
-      {id:"t9u",brand:"CHERY",name:"Tiggo 9 Ультра",nm0:"Tiggo 9 Ultra 4WD",stock:"t9",rrc:4640000,dealer:4200000,ti:200000,tiBack:150000,cr:200000,crBack:0,bonus:0.02,vat:1.2,fee:0.02,kmMin:-30,kmMax:0,prioMin:-30,prioMax:0},
-      {id:"a8a",brand:"CHERY",name:"Arrizo 8 Актив",nm0:"Arrizo 8 Active",stock:"a8",rrc:2865000,dealer:2649000,ti:250000,tiBack:230000,cr:0,crBack:0,bonus:0.02,vat:1.2,fee:0.02,kmMin:-30,kmMax:0,prioMin:-30,prioMax:0},
-      {id:"a8p",brand:"CHERY",name:"Arrizo 8 Прайм",nm0:"Arrizo 8 Prime",stock:"a8",rrc:3060000,dealer:2699000,ti:200000,tiBack:180000,cr:261000,crBack:0,bonus:0.02,vat:1.2,fee:0.02,kmMin:-30,kmMax:0,prioMin:-30,prioMax:0},
-      {id:"a8u",brand:"CHERY",name:"Arrizo 8 Ультра Чёрный",nm0:"Arrizo 8 Ultra Black",stock:"a8",rrc:3275000,dealer:2899000,ti:200000,tiBack:180000,cr:0,crBack:0,bonus:0.02,vat:1.2,fee:0.02,kmMin:-30,kmMax:0,prioMin:-30,prioMax:0},
-      {id:"t7l",brand:"CHERY",name:"Tiggo 7L Актив",nm0:"Tiggo 7 L Active",stock:"t7l",rrc:2735000,dealer:2620000,ti:100000,tiBack:70000,cr:0,crBack:0,bonus:0.02,vat:1.2,fee:0.02,kmMin:0,kmMax:30,prioMin:0,prioMax:30},
-      {id:"l4s",brand:"TENET PLUS",name:"L4 Стайл",nm0:"L4 Style",stock:"pl4",rrc:2540000,dealer:2438400,ti:150000,tiBack:150000,cr:0,crBack:0,bonus:0.022,vat:1.22,fee:0.01,kmMin:0,kmMax:50,prioMin:0,prioMax:50},
-      {id:"l4e",brand:"TENET PLUS",name:"L4 Элегант",nm0:"L4 Elegant",stock:"pl4",rrc:2690000,dealer:2582400,ti:150000,tiBack:150000,cr:0,crBack:0,bonus:0.022,vat:1.22,fee:0.01,kmMin:0,kmMax:50,prioMin:0,prioMax:50},
-      {id:"l6e",brand:"TENET PLUS",name:"L6 Элегант",nm0:"L6 Elegant",stock:"pl6",rrc:2890000,dealer:2745500,ti:100000,tiBack:70000,cr:0,crBack:0,bonus:0.022,vat:1.22,fee:0.01,kmMin:0,kmMax:50,prioMin:0,prioMax:50},
-      {id:"l6u",brand:"TENET PLUS",name:"L6 Ультра",nm0:"L6 Ultra",stock:"pl6",rrc:3040000,dealer:2888000,ti:100000,tiBack:70000,cr:0,crBack:0,bonus:0.022,vat:1.22,fee:0.01,kmMin:0,kmMax:50,prioMin:0,prioMax:50}
+      {id:"t4p",brand:"TENET",name:"T4 Prime 2025",stock:"t4",rrc:2449000,dealer:2369000,ti:100000,tiBack:80000,cr:0,crBack:0,bonus:0.03,vat:1.22,fee:0.01,kmMin:-30,kmMax:20,prioMin:-30,prioMax:20},
+      {id:"t4la",brand:"TENET",name:"T4L Active",stock:"t4l",rrc:2344000,dealer:2249000,ti:0,tiBack:0,cr:0,crBack:0,bonus:0.02,vat:1.22,fee:0.01,kmMin:0,kmMax:50,prioMin:0,prioMax:50},
+      {id:"t4lp",brand:"TENET",name:"T4L Prime",stock:"t4l",rrc:2494000,dealer:2404000,ti:0,tiBack:0,cr:0,crBack:0,bonus:0.02,vat:1.22,fee:0.01,kmMin:0,kmMax:50,prioMin:0,prioMax:50},
+      {id:"t7a",brand:"TENET",name:"T7 Active 2WD",stock:"t7",rrc:2805000,dealer:2665000,ti:180000,tiBack:130000,cr:0,crBack:0,bonus:0.02,vat:1.22,fee:0.01,kmMin:30,kmMax:80,prioMin:30,prioMax:80},
+      {id:"t7p",brand:"TENET",name:"T7 Prime 2WD",stock:"t7",rrc:3005000,dealer:2860000,ti:200000,tiBack:150000,cr:0,crBack:0,bonus:0.02,vat:1.22,fee:0.01,kmMin:30,kmMax:80,prioMin:30,prioMax:80},
+      {id:"t7a4",brand:"TENET",name:"T7 Active 4WD",stock:"t7",rrc:3010000,dealer:2880000,ti:130000,tiBack:90000,cr:0,crBack:0,bonus:0.02,vat:1.22,fee:0.01,kmMin:30,kmMax:80,prioMin:30,prioMax:80},
+      {id:"t7p4",brand:"TENET",name:"T7 Prime 4WD",stock:"t7",rrc:3210000,dealer:3065000,ti:150000,tiBack:110000,cr:0,crBack:0,bonus:0.02,vat:1.22,fee:0.01,kmMin:30,kmMax:80,prioMin:30,prioMax:80},
+      {id:"t8a",brand:"TENET",name:"T8 Active 2WD",stock:"t8",rrc:3099000,dealer:2999000,ti:200000,tiBack:150000,cr:0,crBack:0,bonus:0.02,vat:1.22,fee:0.01,kmMin:0,kmMax:30,prioMin:-50,prioMax:0},
+      {id:"t8p",brand:"TENET",name:"T8 Prime 2WD",stock:"t8",rrc:3299000,dealer:3149000,ti:200000,tiBack:150000,cr:0,crBack:0,bonus:0.02,vat:1.22,fee:0.01,kmMin:0,kmMax:30,prioMin:-50,prioMax:0},
+      {id:"t8p4",brand:"TENET",name:"T8 Prime 4WD",stock:"t8",rrc:3630000,dealer:3465000,ti:150000,tiBack:100000,cr:0,crBack:0,bonus:0.02,vat:1.22,fee:0.01,kmMin:0,kmMax:30,prioMin:-50,prioMax:0},
+      {id:"t8u4",brand:"TENET",name:"T8 Ultra 4WD",stock:"t8",rrc:3885000,dealer:3705000,ti:150000,tiBack:100000,cr:0,crBack:0,bonus:0.02,vat:1.22,fee:0.01,kmMin:0,kmMax:30,prioMin:-50,prioMax:0},
+      {id:"ta8p",brand:"TENET",name:"A8 Prime 1.6",stock:"ta8",rrc:2999000,dealer:2874000,ti:100000,tiBack:70000,cr:0,crBack:0,bonus:0.02,vat:1.22,fee:0.01,kmMin:0,kmMax:30,prioMin:0,prioMax:30},
+      {id:"ta8u",brand:"TENET",name:"A8 Ultra 2.0",stock:"ta8",rrc:3499000,dealer:3354000,ti:100000,tiBack:70000,cr:0,crBack:0,bonus:0.02,vat:1.22,fee:0.01,kmMin:0,kmMax:30,prioMin:0,prioMax:30},
+      {id:"tt9p",brand:"TENET",name:"T9 Prime 5-seat",stock:"tt9",rrc:3949000,dealer:3799000,ti:200000,tiBack:130000,cr:0,crBack:0,bonus:0.02,vat:1.22,fee:0.01,kmMin:0,kmMax:30,prioMin:0,prioMax:30},
+      {id:"tt9u",brand:"TENET",name:"T9 Ultra 5-seat",stock:"tt9",rrc:4299000,dealer:4099000,ti:200000,tiBack:130000,cr:0,crBack:0,bonus:0.02,vat:1.22,fee:0.01,kmMin:0,kmMax:30,prioMin:0,prioMax:30},
+      {id:"tt9u7",brand:"TENET",name:"T9 Ultra 7-seat",stock:"tt9",rrc:4449000,dealer:4199000,ti:200000,tiBack:150000,cr:0,crBack:0,bonus:0.02,vat:1.22,fee:0.01,kmMin:0,kmMax:30,prioMin:0,prioMax:30},
+      {id:"tt9s7",brand:"TENET",name:"T9 Prestige 7-seat",stock:"tt9",rrc:4649000,dealer:4299000,ti:200000,tiBack:150000,cr:0,crBack:0,bonus:0.02,vat:1.22,fee:0.01,kmMin:0,kmMax:30,prioMin:0,prioMax:30},
+      {id:"t9p",brand:"CHERY",name:"Tiggo 9 Prime 4WD",stock:"t9",rrc:4335000,dealer:3895000,ti:300000,tiBack:250000,cr:0,crBack:0,bonus:0.02,vat:1.2,fee:0.02,kmMin:-30,kmMax:0,prioMin:-30,prioMax:0},
+      {id:"t9u",brand:"CHERY",name:"Tiggo 9 Ultra 4WD",stock:"t9",rrc:4640000,dealer:4200000,ti:200000,tiBack:150000,cr:200000,crBack:0,bonus:0.02,vat:1.2,fee:0.02,kmMin:-30,kmMax:0,prioMin:-30,prioMax:0},
+      {id:"a8a",brand:"CHERY",name:"Arrizo 8 Active",stock:"a8",rrc:2865000,dealer:2649000,ti:250000,tiBack:230000,cr:0,crBack:0,bonus:0.02,vat:1.2,fee:0.02,kmMin:-30,kmMax:0,prioMin:-30,prioMax:0},
+      {id:"a8p",brand:"CHERY",name:"Arrizo 8 Prime",stock:"a8",rrc:3060000,dealer:2699000,ti:200000,tiBack:180000,cr:261000,crBack:0,bonus:0.02,vat:1.2,fee:0.02,kmMin:-30,kmMax:0,prioMin:-30,prioMax:0},
+      {id:"a8u",brand:"CHERY",name:"Arrizo 8 Ultra Black",stock:"a8",rrc:3275000,dealer:2899000,ti:200000,tiBack:180000,cr:0,crBack:0,bonus:0.02,vat:1.2,fee:0.02,kmMin:-30,kmMax:0,prioMin:-30,prioMax:0},
+      {id:"t7l",brand:"CHERY",name:"Tiggo 7 L Active",stock:"t7l",rrc:2735000,dealer:2620000,ti:100000,tiBack:70000,cr:0,crBack:0,bonus:0.02,vat:1.2,fee:0.02,kmMin:0,kmMax:30,prioMin:0,prioMax:30},
+      {id:"l4s",brand:"TENET PLUS",name:"L4 Style",stock:"pl4",rrc:2540000,dealer:2438400,ti:150000,tiBack:150000,cr:0,crBack:0,bonus:0.022,vat:1.22,fee:0.01,kmMin:0,kmMax:50,prioMin:0,prioMax:50},
+      {id:"l4e",brand:"TENET PLUS",name:"L4 Elegant",stock:"pl4",rrc:2690000,dealer:2582400,ti:150000,tiBack:150000,cr:0,crBack:0,bonus:0.022,vat:1.22,fee:0.01,kmMin:0,kmMax:50,prioMin:0,prioMax:50},
+      {id:"l6e",brand:"TENET PLUS",name:"L6 Elegant",stock:"pl6",rrc:2890000,dealer:2745500,ti:100000,tiBack:70000,cr:0,crBack:0,bonus:0.022,vat:1.22,fee:0.01,kmMin:0,kmMax:50,prioMin:0,prioMax:50},
+      {id:"l6u",brand:"TENET PLUS",name:"L6 Ultra",stock:"pl6",rrc:3040000,dealer:2888000,ti:100000,tiBack:70000,cr:0,crBack:0,bonus:0.022,vat:1.22,fee:0.01,kmMin:0,kmMax:50,prioMin:0,prioMax:50}
     ];
-    const PRIO_VINS = new Set(["EDXGD34B8TE095347","EDXGD34B5TE095631","EDXGB32B8TE110275","EDXGB32B1TE110196","EDXGB32B0TE089261","EDXFD32B2TE042710","EDEFD32B1TE101190","EDEFD32B5TE102522","EDEFB32B8TE099203","EDEFB32BXTE100707","EDEFB32B8TE105355","EDEFB32B2TE105500","EDEEB31B8TE003261"]);
-    const KM_FORK = {
-      "EDEFD32B4TE136144":{ti:100,cash:200}
-    };
+    const PRIO_VINS = new Set(["EDEEB31B8TE003261", "EDXGD34B5TE095631", "EDXGD34B8TE095347", "EDEFB32BXTE100707", "EDEFB32B8TE099203", "EDEFB32B8TE105355", "EDXFD32B2TE042710"]);
+
+    const KM_FORK = Object.fromEntries([
+      ...KM_CORRIDOR.filter(r=>/^[A-HJ-NPR-Z0-9]{17}$/.test(r.trim)).map(r=>{
+        const pair=r.km.replace(/[−–]/g,"-").split("/").map(Number);
+        return [r.trim,{ti:pair[0],cash:pair[1]}];
+      }),
+      ...TERMS_PRIO.filter(r=>Number.isFinite(r.kmTi)&&Number.isFinite(r.kmCash)).map(r=>[r.vin,{ti:r.kmTi,cash:r.kmCash}])
+    ]);
     const PANGO_ONLY = {};
     const NOT_INVOICE = {"EDXGD34B7TE034443":1};
     function kmBand(vin, useTi, prio, m){
@@ -4384,15 +4389,13 @@ async function pingTelegram(body){
       {id:"sber", name:"Сбер"},
       {id:"sovcom", name:"Совкомбанк"},
       {id:"alfa", name:"Альфа"},
-      {id:"tbank", name:"Т-Банк"},
-      {id:"vtb", name:"ВТБ"}
+      {id:"tbank", name:"Т-Банк"}
     ];
     const KM_BANK_MONTHS = {
       sber:[12,24,36,48,60,72,84,96,108,120],
       sovcom:[12,24,36,48,60,72,84],
       alfa:[12,24,36,48,60,72,84,96],
-      tbank:[12,24,36,48,60,72,84,96],
-      vtb:[12,24,36,48,60,72,84]
+      tbank:[12,24,36,48,60,72,84,96]
     };
     const KM_BANK_RATES = {
       sber:{
@@ -4490,7 +4493,7 @@ async function pingTelegram(body){
           80:[0.01,0.01,0.01,0.01,0.01,0.01,0.01],
           70:[0.01,0.01,0.01,0.01,0.01,2.20,3.00],
           60:[0.01,0.01,0.01,1.80,3.50,4.90,5.20],
-          50:[0.01,0.01,2.80,4.30,7.30,8.00,8.40],
+          50:[0.01,0.01,2.80,4.30,6.60,7.30,8.00],
           40:[0.01,1.00,4.60,6.60,8.40,9.00,9.70],
           30:[0.01,3.00,6.40,8.10,9.60,9.90,10.50],
           20:[0.01,5.40,8.10,10.50,11.00,11.90,12.10],
@@ -4551,7 +4554,8 @@ async function pingTelegram(body){
           40:[0.01,0.01,4.50,6.70,8.20,9.50,10.60,11.90],
           30:[0.01,2.10,6.60,8.50,9.80,11.00,11.90,13.00],
           20:[0.01,4.40,8.30,10.00,11.20,12.20,13.00,14.00],
-          10:[0.01,6.30,9.70,11.20,12.20,13.20,13.80,14.70]
+          10:[0.01,6.30,9.70,11.20,12.20,13.20,13.80,14.70],
+          0:[0.01,6.30,9.70,11.20,12.20,13.20,13.80,14.70]
         },
         plusL4:{
           80:[0.01,0.01,0.01,0.01,0.01,0.01,0.01,2.50],
@@ -4561,7 +4565,8 @@ async function pingTelegram(body){
           40:[0.01,1.30,5.00,7.00,8.40,9.70,10.60,12.10],
           30:[0.01,2.90,7.00,8.70,9.90,11.10,12.00,13.20],
           20:[0.01,5.10,8.70,10.20,11.20,12.30,13.00,14.10],
-          10:[2.00,6.90,10.00,11.30,12.20,13.20,13.80,14.80]
+          10:[2.00,6.90,10.00,11.30,12.20,13.20,13.80,14.80],
+          0:[2.00,6.90,10.00,11.30,12.20,13.20,13.80,14.80]
         }
       },
       tbank:{
