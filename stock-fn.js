@@ -57,8 +57,7 @@
         if(typeof carIsMpt==="function"?carIsMpt(r):r.mpt) bits.push(`<span class="st mpt">МПТ</span>`);
         if(typeof carIsCorp==="function"?carIsCorp(r):(r.corp || (typeof CORP_VINS!=="undefined" && CORP_VINS.has(r.vin)))) bits.push(`<span class="st corp">Корпоративный</span>`);
       }
-      if(r.taxi) bits.push(`<span class="st taxi">ТАКСИ</span>`);
-      if(r.demo) bits.push(`<span class="st demo">ДЕМО</span>`);
+            if(r.demo) bits.push(`<span class="st demo">ДЕМО</span>`);
       return bits.join(" ");
     }
     function stockYear(c){
@@ -191,7 +190,8 @@
       const priceTxt=price?rub(price)+" ₽":"—";
       const model=r.name||"";
       const trim=r.trim||"";
-      return `<article class="st-row${tone?" "+tone:""}${reservedCls}${r.invoice?" is-invoice":""}${open}" data-st-card data-vin="${escape(r.vin||"")}">
+      return `<article class="st-row${tone?" "+tone:""}${reservedCls}${r.invoice?" is-invoice":""}${r.taxi?" is-taxi":""}${open}" data-st-card data-vin="${escape(r.vin||"")}">
+        ${r.taxi?`<i class="st-taxi-dot" title="Подходит для такси" aria-label="Подходит для такси"></i>`:""}
         <div class="st-swatch" aria-hidden="true"></div>
         <div class="st-face">
           <b class="st-name">${escape(model)}${superOn?" · СУПЕРСПЕЦ":""}</b>
@@ -279,7 +279,8 @@
         if(q) return stockVinNorm(x.vin).indexOf(q)>=0;
         if(stockFilter!=="all" && x.model!==stockFilter) return false;
         if(stockStatus==="test") return false;
-        if(stockStatus!=="all" && x.status!==stockStatus) return false;
+        if(stockStatus==="taxi" && !x.taxi) return false;
+        if(stockStatus!=="all" && stockStatus!=="taxi" && x.status!==stockStatus) return false;
         if(!invOk(x)) return false;
         return true;
       });
@@ -288,6 +289,7 @@
       const scoped=statusScoped;
       const nIn=statusScoped.filter(x=>x.status==="in").length;
       const nWay=statusScoped.filter(x=>x.status==="way").length;
+      const nTaxi=statusScoped.filter(x=>x.taxi).length;
       const invScoped=modelScoped.filter(x=>stockStatus==="all"||stockStatus==="test"||x.status===stockStatus);
       const nInv=invScoped.filter(x=>!!x.invoice).length;
       const nDir=invScoped.filter(x=>!x.invoice).length;
@@ -341,16 +343,16 @@
           }).join("")+`</div>`
         : "";
       const tests = q ? stockTestHtml() : "";
-      const taxi=testOn||q?"":stockTaxiBlock(sale.filter(x=>x.taxi===true));
-      const body = (stockBody || tests) ? (testOn ? stockBody : stockBody+tests) : `<div class="card" style="margin-top:12px"><p>${q?"VIN не найден.":"По этому фильтру машин нет."}</p></div>`;
+            const body = (stockBody || tests) ? (testOn ? stockBody : stockBody+tests) : `<div class="card" style="margin-top:12px"><p>${q?"VIN не найден.":"По этому фильтру машин нет."}</p></div>`;
       const typed=escape(typeof stockVin==="string"?stockVin:"");
       return banner("Склад", `Logicstars · ${meta.updated}`, "TENET")+`
-        <p class="lead">${q?"Поиск по VIN по складу и тестам. Хвост номера тоже подходит.":(testOn?"Четыре теста. Цена в последней колонке фиксированная, продажа только через PANGO.":"Сначала модель, внутри — комплектация. Сортировка меняет порядок машин и групп.")}</p>
+        <p class="lead">${q?"Поиск по VIN по складу и тестам. Хвост номера тоже подходит.":(stockStatus==="taxi"?"Авто с зелёной меткой «Такси» в Logicstars. Шашечка на карточке — подходит для такси.":(testOn?"Четыре теста. Цена в последней колонке фиксированная, продажа только через PANGO.":"Сначала модель, внутри — комплектация. Сортировка меняет порядок машин и групп."))}</p>
         <div class="st-sticky"><input id="stockVin" class="st-vin-search" type="search" inputmode="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Поиск по VIN" value="${typed}"></div>
         <div class="study-pick st-filters">
           <button class="chip ${stockStatus==="all"?"on":""}" data-stock-st="all">Все · ${scoped.length}</button>
           <button class="chip ${stockStatus==="in"?"on":""}" data-stock-st="in">В наличии · ${nIn}</button>
           <button class="chip ${stockStatus==="way"?"on":""}" data-stock-st="way">В пути · ${nWay}</button>
+          <button class="chip ${stockStatus==="taxi"?"on":""}" data-stock-st="taxi">Такси · ${nTaxi}</button>
           <button class="chip ${stockStatus==="test"?"on":""}" data-stock-st="test">Тесты в продаже · ${(typeof TEST_SALE!=="undefined"?TEST_SALE.length:0)}</button>
         </div>
         ${testOn?"":`<div class="study-pick st-filters st-inv">
@@ -361,6 +363,5 @@
           <span class="st-sort-lab">Сортировка</span>
           ${sortBtns}
         </div>`}
-        ${taxi}
         ${body}`;
     }
