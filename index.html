@@ -5926,10 +5926,7 @@ async function pingTelegram(body){
         const note=b.termNote?b.termNote:(b.capped?`нет ${yearsWant} ${yearsWant===1?"года":"лет"} · считаем ${b.term} мес. (${yearsHave} ${yearsHave===1?"год":yearsHave<5?"года":"лет"})`:`${b.term} мес.`);
         return `<div class="bank-row"><span><b>${escape(b.name)}</b><br/><small>${b.rate}% · ${note} · переплата ~${rub(Math.round(b.over||0))}</small></span><span class="pay">${rub(Math.round(b.pay||0))} ₽</span></div>`;
       }
-      const directPairs=(ordDeal.banks||[]).map((b,i)=>{
-        const rb=prioInStock&&prioDeal.banks?prioDeal.banks[i]:null;
-        return `<div class="pay-cell">${kmBankCell(b)}</div>`+(rb?`<div class="pay-cell prio">${kmBankCell(rb)}</div>`:"");
-      }).join("");
+      const directPairs=(ordDeal.banks||[]).map(b=>`<div class="pay-cell">${kmBankCell(b)}</div>`).join("");
       const qFleetPrio=(m.id==="t7a" && typeof fleetSubQuote==="function")?fleetSubQuote(Math.max(0, 2333000-tiMpt), subAmt, down, addons, pack||0, months, !!(showSub && subAmt), 22.5):null;
       const qFleetPrioSber=qFleetPrio?fleetSubQuote(Math.max(0, 2333000-tiMpt), subAmt, down, addons, pack||0, months, !!(showSub && subAmt), 24):null;
       const banksMptPrio=qFleetPrio&&typeof fleetBanksFrom==="function"?fleetBanksFrom(qFleetPrio, qFleetPrioSber, months):[];
@@ -6006,18 +6003,13 @@ async function pingTelegram(body){
           ${(showSub||showFleet)?fleetWarn.html:""}${qFleetPrio&&fleetPrioWarn.low&&!(fleetWarn.low&&fleetWarn.html===fleetPrioWarn.html)?fleetPrioWarn.html:""}${pShow?pangoWarn.html:""}
         </div><div class="km-pays">
           ${pangoOnly?"":`<div class="pay-col std km-pay">
-            <div class="km-contrast${prioInStock?"":" solo"}">
+            <div class="km-contrast solo">
               <div class="pay-cell">
                 <p class="eyebrow">Директ</p>
                 <p class="calc-note">Обычный. Цена ${rub(ordDeal.price)} · ПВ ${rub(ordDeal.down)} · тело ${rub(ordDeal.credit)}</p>
               </div>
-              ${prioInStock?`<div class="pay-cell prio">
-                <p class="eyebrow">Директ · приоритет</p>
-                <p class="calc-note">КМ ${prioKmTxt}. Цена ${rub(prioDeal.price)} · скидка ДЦ ${rub(prioDeal.dc)} · ПВ ${rub(prioDeal.down)} · тело ${rub(prioDeal.credit)}</p>
-              </div>`:""}
               ${directPairs}
               <div class="pay-cell"><p class="calc-note">КМ ${kmFixK(ordDeal.km/1000)} тыс. · фикс ${typeof kmBandTxt==="function"?kmBandTxt(ob.lo,ob.hi):ob.lo+" тыс."}${useTi?" с трейд-ином":" без трейд-ина"}</p></div>
-              ${prioInStock?`<div class="pay-cell prio"><p class="calc-note">КМ ${(kmBand(kmVin, useTi, true, m).lo)} тыс.${prioDeal.price<ordDeal.price?" · дешевле на "+rub(ordDeal.price-prioDeal.price):""}</p></div>`:""}
             </div>
             <p class="calc-note">${isPlus?"Ставки TENET PLUS, ИП 1938/И (пролонгирована).":"Ставки TENET ФИНАНС, ИП 1890/И."}</p>
             
