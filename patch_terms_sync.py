@@ -115,8 +115,6 @@ def move_plus_specs(text):
         return text
     inv = text[s_inv[0]:s_inv[1]]
     rows = [m.group(0) for m in PLUS_ROW.finditer(inv)]
-    if not rows:
-        return text
     inv_lines = [l for l in inv.split("\n") if not PLUS_ROW.search(l)]
     for k in range(len(inv_lines) - 1, -1, -1):
         if inv_lines[k].strip().startswith("{"):
@@ -124,16 +122,17 @@ def move_plus_specs(text):
             break
     new_inv = "\n".join(inv_lines)
     plus = text[s_plus[0]:s_plus[1]]
-    keep = [m.group(0) for m in PLUS_ROW.finditer(plus)]
-    have = {PLUS_ROW.match(r).group(1) + "|" + PLUS_ROW.match(r).group(2): r for r in keep}
-    for r in rows:
-        key = PLUS_ROW.match(r).group(1) + "|" + PLUS_ROW.match(r).group(2)
-        if key in have:
-            keep[keep.index(have[key])] = r
-        else:
-            keep.insert(0, r)
-        have[key] = r
-    keep.sort(key=lambda r: (PLUS_ROW.match(r).group(1), 0))
+    # A build translates trims to Russian; canonical data still uses English.
+    # Use a stable trim identity or the next sync adds Style/Стайл twice.
+    aliases = {"стайл": "style", "элегант": "elegant", "ультра": "ultra"}
+    def key(row):
+        m = PLUS_ROW.match(row)
+        trim = m.group(2).strip().lower().replace("ё", "е")
+        return m.group(1), aliases.get(trim, trim)
+    unique = {}
+    for row in [m.group(0) for m in PLUS_ROW.finditer(plus)] + rows:
+        unique[key(row)] = row  # canonical row wins, including its price
+    keep = [unique[k] for k in sorted(unique)]
     new_plus = "    const TERMS_INV_PLUS = [\n" + ",\n".join("      " + r for r in keep) + "\n    ];"
     a, b = (s_inv, s_plus) if s_inv[0] < s_plus[0] else (s_plus, s_inv)
     na, nb = (new_inv, new_plus) if s_inv[0] < s_plus[0] else (new_plus, new_inv)
@@ -220,7 +219,20 @@ def drop_sold_vin_specs(text):
     return text
 
 
+def drop_sold_tests(text):
+    """08.11: sold Tiggo 8 Pro Max is no longer a test car for sale.
+    Only TEST_SALE is edited; stock and KP logic stay untouched.
+    """
+    s = span(text, "TEST_SALE")
+    if not s:
+        return text
+    block = text[s[0]:s[1]]
+    block = re.sub(r'^\s*\{[^\n]*vin:"LVTDD24B5RD409189"[^\n]*\},?\n', "\n", block, flags=re.M)
+    return text[:s[0]] + block + text[s[1]:]
+
+
 def ensure_local(text):
+    text = drop_sold_tests(text)
     text = ensure_t9(text)
     text = ensure_prio_sold(text)
     text = text.replace(
