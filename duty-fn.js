@@ -172,13 +172,29 @@
       const cars=(typeof dutyCars==="function")?dutyCars():DUTY_CARS;
       const avitoPack=(typeof window.avitoPhotosForPrint==="function")?window.avitoPhotosForPrint():null;
       const avitoRows=(avitoPack&&Array.isArray(avitoPack.rows))?avitoPack.rows:[];
+      const avitoBlocks=(avitoPack&&Array.isArray(avitoPack.blocks))?avitoPack.blocks:null;
+      function avitoCardH(pack, rows){
+        var blocks=pack&&Array.isArray(pack.blocks)?pack.blocks:null;
+        if(!blocks){
+          var grid=rows&&rows.length?Math.ceil(rows.length/2):1;
+          return 56+(rows&&rows.length?grid*(52+8)-8:36)+16;
+        }
+        var h=56;
+        blocks.forEach(function(b){
+          h+=18;
+          if(b.lead) h+=14;
+          var n=b.rows&&b.rows.length||0;
+          if(b.collapsed||!n) h+=20;
+          else h+=n*(54+6);
+          h+=8;
+        });
+        if(pack.feedNote) h+=22;
+        return h+12;
+      }
       const W=1240;
       const pad=36, gap=14;
       const carH=348, footH=268;
-      const avitoRowH=52;
-      const avitoHead=56;
-      const avitoGrid=avitoRows.length?Math.ceil(avitoRows.length/2):1;
-      const avitoH=18+avitoHead+(avitoRows.length?avitoGrid*(avitoRowH+8):40)+28;
+      const avitoH=18+avitoCardH(avitoPack, avitoRows)+40;
       const carRows=Math.max(1, Math.ceil((cars&&cars.length)||1)/3);
       const H=Math.max(1754, 154+carRows*(carH+gap)+footH+20+avitoH+64);
       const c=document.createElement("canvas");
@@ -325,36 +341,81 @@
           ctx.fillText("✓", x+3, yy+13);
         }
       }
-      const cardX=pad, cardW=W-pad*2, cardY=y;
-      const headH=56, cellH=52, cellGap=8, inset=16;
-      const gridRows=avitoRows.length?Math.ceil(avitoRows.length/2):1;
-      const cardH=headH+(avitoRows.length?gridRows*(cellH+cellGap)-cellGap:36)+inset;
+      const cardX=pad, cardW=W-pad*2, cardY=y, inset=16;
+      const cardH=avitoCardH(avitoPack, avitoRows);
       ctx.fillStyle="#f3eee4";
       rr(cardX, cardY, cardW, cardH, 18); ctx.fill();
       ctx.lineWidth=1.6; ctx.strokeStyle="#c4b49a";
       rr(cardX, cardY, cardW, cardH, 18); ctx.stroke();
       ctx.fillStyle="#1b5e20";
-      ctx.fillRect(cardX, cardY+16, 5, cardH-32);
+      ctx.fillRect(cardX, cardY+16, 5, Math.max(12, cardH-32));
       ctx.fillStyle="#1c1a17"; ctx.font="800 18px Inter, Arial, sans-serif";
       ctx.fillText("ФОТО ДЛЯ АВИТО", cardX+22, cardY+26);
       ctx.fillStyle="#6d6458"; ctx.font="500 12px Inter, Arial, sans-serif";
-      ctx.fillText(avitoRows.length?"в наличии, нет фото":"все фото в наличии", cardX+22, cardY+44);
-      const count=avitoRows.length?String(avitoRows.length)+" шт.":"—";
+      ctx.fillText(avitoBlocks?(avitoPack.subtitle||"в салоне и в пути"):(avitoRows.length?"в салоне и в пути":"список съёмки пуст"), cardX+22, cardY+44);
+      const count=avitoBlocks?(avitoPack.badge||"—"):(avitoRows.length?String(avitoRows.length)+" шт.":"—");
       ctx.font="800 12px Inter, Arial, sans-serif";
-      const countW=ctx.measureText(count).width+18;
+      const countW=Math.min(cardW-180, ctx.measureText(count).width+18);
       const countX=cardX+cardW-inset-countW, countY=cardY+16;
       ctx.fillStyle="#ffffff"; rr(countX, countY, countW, 22, 11); ctx.fill();
       ctx.strokeStyle="#eadfcf"; ctx.lineWidth=1; rr(countX, countY, countW, 22, 11); ctx.stroke();
-      ctx.fillStyle="#1c1a17"; ctx.fillText(count, countX+9, countY+15);
-      if(!avitoRows.length){
+      ctx.fillStyle="#1c1a17"; ctx.fillText(fitLine(count, countW-16), countX+9, countY+15);
+      if(avitoBlocks){
+        var cursor=cardY+56;
+        avitoBlocks.forEach(function(b){
+          ctx.fillStyle="#1c1a17"; ctx.font="800 13px Inter, Arial, sans-serif";
+          ctx.fillText(fitLine(b.title+(b.count&&b.count!=="0"?" · "+b.count:""), cardW-44), cardX+22, cursor+13);
+          cursor+=18;
+          if(b.lead){
+            ctx.fillStyle="#7a7166"; ctx.font="500 11px Inter, Arial, sans-serif";
+            ctx.fillText(fitLine(b.lead, cardW-44), cardX+22, cursor+11);
+            cursor+=14;
+          }
+          var n=b.rows&&b.rows.length||0;
+          if(b.collapsed||!n){
+            var msg=!n?(avitoPack.emptyText||"Съёмка не требуется. Это не значит, что фото на Авито готовы."):(b.count||"");
+            ctx.fillStyle="#6d6458"; ctx.font="500 12px Inter, Arial, sans-serif";
+            ctx.fillText(fitLine(msg, cardW-44), cardX+22, cursor+14);
+            cursor+=20;
+          }else{
+            b.rows.forEach(function(row){
+              ctx.fillStyle=row.on?"#e8f5e9":"#ffffff";
+              rr(cardX+inset, cursor, cardW-inset*2, 54, 8); ctx.fill();
+              ctx.lineWidth=1; ctx.strokeStyle=row.on?"#1b5e20":"#eadfcf";
+              rr(cardX+inset, cursor, cardW-inset*2, 54, 8); ctx.stroke();
+              var tx=cardX+inset+10;
+              if(b.check){ boxCheck(tx, cursor+8, !!row.on); tx+=24; }
+              var maxW=cardW-inset*2-(b.check?44:24);
+              ctx.fillStyle="#1c1a17"; ctx.font="700 13px Inter, Arial, sans-serif";
+              ctx.fillText(fitLine(row.title, maxW), tx, cursor+16);
+              var line=(row.states&&row.states.length?row.states:row.vins||[]).join("   ");
+              if(line){
+                ctx.fillStyle="#6d6458"; ctx.font="500 11px ui-monospace, Menlo, Consolas, monospace";
+                ctx.fillText(fitLine(line, maxW), tx, cursor+30);
+              }
+              if(row.reason){
+                ctx.fillStyle="#6d6458"; ctx.font="500 11px Inter, Arial, sans-serif";
+                ctx.fillText(fitLine(row.reason, maxW), tx, cursor+44);
+              }
+              cursor+=60;
+            });
+          }
+          cursor+=8;
+        });
+        if(avitoPack.feedNote){
+          ctx.fillStyle="#6d6458"; ctx.font="500 11px Inter, Arial, sans-serif";
+          ctx.fillText(fitLine(avitoPack.feedNote, cardW-44), cardX+22, cursor+14);
+        }
+      }else if(!avitoRows.length){
         ctx.fillStyle="#7a7166"; ctx.font="500 13px Inter, Arial, sans-serif";
-        ctx.fillText(avitoPack&&avitoPack.ready===false?"Список загружается…":"Фотографии не нужны, все фото в наличии.", cardX+22, cardY+headH+18);
+        ctx.fillText(avitoPack&&avitoPack.ready===false?"Список загружается…":((avitoPack&&avitoPack.emptyText)||"Список фото пуст. Готовность на Авито не подтверждена."), cardX+22, cardY+74);
       }else{
+        const cellH=52, cellGap=8;
         const colW=(cardW-inset*2-cellGap)/2;
         avitoRows.forEach(function(row, i){
           const col=i%2, r=Math.floor(i/2);
           const x=cardX+inset+col*(colW+cellGap);
-          const ry=cardY+headH+r*(cellH+cellGap);
+          const ry=cardY+56+r*(cellH+cellGap);
           ctx.fillStyle=row.on?"#e8f5e9":"#ffffff";
           rr(x, ry, colW, cellH, 10); ctx.fill();
           ctx.lineWidth=1; ctx.strokeStyle=row.on?"#1b5e20":"#eadfcf";
@@ -362,9 +423,10 @@
           boxCheck(x+10, ry+18, !!row.on);
           ctx.fillStyle="#1c1a17"; ctx.font="700 13px Inter, Arial, sans-serif";
           ctx.fillText(fitLine(row.title, colW-46), x+34, ry+22);
-          if(row.vins&&row.vins.length){
+          var line=(row.states&&row.states.length?row.states:row.vins||[]).join("  ");
+          if(line){
             ctx.fillStyle="#6d6458"; ctx.font="500 11px ui-monospace, Menlo, Consolas, monospace";
-            ctx.fillText(fitLine(row.vins.join("  "), colW-46), x+34, ry+40);
+            ctx.fillText(fitLine(line, colW-46), x+34, ry+40);
           }
         });
       }
@@ -516,7 +578,7 @@
           </div>
           <div class="cl-print" id="dutyPrintBar">
             <button type="button" class="btn ivory" id="dutyPrint" disabled>Печать / сохранить</button>
-            <p class="cl-print-hint" id="dutyPrintHint">Фотографии не нужны, все фото в наличии</p>
+            <p class="cl-print-hint" id="dutyPrintHint">Загрузка списка фото</p>
           </div>
           <div class="cl-log">
             <h3>Сохранённые чек-листы</h3>

@@ -76,7 +76,7 @@
           </section>
           <div class="cl-print" id="dutyPrintBar">
             <button type="button" class="btn ivory" id="dutyPrint" disabled>Печать / сохранить</button>
-            <p class="cl-print-hint" id="dutyPrintHint">Фотографии не нужны, все фото в наличии</p>
+            <p class="cl-print-hint" id="dutyPrintHint">Загрузка списка фото</p>
           </div>
           <div class="cl-log">
             <h3>Сохранённые чек-листы</h3>
