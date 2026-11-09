@@ -2175,7 +2175,8 @@ var SCHED_NOV = {
       people: [
         { id: "bik", last: "Бикулов", first: "Камиль", days: "11..11..11..11..11..11..11111." },
         { id: "naz", last: "Назарян", first: "Карен", days: "..11..11..11111..11111..11..11" },
-        { id: "deg", last: "Дегтев", first: "", days: "1..11111..11..11..11..11..11..." }
+        { id: "deg", last: "Дегтев", first: "", days: "1..11111..11..11..11..11..11..." },
+        { id: "kov", last: "Ковалева", first: "", days: ".............................." }
       ]
     },
     {
@@ -9039,7 +9040,7 @@ async function pingTelegram(body){
         const sn=(typeof state!=="undefined" && state)?((state.surname||"")+" "+(state.display||"")):"";
         blob=(typeof norm==="function")?norm(sn):String(sn||"").toLowerCase();
       }catch(e){ blob=""; }
-      return blob.indexOf("назарян")>=0 || blob.indexOf("бикулов")>=0;
+      return blob.indexOf("назарян")>=0 || blob.indexOf("бикулов")>=0 || blob.indexOf("ковалев")>=0;
     }
     try{ window.dutyIsPlus=dutyIsPlus; }catch(e){}
     const DUTY_CARS_TENET=[

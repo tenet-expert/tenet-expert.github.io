@@ -452,7 +452,7 @@
         const sn=(typeof state!=="undefined" && state)?((state.surname||"")+" "+(state.display||"")):"";
         blob=(typeof norm==="function")?norm(sn):String(sn||"").toLowerCase();
       }catch(e){ blob=""; }
-      return blob.indexOf("назарян")>=0 || blob.indexOf("бикулов")>=0;
+      return blob.indexOf("назарян")>=0 || blob.indexOf("бикулов")>=0 || blob.indexOf("ковалев")>=0;
     }
     try{ window.dutyIsPlus=dutyIsPlus; }catch(e){}
     const DUTY_CARS_TENET=[
