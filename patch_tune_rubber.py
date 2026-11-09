@@ -173,6 +173,16 @@ PAIRS += [
      '["Pirelli Formula 235/55 R18 104T XL Ice TL, шип.",15500,62000,"резерв"]'),
 ]
 
+# Drive 08.11.2026: T8 R18 Pirelli нет в наличии («-»), убран Tracmax 235/55 R18; T7 R18 убран Pirelli; T4L / L6 — Landspider вместо Ikon
+PAIRS += [
+    ('["Pirelli Formula 235/55 R18 104T XL Ice TL, шип.",15500,62000,"резерв"],["Автошина Ikon Tyres 235/55R18 104T XL Character Ice 7 SUV TL (шип.)",17500,70000,"2"],["Автошина 235/55 R18 Tracmax 104T XL X-Privilo S500 TL (шип.)",12500,50000,"3"]]]',
+     '["Pirelli Formula 235/55 R18 104T XL Ice TL, шип.",15500,62000,"-"],["Автошина Ikon Tyres 235/55R18 104T XL Character Ice 7 SUV TL (шип.)",17500,70000,"2"]]]'),
+    ('"3"],["Pirelli Formula 225/55 R18 102T XL Ice TL, шип.",14500,58000,"2"],["Sailun RoadX',
+     '"3"],["Sailun RoadX'),
+    ('["225/60 R18 Ikon 104T XL Character Ice 7 SUV TL /шипованная/",16000,64000,"3"]',
+     '["Автошина 225/60 R18 Landspider 104T XL Arctictraxx TL BSW (шип.) ",13000,52000,"3"]'),
+]
+
 def patch(path: Path) -> bool:
     if not path.exists():
         return False
