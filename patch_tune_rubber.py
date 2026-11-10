@@ -183,6 +183,13 @@ PAIRS += [
      '["Автошина 225/60 R18 Landspider 104T XL Arctictraxx TL BSW (шип.) ",13000,52000,"3"]'),
 ]
 
+# Drive 09.11.2026: T9 R20 Fortune «230 (шип)» вместо «230 шип.»
+PAIRS += [
+    ('["Fortune 245/50R20 105T Polaro Ice TL, 230 шип.",15500,62000,"2"]',
+     '["Fortune 245/50R20 105T Polaro Ice TL, 230 (шип)",15500,62000,"2"]'),
+]
+
+
 def patch(path: Path) -> bool:
     if not path.exists():
         return False
