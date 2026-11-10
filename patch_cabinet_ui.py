@@ -629,7 +629,11 @@ def patch_index(html):
     )
     html = html.replace('.st-swatch{height:8px}', '.st-swatch{height:32px;display:flex;align-items:center;justify-content:center;font:700 11px/1 Inter,system-ui,sans-serif;letter-spacing:.02em;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.25);padding:0 8px;overflow:hidden;white-space:nowrap}')
 
-    return html
+    
+    # HARD FORCE color name
+    html = html.replace('<div class="st-swatch" aria-hidden="true"></div>', '<div class="st-swatch">${escape(r.color||"")}</div>')
+    html = html.replace("aria-hidden=\"true\"></div>\n        <div class=\"st-face\">", '>${escape(r.color||"")}</div>\n        <div class="st-face">')
+return html
 
 
 def patch_stock_fn(text):
