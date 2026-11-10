@@ -616,11 +616,16 @@ def patch_index(html):
         ".st-row{display:flex;flex-direction:column;aspect-ratio:1;",
         ".st-row{display:flex;flex-direction:column;aspect-ratio:auto;",
     )
-    # force color name on swatch
+    # force color name on swatch (all occurrences, flexible whitespace)
+    import re as _re
+    html = _re.sub(
+        r'<div\s+class="st-swatch"[^>]*>\s*</div>',
+        '<div class="st-swatch">${escape(r.color||"")}</div>',
+        html
+    )
     html = html.replace(
         '<div class="st-swatch" aria-hidden="true"></div>',
-        '<div class="st-swatch">${escape(r.color||"")}</div>',
-        1
+        '<div class="st-swatch">${escape(r.color||"")}</div>'
     )
     html = html.replace('.st-swatch{height:8px}', '.st-swatch{height:32px;display:flex;align-items:center;justify-content:center;font:700 11px/1 Inter,system-ui,sans-serif;letter-spacing:.02em;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.25);padding:0 8px;overflow:hidden;white-space:nowrap}')
 
