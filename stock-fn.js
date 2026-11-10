@@ -164,6 +164,7 @@
       const c=String(color||"").toLowerCase().replace(/ё/g,"е");
       if(c.includes("черн")) return "tone-black";
       if(c.includes("бел")) return "tone-white";
+      if(c.includes("оранж")||c.includes("апельсин")) return "tone-orange";
       if(c.includes("крас")) return "tone-red";
       if(c.includes("зелен")) return "tone-green";
       if(c.includes("голуб")||c.includes("син")) return "tone-blue";

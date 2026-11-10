@@ -22,6 +22,8 @@ html{scroll-padding-top:84px}
 .st-count{white-space:normal;line-height:1.35;text-align:right}
 .st-row{aspect-ratio:auto;height:auto;min-height:0}
 .st-row.open{grid-column:auto;aspect-ratio:auto;min-height:0}
+.st-row.tone-orange:not(.is-reserved):not(.is-invoice){background:#fff6ef}
+.st-row.tone-orange .st-swatch{background:#e07a2f;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.25)}
 .st-swatch{height:32px;display:flex;align-items:center;justify-content:center;font:700 11px/1 Inter,system-ui,sans-serif;letter-spacing:.02em;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.25);padding:0 8px;overflow:hidden;white-space:nowrap}
 .st-face{height:auto;gap:3px;padding:10px 12px 10px}
 .st-name{font-size:15px;line-height:1.25;display:block;overflow:visible;white-space:normal;-webkit-line-clamp:unset}
