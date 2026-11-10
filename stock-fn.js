@@ -192,7 +192,7 @@
       const trim=r.trim||"";
       return `<article class="st-row${tone?" "+tone:""}${reservedCls}${r.invoice?" is-invoice":""}${r.taxi?" is-taxi":""}${open}" data-st-card data-vin="${escape(r.vin||"")}">
         ${r.taxi?`<i class="st-taxi-dot" title="Подходит для такси" aria-label="Подходит для такси"></i>`:""}
-        <div class="st-swatch" aria-hidden="true"></div>
+        <div class="st-swatch">${escape(r.color||"")}</div>
         <div class="st-face">
           <b class="st-name">${escape(model)}${superOn?" · СУПЕРСПЕЦ":""}</b>
           <span class="st-trim">${escape(trim||"—")}</span>
