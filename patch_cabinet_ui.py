@@ -134,7 +134,8 @@ STOCK_CARD = r"""    function stockCard(r){
       const priceTxt=price?rub(price)+" ₽":"—";
       const model=r.name||"";
       const trim=r.trim||"";
-      return `<article class="st-row${tone?" "+tone:""}${reservedCls}${r.invoice?" is-invoice":""}${open}" data-st-card data-vin="${escape(r.vin||"")}">
+      return `<article class="st-row${tone?" "+tone:""}${reservedCls}${r.invoice?" is-invoice":""}${r.taxi?" is-taxi":""}${open}" data-st-card data-vin="${escape(r.vin||"")}">
+        ${r.taxi?`<i class="st-taxi-dot" title="Подходит для такси" aria-label="Подходит для такси"></i>`:""}
         <div class="st-swatch">${escape(r.color||"")}</div>
         <div class="st-face">
           <b class="st-name">${escape(model)}${superOn?" · СУПЕРСПЕЦ":""}</b>
@@ -324,7 +325,7 @@ def patch_stock_logic(html, label):
         print("already", label+" helpers")
     old_card_start = "    function stockCard(r){"
     old_card_end = "    const TEST_SALE = ["
-    if "data-vin=" not in html.split("function stockCard", 1)[-1][:1800]:
+    if True:  # always force updated stockCard with color name
         a = html.find(old_card_start)
         b = html.find(old_card_end)
         if a < 0 or b < a:
