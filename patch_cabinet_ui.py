@@ -633,7 +633,7 @@ def patch_index(html):
     # HARD FORCE color name
     html = html.replace('<div class="st-swatch" aria-hidden="true"></div>', '<div class="st-swatch">${escape(r.color||"")}</div>')
     html = html.replace("aria-hidden=\"true\"></div>\n        <div class=\"st-face\">", '>${escape(r.color||"")}</div>\n        <div class="st-face">')
-return html
+    return html
 
 
 def patch_stock_fn(text):
