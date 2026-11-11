@@ -1,30 +1,30 @@
 {
-  "updated": "10.11.2026",
+  "updated": "11.11.2026",
   "note": "Полный склад LS: в наличии и в пути. Съёмка, неподтверждённые комплекты и проверка загрузки показаны отдельно. Наличие фото в выгрузке не доказывает их загрузку на Авито.",
   "sources": {
-    "stock": "LS sync09e (последний, 09.11.2026): 86 TENET; TENET PLUS 38 без изменений по последнему доступному срезу. Две T7 Прайм (EDEFB32B7TE145765, EDEFB32B8TE120616) выбыли — убраны.",
-    "drive": "Каталоги TENET и TENET PLUS: срез 08.11.2026; повторная сверка 10.11 (без доступа к LS-интерфейсу в изолированном запуске) состав Drive не перепроверяла",
+    "stock": "LS sync10e (вечер 10.11.2026): 85 TENET + 38 TENET PLUS (в наличии и в пути); живой сайт ещё на срезе 09.11, утренний синк 11.11 не получен",
+    "drive": "TENET: срез 08.11, изменений папок с 08.11 нет; TENET PLUS: сверено 11.11 по списку изменённых папок (новые папки L6 Elegant чёрный/серебристый, содержимое недоступно для чтения)",
     "feeds": "Текущие файлы 1 и 2 обоих кабинетов; не равно факту активной публикации",
-    "avito_errors": "Проверенный отчёт 08.11 07:14 Самара",
+    "avito_errors": "Отчёт 08.11 07:14 Самара (новее не найден)",
     "limitations": "Доступность общих комплектов для повторного использования и все совпадения изображений не подтверждены; спорные варианты не помечены готовыми."
   },
   "summary": {
     "TENET": {
-      "check_set": 45,
-      "feed_photos_present": 28,
+      "check_set": 43,
+      "feed_photos_present": 27,
       "upload_error": 3,
       "verify": 8,
-      "shoot": 2
+      "shoot": 4
     },
     "TENET PLUS": {
-      "check_set": 23,
-      "shoot": 7,
+      "check_set": 28,
+      "verify": 2,
       "feed_photos_present": 8
     }
   },
   "groups": [
     {
-      "id": "edefb32b6te145059",
+      "id": "tenet-t7-praym-svetlo-seryy-check-set",
       "queue": 2,
       "brand": "TENET",
       "model": "T7",
@@ -50,41 +50,15 @@
         {
           "vin": "EDEFB32B8TE120504",
           "state": "в салоне"
-        }
-      ]
-    },
-    {
-      "id": "edefb32b7te145765",
-      "queue": 2,
-      "brand": "TENET",
-      "model": "T7",
-      "trim": "Прайм",
-      "drive": "2WD",
-      "color": "белый",
-      "stage": "check_set",
-      "reason": "Подходящая папка на Drive есть; фото данного VIN в текущих выгрузках не найдены. Проверить комплект и возможность использования/загрузки, не считать автоматически новой съёмкой.",
-      "photo_folder": {
-        "id": "16f093nZeWRMZ7nspbgIEBbz68ffo935q",
-        "name": "T7 Prime 2WD белый Сидоров 13.09",
-        "url": "https://drive.google.com/drive/folders/16f093nZeWRMZ7nspbgIEBbz68ffo935q"
-      },
-      "cars": [
+        },
         {
-          "vin": "EDEFB32B2TE145575",
+          "vin": "EDEFB32B9TE146383",
           "state": "в пути"
-        },
-        {
-          "vin": "EDEFB32B2TE136567",
-          "state": "в салоне"
-        },
-        {
-          "vin": "EDEFB32B2TE136648",
-          "state": "в салоне"
         }
       ]
     },
     {
-      "id": "edxgb32b8te110275",
+      "id": "tenet-t8-praym-5-mest-2wd-chernyy-upload-error",
       "queue": 2,
       "brand": "TENET",
       "model": "T8",
@@ -106,7 +80,7 @@
       ]
     },
     {
-      "id": "edxgd34b5te095631",
+      "id": "tenet-t8-praym-7-mest-4wd-chernyy-upload-error",
       "queue": 2,
       "brand": "TENET",
       "model": "T8",
@@ -132,29 +106,7 @@
       ]
     },
     {
-      "id": "edefb32b2te105500",
-      "queue": 2,
-      "brand": "TENET",
-      "model": "T7",
-      "trim": "Актив",
-      "drive": "2WD",
-      "color": "чёрный",
-      "stage": "check_set",
-      "reason": "Подходящая папка на Drive есть; фото данного VIN в текущих выгрузках не найдены. Проверить комплект и возможность использования/загрузки, не считать автоматически новой съёмкой.",
-      "photo_folder": {
-        "id": "1ZlxhGo4p34U6CjFCY9gv-saGMYVJnuos",
-        "name": "T7 Active 2WD черный Металина 06.09",
-        "url": "https://drive.google.com/drive/folders/1ZlxhGo4p34U6CjFCY9gv-saGMYVJnuos"
-      },
-      "cars": [
-        {
-          "vin": "EDEFB32B2TE105500",
-          "state": "в салоне"
-        }
-      ]
-    },
-    {
-      "id": "edxgb32bxte087470",
+      "id": "tenet-t8-aktiv-5-mest-2wd-chernyy-verify",
       "queue": 2,
       "brand": "TENET",
       "model": "T8",
@@ -176,7 +128,7 @@
       ]
     },
     {
-      "id": "edelb31b0te116838",
+      "id": "tenet-t4l-aktiv-chernyy-check-set",
       "queue": 2,
       "brand": "TENET",
       "model": "T4L",
@@ -238,7 +190,7 @@
       ]
     },
     {
-      "id": "edelb31b3te119538",
+      "id": "tenet-t4l-aktiv-krasnyy-check-set",
       "queue": 2,
       "brand": "TENET",
       "model": "T4L",
@@ -292,7 +244,7 @@
       ]
     },
     {
-      "id": "edelb31b9te113744",
+      "id": "tenet-t4l-aktiv-belyy-check-set",
       "queue": 2,
       "brand": "TENET",
       "model": "T4L",
@@ -318,7 +270,7 @@
       ]
     },
     {
-      "id": "edefb32b7te122342",
+      "id": "tenet-t7-aktiv-seryy-verify",
       "queue": 2,
       "brand": "TENET",
       "model": "T7",
@@ -352,7 +304,29 @@
       ]
     },
     {
-      "id": "edelb31b7te120188",
+      "id": "tenet-t7-praym-chernyy-check-set",
+      "queue": 2,
+      "brand": "TENET",
+      "model": "T7",
+      "trim": "Прайм",
+      "drive": "2WD",
+      "color": "чёрный",
+      "stage": "check_set",
+      "reason": "Подходящая папка на Drive есть; фото данного VIN в текущих выгрузках не найдены. Проверить комплект и возможность использования/загрузки, не считать автоматически новой съёмкой.",
+      "photo_folder": {
+        "id": "1WRkCEOrgL_c2zeBNXpRw4nbzArMppies",
+        "name": "T7 Prime 2WD черный Спицын 10.10",
+        "url": "https://drive.google.com/drive/folders/1WRkCEOrgL_c2zeBNXpRw4nbzArMppies"
+      },
+      "cars": [
+        {
+          "vin": "EDEFB32B7TE146205",
+          "state": "в пути"
+        }
+      ]
+    },
+    {
+      "id": "tenet-t4l-aktiv-svetlo-seryy-verify",
       "queue": 2,
       "brand": "TENET",
       "model": "T4L",
@@ -378,7 +352,7 @@
       ]
     },
     {
-      "id": "edelb31b4te121993",
+      "id": "tenet-t4l-praym-krasnyy-check-set",
       "queue": 2,
       "brand": "TENET",
       "model": "T4L",
@@ -400,7 +374,7 @@
       ]
     },
     {
-      "id": "edxgd34bxte038762",
+      "id": "tenet-t8-ultra-7-mest-4wd-chernyy-check-set",
       "queue": 2,
       "brand": "TENET",
       "model": "T8",
@@ -430,7 +404,7 @@
       ]
     },
     {
-      "id": "edxdc24b5tg041704",
+      "id": "tenet-a8-2-0t-8at-ultra-chernyy-check-set",
       "queue": 2,
       "brand": "TENET",
       "model": "A8",
@@ -452,29 +426,7 @@
       ]
     },
     {
-      "id": "edxgd34bxte129031",
-      "queue": 2,
-      "brand": "TENET",
-      "model": "T8",
-      "trim": "Прайм 7 мест 4WD",
-      "drive": "4WD",
-      "color": "тёмно-зелёный",
-      "stage": "check_set",
-      "reason": "Подходящая папка на Drive есть; фото данного VIN в текущих выгрузках не найдены. Проверить комплект и возможность использования/загрузки, не считать автоматически новой съёмкой. В сверке 27.10 отмечена вторая очередь; актуальная занятость требует проверки.",
-      "photo_folder": {
-        "id": "1PAF4jsKUHH2IcqXZKAr7HtGNaIcpvBTW",
-        "name": "T8 Prime 4WD зеленый Хорошунов 11.09",
-        "url": "https://drive.google.com/drive/folders/1PAF4jsKUHH2IcqXZKAr7HtGNaIcpvBTW"
-      },
-      "cars": [
-        {
-          "vin": "EDXGD34BXTE129031",
-          "state": "в салоне"
-        }
-      ]
-    },
-    {
-      "id": "edefd32b4te136144",
+      "id": "tenet-t7-praym-4wd-sine-zelenyy-check-set",
       "queue": 2,
       "brand": "TENET",
       "model": "T7",
@@ -496,7 +448,7 @@
       ]
     },
     {
-      "id": "edelb31b9te125473",
+      "id": "tenet-t4l-praym-chernyy-check-set",
       "queue": 2,
       "brand": "TENET",
       "model": "T4L",
@@ -518,7 +470,7 @@
       ]
     },
     {
-      "id": "edehd24b8te106287",
+      "id": "tenet-t9-ultra-4wd-temno-zelenyy-shoot",
       "queue": 1,
       "brand": "TENET",
       "model": "T9",
@@ -532,11 +484,15 @@
         {
           "vin": "EDEHD24B8TE106287",
           "state": "в салоне"
+        },
+        {
+          "vin": "EDEHD24BXTE127576",
+          "state": "в пути"
         }
       ]
     },
     {
-      "id": "edehd24b2te115115",
+      "id": "tenet-t9-praym-4wd-svetlo-seryy-verify",
       "queue": 2,
       "brand": "TENET",
       "model": "T9",
@@ -558,7 +514,7 @@
       ]
     },
     {
-      "id": "edxgd34b5te130653",
+      "id": "tenet-t8-praym-7-mest-4wd-svetlo-seryy-check-set",
       "queue": 2,
       "brand": "TENET",
       "model": "T8",
@@ -580,7 +536,7 @@
       ]
     },
     {
-      "id": "edxgd34b4te134497",
+      "id": "tenet-t8-ultra-7-mest-4wd-svetlo-seryy-check-set",
       "queue": 2,
       "brand": "TENET",
       "model": "T8",
@@ -602,7 +558,33 @@
       ]
     },
     {
-      "id": "edefd32b5te138047",
+      "id": "tenet-t7-praym-belyy-check-set",
+      "queue": 2,
+      "brand": "TENET",
+      "model": "T7",
+      "trim": "Прайм",
+      "drive": "2WD",
+      "color": "белый",
+      "stage": "check_set",
+      "reason": "Подходящая папка на Drive есть; фото данного VIN в текущих выгрузках не найдены. Проверить комплект и возможность использования/загрузки, не считать автоматически новой съёмкой. В сверке 27.10 отмечена вторая очередь; актуальная занятость требует проверки.",
+      "photo_folder": {
+        "id": "16f093nZeWRMZ7nspbgIEBbz68ffo935q",
+        "name": "T7 Prime 2WD белый Сидоров 13.09",
+        "url": "https://drive.google.com/drive/folders/16f093nZeWRMZ7nspbgIEBbz68ffo935q"
+      },
+      "cars": [
+        {
+          "vin": "EDEFB32B2TE136567",
+          "state": "в салоне"
+        },
+        {
+          "vin": "EDEFB32B2TE136648",
+          "state": "в салоне"
+        }
+      ]
+    },
+    {
+      "id": "tenet-t7-aktiv-4wd-belyy-check-set",
       "queue": 2,
       "brand": "TENET",
       "model": "T7",
@@ -624,7 +606,7 @@
       ]
     },
     {
-      "id": "edefd32b9te138147",
+      "id": "tenet-t7-aktiv-4wd-chernyy-check-set",
       "queue": 2,
       "brand": "TENET",
       "model": "T7",
@@ -646,7 +628,7 @@
       ]
     },
     {
-      "id": "edelb31b6te132249",
+      "id": "tenet-t4l-praym-belyy-check-set",
       "queue": 2,
       "brand": "TENET",
       "model": "T4L",
@@ -676,7 +658,7 @@
       ]
     },
     {
-      "id": "edehd24b7te098862",
+      "id": "tenet-t9-praym-4wd-belyy-shoot",
       "queue": 1,
       "brand": "TENET",
       "model": "T9",
@@ -694,29 +676,25 @@
       ]
     },
     {
-      "id": "edefd32b3te138225",
-      "queue": 2,
+      "id": "tenet-t9-ultra-4wd-chernyy-shoot",
+      "queue": 1,
       "brand": "TENET",
-      "model": "T7",
-      "trim": "Актив 4WD",
+      "model": "T9",
+      "trim": "Ультра 4WD",
       "drive": "4WD",
-      "color": "светло-серый",
-      "stage": "check_set",
-      "reason": "Подходящая папка на Drive есть; фото данного VIN в текущих выгрузках не найдены. Проверить комплект и возможность использования/загрузки, не считать автоматически новой съёмкой.",
-      "photo_folder": {
-        "id": "1MDBVd34nbtHJ2KO92KgRRzQZdimC6uLU",
-        "name": "T7 Active 4x4 светло-серый Хорош 21.01",
-        "url": "https://drive.google.com/drive/folders/1MDBVd34nbtHJ2KO92KgRRzQZdimC6uLU"
-      },
+      "color": "чёрный",
+      "stage": "shoot",
+      "reason": "В проверенном каталоге Drive нет подходящего комплекта; в текущих выгрузках фото для VIN не найдены. Фото другой комплектации/числа мест не подходят.",
+      "photo_folder": null,
       "cars": [
         {
-          "vin": "EDEFD32B3TE138225",
+          "vin": "EDEHD24B2TE122100",
           "state": "в пути"
         }
       ]
     },
     {
-      "id": "edemb31b1te137072",
+      "id": "tenet-plus-l6-elegant-chernyy-check-set",
       "queue": 2,
       "brand": "TENET PLUS",
       "model": "L6",
@@ -726,9 +704,9 @@
       "stage": "check_set",
       "reason": "Подходящая папка на Drive есть; фото данного VIN в текущих выгрузках не найдены. Проверить комплект и возможность использования/загрузки, не считать автоматически новой съёмкой.",
       "photo_folder": {
-        "id": "1V3G7Z7T8gk_eFoZJUuaaDcmmyGSMj6Se",
-        "name": "Л6 Elegant черный",
-        "url": "https://drive.google.com/drive/folders/1V3G7Z7T8gk_eFoZJUuaaDcmmyGSMj6Se"
+        "id": "1mSmqWS6wJj_9W8H3vVd4wyx-gj8-7Q61",
+        "name": "L6 Elegant черный 1.0",
+        "url": "https://drive.google.com/drive/folders/1mSmqWS6wJj_9W8H3vVd4wyx-gj8-7Q61"
       },
       "cars": [
         {
@@ -746,16 +724,20 @@
       ]
     },
     {
-      "id": "edemb31b9te139636",
-      "queue": 1,
+      "id": "tenet-plus-l6-elegant-serebristyy-check-set",
+      "queue": 2,
       "brand": "TENET PLUS",
       "model": "L6",
       "trim": "Элегант",
       "drive": "2WD",
       "color": "серебристый",
-      "stage": "shoot",
-      "reason": "В проверенном каталоге Drive нет подходящего комплекта; в текущих выгрузках фото для VIN не найдены. Комплект L6 другой комплектации не подходит.",
-      "photo_folder": null,
+      "stage": "check_set",
+      "reason": "Подходящая папка на Drive есть; фото данного VIN в текущих выгрузках не найдены. Проверить комплект и возможность использования/загрузки, не считать автоматически новой съёмкой.",
+      "photo_folder": {
+        "id": "1zHhgh_VoxkevbHrf34bJEcOBYyTkH2Yj",
+        "name": "L6 Elegant серебристый 1.0",
+        "url": "https://drive.google.com/drive/folders/1zHhgh_VoxkevbHrf34bJEcOBYyTkH2Yj"
+      },
       "cars": [
         {
           "vin": "EDEMB31B9TE139636",
@@ -780,7 +762,7 @@
       ]
     },
     {
-      "id": "edemb31b1te144443",
+      "id": "tenet-plus-l6-ultra-oranzhevyy-check-set",
       "queue": 2,
       "brand": "TENET PLUS",
       "model": "L6",
@@ -814,16 +796,20 @@
       ]
     },
     {
-      "id": "edemb31b3te144489",
-      "queue": 1,
+      "id": "tenet-plus-l6-ultra-chernyy-verify",
+      "queue": 2,
       "brand": "TENET PLUS",
       "model": "L6",
       "trim": "Ультра",
       "drive": "2WD",
       "color": "чёрный",
-      "stage": "shoot",
-      "reason": "В проверенном каталоге Drive нет подходящего комплекта; в текущих выгрузках фото для VIN не найдены. Комплект L6 другой комплектации не подходит.",
-      "photo_folder": null,
+      "stage": "verify",
+      "reason": "Папка «L6 ultra черный» переименована 10.11 (раньше «Л6 Elegant черный»); комплектация по названию и содержимому не подтверждена, содержимое новых папок недоступно для чтения.",
+      "photo_folder": {
+        "id": "1V3G7Z7T8gk_eFoZJUuaaDcmmyGSMj6Se",
+        "name": "Л6 Elegant черный",
+        "url": "https://drive.google.com/drive/folders/1V3G7Z7T8gk_eFoZJUuaaDcmmyGSMj6Se"
+      },
       "cars": [
         {
           "vin": "EDEMB31B3TE144489",
@@ -836,7 +822,7 @@
       ]
     },
     {
-      "id": "efedb21b0t3003360",
+      "id": "tenet-plus-l4-stayl-seryy-check-set",
       "queue": 2,
       "brand": "TENET PLUS",
       "model": "L4",
@@ -866,7 +852,7 @@
       ]
     },
     {
-      "id": "efedb21b0t3002547",
+      "id": "tenet-plus-l4-elegant-belyy-check-set",
       "queue": 2,
       "brand": "TENET PLUS",
       "model": "L4",
@@ -892,7 +878,7 @@
       ]
     },
     {
-      "id": "efedb21b0t3003665",
+      "id": "tenet-plus-l4-stayl-belyy-check-set",
       "queue": 2,
       "brand": "TENET PLUS",
       "model": "L4",
@@ -922,7 +908,7 @@
       ]
     },
     {
-      "id": "efedb21b1t3003786",
+      "id": "tenet-plus-l4-stayl-chernyy-check-set",
       "queue": 2,
       "brand": "TENET PLUS",
       "model": "L4",
@@ -952,7 +938,7 @@
       ]
     },
     {
-      "id": "efedb21b0t3004119",
+      "id": "tenet-plus-l4-elegant-krasnyy-check-set",
       "queue": 2,
       "brand": "TENET PLUS",
       "model": "L4",
@@ -978,7 +964,7 @@
       ]
     },
     {
-      "id": "edemb31b9te126658",
+      "id": "tenet-plus-l6-elegant-oranzhevyy-check-set",
       "queue": 2,
       "brand": "TENET PLUS",
       "model": "L6",
@@ -1000,7 +986,7 @@
       ]
     },
     {
-      "id": "efedb21b1t3004257",
+      "id": "tenet-plus-l4-elegant-seryy-check-set",
       "queue": 2,
       "brand": "TENET PLUS",
       "model": "L4",
