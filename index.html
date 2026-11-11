@@ -4319,7 +4319,10 @@ async function pingTelegram(body){
     const PANGO_NSS = 0.0089;
     const PANGO_VIN = {
     };
-    const EXCL_FIX = {};
+    const EXCL_FIX = {/*VIN-спец (Александр 11.11.2026): T4L Актив белый, 2 200 нал / 2 100 ТИ*/
+      "EDELB31B2TE104643":{cash:2200000,ti:2100000},
+      "EDELB31B4TE104739":{cash:2200000,ti:2100000}
+    };
     function pangoOf(id){
       const vin=typeof kmVin==="string"?String(kmVin).toUpperCase():"";
       if(vin && typeof EXCL_FIX!=="undefined" && EXCL_FIX[vin]) return EXCL_FIX[vin];
