@@ -190,6 +190,23 @@ PAIRS += [
 ]
 
 
+# Drive 12.11.2026: T8 R19 +Goodride лип; T8 R18 остатки Pirelli 2 / Ikon 1;
+# T7 R19 Pirelli 9; группа Arrizo = Tenet A8 R17/18 (Tracmax вместо Hankook);
+# шиномонтаж R17–R19 7950
+PAIRS += [
+    ('["Fortune 235/50R19 103T Polaro Ice TL, шип.",15500,62000,"2"]]]',
+     '["Fortune 235/50R19 103T Polaro Ice TL, шип.",15500,62000,"2"],["Автошина Goodride 235/50R19 99H SW618 TL лип",12500,50000,"1"]]]'),
+    ('["T8 R18",[["Pirelli Formula 235/55 R18 104T XL Ice TL, шип.",15500,62000,"-"],["Автошина Ikon Tyres 235/55R18 104T XL Character Ice 7 SUV TL (шип.)",17500,70000,"2"]]]',
+     '["T8 R18",[["Pirelli Formula 235/55 R18 104T XL Ice TL, шип.",15500,62000,"2"],["Автошина Ikon Tyres 235/55R18 104T XL Character Ice 7 SUV TL (шип.)",17500,70000,"1"]]]'),
+    ('["Pirelli Formula 225/55 R19 103T XL Ice TL, шип.",18500,74000,"10"]',
+     '["Pirelli Formula 225/55 R19 103T XL Ice TL, шип.",18500,74000,"9"]'),
+    ('["Arrizo R17",[["Автошина Hankook 225/45R18 95T XL Winter i*Pike RS2 W429 TL (шип.)",18500,74000,"1"],["Pirelli Formula 215/50R17 95T XL Ice TL, шип.",11100,44400,"1"]]]',
+     '["Arrizo = Tenet A8    R17/18",[["Автошина 225/45 R18 Tracmax95T XL X-Privilo S500 TL шип",12000,48000,"1"],["Pirelli Formula 215/50R17 95T XL Ice TL, шип.",11100,44400,"1"]]]'),
+    ('mount:[["R16",6600],["R17, R18, R19",7250],["R20",9850]]',
+     'mount:[["R16",6600],["R17, R18, R19",7950],["R20",9850]]'),
+]
+
+
 def patch(path: Path) -> bool:
     if not path.exists():
         return False
