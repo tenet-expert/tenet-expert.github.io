@@ -1,8 +1,8 @@
 {
-  "updated": "11.11.2026",
+  "updated": "12.11.2026",
   "note": "Полный склад LS: в наличии и в пути. Съёмка, неподтверждённые комплекты и проверка загрузки показаны отдельно. Наличие фото в выгрузке не доказывает их загрузку на Авито.",
   "sources": {
-    "stock": "LS sync10e (вечер 10.11.2026): 85 TENET + 38 TENET PLUS (в наличии и в пути); живой сайт ещё на срезе 09.11, утренний синк 11.11 не получен",
+    "stock": "LS sync11e (вечер 11.11.2026), TENET stock.json + TENET+ PLUS_CARS (в наличии и в пути); синка за утро 12.11 пока нет",
     "drive": "TENET: срез 08.11, изменений папок с 08.11 нет; TENET PLUS: сверено 11.11 по списку изменённых папок (новые папки L6 Elegant чёрный/серебристый, содержимое недоступно для чтения)",
     "feeds": "Текущие файлы 1 и 2 обоих кабинетов; не равно факту активной публикации",
     "avito_errors": "Отчёт 08.11 07:14 Самара (новее не найден)",
@@ -10,15 +10,16 @@
   },
   "summary": {
     "TENET": {
-      "check_set": 43,
-      "feed_photos_present": 27,
+      "check_set": 48,
+      "feed_photos_present": 25,
       "upload_error": 3,
       "verify": 8,
       "shoot": 4
     },
     "TENET PLUS": {
       "check_set": 28,
-      "verify": 2,
+      "verify": 3,
+      "shoot": 2,
       "feed_photos_present": 8
     }
   },
@@ -240,6 +241,10 @@
         {
           "vin": "EDELB31B5TE130993",
           "state": "в пути"
+        },
+        {
+          "vin": "EDELB31B2TE131065",
+          "state": "в пути"
         }
       ]
     },
@@ -266,6 +271,14 @@
         {
           "vin": "EDELB31B6TE132994",
           "state": "в салоне"
+        },
+        {
+          "vin": "EDELB31B7TE147052",
+          "state": "в пути"
+        },
+        {
+          "vin": "EDELB31B7TE146922",
+          "state": "в пути"
         }
       ]
     },
@@ -654,6 +667,14 @@
         {
           "vin": "EDELB31B7TE137640",
           "state": "в пути"
+        },
+        {
+          "vin": "EDELB31B9TE146646",
+          "state": "в пути"
+        },
+        {
+          "vin": "EDELB31B2TE146648",
+          "state": "в пути"
         }
       ]
     },
@@ -719,7 +740,7 @@
         },
         {
           "vin": "EDEMB31B1TE136973",
-          "state": "в пути"
+          "state": "в салоне"
         }
       ]
     },
@@ -753,11 +774,11 @@
         },
         {
           "vin": "EDEMB31B0TE139699",
-          "state": "в пути"
+          "state": "в салоне"
         },
         {
           "vin": "EDEMB31B1TE139629",
-          "state": "в пути"
+          "state": "в салоне"
         }
       ]
     },
@@ -787,11 +808,11 @@
         },
         {
           "vin": "EDEMB31B0TE139542",
-          "state": "в пути"
+          "state": "в салоне"
         },
         {
           "vin": "EDEMB31B2TE140191",
-          "state": "в пути"
+          "state": "в салоне"
         }
       ]
     },
@@ -818,6 +839,66 @@
         {
           "vin": "EDEMB31B0TE146409",
           "state": "в пути"
+        },
+        {
+          "vin": "EDEMB31B0TE145552",
+          "state": "в пути"
+        }
+      ]
+    },
+    {
+      "id": "tenet-plus-l6-ultra-serebristyy-shoot",
+      "queue": 1,
+      "brand": "TENET PLUS",
+      "model": "L6",
+      "trim": "Ультра",
+      "drive": "2WD",
+      "color": "серебристый",
+      "stage": "shoot",
+      "reason": "В проверенном каталоге Drive нет подходящего комплекта; в текущих выгрузках фото для VIN не найдены. Комплект L6 другой комплектации не подходит.",
+      "photo_folder": null,
+      "cars": [
+        {
+          "vin": "EDEMB31B0TE146572",
+          "state": "в пути"
+        },
+        {
+          "vin": "EDEMB31B1TE102015",
+          "state": "в пути"
+        }
+      ]
+    },
+    {
+      "id": "tenet-plus-l4-stayl-belyy-check-set",
+      "queue": 2,
+      "brand": "TENET PLUS",
+      "model": "L4",
+      "trim": "Стайл",
+      "drive": "2WD",
+      "color": "белый",
+      "stage": "check_set",
+      "reason": "Подходящая папка на Drive есть; фото данного VIN в текущих выгрузках не найдены. Проверить комплект и возможность использования/загрузки, не считать автоматически новой съёмкой.",
+      "photo_folder": {
+        "id": "1RTooBr3MAZxQ_82kg2cmvtbOxkM75DXU",
+        "name": "L4 Style белый",
+        "url": "https://drive.google.com/drive/folders/1RTooBr3MAZxQ_82kg2cmvtbOxkM75DXU"
+      },
+      "cars": [
+        {
+          "vin": "EFEDB21BXT3003706",
+          "state": "в пути"
+        },
+        {
+          "vin": "EFEDB21B0T3003665",
+          "state": "в пути"
+        },
+        {
+          "vin": "EFEDB21B1T3001911",
+          "state": "в салоне"
+        },
+        {
+          "vin": "EFEDB21B1T3003996",
+          "state": "в салоне"
         }
       ]
     },
@@ -878,36 +959,6 @@
       ]
     },
     {
-      "id": "tenet-plus-l4-stayl-belyy-check-set",
-      "queue": 2,
-      "brand": "TENET PLUS",
-      "model": "L4",
-      "trim": "Стайл",
-      "drive": "2WD",
-      "color": "белый",
-      "stage": "check_set",
-      "reason": "Подходящая папка на Drive есть; фото данного VIN в текущих выгрузках не найдены. Проверить комплект и возможность использования/загрузки, не считать автоматически новой съёмкой.",
-      "photo_folder": {
-        "id": "1RTooBr3MAZxQ_82kg2cmvtbOxkM75DXU",
-        "name": "L4 Style белый",
-        "url": "https://drive.google.com/drive/folders/1RTooBr3MAZxQ_82kg2cmvtbOxkM75DXU"
-      },
-      "cars": [
-        {
-          "vin": "EFEDB21B0T3003665",
-          "state": "в пути"
-        },
-        {
-          "vin": "EFEDB21B1T3001911",
-          "state": "в салоне"
-        },
-        {
-          "vin": "EFEDB21B1T3003996",
-          "state": "в салоне"
-        }
-      ]
-    },
-    {
       "id": "tenet-plus-l4-stayl-chernyy-check-set",
       "queue": 2,
       "brand": "TENET PLUS",
@@ -928,11 +979,11 @@
           "state": "в пути"
         },
         {
-          "vin": "EFEDB21B4T3003944",
+          "vin": "EFEDB21B3T3003949",
           "state": "в салоне"
         },
         {
-          "vin": "EFEDB21B3T3003949",
+          "vin": "EFEDB21B4T3003944",
           "state": "в салоне"
         }
       ]
@@ -981,7 +1032,7 @@
       "cars": [
         {
           "vin": "EDEMB31B9TE126658",
-          "state": "в пути"
+          "state": "в салоне"
         }
       ]
     },
@@ -1003,10 +1054,6 @@
       "cars": [
         {
           "vin": "EFEDB21B1T3004257",
-          "state": "в салоне"
-        },
-        {
-          "vin": "EFEDB21B2T3002176",
           "state": "в салоне"
         }
       ]
