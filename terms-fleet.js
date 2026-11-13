@@ -1,4 +1,5 @@
     const CORP_VINS = new Set([
+      "EDXFB32B2TE041658",
       "EDXFB32B4TE041659",
       "EDXFB32B1TE087336",
       "EDXFB32B3TE091114",
@@ -11,28 +12,27 @@
       a8a:{name:"Arrizo 8 Active",rrc:2865000,dealer:2649000,an:376000,client:2492550,prem:213750,km:44057,tidy:2489000,sub:150000,do:70000,casco:80000},
       a8p:{name:"Arrizo 8 Prime",rrc:3060000,dealer:2699000,an:491000,client:2570400,prem:189800,km:49016,tidy:2569000,sub:150000,do:70000,casco:80000},
       a8u:{name:"Arrizo 8 Ultra Black",rrc:3275000,dealer:2899000,an:596000,client:2685500,prem:279000,km:48361,tidy:2679000,sub:150000,do:70000,casco:80000},
-      t4p:{name:"T4 Prime 2025",rrc:2449000,dealer:2369000,an:150000,client:2302060,prem:140410,km:36803,tidy:2249000,sub:120000,do:70000,casco:80000},
-      t4la:{name:"T4L Active",rrc:2344000,dealer:2249000,an:125000,client:2226800,prem:92520,km:32033,tidy:2219000,sub:100000,do:70000,casco:80000},
-      t4lp:{name:"T4L Prime",rrc:2494000,dealer:2404000,an:195000,client:2319420,prem:159400,km:24148,tidy:2299000,sub:100000,do:70000,casco:80000},
-      t7a:{name:"T7 Active 2WD",rrc:2805000,dealer:2665000,an:326000,client:2496450,prem:252700,km:36680,tidy:2429000,sub:150000,do:70000,casco:80000},
-      t7p:{name:"T7 Prime 2WD",rrc:3005000,dealer:2860000,an:336000,client:2674450,prem:275700,km:36680,tidy:2599000,sub:150000,do:70000,casco:80000},
-      t7a4:{name:"T7 Active 4WD",rrc:3010000,dealer:2880000,an:361000,client:2678900,prem:291400,km:33197,tidy:2599000,sub:150000,do:70000,casco:80000},
-      t7p4:{name:"T7 Prime 4WD",rrc:3210000,dealer:3065000,an:411000,client:2824800,prem:336500,km:43115,tidy:2749000,sub:150000,do:70000,casco:80000},
-      t8a:{name:"T8 Active 2WD",rrc:3099000,dealer:2999000,an:280000,client:2851080,prem:240890,km:42525,tidy:2779000,sub:130000,do:70000,casco:80000},
-      t8p:{name:"T8 Prime 2WD",rrc:3299000,dealer:3149000,an:400000,client:2936110,prem:311860,km:44959,tidy:2859000,sub:130000,do:70000,casco:80000},
-      t8p4:{name:"T8 Prime 4WD",rrc:3630000,dealer:3465000,an:431000,client:3230700,prem:343200,km:43852,tidy:3139000,sub:130000,do:70000,casco:80000},
-      t8u4:{name:"T8 Ultra 4WD",rrc:3885000,dealer:3705000,an:486000,client:3457650,prem:363900,km:38320,tidy:3349000,sub:130000,do:70000,casco:80000},
-      tt9p:{name:"T9 Prime 5-seat",rrc:3949000,dealer:3799000,an:500000,client:3514610,prem:402860,km:34713,tidy:3399000,sub:190000,do:70000,casco:80000},
-      tt9u:{name:"T9 Ultra 5-seat",rrc:4299000,dealer:4099000,an:600000,client:3783120,prem:444850,km:31016,tidy:3649000,sub:190000,do:70000,casco:80000},
-      ta8p:{name:"A8 Prime 1.6",rrc:2999000,dealer:2874000,an:350000,client:2699100,prem:264870,km:16279,tidy:2599000,sub:0,do:70000,casco:80000},
-      ta8u:{name:"A8 Ultra 2.0",rrc:3499000,dealer:3354000,an:450000,client:3114110,prem:344860,km:20369,tidy:2999000,sub:150000,do:70000,casco:80000},
-      l4s:{name:"L4 Style",rrc:2540000,dealer:2438400,an:291000,client:2286000,prem:228600,km:0,tidy:2235200,sub:100000,do:70000,casco:80000},
-      l4e:{name:"L4 Elegant",rrc:2690000,dealer:2582400,an:341000,client:2367200,prem:295900,km:0,tidy:2313400,sub:100000,do:70000,casco:80000},
-      l6e:{name:"L6 Elegant",rrc:2890000,dealer:2745500,an:391000,client:2514300,prem:317900,km:0,tidy:2456500,sub:150000,do:70000,casco:80000},
-      l6u:{name:"L6 Ultra",rrc:3040000,dealer:2888000,an:441000,client:2644800,prem:334400,km:0,tidy:2584000,sub:150000,do:70000,casco:80000}
+      t4p:{name:"T4 Prime 2025",rrc:2449000,dealer:2369000,an:200000,client:2253080,prem:164900,km:36803,tidy:2249000,sub:120000,do:70000,casco:80000},
+      t4la:{name:"T4L Active",rrc:2329000,dealer:2234000,an:140000,client:2189260,prem:91320,km:37967,tidy:2189000,sub:100000,do:70000,casco:80000},
+      t4lp:{name:"T4L Prime",rrc:2479000,dealer:2389000,an:230000,client:2255890,prem:182690,km:34992,tidy:2249000,sub:100000,do:70000,casco:80000},
+      t7a:{name:"T7 Active 2WD",rrc:2830000,dealer:2690000,an:331000,client:2518700,prem:256200,km:53443,tidy:2499000,sub:150000,do:70000,casco:80000},
+      t7p:{name:"T7 Prime 2WD",rrc:2985000,dealer:2840000,an:456000,client:2537250,prem:362450,km:42172,tidy:2529000,sub:150000,do:70000,casco:80000},
+      t7a4:{name:"T7 Active 4WD",rrc:2990000,dealer:2860000,an:461000,client:2541500,prem:378300,km:38770,tidy:2529000,sub:150000,do:70000,casco:80000},
+      t7p4:{name:"T7 Prime 4WD",rrc:3190000,dealer:3045000,an:491000,client:2711500,prem:397300,km:42049,tidy:2699000,sub:150000,do:70000,casco:80000},
+      t8a:{name:"T8 Active 2WD",rrc:3099000,dealer:2999000,an:310000,client:2789100,prem:271880,km:50721,tidy:2789000,sub:130000,do:70000,casco:80000},
+      t8p:{name:"T8 Prime 2WD",rrc:3299000,dealer:3149000,an:430000,client:2870130,prem:344850,km:53156,tidy:2869000,sub:130000,do:70000,casco:80000},
+      t8p4:{name:"T8 Prime 4WD",rrc:3630000,dealer:3465000,an:481000,client:3158100,prem:379500,km:52049,tidy:3149000,sub:130000,do:70000,casco:80000},
+      t8u4:{name:"T8 Ultra 4WD",rrc:3885000,dealer:3705000,an:536000,client:3379950,prem:402750,km:38320,tidy:3349000,sub:130000,do:70000,casco:80000},
+      tt9p:{name:"T9 Prime 5-seat",rrc:3949000,dealer:3799000,an:550000,client:3435630,prem:442350,km:34713,tidy:3399000,sub:190000,do:70000,casco:80000},
+      tt9u:{name:"T9 Ultra 5-seat",rrc:4299000,dealer:4099000,an:650000,client:3697140,prem:487840,km:31016,tidy:3649000,sub:190000,do:70000,casco:80000},
+      ta8p:{name:"A8 Prime 1.6",rrc:2999000,dealer:2874000,an:400000,client:2639120,prem:294860,km:16279,tidy:2599000,sub:150000,do:70000,casco:80000},
+      ta8u:{name:"A8 Ultra 2.0",rrc:3499000,dealer:3354000,an:500000,client:3044130,prem:379850,km:20369,tidy:2999000,sub:150000,do:70000,casco:80000},
+      l4s:{name:"L4 Style",rrc:2540000,dealer:2438400,an:0,client:2235200,prem:0,km:0,tidy:2235200,sub:100000,do:70000,casco:80000},
+      l4e:{name:"L4 Elegant",rrc:2690000,dealer:2582400,an:0,client:2313400,prem:0,km:0,tidy:2313400,sub:100000,do:70000,casco:80000},
+      l6e:{name:"L6 Elegant",rrc:2890000,dealer:2745500,an:0,client:2456500,prem:0,km:0,tidy:2456500,sub:150000,do:70000,casco:80000},
+      l6u:{name:"L6 Ultra",rrc:3040000,dealer:2888000,an:0,client:2584000,prem:0,km:0,tidy:2584000,sub:150000,do:70000,casco:80000}
     };
     const FLEET_TI = 100000;
-    const FLEET_PIN = {"EDXFB32B7TE062327":2333000};
     function fleetMonthsLeft(principal, payment, annual){
       if(!(principal>0)) return 0;
       const r=(Number(annual)||0)/100/12;
@@ -44,21 +44,7 @@
       const months=Math.ceil(n-1e-6);
       return months<1?1:months;
     }
-    function fleetRateOf(m){
-      return 22.5;
-    }
-    function fleetRateTxt(n){
-      const x=Number(n);
-      return String(Number.isFinite(x)&&x>0?x:22.5).replace(".",",");
-    }
-    function fleetBanksFrom(qSov, qSber, months){
-      function one(id, name, q){
-        if(!q) return null;
-        return {id:id, name:name, rate:q.rate, term:q.termAfter, capped:!q.early && q.term!==months, termNote:q.early?(q.termAfter+" мес. вместо "+q.term+" · досрочное не меняет платёж"):"", payMpt:q.pay, overMpt:q.over};
-      }
-      return [one("sovcom","Совкомбанк",qSov), one("sber","Сбер",qSber)].filter(Boolean);
-    }
-    function fleetSubQuote(base, sub, down, doAmt, cascoAmt, months, limitPv, rateIn){
+    function fleetSubQuote(base, sub, down, doAmt, cascoAmt, months, limitPv){
       base=Math.max(0, Math.round(Number(base)||0));
       sub=Math.max(0, Math.min(base, Math.round(Number(sub)||0)));
       const price=Math.max(0, base-sub);
@@ -68,20 +54,24 @@
       const maxPv=Math.max(0, cap49-sub);
       const earlyCap=Math.round(base*0.25);
       const limited=!!limitPv && sub>0;
-      let pv, early=0, earlyOver=0;
+      let pv, early=0, earlyOver=0, pvExtras=0;
       if(limited){
         pv=Math.min(want, maxPv);
         const raw=Math.max(0, want-pv);
-        early=Math.min(raw, earlyCap);
-        earlyOver=raw-early;
-      }else pv=Math.min(want, price+doCasco);
-      const pvExtras=Math.min(pv, doCasco);
-      const pvCar=Math.max(0, pv-pvExtras);
+        const extrasFromRaw=Math.min(doCasco, raw);
+        pvExtras=extrasFromRaw;
+        const rawLeft=raw-extrasFromRaw;
+        early=Math.min(rawLeft, earlyCap);
+        earlyOver=rawLeft-early;
+      }else{
+        pv=Math.min(want, price+doCasco);
+        pvExtras=Math.min(pv, doCasco);
+      }
+      const pvCar=Math.max(0, pv-(limited?0:pvExtras));
       const extrasCredit=Math.max(0, doCasco-pvExtras);
       const credit=Math.max(0, price-pvCar+extrasCredit);
       const term=Math.min(Math.max(1, Math.round(Number(months)||84)), 84);
-      const given=Number(rateIn);
-      const rate=Number.isFinite(given)&&given>0?given:22.5;
+      const rate=19.2;
       const pay=typeof calcPay==="function"?calcPay(credit+pvCar, pvCar, term, rate):0;
       let termAfter=term;
       if(early>0){
@@ -91,26 +81,12 @@
       }
       const owe=Math.max(0, credit-early);
       const over=termAfter>0?pay*termAfter-owe:0;
-      return {base, sub, price, cap49, maxPv, earlyCap, limited, pv, early, earlyOver, doCasco, pvExtras, pvCar, extrasCredit, credit, term, termAfter, rate, pay, over};
+      return {base, sub, price, cap49, maxPv, earlyCap, limited, want, pv, early, earlyOver, doCasco, pvExtras, pvCar, extrasCredit, credit, term, termAfter, rate, pay, over};
     }
     function fleetPaid(q){
       const deal=Math.max(0, Math.round((q&&q.credit)||0));
       const paid=Math.max(0, Math.round((q&&q.early)||0)+Math.round((q&&q.earlyOver)||0));
       return {deal, after:Math.max(0, deal-paid), pv:Math.max(0, Math.round((q&&q.pv)||0))};
-    }
-    function fleetPvHave(q){
-      if(!q) return 0;
-      return Math.max(0, Math.round(Number(q.pvCar)||0)+Math.round(Number(q.early)||0)+Math.round(Number(q.earlyOver)||0)+Math.round(Number(q.sub)||0));
-    }
-    function pvMinBox(have, base, minPct, how){
-      base=Math.max(0, Math.round(Number(base)||0));
-      have=Math.max(0, Math.round(Number(have)||0));
-      if(!(base>0)) return {low:false, html:""};
-      const need=Math.round(base*minPct/100);
-      if(have+1>=need) return {low:false, html:""};
-      const got=Math.round(have*1000/base)/10;
-      const gotTxt=String(got).replace(".",",");
-      return {low:true, html:`<p class="pv-min">Минималка ${minPct}%<b>${rub(need)} ₽</b><span>${how} сейчас ${rub(have)} ₽ · ${gotTxt}%</span></p>`};
     }
     function fleetBodyTop(q){
       const b=fleetPaid(q);
@@ -201,9 +177,7 @@
     }
     function fleetCreditBox(price, m, f, useFleet, useTi, mode){
       const isSub=mode==="sub";
-      const pin=(typeof FLEET_PIN!=="undefined" && typeof kmVin==="string" && FLEET_PIN[kmVin])||0;
-      const tiCut=useTi?(typeof FLEET_TI==="number"?FLEET_TI:100000):0;
-      const base=pin?Math.max(0, pin-tiCut):Math.max(0, Math.round((useFleet?(f.tidy||f.rrc):(f.rrc||0))-tiCut));
+      const base=Math.max(0, Math.round((useFleet?(f.tidy||f.rrc):(f.rrc||0))-(useTi?FLEET_TI:0)));
       const subAmt=isSub?Math.max(0, Math.round((f&&f.sub)||0)):0;
       const months=typeof kmVal==="function"?kmVal("cMonths", 84):84;
       const _down=typeof kmDownRead==="function"?kmDownRead(base, false, false):null;
@@ -213,12 +187,9 @@
       const addons=typeof kmVal==="function"?kmVal("kmDo", 70000):70000;
       const pack=typeof kmVal==="function"?kmVal("kmPack", 150000):150000;
       const finDelta=(addons-70000)+(pack-150000);
-      const q=fleetSubQuote(base, subAmt, down, addons, pack, months, isSub, 22.5);
-      const qSber=fleetSubQuote(base, subAmt, down, addons, pack, months, isSub, 24);
-      const fleetNeed=q.base;
-      const fleetWarn=pvMinBox(fleetPvHave(q), fleetNeed, 20, "ПВ в авто + субсидия");
+      const q=fleetSubQuote(base, subAmt, down, addons, pack, months, isSub);
       const creditMpt=q.credit;
-      const banksMpt=fleetBanksFrom(q, qSber, months);
+      const banksMpt=[{id:"sovcom", name:"Совкомбанк", rate:q.rate, term:q.termAfter, capped:!q.early && q.term!==months, termNote:q.early?(q.termAfter+" мес. вместо "+q.term+" · досрочное не меняет платёж"):"", payMpt:q.pay, overMpt:q.over}];
       const priceReg=Math.max(0, (m&&m.rrc?m.rrc:f.rrc)-(useTi&&m&&m.ti?m.ti:0));
       const fee=typeof KM_BANK_FEE==="number"?KM_BANK_FEE:30000;
       const extras=addons+pack+fee;
@@ -258,7 +229,6 @@
         </div>
         <input type="hidden" id="cDownMode" value="${downMode==="sum"?"sum":"pct"}" />
         <p class="calc-note">${rub(down)} ₽ · ${downPct}% · одинаковые ПВ и срок для обоих расчётов</p>
-        ${fleetWarn.html}
       </div>`;
       const stdCol=`<div class="pay-col std km-pay">
             <p class="eyebrow">Директ</p>
@@ -266,9 +236,8 @@
             ${fleetPayRows(banks,"pay","over",months)}
             ${regBreak}
           </div>`;
-      const altCol=`<div class="pay-col sub km-pay${fleetWarn.low?" pv-low":""}">
-            <p class="eyebrow">${isSub?"Флит · субсидия бренда":"Флит · Совкомбанк 22,5% · Сбер 24%"}</p>
-            ${fleetWarn.html}
+      const altCol=`<div class="pay-col sub km-pay">
+            <p class="eyebrow">${isSub?"Флит · субсидия бренда":"Флит · Совкомбанк 19,2%"}</p>
             ${fleetBodyTop(q)}
             ${fleetPayRows(banksMpt,"payMpt","overMpt",months)}
             ${fleetBodyRows(q)}
@@ -290,101 +259,6 @@
         const pNssRate=typeof PANGO_NSS==="number"?PANGO_NSS:0.0089;
         const pYears=months/12;
         const pYearsLabel=Math.abs(pYears-Math.round(pYears))<0.05?String(Math.round(pYears)):pYears.toFixed(1);
-        const yNum=Number(pYearsLabel);
-        const pYearsWord=(yNum===1)?"год":(yNum>1&&yNum<5&&Math.abs(yNum-Math.round(yNum))<0.05?"года":"лет");
-        const pBase=Math.max(0, pFix-pDownP)+pBundle+finDelta;
-        const pNss=Math.round(pBase*pNssRate*pYears);
-        const pCreditB=pBase+pNss;
-        const pPayA=typeof calcPay==="function"?calcPay(pBase+pDownP, pDownP, months, pRateA):0;
-        const pPayB=typeof calcPay==="function"?calcPay(pCreditB+pDownP, pDownP, months, pRateB):0;
-        const pOverA=pPayA*months-pBase;
-        const pOverB=pPayB*months-pCreditB;
-        const pangoWarn=pvMinBox(pDownP, pFix, 10, "первый взнос");
-        pangoCol=`<div class="pay-col pango km-pay${pangoWarn.low?" pv-low":""}">
-            <p class="eyebrow">Спеццена · PANGO</p>
-            ${pangoWarn.html}
-            <p class="eyebrow" style="margin-top:8px">17,4% без комиссий</p>
-            <div class="bank-row pay-top"><span><b>Платёж</b><br/><small>${pRateA}% · ${months} мес. · переплата ~${rub(Math.round(pOverA))}</small></span><span class="pay">${rub(Math.round(pPayA))} ₽</span></div>
-            <div class="bank-row"><span>Тело кредита</span><span class="pay">${rub(pBase)}</span></div>
-            <p class="eyebrow" style="margin-top:8px">14,4% · НСС в теле</p>
-            <div class="bank-row pay-top"><span><b>Платёж</b><br/><small>${pRateB}% · ${months} мес. · переплата ~${rub(Math.round(pOverB))}</small></span><span class="pay">${rub(Math.round(pPayB))} ₽</span></div>
-            <div class="bank-row"><span>Тело с НСС</span><span class="pay">${rub(pCreditB)}</span></div>
-            <details class="calc-more">
-              <summary>Подробности расчёта</summary>
-              <p class="calc-note">Если машина по спеццене. Фикс ${useTi?"с трейд-ин":"без трейд-ин"} ${rub(pFix)}. Каско + GAP + ДМС ${rub(pBundle)} всегда в кредите.</p>
-              <div class="bank-row"><span>Цена авто</span><span class="pay">${rub(pFix)}</span></div>
-              <div class="bank-row"><span>Первый взнос</span><span class="pay">${rub(pDownP)}</span></div>
-              <div class="bank-row"><span>Каско + GAP + ДМС</span><span class="pay">${rub(pBundle)}</span></div>
-              ${finDelta?`<div class="bank-row"><span>Д/О и каско сверх нормы</span><span class="pay">${finDelta>0?"+":"−"} ${rub(Math.abs(finDelta))}</span></div>`:""}
-              <div class="bank-row"><span>НСС 0,89% × ${pYearsLabel} ${pYearsWord}</span><span class="pay">${rub(pNss)}</span></div>
-            </details>
-          </div>`;
       }
-      return {inputs, stdCol, altCol, pangoCol};
-    }
-    function calcFleet(m){
-      const f=fleetOf(m.id);
-      const useFleet=kmVal("kmFleetDisc", true);
-      const useTi=kmVal("kmUseTi", false);
-      let price=f.rrc;
-      const fleetCut=Math.max(0, f.rrc-(f.tidy||f.rrc));
-      const steps=[];
-      const car=(typeof STOCK!=="undefined"?STOCK:[]).find(x=>x.vin===kmVin);
-      const carMpt=typeof carIsMpt==="function"?carIsMpt(car):!!(car&&car.mpt);
-      const canSub=typeof kmHasBrandSub==="function"?kmHasBrandSub(m):((f.sub||0)>0);
-      const useMpt=false;
-      const useSub=canSub && kmVal("kmFleetSub", true);
-      const pin=(typeof FLEET_PIN!=="undefined" && FLEET_PIN[kmVin])||0;
-      if(pin){
-        price=pin;
-        steps.push("флит сразу от "+rub(pin));
-        if(useTi){ price=Math.max(0, price-FLEET_TI); steps.push("трейд-ин −"+rub(FLEET_TI)); }
-      }
-      else if(useFleet && useTi){ price=Math.max(0, f.tidy-FLEET_TI); steps.push("флит + трейд-ин"); }
-      else if(useFleet){ price=f.tidy; steps.push("флит −"+rub(fleetCut)); }
-      else if(useTi){ price=Math.max(0, f.rrc-FLEET_TI); steps.push("флит + трейд-ин"); }
-      if(useSub){ price=Math.max(0, price-(f.sub||0)); steps.push("субс. бренда −"+rub(f.sub||0)); }
-      const mptCut=Math.round((useFleet?f.tidy:f.rrc)*(useTi?0.9:1)*0.1);
-      const subCut=f.sub||0;
-      const fleetBox=fleetCreditBox(price, m, f, useFleet, useTi, useSub?"sub":"fleet");
-      return banner("Калькулятор","Флит · BFS Совкомбанк лизинг","TENET")+`
-        <p class="lead">${fleetBox.pangoCol?"Три расчёта рядом: директ, "+(useSub?"флит с субсидией бренда":"флит")+" и спеццена PANGO.":(useSub?"Скидки флита, директ и справа флит с субсидией бренда.":"Скидки флита, директ и флит: Совкомбанк 22,5%, Сбер 24%.")}</p>
-        <div class="km-stage${fleetBox?(fleetBox.pangoCol?" km-4":" km-3"):""}">
-        <div class="km-chips">${kmChipGroups(m.id)}</div>
-        <div class="km-layout${fleetBox?(fleetBox.pangoCol?" km-4":" km-3"):""}">
-          <div class="card km-disc">
-            <p class="eyebrow">BFS Совкомбанк лизинг · ${escape(f.name)}</p>
-            ${car?`<p class="calc-note">${escape(car.vin)} · ${escape(car.color||"")} · ${escape(car.trim||"")}${carIsCorp(car)?" · корп":""}</p>`:""}
-            <div class="note-box">Директ нельзя. По центру — директ той же комплектации. Справа — ${useSub?"флит с субсидией бренда":"флит: Совкомбанк 22,5% и Сбер 24%"}.</div>
-            <label class="check-row"><input id="kmFleetDisc" type="checkbox" ${useFleet?"checked":""} /> <span>Флит скидка ${rub(fleetCut)} · макс. выгода ${rub(f.an)}</span></label>
-            <label class="check-row"><input id="kmUseTi" type="checkbox" ${useTi?"checked":""} /> <span>Трейд-ин ${rub(FLEET_TI)}</span></label>
-            ${!useMpt&&canSub?`<label class="check-row"><input id="kmFleetSub" type="checkbox" ${useSub?"checked":""} /> <span>Субсидия бренда ${rub(subCut)}</span></label>`:""}
-            <div class="note-box" style="margin-top:14px">
-              <p class="eyebrow" style="margin:0 0 6px">Итоговая цена</p>
-              ${price<f.rrc?`<div class="calc-out" style="text-decoration:line-through;opacity:.42;margin-bottom:2px">${rub(f.rrc)} ₽</div>`:""}
-              <div class="calc-out">${rub(Math.round(price))} ₽</div>
-              <p class="calc-note">${steps.length?steps.join(" → "):"Базовая цена без скидок."}${useFleet?" · AP без тюнинга "+rub(f.tidy):""}</p>
-            </div>
-          </div>
-          ${fleetBox?`<div class="km-credit">${fleetBox.inputs}<div class="km-pays">${fleetBox.stdCol}${fleetBox.altCol}${fleetBox.pangoCol||""}</div></div>`:""}
-        </div>
-        </div>
-        <div class="card">
-              <p class="eyebrow">Лист «Флит» BFS</p>
-              <div class="bank-row"><span>РРЦ</span><span class="pay">${rub(f.rrc)} ₽</span></div>
-              <div class="bank-row"><span>Макс. выгода AN</span><span class="pay">${rub(f.an)} ₽</span></div>
-              <div class="bank-row"><span>Цена AP без тюнинга</span><span class="pay">${rub(f.tidy)} ₽</span></div>
-              ${useMpt
-                ? `<div class="bank-row"><span>МПТ −10%</span><span class="pay">${rub(mptCut)} ₽</span></div>`
-                : (useSub?`<div class="bank-row"><span>Субсидия бренда AQ</span><span class="pay">${rub(subCut)} ₽</span></div>`:`<div class="bank-row"><span>Субсидия TENET</span><span class="pay">${rub(f.sub||0)} ₽</span></div>`)}
-              <p class="calc-note">${useSub?"Порядок: флит"+(useTi?" + трейд-ин":"")+" → субсидия бренда. Мин. ПВ 20% = деньги клиента + ТИ + субсидия. ПВ + субсидия не больше 49%. Остаток до 25% сокращает срок, не платёж.":"Порядок: флит"+(useTi?" + трейд-ин":"")+". Мин. ПВ 20% = деньги клиента + ТИ + субсидия."}</p>
-            </div>
-        <div class="km-bottom">
-          <div class="card dc-result ok">
-            <p class="eyebrow">КМ без НДС · флит BFS</p>
-            <div class="calc-out">${rub(f.km)} ₽</div>
-            <p class="calc-note">КМ с листа «Флит», блок BFS. Пауза банка, ориентир 21.09.</p>
-          </div>
-          ${kmSideList(m)}
-        </div>`;
+      return {inputs, stdCol, altCol, pangoCol, q};
     }

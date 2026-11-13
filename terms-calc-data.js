@@ -1,4 +1,4 @@
-    const TERMS_DATE = "09.11.2026";
+    const TERMS_DATE = "13.11.2026";
     const KM_CORRIDOR = [
       {model:"T4L",trim:"Все",km:"0 / 50",note:""},
       {model:"T7",trim:"Все",km:"30 / 80",note:""},
@@ -76,17 +76,14 @@
     const PANGO_RATE_A = 17.4;
     const PANGO_RATE_B = 14.4;
     const PANGO_NSS = 0.0089;
-    const EXCL_FIX = {
-      "EDELB31B1TE103208":{cash:2100000,ti:2000000},
-      "EDELB31BXTE095545":{cash:2200000,ti:2100000},
-      "EDELB31B3TE093989":{cash:2200000,ti:2100000},
-      "EDXGD34B6TE031162":{cash:3000000,ti:3000000}
+    const PANGO_VIN = {
     };
     function pangoOf(id){
       const vin=typeof kmVin==="string"?String(kmVin).toUpperCase():"";
-      if(vin && typeof EXCL_FIX!=="undefined" && EXCL_FIX[vin]) return EXCL_FIX[vin];
+      if(vin && typeof PANGO_VIN!=="undefined" && PANGO_VIN[vin]) return PANGO_VIN[vin];
       return (typeof PANGO_FIX!=="undefined" && PANGO_FIX[id]) || null;
     }
+
     const TERMS_PRIO = [
       {model:"T4",vin:"EDEEB31B8TE003261",trim:"Прайм",year:"2026",color:"Светло-серый",extra:"",pay:1000,kmTi:-50,kmCash:0},
       {model:"T8",vin:"EDXGD34B5TE095631",trim:"Прайм 7 мест 4WD",year:"2026",color:"Чёрный",extra:"",pay:1000,kmTi:-50,kmCash:0},
@@ -106,10 +103,10 @@
       {id:"t4p",brand:"TENET",name:"T4 Prime 2025",stock:"t4",rrc:2449000,dealer:2369000,ti:100000,tiBack:80000,cr:0,crBack:0,bonus:0.03,vat:1.22,fee:0.01,kmMin:-30,kmMax:20,prioMin:-30,prioMax:20},
       {id:"t4la",brand:"TENET",name:"T4L Active",stock:"t4l",rrc:2344000,dealer:2249000,ti:0,tiBack:0,cr:0,crBack:0,bonus:0.02,vat:1.22,fee:0.01,kmMin:0,kmMax:50,prioMin:0,prioMax:50},
       {id:"t4lp",brand:"TENET",name:"T4L Prime",stock:"t4l",rrc:2494000,dealer:2404000,ti:0,tiBack:0,cr:0,crBack:0,bonus:0.02,vat:1.22,fee:0.01,kmMin:0,kmMax:50,prioMin:0,prioMax:50},
-      {id:"t7a",brand:"TENET",name:"T7 Active 2WD",stock:"t7",rrc:2805000,dealer:2665000,ti:180000,tiBack:130000,cr:0,crBack:0,bonus:0.02,vat:1.22,fee:0.01,kmMin:30,kmMax:80,prioMin:30,prioMax:80},
-      {id:"t7p",brand:"TENET",name:"T7 Prime 2WD",stock:"t7",rrc:3005000,dealer:2860000,ti:200000,tiBack:150000,cr:0,crBack:0,bonus:0.02,vat:1.22,fee:0.01,kmMin:30,kmMax:80,prioMin:30,prioMax:80},
-      {id:"t7a4",brand:"TENET",name:"T7 Active 4WD",stock:"t7",rrc:3010000,dealer:2880000,ti:130000,tiBack:90000,cr:0,crBack:0,bonus:0.02,vat:1.22,fee:0.01,kmMin:30,kmMax:80,prioMin:30,prioMax:80},
-      {id:"t7p4",brand:"TENET",name:"T7 Prime 4WD",stock:"t7",rrc:3210000,dealer:3065000,ti:150000,tiBack:110000,cr:0,crBack:0,bonus:0.02,vat:1.22,fee:0.01,kmMin:30,kmMax:80,prioMin:30,prioMax:80},
+      {id:"t7a",brand:"TENET",name:"T7 Active 2WD",stock:"t7",rrc:2830000,dealer:2690000,ti:150000,tiBack:110000,cr:0,crBack:0,bonus:0.02,vat:1.22,fee:0.01,kmMin:30,kmMax:80,prioMin:30,prioMax:80},
+      {id:"t7p",brand:"TENET",name:"T7 Prime 2WD",stock:"t7",rrc:3005000,dealer:2860000,ti:200000,tiBack:150000,cr:50000,crBack:30000,bonus:0.02,vat:1.22,fee:0.01,kmMin:30,kmMax:80,prioMin:30,prioMax:80},
+      {id:"t7a4",brand:"TENET",name:"T7 Active 4WD",stock:"t7",rrc:3010000,dealer:2880000,ti:130000,tiBack:90000,cr:50000,crBack:30000,bonus:0.02,vat:1.22,fee:0.01,kmMin:30,kmMax:80,prioMin:30,prioMax:80},
+      {id:"t7p4",brand:"TENET",name:"T7 Prime 4WD",stock:"t7",rrc:3210000,dealer:3065000,ti:150000,tiBack:110000,cr:50000,crBack:30000,bonus:0.02,vat:1.22,fee:0.01,kmMin:30,kmMax:80,prioMin:30,prioMax:80},
       {id:"t8a",brand:"TENET",name:"T8 Active 2WD",stock:"t8",rrc:3099000,dealer:2999000,ti:200000,tiBack:150000,cr:0,crBack:0,bonus:0.02,vat:1.22,fee:0.01,kmMin:0,kmMax:30,prioMin:-50,prioMax:0},
       {id:"t8p",brand:"TENET",name:"T8 Prime 2WD",stock:"t8",rrc:3299000,dealer:3149000,ti:200000,tiBack:150000,cr:0,crBack:0,bonus:0.02,vat:1.22,fee:0.01,kmMin:0,kmMax:30,prioMin:-50,prioMax:0},
       {id:"t8p4",brand:"TENET",name:"T8 Prime 4WD",stock:"t8",rrc:3630000,dealer:3465000,ti:150000,tiBack:100000,cr:0,crBack:0,bonus:0.02,vat:1.22,fee:0.01,kmMin:0,kmMax:30,prioMin:-50,prioMax:0},
@@ -131,24 +128,9 @@
       {id:"l6e",brand:"TENET PLUS",name:"L6 Elegant",stock:"pl6",rrc:2890000,dealer:2745500,ti:100000,tiBack:70000,cr:0,crBack:0,bonus:0.022,vat:1.22,fee:0.01,kmMin:0,kmMax:50,prioMin:0,prioMax:50},
       {id:"l6u",brand:"TENET PLUS",name:"L6 Ultra",stock:"pl6",rrc:3040000,dealer:2888000,ti:100000,tiBack:70000,cr:0,crBack:0,bonus:0.022,vat:1.22,fee:0.01,kmMin:0,kmMax:50,prioMin:0,prioMax:50}
     ];
-    const PRIO_VINS = new Set(["EDEEB31B8TE003261", "EDXGD34B5TE095631", "EDXGD34B8TE095347", "EDEFB32BXTE100707", "EDEFB32B8TE099203", "EDEFB32B8TE105355", "EDXFD32B2TE042710", "EDXGB32B8TE110275", "EDXGB32B1TE110196", "EDXGB32B0TE089261", "EDEFD32B1TE101190", "EDEFD32B5TE102522", "EDEFB32B2TE105500"]);
 
-    const KM_FORK = Object.fromEntries([
-      ...KM_CORRIDOR.filter(r=>/^[A-HJ-NPR-Z0-9]{17}$/.test(r.trim)).map(r=>{
-        const pair=r.km.replace(/[−–]/g,"-").split("/").map(Number);
-        return [r.trim,{ti:pair[0],cash:pair[1]}];
-      }),
-      ...TERMS_PRIO.filter(r=>Number.isFinite(r.kmTi)&&Number.isFinite(r.kmCash)).map(r=>[r.vin,{ti:r.kmTi,cash:r.kmCash}])
-    ]);
-    const PANGO_ONLY = {};
-    const NOT_INVOICE = {"EDXGD34B7TE034443":1};
-    function kmBand(vin, useTi, prio, m){
-      const fork=KM_FORK[vin];
-      if(fork){ const t=useTi?fork.ti:fork.cash; return {lo:t, hi:t, lock:true}; }
-      if(prio){ const t=useTi?(m.prioMin??m.kmMin):(m.prioMax??m.kmMax); return {lo:t, hi:t, lock:true}; }
-      return {lo:m.kmMin, hi:m.kmMax, lock:false};
-    }
-    function kmBandTxt(lo, hi){ return lo===hi ? (lo+" тыс.") : (lo+" … "+hi+" тыс."); }
+
+    const PRIO_VINS = new Set(["EDEEB31B8TE003261", "EDXGD34B5TE095631", "EDXGD34B8TE095347", "EDEFB32BXTE100707", "EDEFB32B8TE099203", "EDEFB32B8TE105355", "EDXFD32B2TE042710", "EDXGB32B8TE110275", "EDXGB32B1TE110196", "EDXGB32B0TE089261", "EDEFD32B1TE101190", "EDEFD32B5TE102522", "EDEFB32B2TE105500"]);
     const KM_DC_DEF = 100000;
     const KM_BANKS = [
       {id:"sber", name:"Сбер"},
@@ -522,64 +504,9 @@
         }
       }
     };
-    const KM_BANK_RATES_TIGGO7 = {/*chery-t7l: ИП 7652/И от 21.08.2026, CHERY ФИНАНС, TIGGO 7; нет строки = недоступно*/
-      sber:{
-        80:[0.01,0.01,0.01,0.01,0.01,0.01,0.01,1.00,4.00,6.00],
-        70:[0.01,0.01,0.01,0.01,3.60,5.50,6.10,7.30,9.00,10.00],
-        60:[0.01,0.01,2.10,5.60,7.20,8.70,9.60,10.50,12.20,13.30],
-        50:[0.01,0.01,5.90,7.90,9.80,10.80,11.80,12.50,13.40,14.30],
-        40:[0.01,3.90,7.80,10.00,11.40,12.40,13.20,13.80,14.30,15.00],
-        30:[0.01,6.30,9.50,11.40,12.60,13.50,14.20,14.70,14.90,15.50],
-        20:[0.01,8.00,10.80,12.70,13.60,14.40,14.90,15.40,15.70,15.90],
-        10:[2.20,9.40,11.90,13.80,14.30,15.30,15.50,15.80,16.00,16.20]
-      },
-      sovcom:{
-        80:[0.01,0.01,0.01,0.01,0.01,0.95,2.20],
-        70:[0.01,0.01,0.01,0.70,2.80,5.10,6.05],
-        60:[0.01,0.01,1.50,4.40,6.00,7.45,8.20],
-        50:[0.01,2.70,5.50,8.10,9.00,10.80,10.70],
-        40:[0.01,4.55,8.00,9.90,10.80,11.90,12.00],
-        30:[0.01,6.20,9.20,11.50,12.00,12.90,13.10],
-        20:[2.80,9.00,10.70,12.90,13.20,14.00,14.00],
-        10:[4.60,10.25,12.00,13.50,14.00,14.50,null],
-        0:[5.70,10.55,12.85,14.10,14.40,14.95,null]
-      },
-      tbank:{
-        80:[0.01,0.01,0.01,0.01,0.01,1.20,1.80,2.60],
-        70:[0.01,0.01,0.01,1.20,3.30,4.70,5.10,5.50],
-        60:[0.01,0.01,2.30,5.10,6.10,7.10,7.90,8.40],
-        50:[0.01,1.20,5.10,7.10,8.40,9.20,9.80,10.30],
-        40:[0.01,4.10,6.90,8.90,10.00,10.70,11.20,11.60],
-        30:[0.01,5.80,8.60,10.30,11.20,11.80,12.20,12.50],
-        20:[0.60,7.50,9.80,11.30,12.10,12.60,13.00,13.20],
-        10:[2.90,8.80,10.80,12.10,12.80,13.20,13.60,13.80],
-        0:[4.70,9.90,11.60,12.70,13.40,13.80,14.10,14.30]
-      },
-      alfa:{
-        80:[0.01,0.01,0.10,0.20,0.30,1.70,2.80,6.10],
-        70:[0.01,0.01,0.10,1.90,4.00,6.00,7.50,9.30],
-        60:[0.01,0.01,2.80,5.30,7.00,8.60,9.80,11.30],
-        50:[0.01,0.90,5.60,7.70,9.10,10.40,11.50,12.70],
-        40:[0.01,3.30,7.60,9.30,10.60,11.70,12.60,13.60],
-        30:[0.01,5.70,9.20,10.80,11.90,12.90,13.70,14.50],
-        20:[1.80,7.60,10.60,12.00,12.90,13.90,14.50,15.30],
-        10:[4.20,9.20,11.80,12.90,13.80,14.50,15.20,15.90]
-      },
-      vtb:{
-        80:[0.01,0.01,0.01,0.01,0.01,0.01,0.01],
-        70:[0.01,0.01,0.01,0.01,1.00,3.00,4.30],
-        60:[0.01,0.01,0.01,3.50,5.80,7.00,8.30],
-        50:[0.01,0.01,4.00,7.00,8.60,10.00,10.60],
-        40:[0.01,2.00,6.80,9.00,10.50,11.50,12.20],
-        30:[0.01,5.00,8.80,10.70,12.00,12.50,13.30],
-        20:[0.01,7.00,10.20,12.00,12.80,13.50,14.10],
-        10:[0.01,8.50,11.50,13.00,13.70,14.30,14.80]
-      }
-    };
     function kmRateGroup(m){
       const s=(m&&m.stock)||"";
-      if(s==="t7l") return "tiggo7";/*chery-t7l*/
-      if(s==="t4l"||s==="t7") return "t4l_t7";
+      if(s==="t4l"||s==="t7"||s==="t7l") return "t4l_t7";
       if(s==="t4"||s==="t8") return "t4_t8";
       if(s==="tt9") return "tt9";/*ИП 2641/И: TENET T9*/
       if(s==="ta8") return "ta8";/*ИП 2641/И: TENET A8*/
@@ -600,3 +527,11 @@
       if(p>=10) return 10;
       return 0;
     }
+
+    const KM_FORK = Object.fromEntries([
+      ...KM_CORRIDOR.filter(r=>/^[A-HJ-NPR-Z0-9]{17}$/.test(r.trim)).map(r=>{
+        const pair=r.km.replace(/[−–]/g,"-").split("/").map(Number);
+        return [r.trim,{ti:pair[0],cash:pair[1]}];
+      }),
+      ...TERMS_PRIO.filter(r=>Number.isFinite(r.kmTi)&&Number.isFinite(r.kmCash)).map(r=>[r.vin,{ti:r.kmTi,cash:r.kmCash}])
+    ]);
