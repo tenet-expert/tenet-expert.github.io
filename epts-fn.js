@@ -30,6 +30,16 @@
     function eptsUtcDate(y,m,d){ return new Date(Date.UTC(y,m-1,d)); }
     function eptsDow(dt){ return dt.getUTCDay(); }
     function eptsIsWeekend(dt){ const d=eptsDow(dt); return d===0||d===6; }
+    function eptsIsOffHours(now){
+      const dt=now instanceof Date?now:new Date();
+      const parts=new Intl.DateTimeFormat("en-GB",{timeZone:"Europe/Moscow",weekday:"short",hour:"2-digit",hourCycle:"h23"}).formatToParts(dt);
+      const g=t=>{ const p=parts.find(x=>x.type===t); return p?p.value:""; };
+      const wd=g("weekday");
+      if(wd==="Sat"||wd==="Sun") return true;
+      let hour=Number(g("hour"));
+      if(hour===24) hour=0;
+      return hour>=17;
+    }
     function eptsFmt(dt){
       const dd=String(dt.getUTCDate()).padStart(2,"0");
       const mm=String(dt.getUTCMonth()+1).padStart(2,"0");
@@ -57,28 +67,39 @@
       return /TENET\s*PLUS/i.test(letter);
     }
     function eptsMailPack(draft){
-      const weekend=eptsIsWeekend(draft.issuedDt);
+      const off=eptsIsOffHours();
       const vin=draft.vin;
       const pay=draft.payBy;
       const line="Прошу согласовать передачу ЭПТС для заключения договора с клиентом. Оплата до "+pay+", отзывных нет, гарантийное письмо во вложении.";
+      const subj="ЭКСПЕРТ АВТО САМАРА_ЭПТС VIN "+vin;
       if(eptsIsPlus(draft)){
+        if(off){
+          return {
+            weekend: true,
+            to: EPTS_TO_WEEKEND,
+            cc: [EPTS_PLUS_TO].concat(EPTS_PLUS_CC).join(", "),
+            subj,
+            body: "Коллеги, добрый день! "+line+"\n\nVIN "+vin,
+            label: "TENET+ · выходные/после 17:00 МСК · team.elpts@chery.ru"
+          };
+        }
         return {
-          weekend,
+          weekend: false,
           to: EPTS_PLUS_TO,
           cc: EPTS_PLUS_CC.join(", "),
-          subj: "ЭКСПЕРТ АВТО САМАРА_ЭПТС VIN "+vin,
+          subj,
           body: "Анастасия, добрый день! "+line+"\n\nVIN "+vin,
           label: "TENET+ · Anastasiia.Klimanova@agr.auto"
         };
       }
-      const who=weekend?"Коллеги, добрый день! ":"Антон, добрый день! ";
+      const who=off?"Коллеги, добрый день! ":"Антон, добрый день! ";
       return {
-        weekend,
-        to: weekend?EPTS_TO_WEEKEND:EPTS_TO_WORK,
-        cc: (weekend?[EPTS_TO_WORK]:[]).concat(EPTS_CC).join(", "),
-        subj: "ЭКСПЕРТ АВТО САМАРА_ЭПТС VIN "+vin,
+        weekend: off,
+        to: off?EPTS_TO_WEEKEND:EPTS_TO_WORK,
+        cc: (off?[EPTS_TO_WORK]:[]).concat(EPTS_CC).join(", "),
+        subj,
         body: who+line+"\n\nVIN "+vin,
-        label: weekend?"Выходной · team.elpts@chery.ru":"Рабочий день · Ekaterina.Bulatetskaya@tenet.ru"
+        label: off?"Выходные/после 17:00 МСК · team.elpts@chery.ru":"Рабочий день · Ekaterina.Bulatetskaya@tenet.ru"
       };
     }
     function eptsLetterName(id, fallback){
@@ -487,7 +508,7 @@
             ${step2body}
           </section>
           <section class="epts-step ${eptsStepClass(3)}">
-            <div class="epts-head"><span class="epts-n">3</span><div><h3>Отправить запрос</h3><p>TENET: будни — Булатецкой, выходные — Chery ELPTS. TENET+ — Климановой, в копии Дмитриев. PDF во вложении через .eml.</p></div></div>
+            <div class="epts-head"><span class="epts-n">3</span><div><h3>Отправить запрос</h3><p>TENET и TENET+: будни до 17:00 МСК — Булатецкой (TENET) / Климановой, в копии Дмитриев (TENET+); выходные и после 17:00 МСК — team.elpts@chery.ru, ответственный менеджер в копии. PDF во вложении через .eml.</p></div></div>
             ${step3body}
           </section>
         </div>
