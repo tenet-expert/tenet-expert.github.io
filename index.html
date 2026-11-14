@@ -1629,6 +1629,46 @@ body:has(.sched-page) .wrap{max-width:1180px;}
   .banner{min-height:110px!important;padding:14px!important;}
 }
 
+/* sber-terms */
+.sber-block{margin:0 0 16px;border:1px solid #cfe3d4;border-radius:16px;background:#f3faf4;padding:14px 14px 12px;box-shadow:0 1px 0 rgba(17,17,20,.04)}
+.sber-block .eyebrow{color:#14803c;margin-bottom:6px}
+.sber-block h2{margin:0 0 6px;font-size:clamp(20px,2.4vw,26px);line-height:1.15;letter-spacing:-.03em;color:#14532d}
+.sber-block .lead{max-width:none;margin:0 0 12px}
+.sber-hi{margin:0 0 14px;padding:10px 12px;border-radius:12px;background:#fff;border:1px solid #b7e0c2;color:#146c2e;font-weight:800;font-size:15px;line-height:1.35}
+.sber-plus{color:#FF7A00;font-weight:800;letter-spacing:.02em}
+.sber-wrap{overflow:auto;border:1px solid #d5e6d8;border-radius:12px;background:#fff}
+.sber-sheet{width:100%;border-collapse:collapse;font-size:13.5px;background:#fff}
+.sber-sheet th,.sber-sheet td{padding:8px 10px;text-align:left;vertical-align:baseline;border-bottom:1px solid #e7f0ea}
+.sber-sheet th{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#5c6b60;background:#f7fbf8;font-weight:700;white-space:nowrap}
+.sber-sheet th.num,.sber-sheet td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.sber-sheet td.model{font-weight:750;white-space:nowrap}
+.sber-sheet td.trim{color:#2c2823}
+.sber-sheet td.benefit{font-weight:800;color:#146c2e}
+.sber-sheet tbody tr:last-child td{border-bottom:0}
+.sber-sheet tbody tr.sber-new:not(:first-child) td{border-top:8px solid #f3faf4}
+.sber-how,.sber-aff{margin-top:12px;padding:12px 14px;border-radius:12px;background:#fff;border:1px solid #d5e6d8}
+.sber-how h3,.sber-aff h3{margin:0 0 6px;font-size:16px;letter-spacing:-.02em}
+.sber-how p{margin:0;font-size:14px;line-height:1.45}
+.sber-aff ol{margin:6px 0 0;padding:0 0 0 1.3em;columns:1;column-gap:28px}
+.sber-aff li{break-inside:avoid;padding:3px 0;font-size:14px;line-height:1.35}
+.sber-fine{margin:12px 2px 0;color:var(--muted);font-size:12px;line-height:1.45}
+@media(min-width:720px){.sber-aff ol{columns:2}}
+@media(min-width:1000px){.sber-aff ol{columns:3}}
+@media(max-width:720px){
+  .sber-block{padding:12px}
+  .sber-sheet thead{display:none}
+  .sber-sheet,.sber-sheet tbody,.sber-sheet tr,.sber-sheet td{display:block;width:auto}
+  .sber-sheet tbody tr{padding:10px 12px 8px;border-bottom:1px solid #e7f0ea}
+  .sber-sheet tbody tr:last-child{border-bottom:0}
+  .sber-sheet tbody tr.sber-new:not(:first-child){border-top:8px solid #f3faf4}
+  .sber-sheet tbody tr.sber-new:not(:first-child) td{border-top:0}
+  .sber-sheet td{border:0;padding:2px 0}
+  .sber-sheet td.model{font-size:14px}
+  .sber-sheet td.trim{margin-bottom:4px;font-weight:650}
+  .sber-sheet td.num{display:flex;justify-content:space-between;align-items:baseline;gap:12px;text-align:right;white-space:normal}
+  .sber-sheet td.num::before{content:attr(data-label);color:#6d6458;font-weight:650;font-size:12px;letter-spacing:.04em;text-transform:uppercase}
+}
+
 </style>
 </head>
 <body>
@@ -5519,6 +5559,100 @@ async function pingTelegram(body){
         </table></div>
       </details>`;
     }
+    const SBER_ROWS = [
+      ["TENET T4L","1.5T 6DCT Active",2344000,2144760],
+      ["TENET T4L","1.5T 6DCT Prime",2494000,2207190],
+      ["TENET T7","1.6T DCT Active",2805000,2286075],
+      ["TENET T7","1.6T DCT Prime",3005000,2449075],
+      ["TENET T7","1.6T DCT Active 4WD",3010000,2498300],
+      ["TENET T7","1.6T DCT Prime 4WD",3210000,2664300],
+      ["TENET T8","1.6T Active 2WD",3099000,2665140],
+      ["TENET T8","1.6T Prime 2WD",3299000,2738170],
+      ["TENET T8","2.0T DCT7 Prime 4WD",3630000,3049200],
+      ["TENET T8","2.0T DCT7 Ultra 4WD",3885000,3263400],
+      ["TENET T9","2.0T 8AT Prime 4WD · 5 мест",3949000,3317160],
+      ["TENET T9","2.0T 8AT Ultra 4WD · 5 мест",4299000,3568170],
+      ["TENET T9","2.0T 8AT Ultra 4WD · 7 мест",4449000,3648180],
+      ["TENET T9","2.0 8AT Prestige 4WD · 7 мест",4649000,3858670],
+      ["TENET A8","1.6T DCT7 Prime",2999000,2609130],
+      ["TENET A8","2.0T 8AT Ultra",3499000,3044130],
+      ["TENET PLUS L4","1.5T 6DCT Style",2540000,2184400],
+      ["TENET PLUS L4","1.5T 6DCT Elegant",2690000,2313400],
+      ["TENET PLUS L6","1.5T 6DCT Elegant",2890000,2514300],
+      ["TENET PLUS L6","1.5T 6DCT Ultra",3040000,2644800]
+    ];
+    const SBER_AFF = [
+      "ПАО Сбербанк",
+      "ООО «СБЕРБАНК ИНВЕСТИЦИИ»",
+      "ООО СК «СБЕРБАНК СТРАХОВАНИЕ»",
+      "ООО СК «Сбербанк Страхование Жизни»",
+      "ООО «СБЕРОБРАЗОВАНИЕ»",
+      "ООО «Сберавто»",
+      "ООО «ДОМКЛИК»",
+      "ООО «ВК Манжерок»",
+      "ООО «ЕАПТЕКА»",
+      "ООО «ЗВУК»",
+      "ООО «Курорт Манжерок»",
+      "ООО «ОККО»",
+      "ООО «СберТех»",
+      "АО «Сбербанк Лизинг»",
+      "«Новые транспортные системы»",
+      "ООО «Мрия»",
+      "ООО НКО «Юмани»",
+      "ООО «Сбербанк Капитал»",
+      "ООО «УМНАЯ ЗАКУПКА»",
+      "ООО «ЖИВОЙ САЙТ»",
+      "ООО «ИНСТАМАРТ СЕРВИС»",
+      "ООО «Рамблер Интернет Холдинг»",
+      "АО «НПФ СБЕРБАНКА»",
+      "Объединённое Кредитное Бюро // АО «ОКБ»",
+      "ООО «ФОКСФОРД»",
+      "ООО «СБЕР БИЗНЕС СОФТ»",
+      "АО «СБЕРБАНК - АСТ»",
+      "ООО «Сберавтотех Инжиниринг»",
+      "ООО «Сбер2В»",
+      "ООО «САЛЮТДЕВАЙСЫ»",
+      "ООО «ЗВУК БИЗНЕС»",
+      "ООО «СБЕРБАНК-ТЕЛЕКОМ»",
+      "ООО «СБЕР ЛИГАЛ»",
+      "ООО «СБЕРЛОГИСТИКА»",
+      "ООО «СФН»",
+      "АНО ДПО «КОРПОРАТИВНЫЙ УНИВЕРСИТЕТ СБЕРБАНКА»",
+      "ООО «СБЕРБАНК ФАКТОРИНГ»",
+      "ООО «ФЬЮЭЛ-АП»",
+      "АО УК «ПЕРВАЯ»",
+      "АНО «Школа 21»",
+      "ООО «С-Маркетинг»",
+      "ООО «ИННОВАЦИОННАЯ МЕДИЦИНА»",
+      "ООО «Умный ритейл»"
+    ];
+    function sberModelHtml(model){
+      if(model.indexOf("TENET PLUS")===0) return `<span class="sber-plus">TENET PLUS</span>${escape(model.slice("TENET PLUS".length))}`;
+      return escape(model);
+    }
+    function sberTermsHtml(){
+      let prev="";
+      const rows=SBER_ROWS.map(function(r){
+        const model=r[0], trim=r[1], rrc=r[2], spec=r[3], benefit=rrc-spec;
+        const fresh=model!==prev; prev=model;
+        return `<tr class="${fresh?"sber-new":""}"><td class="model">${sberModelHtml(model)}</td><td class="trim">${escape(trim)}</td><td class="num" data-label="РРЦ">${rub(rrc)}</td><td class="num" data-label="Спеццена">${rub(spec)}</td><td class="num benefit" data-label="Выгода">${rub(benefit)}</td></tr>`;
+      }).join("");
+      return `<section class="sber-block" id="sber-terms">`+
+        `<p class="eyebrow">Сбер</p>`+
+        `<h2>Специальные цены для сотрудников Сбера и аффилированных компаний</h2>`+
+        `<p class="lead">Автомобили TENET и TENET PLUS · цены действуют с 12.11.2026</p>`+
+        `<p class="sber-hi">Выгода до 100 000 ₽ при обмене по трейд-ин</p>`+
+        `<div class="sber-wrap"><table class="sber-sheet">`+
+        `<thead><tr><th>Модель</th><th>Комплектация</th><th class="num">РРЦ</th><th class="num">Спеццена</th><th class="num">Выгода</th></tr></thead>`+
+        `<tbody>${rows}</tbody></table></div>`+
+        `<div class="sber-how"><h3>Как воспользоваться</h3>`+
+        `<p>Покажите менеджеру подтверждение работы в Сбере или аффилированной компании и уточните наличие и детали предложения.</p></div>`+
+        `<div class="sber-aff"><h3>Аффилированные компании</h3><ol>`+
+        SBER_AFF.map(function(name){ return `<li>${escape(name)}</li>`; }).join("")+
+        `</ol></div>`+
+        `<p class="sber-fine">Цены действуют с 12.11.2026. Цены указаны без учёта дополнительного оборудования и тюнинга. Не является публичной офертой. Подробности уточняйте у менеджера.</p>`+
+        `</section>`;
+    }
     function terms(){
       if(needAuth()) return login();
       return banner("Торговые условия","Файл «Торговые условия» · с "+TERMS_DATE,"TENET")+
@@ -5529,6 +5663,7 @@ async function pingTelegram(body){
         `<section class="spec-plus"><h2>Спец · TENET+</h2>`+
         `<div class="terms-cards">`+termGroup(typeof TERMS_INV_PLUS!=="undefined"?TERMS_INV_PLUS:[],"price")+`</div></section>`+
         `</div>`+
+        sberTermsHtml()+
         fleetPricesHtml()+
         `<div class="terms-top">`+
         `<details class="terms-fold"><summary>Доходность</summary>`+
