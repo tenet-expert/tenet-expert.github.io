@@ -6774,7 +6774,8 @@ async function pingTelegram(body){
       const nDir=invScoped.filter(x=>!x.invoice).length;
       const byModel={};
       list.forEach(r=>{ (byModel[r.model]=byModel[r.model]||[]).push(r); });
-      const ids=stockIds(byModel).concat(stockStatus==="spec"?["pl4","pl6"].filter(id=>byModel[id]):[]);
+      const ids=stockIds(byModel);
+      if(stockStatus==="spec") ["pl4","pl6"].forEach(id=>{ if(byModel[id] && ids.indexOf(id)<0) ids.push(id); });
       const sorts=[["price","Цена"],["color","Цвет"],["trim","Комплектация"]];
       const sortBtns=sorts.map(([k,lab])=>{
         const on=stockSort===k;
