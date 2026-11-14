@@ -6698,6 +6698,49 @@ async function pingTelegram(body){
         <div id="taxi-stock-list" class="st-taxi-models">${models}</div>
       </section>`;
     }
+    function specKmId(model, trim){
+      const m=String(model||"");
+      const t=String(trim||"").toLowerCase();
+      const four=t.includes("4wd");
+      const prime=t.includes("prime")||t.includes("прайм");
+      const ultra=t.includes("ultra")||t.includes("ультра");
+      const seven=t.includes("7");
+      if(m==="T4L") return prime?"t4lp":"t4la";
+      if(m==="T7"){
+        if(four&&prime) return "t7p4";
+        if(four) return "t7a4";
+        if(prime) return "t7p";
+        return "t7a";
+      }
+      if(m==="T8"){
+        if(ultra) return "t8u4";
+        if(four) return "t8p4";
+        if(prime) return "t8p";
+        return "t8a";
+      }
+      if(m==="T9"){
+        if(t.includes("prestige")||t.includes("престиж")) return "tt9s7";
+        if(seven&&ultra) return "tt9u7";
+        if(ultra) return "tt9u";
+        if(prime) return "tt9p";
+        return "";
+      }
+      if(m==="L4") return (t.includes("style")||t.includes("стайл"))?"l4s":"l4e";
+      if(m==="L6") return ultra?"l6u":"l6e";
+      return "";
+    }
+    function stockSpecIds(){
+      const rows=[]
+        .concat(typeof TERMS_INV!=="undefined"?TERMS_INV:[])
+        .concat(typeof TERMS_INV_PLUS!=="undefined"?TERMS_INV_PLUS:[]);
+      const set={};
+      rows.forEach(r=>{ const id=specKmId(r.model, r.trim); if(id) set[id]=1; });
+      return set;
+    }
+    function stockIsSpec(car){
+      if(!car || typeof kmIdFromCar!=="function") return false;
+      return !!stockSpecIds()[kmIdFromCar(car)];
+    }
     function stock(){
       if(needAuth()) return login();
       if(typeof stockSort!=="string" || stockSort==="year") stockSort="trim";
@@ -6714,7 +6757,8 @@ async function pingTelegram(body){
         if(stockFilter!=="all" && x.model!==stockFilter) return false;
         if(stockStatus==="test") return false;
         if(stockStatus==="taxi" && !x.taxi) return false;
-        if(stockStatus!=="all" && stockStatus!=="taxi" && x.status!==stockStatus) return false;
+        if(stockStatus==="spec" && !stockIsSpec(x)) return false;
+        if(stockStatus!=="all" && stockStatus!=="taxi" && stockStatus!=="spec" && x.status!==stockStatus) return false;
         if(!invOk(x)) return false;
         return true;
       });
@@ -6724,12 +6768,13 @@ async function pingTelegram(body){
       const nIn=statusScoped.filter(x=>x.status==="in").length;
       const nWay=statusScoped.filter(x=>x.status==="way").length;
       const nTaxi=statusScoped.filter(x=>x.taxi).length;
-      const invScoped=modelScoped.filter(x=>stockStatus==="all"||stockStatus==="test"||x.status===stockStatus);
+      const nSpec=statusScoped.filter(stockIsSpec).length;
+      const invScoped=modelScoped.filter(x=>stockStatus==="all"||stockStatus==="test"||(stockStatus==="spec"?stockIsSpec(x):x.status===stockStatus));
       const nInv=invScoped.filter(x=>!!x.invoice).length;
       const nDir=invScoped.filter(x=>!x.invoice).length;
       const byModel={};
       list.forEach(r=>{ (byModel[r.model]=byModel[r.model]||[]).push(r); });
-      const ids=stockIds(byModel);
+      const ids=stockIds(byModel).concat(stockStatus==="spec"?["pl4","pl6"].filter(id=>byModel[id]):[]);
       const sorts=[["price","Цена"],["color","Цвет"],["trim","Комплектация"]];
       const sortBtns=sorts.map(([k,lab])=>{
         const on=stockSort===k;
@@ -6740,7 +6785,7 @@ async function pingTelegram(body){
       const testOn=stockStatus==="test" && !q;
       const stockBody = testOn ? stockTestHtml() : list.length
         ? `<div class="st-board">`+ids.map(id=>{
-            const titles={t4:["TENET","T4"],t4l:["TENET","T4L"],t7:["TENET","T7"],t8:["TENET","T8"],tt9:["TENET","T9"],t9:["CHERY","Tiggo 9"],t7l:["CHERY","Tiggo 7 L"],ta8:["TENET","A8"],a8:["CHERY","Arrizo 8"]};
+            const titles={t4:["TENET","T4"],t4l:["TENET","T4L"],t7:["TENET","T7"],t8:["TENET","T8"],tt9:["TENET","T9"],t9:["CHERY","Tiggo 9"],t7l:["CHERY","Tiggo 7 L"],ta8:["TENET","A8"],a8:["CHERY","Arrizo 8"],pl4:["TENET PLUS","L4"],pl6:["TENET PLUS","L6"]};
             const known=titles[id];
             const base=MODELS[id]||{id,brand:"TENET",name:id.toUpperCase()};
             const m=known?Object.assign({},base,{brand:known[0],name:known[1]}):base;
@@ -6780,13 +6825,14 @@ async function pingTelegram(body){
             const body = (stockBody || tests) ? (testOn ? stockBody : stockBody+tests) : `<div class="card" style="margin-top:12px"><p>${q?"VIN не найден.":"По этому фильтру машин нет."}</p></div>`;
       const typed=escape(typeof stockVin==="string"?stockVin:"");
       return banner("Склад", `Logicstars · ${meta.updated}`, "TENET")+`
-        <p class="lead">${q?"Поиск по VIN по складу и тестам. Хвост номера тоже подходит.":(stockStatus==="taxi"?"Авто с зелёной меткой «Такси» в Logicstars. Шашечка на карточке — подходит для такси.":(testOn?"Четыре теста. Цена в последней колонке фиксированная, продажа только через PANGO.":"Сначала модель, внутри — комплектация. Сортировка меняет порядок машин и групп."))}</p>
+        <p class="lead">${q?"Поиск по VIN по складу и тестам. Хвост номера тоже подходит.":(stockStatus==="taxi"?"Авто с зелёной меткой «Такси» в Logicstars. Шашечка на карточке — подходит для такси.":(stockStatus==="spec"?"Комплектации из блоков «Спец · TENET» и «Спец · TENET+».":(testOn?"Четыре теста. Цена в последней колонке фиксированная, продажа только через PANGO.":"Сначала модель, внутри — комплектация. Сортировка меняет порядок машин и групп.")))}</p>
         <div class="st-sticky"><input id="stockVin" class="st-vin-search" type="search" inputmode="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Поиск по VIN" value="${typed}"></div>
         <div class="study-pick st-filters">
           <button class="chip ${stockStatus==="all"?"on":""}" data-stock-st="all">Все · ${scoped.length}</button>
           <button class="chip ${stockStatus==="in"?"on":""}" data-stock-st="in">В наличии · ${nIn}</button>
           <button class="chip ${stockStatus==="way"?"on":""}" data-stock-st="way">В пути · ${nWay}</button>
           <button class="chip ${stockStatus==="taxi"?"on":""}" data-stock-st="taxi">Такси · ${nTaxi}</button>
+          <button class="chip ${stockStatus==="spec"?"on":""}" data-stock-st="spec">Спец · ${nSpec}</button>
           <button class="chip ${stockStatus==="test"?"on":""}" data-stock-st="test">Тесты в продаже · ${(typeof TEST_SALE!=="undefined"?TEST_SALE.length:0)}</button>
         </div>
         ${testOn?"":`<div class="study-pick st-filters st-inv">
