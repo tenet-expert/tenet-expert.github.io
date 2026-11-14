@@ -1691,6 +1691,16 @@ body:has(.sched-page) .wrap{max-width:1180px;}
   .terms-acc-btn{padding:12px 14px;font-size:16px}
   .sber-block .terms-acc-panel{padding:0 12px 12px}
 }
+.test-sale-acc{border:1px solid var(--border);border-radius:16px;background:#fff;box-shadow:0 1px 0 rgba(17,17,20,.04);overflow:hidden}
+.test-sale-acc .terms-acc-btn{color:#1c1a17}
+.test-sale-acc .terms-acc-panel{padding:0 14px 14px}
+.test-sale-h{margin:0 0 8px;font-size:16px;letter-spacing:-.02em}
+.terms-col>.terms-spec,.terms-col>.sber-block,.terms-col>.fleet-board.terms-fold,.terms-col>.terms-top,.terms-col>.test-sale-acc{margin:0 0 12px}
+.terms-col>.terms-spec{gap:12px}
+.terms-col>.terms-top{display:grid;grid-template-columns:1fr;gap:12px}
+@media(min-width:900px){
+  .terms-col>.terms-top{grid-template-columns:1fr 1fr}
+}
 
 </style>
 </head>
@@ -5697,7 +5707,7 @@ async function pingTelegram(body){
         `<details class="terms-fold"><summary>Бонусы</summary>`+
         `<div class="terms-cards">`+termGroup(TERMS_BONUS,"bonus")+`</div></details>`+
         `</div>`+
-        (typeof stockTestHtml==="function"?stockTestHtml():"")+
+        (typeof stockTestHtml==="function"?stockTestHtml(true):"")+
         `<h2>Приоритет · октябрь · ${TERMS_PRIO.length} авто</h2>`+
         `<p class="lead">Личного плана нет. Командная победа — 13 машин из списка.</p>`+
         prioList()+
@@ -6644,7 +6654,7 @@ async function pingTelegram(body){
     function stockVinNorm(s){
       return String(s||"").toUpperCase().replace(/[^A-Z0-9]/g,"");
     }
-    function stockTestHtml(){
+    function stockTestHtml(asAcc){
       const q=stockVinNorm(typeof stockVin==="string"?stockVin:"");
       const cars=(typeof TEST_SALE!=="undefined"?TEST_SALE:[]).filter(c=>!q || stockVinNorm(c.vin).indexOf(q)>=0);
       if(!cars.length) return "";
@@ -6658,7 +6668,9 @@ async function pingTelegram(body){
         <td>${rub(c.fix)} ₽</td>
         <td><button type="button" class="chip" data-km-id="${c.id}">Калькулятор</button></td>
       </tr>`).join("");
-      return `<div class="card"><p class="eyebrow">Тесты в продаже</p><h3 style="margin:4px 0 8px">Цена фикс</h3><p class="tune-note">Как в таблице отдела. Продажа на Авито, только через PANGO. Скидки директа и флита не действуют, тюнинг уже в машине.</p><div class="tune-scroll"><table class="tune-table test-sale"><thead><tr><th>Модель</th><th>VIN</th><th>Цена розница</th><th>Сумма тюнинга</th><th>Год</th><th>Пробег</th><th>Цена фикс</th><th></th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
+      const body=`<h3 class="test-sale-h">Цена фикс</h3><p class="tune-note">Как в таблице отдела. Продажа на Авито, только через PANGO. Скидки директа и флита не действуют, тюнинг уже в машине.</p><div class="tune-scroll"><table class="tune-table test-sale"><thead><tr><th>Модель</th><th>VIN</th><th>Цена розница</th><th>Сумма тюнинга</th><th>Год</th><th>Пробег</th><th>Цена фикс</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`;
+      if(asAcc) return `<section class="terms-acc test-sale-acc" id="test-sale-terms"><h2 class="terms-acc-h"><button type="button" class="terms-acc-btn" aria-expanded="false" aria-controls="test-sale-panel"><span class="terms-chevron" aria-hidden="true"></span><span class="terms-acc-title">Тесты в продаже</span></button></h2><div class="terms-acc-panel" id="test-sale-panel" hidden>${body}</div></section>`;
+      return `<div class="card"><p class="eyebrow">Тесты в продаже</p>${body}</div>`;
     }
     /*stock-taxi-block v1: Logicstars Confirm.svg tooltip «Такси»; red BallRed is separate.*/
     function stockTaxiBlock(rows){
