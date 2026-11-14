@@ -129,7 +129,7 @@ STOCK_CARD = r"""    function stockCard(r){
       const superOn=typeof EXCL_FIX!=="undefined"&&EXCL_FIX[r.vin]&&r.model==="t4l";
       const notes=[];
       if(typeof PANGO_ONLY!=="undefined"&&PANGO_ONLY[r.vin]) notes.push("спеццена · сотрудник · 1 хоз ГИБДД · 500 км · только PANGO");
-      if(superOn) notes.push("СУПЕРСПЕЦ "+Math.round(EXCL_FIX[r.vin].cash/1000)+" нал / "+Math.round(EXCL_FIX[r.vin].ti/1000)+" с ТИ");
+      if(superOn) notes.push("Спец "+Math.round(EXCL_FIX[r.vin].cash/1000)+" нал / "+Math.round(EXCL_FIX[r.vin].ti/1000)+" с ТИ");
       if(typeof KM_FORK!=="undefined"&&KM_FORK[r.vin]) notes.push("КМ "+KM_FORK[r.vin].ti+" тыс. с трейд-ин · "+KM_FORK[r.vin].cash+" без");
       if(r.note) notes.push(r.note);
       const open=(typeof stockCardVin==="string" && stockCardVin && stockCardVin===r.vin)?" open":"";
@@ -140,7 +140,7 @@ STOCK_CARD = r"""    function stockCard(r){
         ${r.taxi?`<i class="st-taxi-dot" title="Подходит для такси" aria-label="Подходит для такси"></i>`:""}
         <div class="st-swatch">${escape(r.color||"")}</div>
         <div class="st-face">
-          <b class="st-name">${escape(model)}${superOn?" · СУПЕРСПЕЦ":""}</b>
+          <b class="st-name">${escape(model)}${superOn?" · Спец":""}</b>
           <span class="st-trim">${escape(trim||"—")}</span>
           <span class="st-tail">${tail?escape(tail):""}</span>
           <span class="st-when">${escape(stay.line)}</span>
