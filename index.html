@@ -6698,48 +6698,8 @@ async function pingTelegram(body){
         <div id="taxi-stock-list" class="st-taxi-models">${models}</div>
       </section>`;
     }
-    function specKmId(model, trim){
-      const m=String(model||"");
-      const t=String(trim||"").toLowerCase();
-      const four=t.includes("4wd");
-      const prime=t.includes("prime")||t.includes("прайм");
-      const ultra=t.includes("ultra")||t.includes("ультра");
-      const seven=t.includes("7");
-      if(m==="T4L") return prime?"t4lp":"t4la";
-      if(m==="T7"){
-        if(four&&prime) return "t7p4";
-        if(four) return "t7a4";
-        if(prime) return "t7p";
-        return "t7a";
-      }
-      if(m==="T8"){
-        if(ultra) return "t8u4";
-        if(four) return "t8p4";
-        if(prime) return "t8p";
-        return "t8a";
-      }
-      if(m==="T9"){
-        if(t.includes("prestige")||t.includes("престиж")) return "tt9s7";
-        if(seven&&ultra) return "tt9u7";
-        if(ultra) return "tt9u";
-        if(prime) return "tt9p";
-        return "";
-      }
-      if(m==="L4") return (t.includes("style")||t.includes("стайл"))?"l4s":"l4e";
-      if(m==="L6") return ultra?"l6u":"l6e";
-      return "";
-    }
-    function stockSpecIds(){
-      const rows=[]
-        .concat(typeof TERMS_INV!=="undefined"?TERMS_INV:[])
-        .concat(typeof TERMS_INV_PLUS!=="undefined"?TERMS_INV_PLUS:[]);
-      const set={};
-      rows.forEach(r=>{ const id=specKmId(r.model, r.trim); if(id) set[id]=1; });
-      return set;
-    }
     function stockIsSpec(car){
-      if(!car || typeof kmIdFromCar!=="function") return false;
-      return !!stockSpecIds()[kmIdFromCar(car)];
+      return !!(car && car.invoice);
     }
     function stock(){
       if(needAuth()) return login();
@@ -6826,7 +6786,7 @@ async function pingTelegram(body){
             const body = (stockBody || tests) ? (testOn ? stockBody : stockBody+tests) : `<div class="card" style="margin-top:12px"><p>${q?"VIN не найден.":"По этому фильтру машин нет."}</p></div>`;
       const typed=escape(typeof stockVin==="string"?stockVin:"");
       return banner("Склад", `Logicstars · ${meta.updated}`, "TENET")+`
-        <p class="lead">${q?"Поиск по VIN по складу и тестам. Хвост номера тоже подходит.":(stockStatus==="taxi"?"Авто с зелёной меткой «Такси» в Logicstars. Шашечка на карточке — подходит для такси.":(stockStatus==="spec"?"Комплектации из блоков «Спец · TENET» и «Спец · TENET+».":(testOn?"Четыре теста. Цена в последней колонке фиксированная, продажа только через PANGO.":"Сначала модель, внутри — комплектация. Сортировка меняет порядок машин и групп.")))}</p>
+        <p class="lead">${q?"Поиск по VIN по складу и тестам. Хвост номера тоже подходит.":(stockStatus==="taxi"?"Авто с зелёной меткой «Такси» в Logicstars. Шашечка на карточке — подходит для такси.":(stockStatus==="spec"?"Машины по спецзакупу. На карточке плашка «Спец инвойс».":(testOn?"Четыре теста. Цена в последней колонке фиксированная, продажа только через PANGO.":"Сначала модель, внутри — комплектация. Сортировка меняет порядок машин и групп.")))}</p>
         <div class="st-sticky"><input id="stockVin" class="st-vin-search" type="search" inputmode="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Поиск по VIN" value="${typed}"></div>
         <div class="study-pick st-filters">
           <button class="chip ${stockStatus==="all"?"on":""}" data-stock-st="all">Все · ${scoped.length}</button>
