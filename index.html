@@ -6699,7 +6699,7 @@ async function pingTelegram(body){
       </section>`;
     }
     function stockIsSpec(car){
-      return !!(car && car.invoice);
+      return !!(car && car.spec===true);
     }
     function stock(){
       if(needAuth()) return login();
@@ -6719,7 +6719,7 @@ async function pingTelegram(body){
         if(stockStatus==="taxi" && !x.taxi) return false;
         if(stockStatus==="spec" && !stockIsSpec(x)) return false;
         if(stockStatus!=="all" && stockStatus!=="taxi" && stockStatus!=="spec" && x.status!==stockStatus) return false;
-        if(!invOk(x)) return false;
+        if(stockStatus!=="spec" && !invOk(x)) return false;
         return true;
       });
       const modelScoped=stockFilter==="all"?sale:sale.filter(x=>x.model===stockFilter);
@@ -6728,7 +6728,7 @@ async function pingTelegram(body){
       const nIn=statusScoped.filter(x=>x.status==="in").length;
       const nWay=statusScoped.filter(x=>x.status==="way").length;
       const nTaxi=statusScoped.filter(x=>x.taxi).length;
-      const nSpec=statusScoped.filter(stockIsSpec).length;
+      const nSpec=modelScoped.filter(stockIsSpec).length;
       const invScoped=modelScoped.filter(x=>stockStatus==="all"||stockStatus==="test"||(stockStatus==="spec"?stockIsSpec(x):x.status===stockStatus));
       const nInv=invScoped.filter(x=>!!x.invoice).length;
       const nDir=invScoped.filter(x=>!x.invoice).length;
@@ -6786,7 +6786,7 @@ async function pingTelegram(body){
             const body = (stockBody || tests) ? (testOn ? stockBody : stockBody+tests) : `<div class="card" style="margin-top:12px"><p>${q?"VIN не найден.":"По этому фильтру машин нет."}</p></div>`;
       const typed=escape(typeof stockVin==="string"?stockVin:"");
       return banner("Склад", `Logicstars · ${meta.updated}`, "TENET")+`
-        <p class="lead">${q?"Поиск по VIN по складу и тестам. Хвост номера тоже подходит.":(stockStatus==="taxi"?"Авто с зелёной меткой «Такси» в Logicstars. Шашечка на карточке — подходит для такси.":(stockStatus==="spec"?"Машины по спецзакупу. На карточке плашка «Спец инвойс».":(testOn?"Четыре теста. Цена в последней колонке фиксированная, продажа только через PANGO.":"Сначала модель, внутри — комплектация. Сортировка меняет порядок машин и групп.")))}</p>
+        <p class="lead">${q?"Поиск по VIN по складу и тестам. Хвост номера тоже подходит.":(stockStatus==="taxi"?"Авто с зелёной меткой «Такси» в Logicstars. Шашечка на карточке — подходит для такси.":(stockStatus==="spec"?"Машины по спецзакупу, в том числе ещё не отгруженные.":(testOn?"Четыре теста. Цена в последней колонке фиксированная, продажа только через PANGO.":"Сначала модель, внутри — комплектация. Сортировка меняет порядок машин и групп.")))}</p>
         <div class="st-sticky"><input id="stockVin" class="st-vin-search" type="search" inputmode="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Поиск по VIN" value="${typed}"></div>
         <div class="study-pick st-filters">
           <button class="chip ${stockStatus==="all"?"on":""}" data-stock-st="all">Все · ${scoped.length}</button>
