@@ -1669,6 +1669,29 @@ body:has(.sched-page) .wrap{max-width:1180px;}
   .sber-sheet td.num::before{content:attr(data-label);color:#6d6458;font-weight:650;font-size:12px;letter-spacing:.04em;text-transform:uppercase}
 }
 
+.terms-spec section.terms-acc{padding:0;height:auto}
+.terms-spec{align-items:start}
+.sber-block.terms-acc{padding:0}
+.terms-acc-h,.terms-spec .terms-acc-h,.sber-block .terms-acc-h{margin:0}
+.sber-block .terms-acc-title .eyebrow{margin:0}
+.terms-acc-btn{width:100%;display:flex;align-items:center;justify-content:flex-start;gap:10px;text-align:left;background:transparent;border:0;color:inherit;font:800 18px/1.2 Inter,system-ui,sans-serif;letter-spacing:-.02em;padding:14px 16px;min-height:48px;cursor:pointer}
+.terms-acc-btn:focus-visible{outline:2px solid currentColor;outline-offset:-4px}
+.terms-acc-title{min-width:0;flex:1}
+.terms-chevron{flex:none;width:9px;height:9px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(-45deg);margin:0 2px 0 0;transition:transform .15s ease}
+.terms-acc-btn[aria-expanded="true"] .terms-chevron{transform:rotate(45deg);margin-top:2px}
+.terms-acc-panel[hidden]{display:none !important}
+.terms-spec .terms-acc-btn{color:#8a5a10}
+.terms-spec .terms-acc-panel{padding:0 12px 8px}
+.sber-block .terms-acc-btn{color:#14532d;align-items:flex-start;padding:14px 16px}
+.sber-block .terms-chevron{margin-top:7px}
+.sber-block .terms-acc-btn[aria-expanded="true"] .terms-chevron{margin-top:9px}
+.sber-block .terms-acc-title{display:flex;flex-direction:column;align-items:flex-start;gap:4px;font-size:clamp(18px,2.2vw,22px);line-height:1.2}
+.sber-block .terms-acc-panel{padding:0 14px 12px}
+@media(max-width:720px){
+  .terms-acc-btn{padding:12px 14px;font-size:16px}
+  .sber-block .terms-acc-panel{padding:0 12px 12px}
+}
+
 </style>
 </head>
 <body>
@@ -5637,9 +5660,12 @@ async function pingTelegram(body){
         const fresh=model!==prev; prev=model;
         return `<tr class="${fresh?"sber-new":""}"><td class="model">${sberModelHtml(model)}</td><td class="trim">${escape(trim)}</td><td class="num" data-label="РРЦ">${rub(rrc)}</td><td class="num" data-label="Спеццена">${rub(spec)}</td><td class="num benefit" data-label="Выгода">${rub(benefit)}</td></tr>`;
       }).join("");
-      return `<section class="sber-block" id="sber-terms">`+
-        `<p class="eyebrow">Сбер</p>`+
-        `<h2>Специальные цены для сотрудников Сбера и аффилированных компаний</h2>`+
+      return `<section class="sber-block terms-acc" id="sber-terms">`+
+        `<h2 class="terms-acc-h"><button type="button" class="terms-acc-btn" aria-expanded="false" aria-controls="sber-terms-panel">`+
+        `<span class="terms-chevron" aria-hidden="true"></span>`+
+        `<span class="terms-acc-title"><span class="eyebrow">Сбер</span>Специальные цены для сотрудников Сбера и аффилированных компаний</span>`+
+        `</button></h2>`+
+        `<div class="terms-acc-panel" id="sber-terms-panel" hidden>`+
         `<p class="lead">Автомобили TENET и TENET PLUS · цены действуют с 12.11.2026</p>`+
         `<p class="sber-hi">Выгода до 100 000 ₽ при обмене по трейд-ин</p>`+
         `<div class="sber-wrap"><table class="sber-sheet">`+
@@ -5651,17 +5677,17 @@ async function pingTelegram(body){
         SBER_AFF.map(function(name){ return `<li>${escape(name)}</li>`; }).join("")+
         `</ol></div>`+
         `<p class="sber-fine">Цены действуют с 12.11.2026. Цены указаны без учёта дополнительного оборудования и тюнинга. Не является публичной офертой. Подробности уточняйте у менеджера.</p>`+
-        `</section>`;
+        `</div></section>`;
     }
     function terms(){
       if(needAuth()) return login();
       return banner("Торговые условия","Файл «Торговые условия» · с "+TERMS_DATE,"TENET")+
         `<div class="terms-col">`+
         `<div class="terms-spec">`+
-        `<section class="spec-tenet"><h2>Спец · TENET</h2>`+
-        `<div class="terms-cards">`+termGroup(TERMS_INV,"price")+`</div></section>`+
-        `<section class="spec-plus"><h2>Спец · TENET+</h2>`+
-        `<div class="terms-cards">`+termGroup(typeof TERMS_INV_PLUS!=="undefined"?TERMS_INV_PLUS:[],"price")+`</div></section>`+
+        `<section class="terms-acc spec-tenet"><h2 class="terms-acc-h"><button type="button" class="terms-acc-btn" aria-expanded="false" aria-controls="spec-tenet-panel"><span class="terms-chevron" aria-hidden="true"></span><span class="terms-acc-title">Спец · TENET</span></button></h2>`+
+        `<div class="terms-acc-panel" id="spec-tenet-panel" hidden><div class="terms-cards">`+termGroup(TERMS_INV,"price")+`</div></div></section>`+
+        `<section class="terms-acc spec-plus"><h2 class="terms-acc-h"><button type="button" class="terms-acc-btn" aria-expanded="false" aria-controls="spec-plus-panel"><span class="terms-chevron" aria-hidden="true"></span><span class="terms-acc-title">Спец · TENET+</span></button></h2>`+
+        `<div class="terms-acc-panel" id="spec-plus-panel" hidden><div class="terms-cards">`+termGroup(typeof TERMS_INV_PLUS!=="undefined"?TERMS_INV_PLUS:[],"price")+`</div></div></section>`+
         `</div>`+
         sberTermsHtml()+
         fleetPricesHtml()+
@@ -10439,6 +10465,12 @@ async function confirmCloud(rec){
     }
     function next(){ if(idx+1>=paper.length) finish(); else { idx++; selected=[]; locked=false; qDeadline=Date.now()+QSEC*1000; left=QSEC; persistRun(false); render(); } }
     function bind(){
+      document.querySelectorAll(".terms-acc-btn").forEach(btn=>btn.onclick=()=>{
+        const open=btn.getAttribute("aria-expanded")==="true";
+        const panel=document.getElementById(btn.getAttribute("aria-controls")||"");
+        btn.setAttribute("aria-expanded", open?"false":"true");
+        if(panel){ if(open) panel.setAttribute("hidden",""); else panel.removeAttribute("hidden"); }
+      });
       const retryCloud=document.getElementById("retryCloud");
       if(retryCloud) retryCloud.onclick=async ()=>{
         if(savingCloud) return;
