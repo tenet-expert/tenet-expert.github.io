@@ -137,7 +137,11 @@
           const note=b.termNote?b.termNote:(b.capped?`нет ${yearsWant} ${yearsWant===1?"года":"лет"} · считаем ${b.term} мес. (${yearsHave} ${yearsHave===1?"год":yearsHave<5?"года":"лет"})`: `${b.term} мес.`);
           const pay=Math.round(b[payKey]||0);
           const over=Math.round(b[overKey]||0);
-          return `<div class="bank-row"><span><b>${escape(b.name)}</b><br/><small>${b.rate}% · ${note} · переплата ~${rub(over)}</small></span><span class="pay">${rub(pay)} ₽</span></div>`;
+          const isSov=b.id==="sovcom" || /совком/i.test(b.name||"");
+          const cls=isSov?"bank-row sovcom-priority":"bank-row";
+          const style=isSov?' style="background:#fff8e6;border-radius:10px;padding:12px 14px;margin:4px -6px;box-shadow:0 0 0 2px #f5a623"':'';
+          const badge=isSov?' <span style="background:#f5a623;color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;margin-left:6px;letter-spacing:.04em">ПРИОРИТЕТ</span>':'';
+          return `<div class="${cls}"${style}><span><b>${escape(b.name)}</b>${badge}<br/><small>${b.rate}% · ${note} · переплата ~${rub(over)}</small></span><span class="pay"${isSov?' style="font-size:20px;color:#c47d00"':''}>${rub(pay)} ₽</span></div>`;
         }).join("");
       }
       const _pg=(typeof pangoOf==="function")?pangoOf(m.id):null;
@@ -172,7 +176,8 @@
         pOk=pKmK+0.05>=lo && pKmK-0.05<=hi;
       }
       let plusAltDirect="", plusAltFleet="", altPick="";
-      if(useLoan && (isPlus || m.brand==="TENET")){
+      const hideAlt=true;
+      if(!hideAlt && useLoan && (isPlus || m.brand==="TENET")){
         const wantPlus=!isPlus;
         const alts=(typeof KM_MODELS!=="undefined"?KM_MODELS:[]).filter(x=>x && x.brand===(wantPlus?"TENET PLUS":"TENET"));
         if(typeof kmAltFor!=="string") kmAltFor="";
