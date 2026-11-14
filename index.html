@@ -6482,7 +6482,7 @@ async function pingTelegram(body){
       bits.push(`<span class="st ${r.status}">${(ST_LABEL&&ST_LABEL[r.status])||r.status}</span>`);
       const superSpec=typeof EXCL_FIX!=="undefined" && !!EXCL_FIX[r.vin] && r.model==="t4l";
       const wayDual=r.status==="way" && (r.model==="t8"||r.model==="t9");
-      if(superSpec) bits.push(`<span class="st super">СУПЕРСПЕЦ</span>`);
+      if(superSpec) bits.push(`<span class="st inv">Спец</span>`);
       else if(wayDual) bits.push(`<span class="st inv">Спец</span> <span class="st mpt">Директ/флит</span>`);
       else if(r.invoice) bits.push(`<span class="st inv">Спец инвойс</span>`);
       else {
@@ -6615,7 +6615,7 @@ async function pingTelegram(body){
       const superOn=typeof EXCL_FIX!=="undefined"&&EXCL_FIX[r.vin]&&r.model==="t4l";
       const notes=[];
       if(typeof PANGO_ONLY!=="undefined"&&PANGO_ONLY[r.vin]) notes.push("спеццена · сотрудник · 1 хоз ГИБДД · 500 км · только PANGO");
-      if(superOn) notes.push("СУПЕРСПЕЦ "+Math.round(EXCL_FIX[r.vin].cash/1000)+" нал / "+Math.round(EXCL_FIX[r.vin].ti/1000)+" с ТИ");
+      if(superOn) notes.push("Спец "+Math.round(EXCL_FIX[r.vin].cash/1000)+" нал / "+Math.round(EXCL_FIX[r.vin].ti/1000)+" с ТИ");
       if(typeof KM_FORK!=="undefined"&&KM_FORK[r.vin]) notes.push("КМ "+KM_FORK[r.vin].ti+" тыс. с трейд-ин · "+KM_FORK[r.vin].cash+" без");
       if(r.note) notes.push(r.note);
       const open=(typeof stockCardVin==="string" && stockCardVin && stockCardVin===r.vin)?" open":"";
@@ -6626,7 +6626,7 @@ async function pingTelegram(body){
         ${r.taxi?`<i class="st-taxi-dot" title="Подходит для такси" aria-label="Подходит для такси"></i>`:""}
         <div class="st-swatch" aria-hidden="true"></div>
         <div class="st-face">
-          <b class="st-name">${escape(model)}${superOn?" · СУПЕРСПЕЦ":""}</b>
+          <b class="st-name">${escape(model)}${superOn?" · Спец":""}</b>
           <span class="st-trim">${escape(trim||"—")}</span>
           <span class="st-tail">${tail?escape(tail):""}</span>
           <span class="st-when">${escape(stay.line)}</span>
