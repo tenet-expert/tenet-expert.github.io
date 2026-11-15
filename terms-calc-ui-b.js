@@ -60,7 +60,10 @@
       const crBack=useCr?m.crBack:0;
       let lo=prio?m.prioMin:m.kmMin;
       let hi=prio?m.prioMax:m.kmMax;
-      if(!useTi && (m.id==="l6e" || m.id==="l6u")){ lo=50; hi=50; }
+      if(m.stock==="pl4" || m.stock==="pl6"){
+        const fix=useTi?lo:hi;
+        lo=fix; hi=fix;
+      }
       const dcPack={rrc,invoice,vat:m.vat,fee:m.fee,bonus:m.bonus,tiAmt,tiBack,spec,dcTi,crAmt,crBack,addons,casco,card};
       const dcFit=typeof kmDcCrFit==="function"?kmDcCrFit(dcPack, lo):(typeof KM_DC_DEF==="number"?KM_DC_DEF:100000);
       const dcMin=typeof kmDcCrMin==="function"?kmDcCrMin(dcPack, hi):0;

@@ -11,8 +11,8 @@
       {model:"T8",trim:"Остальные",km:"0 / 30",note:""},
       {model:"T9",trim:"Все",km:"0 / 30",note:""},
       {model:"A8",trim:"Все",km:"0 / 30",note:""},
-      {model:"L6",trim:"Все",km:"0 / 50",note:""},
-      {model:"L4",trim:"Все",km:"−30 / 50",note:""}
+      {model:"L6",trim:"Все",km:"0 / 50",note:"фикс: с ТИ 0, без ТИ 50"},
+      {model:"L4",trim:"Все",km:"−30 / 50",note:"фикс: с ТИ −30, без ТИ 50"}
     ];
     const TERMS_BONUS = [
       {model:"T4L",trim:"Все",bonus:"2%"},
