@@ -1,16 +1,16 @@
     const TERMS_DATE = "13.11.2026";
     const KM_CORRIDOR = [
-      {model:"T4L",trim:"Все",km:"0 / 50",note:""},
-      {model:"T7",trim:"Все",km:"30 / 80",note:""},
+      {model:"T4L",trim:"Все",km:"0 / 50",note:"фикс: с ТИ 0, без ТИ 50"},
+      {model:"T7",trim:"Все",km:"30 / 80",note:"фикс: с ТИ 30, без ТИ 80"},
       {model:"T7",trim:"EDEFD32B4TE136144",km:"100 / 200",note:"Prime 4WD"},
       {model:"T7",trim:"EDEFB32B2TE136648",km:"50 / 100",note:"Prime 2WD"},
       {model:"T7",trim:"EDEFB32B2TE136567",km:"50 / 100",note:"Prime 2WD"},
       {model:"T7",trim:"EDEFD32B9TE138147",km:"50 / 100",note:"Active 4WD"},
       {model:"T7",trim:"EDEFD32B3TE138225",km:"50 / 100",note:"Active 4WD"},
       {model:"T8",trim:"Приоритет",km:"−50 / 0",note:"Только 2 VIN Prime 4WD; приоритетные 2WD — стандарт 0/30"},
-      {model:"T8",trim:"Остальные",km:"0 / 30",note:""},
-      {model:"T9",trim:"Все",km:"0 / 30",note:""},
-      {model:"A8",trim:"Все",km:"0 / 30",note:""},
+      {model:"T8",trim:"Остальные",km:"0 / 30",note:"фикс: с ТИ 0, без ТИ 30"},
+      {model:"T9",trim:"Все",km:"0 / 30",note:"фикс: с ТИ 0, без ТИ 30"},
+      {model:"A8",trim:"Все",km:"0 / 30",note:"фикс: с ТИ 0, без ТИ 30"},
       {model:"L6",trim:"Все",km:"0 / 50",note:"фикс: с ТИ 0, без ТИ 50"},
       {model:"L4",trim:"Все",km:"−30 / 50",note:"фикс: с ТИ −30, без ТИ 50"}
     ];
