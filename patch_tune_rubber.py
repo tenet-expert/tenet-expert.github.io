@@ -216,6 +216,14 @@ PAIRS += [
 ]
 
 
+# Drive 13.11.2026: в файле снова «Автошина» у Ikon T4L (отмена снятия префикса от 27.10,
+# иначе pages.yml на каждом деплое обрезает название парой от 27.10)
+PAIRS += [
+    ('["225/60 R18 Ikon 104T XL Character Ice 7 SUV TL /шипованная/",16000,64000,"3"]',
+     '["Автошина 225/60 R18 Ikon 104T XL Character Ice 7 SUV TL /шипованная/",16000,64000,"3"]'),
+]
+
+
 def patch(path: Path) -> bool:
     if not path.exists():
         return False
