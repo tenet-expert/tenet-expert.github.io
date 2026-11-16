@@ -207,6 +207,15 @@ PAIRS += [
 ]
 
 
+
+# Drive 13.11.2026 (сверка 16.11): T4L / L6 снова Ikon 225/60 R18
+# 16 000/64 000 ×3 — между Triangle и Landspider (как в файле)
+PAIRS += [
+    ('["T4L / L6",[["Автошины Triangle TRIN PL01 225/60 R18 104R липучка",11500,46000,"2"],["Автошина 225/60 R18 Landspider 104T XL Arctictraxx TL BSW (шип.) ",13000,52000,"3"]]]',
+     '["T4L / L6",[["Автошины Triangle TRIN PL01 225/60 R18 104R липучка",11500,46000,"2"],["Автошина 225/60 R18 Ikon 104T XL Character Ice 7 SUV TL /шипованная/",16000,64000,"3"],["Автошина 225/60 R18 Landspider 104T XL Arctictraxx TL BSW (шип.) ",13000,52000,"3"]]]'),
+]
+
+
 def patch(path: Path) -> bool:
     if not path.exists():
         return False
