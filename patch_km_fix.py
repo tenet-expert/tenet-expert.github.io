@@ -21,7 +21,7 @@ import re, shutil, subprocess, tempfile, os
 from pathlib import Path
 
 TARGETS = [Path("index.html"), Path("_site/index.html")]
-NO_CREDIT = {"t7p"}
+NO_CREDIT = set()  # t7p credit restored 16.11.2026
 NUM = r"((?:[−\-–]\s*)?\d+(?:[.,]\d+)?)"
 PAIR = re.compile(NUM + r"\s*/\s*" + NUM)
 
