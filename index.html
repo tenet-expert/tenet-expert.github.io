@@ -528,12 +528,16 @@ input,textarea{width:100%;background:#fff;border:1px solid var(--border);color:v
 .prio-item{padding:12px 14px;border-bottom:1px solid var(--border)}
 .prio-item:last-child{border-bottom:0}
 .prio-item.sold{background:#e8f5e9}
+.prio-item.out{background:#f3f3f3}
+.prio-item.out .prio-top b{color:#8a8a8a;font-weight:600;text-decoration:line-through}
 .prio-item.hold{background:#fff3e0}
 .prio-top{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
 .prio-meta,.prio-pay{color:var(--muted);font-size:13px;margin-top:4px}
 .prio-item.sold .prio-meta,.prio-item.sold .prio-pay{color:#1b5e20}
+.prio-item.out .prio-meta,.prio-item.out .prio-pay{color:#9a9a9a}
 .prio-item.hold .prio-meta,.prio-item.hold .prio-pay{color:#8a5a12}
 .sold-mark{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:#2e7d32}
+.out-mark{color:#5c5c5c;background:#e4e4e4;border-radius:999px;padding:2px 8px;font-weight:700}
 .hold-mark{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:#e65100}
 .sold-mark i{display:inline-flex;min-width:20px;height:20px;padding:0 5px;border-radius:999px;background:#8d6e63;color:#fff;align-items:center;justify-content:center;font-style:normal;font-size:12px}
 .mpt-cal{margin:8px 0 22px;padding:14px;border:1px solid var(--border);border-radius:12px;background:#fff;box-shadow:var(--shadow);max-width:560px}
@@ -4403,7 +4407,8 @@ async function pingTelegram(body){
       return (typeof PANGO_FIX!=="undefined" && PANGO_FIX[id]) || null;
     }
     const TERMS_PRIO = [
-      {model:"T4",vin:"EDEEB31B8TE003261",trim:"Прайм",year:"2026",color:"Светло-серый",extra:"",pay:1000,kmTi:-50,kmCash:0},
+      {model:"T4",vin:"EDEEB31B8TE003261",trim:"Прайм",year:"2026",color:"Светло-серый",extra:"",pay:1000,kmTi:-50,kmCash:0,sold:true,out:true},
+      {model:"Tiggo 7 L",vin:"",trim:"Active",year:"2025",color:"",extra:"",pay:0,sold:true,out:true},
       {model:"T8",vin:"EDXGD34B5TE095631",trim:"Прайм 7 мест 4WD",year:"2026",color:"Чёрный",extra:"",pay:1000,kmTi:-50,kmCash:0},
       {model:"T8",vin:"EDXGD34B8TE095347",trim:"Прайм 7 мест 4WD",year:"2026",color:"Белый",extra:"",pay:1000,kmTi:-50,kmCash:0},
       {model:"T7",vin:"EDEFB32BXTE100707",trim:"Актив",year:"2026",color:"Белый",extra:"",pay:1000,kmTi:0,kmCash:50},
@@ -5461,15 +5466,17 @@ async function pingTelegram(body){
       </div>`;
       const scales=`<div class="prio-scales">${teamBar}</div>`;
       return scales+`<ol class="prio-list">`+TERMS_PRIO.map((r,i)=>{
-        const sold=!!r.sold;
+        const out=!!r.out;
+        const sold=!!r.sold || out;
         const hold=!sold && !!r.reserved;
         const n=r.seller?soldBy[r.seller]||0:0;
-        const mark=sold?(r.seller?`<span class="sold-mark">Продано · ${escape(r.seller)} <i>${n}</i></span>`:`<span class="sold-mark">Продано</span>`):(hold&&r.seller?`<span class="hold-mark">Бронь · ${escape(r.seller)}</span>`:"");
+        const mark=out?`<span class="sold-mark out-mark">Продан</span>`:(sold?(r.seller?`<span class="sold-mark">Продано · ${escape(r.seller)} <i>${n}</i></span>`:`<span class="sold-mark">Продано</span>`):(hold&&r.seller?`<span class="hold-mark">Бронь · ${escape(r.seller)}</span>`:""));
         const extra=r.extra?` · ${escape(r.extra)}`:"";
-        return `<li class="prio-item${sold?" sold":hold?" hold":""}">
+        const meta=(r.vin&&String(r.vin).length>=11)?`${escape(r.vin)} · ${escape(r.color)} · ${escape(r.year)}${extra}`:`Модель снята с продажи${r.trim?` · ${escape(r.trim)}`:""}`;
+        return `<li class="prio-item${out?" out":sold?" sold":hold?" hold":""}">
           <div class="prio-top"><b>${i+1}. ${escape(r.model)} · ${escape(r.trim)}</b>${mark}</div>
-          <div class="prio-meta">${escape(r.vin)} · ${escape(r.color)} · ${escape(r.year)}${extra}</div>
-          <div class="prio-pay">Взнос ${r.pay?rub(r.pay):"—"}</div>
+          <div class="prio-meta">${meta}</div>
+          ${r.pay?`<div class="prio-pay">Взнос ${rub(r.pay)}</div>`:""}
         </li>`;
       }).join("")+`</ol>`;
     }
@@ -5551,7 +5558,6 @@ async function pingTelegram(body){
       return list.filter(c=>!(typeof stockIsDemo==="function"?stockIsDemo(c):c.demo) && c.model===m.stock && kmTrimFit(m,c));
     }
     const FLEET_CAT=[
-      ["T4 Prime",2449000,2299000,2199000,2249000,120000],
       ["T4L Active",2344000,2219000,2189000,2219000,100000],
       ["T4L Prime",2494000,2299000,2279000,2299000,100000],
       ["T7 Active 2WD",2805000,2479000,2369000,2429000,150000],
@@ -5708,7 +5714,7 @@ async function pingTelegram(body){
         `<div class="terms-cards">`+termGroup(TERMS_BONUS,"bonus")+`</div></details>`+
         `</div>`+
         (typeof stockTestHtml==="function"?stockTestHtml(true):"")+
-        `<h2>Приоритет · октябрь · ${TERMS_PRIO.length} авто</h2>`+
+        `<h2>Приоритет · октябрь · ${TERMS_PRIO.length} авто${TERMS_PRIO.some(r=>r.out)?" · "+TERMS_PRIO.filter(r=>r.out).length+" продано":""}</h2>`+
         `<p class="lead">Личного плана нет. Командная победа — 13 машин из списка.</p>`+
         prioList()+
         `<p class="lead">Доплата за 4WD на T7 — 205 000 ₽. Мотор T7 везде 1.6T 150.</p>`+
@@ -5770,7 +5776,7 @@ async function pingTelegram(body){
     }
     function kmChipGroups(active){
       const groups={};
-      const off={t7l:1,t9p:1,t9u:1,a8a:1,a8p:1,a8u:1};
+      const off={t4p:1,t7l:1,t9p:1,t9u:1,a8a:1,a8p:1,a8u:1};
       KM_MODELS.forEach(x=>{
         if(off[x.id]) return;
         const g=kmLineOf(x.id);
@@ -5781,7 +5787,7 @@ async function pingTelegram(body){
       const tests=(typeof TEST_SALE!=="undefined"?TEST_SALE:[]);
       const testSlot=tests.length?slot("s-test", `<div class="km-line tone-test"><p class="stock-h">Тесты в продаже · только PANGO</p><div class="km-grid">${tests.map(x=>`<button type="button" class="chip ${x.id===active?"on":""}" data-km-id="${x.id}">${escape(x.short)}<small>фикс ${rub(x.fix)}</small></button>`).join("")}</div></div>`):"";
       return `<div class="km-board"><span class="km-brand tenet">TENET</span><span class="km-brand plus">TENET PLUS</span><span class="km-brand chery">CHERY</span>`
-        +slot("s-t4",`<div class="km-pair is-2">${line("T4","a")}${line("T4L","a")}</div>`)
+        +slot("s-t4", (groups["T4"]?`<div class="km-pair is-2">${line("T4","a")}${line("T4L","a")}</div>`:line("T4L","a")))
         +slot("s-t7",line("T7","a"))
         +slot("s-c7",line("Tiggo 7 L","b"))
         +slot("s-t8",line("T8","a"))
@@ -5976,8 +5982,8 @@ async function pingTelegram(body){
     function calcKm(){
       const testHit=typeof testSaleOf==="function"?testSaleOf(kmId):null;
       if(testHit) return calcTestSale(testHit);
-      const kmOff={t7l:1,t9p:1,a8a:1,a8u:1};
-      if(typeof kmId!=="string" || !KM_MODELS.some(x=>x.id===kmId && !kmOff[x.id])) kmId=(KM_MODELS.find(x=>!kmOff[x.id])||KM_MODELS[0]).id;
+      const kmOff={t4p:1,t7l:1,t9p:1,a8a:1,a8u:1};
+      if(typeof kmId!=="string" || !KM_MODELS.some(x=>x.id===kmId && !kmOff[x.id])){ kmId=(KM_MODELS.find(x=>!kmOff[x.id])||KM_MODELS[0]).id; kmVin=""; }
       if(typeof kmVin!=="string") kmVin="";
       const m=KM_MODELS.find(x=>x.id===kmId)||KM_MODELS[0];
       if(typeof kmIsCorp==="function" && kmIsCorp(kmVin) && typeof calcFleet==="function") return calcFleet(m);
@@ -6639,7 +6645,7 @@ async function pingTelegram(body){
           <div class="st-flags-mini">${stockBadges(r)}${reservedBadge}</div>
           <p class="st-vin">${escape(r.vin||"")}</p>
           ${notes.length?`<p class="st-notes">${escape(notes.join(" · "))}</p>`:""}
-          <button type="button" class="chip st-calc" data-km-vin="${escape(r.vin)}">Калькулятор</button>
+          ${(r.model==="t4"||r.model==="t7l")?"":`<button type="button" class="chip st-calc" data-km-vin="${escape(r.vin)}">Калькулятор</button>`}
         </div>
       </article>`;
     }
@@ -6908,7 +6914,7 @@ async function pingTelegram(body){
         <div class="hub-grid offer-grid">${cards.map(([id,mark,title,lead])=>`<button class="card hub-card" data-offer-tab="${id}" type="button"><span class="hub-mark">${mark}</span><div class="txt"><h3>${title}</h3><p>${lead}</p></div></button>`).join("")}</div>`;
     }
     function offerDeal(){
-      const models=typeof KM_MODELS!=="undefined"?KM_MODELS:[];
+      const models=(typeof KM_MODELS!=="undefined"?KM_MODELS:[]).filter(x=>x.id!=="t4p"&&x.id!=="t7l");
       const seeded=!!(offerSeed && !document.getElementById("ofModel"));
       const S=seeded?offerSeed:null;
       if(seeded) offerSeed=null;
@@ -7596,7 +7602,7 @@ async function pingTelegram(body){
         ${offerField("Срок действия", `<input id="ofValid" value="${escape(d.valid)}" />`)}`;
     }
     function offerFromCalc(){
-      const models=typeof KM_MODELS!=="undefined"?KM_MODELS:[];
+      const models=(typeof KM_MODELS!=="undefined"?KM_MODELS:[]).filter(x=>x.id!=="t4p"&&x.id!=="t7l");
       const mid=(typeof kmId==="string" && models.some(x=>x.id===kmId))?kmId:(models[0]?models[0].id:"t7a");
       const m=models.find(x=>x.id===mid)||{};
       function num(id, def){
@@ -8168,7 +8174,7 @@ async function pingTelegram(body){
     function offerLease(){
       const models=typeof KM_MODELS!=="undefined"?KM_MODELS:[];
       const fset=typeof FLEET_BFS!=="undefined"?FLEET_BFS:{};
-      const fleetIds=Object.keys(fset);
+      const fleetIds=Object.keys(fset).filter(id=>id!=="t4p"&&id!=="t7l");
       const options=fleetIds.length?fleetIds.map(id=>{ const km=models.find(x=>x.id===id); return {id,brand:km&&km.brand,name:(fset[id]&&fset[id].name)||id,rrc:(fset[id]&&(fset[id].rrc||fset[id].tidy))||0}; }):models;
       const fid=offerVal("olModel", options[0]?options[0].id:(models[0]?models[0].id:"t7a"));
       const m=models.find(x=>x.id===fid)||options.find(x=>x.id===fid)||{id:fid,name:"TENET",rrc:0};
@@ -10617,8 +10623,10 @@ async function confirmCloud(rec){
         view="calc"; render();
       });
       document.querySelectorAll("[data-km-vin]").forEach(b=>b.onclick=()=>{
-        if(view==="stock" && typeof stockLeaveForCalc==="function") stockLeaveForCalc();
         const vin=b.dataset.kmVin||"";
+        const picked=(typeof STOCK!=="undefined"?STOCK:[]).find(x=>x.vin===vin);
+        if(picked && (picked.model==="t4"||picked.model==="t7l")) return;
+        if(view==="stock" && typeof stockLeaveForCalc==="function") stockLeaveForCalc();
         kmVin=vin;
         kmVinQuery=vin;
         kmVinMiss="";

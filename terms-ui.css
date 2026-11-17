@@ -43,6 +43,10 @@
 .prio-item{padding:12px 14px;border-bottom:1px solid var(--border)}
 .prio-item:last-child{border-bottom:0}
 .prio-item.sold{background:#e8f5e9}
+.prio-item.out{background:#f3f3f3}
+.prio-item.out .prio-top b{color:#8a8a8a;font-weight:600;text-decoration:line-through}
+.prio-item.out .prio-meta,.prio-item.out .prio-pay{color:#9a9a9a}
+.out-mark{color:#5c5c5c;background:#e4e4e4;border-radius:999px;padding:2px 8px;font-weight:700}
 .prio-item.hold{background:#fff3e0}
 .prio-top{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
 .prio-meta,.prio-pay{color:var(--muted);font-size:13px;margin-top:4px}
