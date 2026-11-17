@@ -10,14 +10,13 @@
   },
   "summary": {
     "TENET": {
-      "check_set": 58,
-      "feed_photos_present": 24,
+      "check_set": 63,
       "upload_error": 3,
-      "shoot": 9
+      "shoot": 3,
+      "feed_photos_present": 24
     },
     "TENET PLUS": {
-      "check_set": 31,
-      "shoot": 8,
+      "check_set": 39,
       "feed_photos_present": 8
     }
   },
@@ -281,16 +280,20 @@
       ]
     },
     {
-      "id": "tenet-t7-praym-4wd-seryy-shoot",
-      "queue": 1,
+      "id": "tenet-t7-praym-4wd-seryy-check-set",
+      "queue": 2,
       "brand": "TENET",
       "model": "T7",
       "trim": "Прайм 4WD",
       "drive": "4WD",
       "color": "серый",
-      "stage": "shoot",
-      "reason": "В проверенном каталоге Drive нет подходящего комплекта; в текущих выгрузках фото для VIN не найдены.",
-      "photo_folder": null,
+      "stage": "check_set",
+      "reason": "Подходящая папка на Drive есть (подтвердил Александр 17.11.2026); новая съёмка не нужна. Проверить загрузку комплекта.",
+      "photo_folder": {
+        "id": "1KXFDLKRtzlFRHZJmA--ahW9Mhoz-s69P",
+        "name": "T7 Prime 4x4 светло-серый черный салон",
+        "url": "https://drive.google.com/drive/folders/1KXFDLKRtzlFRHZJmA--ahW9Mhoz-s69P"
+      },
       "cars": [
         {
           "vin": "EDEFD32BXTE143888",
@@ -505,10 +508,6 @@
         {
           "vin": "EDEHD24B8TE106287",
           "state": "в салоне"
-        },
-        {
-          "vin": "EDEHD24BXTE127576",
-          "state": "в салоне"
         }
       ]
     },
@@ -675,16 +674,20 @@
       ]
     },
     {
-      "id": "tenet-t7-praym-sine-zelenyy-shoot",
-      "queue": 1,
+      "id": "tenet-t7-praym-sine-zelenyy-check-set",
+      "queue": 2,
       "brand": "TENET",
       "model": "T7",
       "trim": "Прайм",
       "drive": "2WD",
       "color": "сине-зелёный",
-      "stage": "shoot",
-      "reason": "В проверенном каталоге Drive нет подходящего комплекта; в текущих выгрузках фото для VIN не найдены.",
-      "photo_folder": null,
+      "stage": "check_set",
+      "reason": "Подходящая папка на Drive есть (подтвердил Александр 17.11.2026); новая съёмка не нужна. Проверить загрузку комплекта.",
+      "photo_folder": {
+        "id": "1xRbgxUXWTd3RUk2lsYeSB2zH3qeEAUrs",
+        "name": "T7 Prime 2WD сине-зеленый Спицын 10.02.26",
+        "url": "https://drive.google.com/drive/folders/1xRbgxUXWTd3RUk2lsYeSB2zH3qeEAUrs"
+      },
       "cars": [
         {
           "vin": "EDEFB32BXTE150619",
@@ -735,16 +738,20 @@
       ]
     },
     {
-      "id": "tenet-plus-l6-ultra-belyy-shoot",
-      "queue": 1,
+      "id": "tenet-plus-l6-ultra-belyy-check-set",
+      "queue": 2,
       "brand": "TENET PLUS",
       "model": "L6",
       "trim": "Ультра",
       "drive": "2WD",
       "color": "белый",
-      "stage": "shoot",
-      "reason": "В проверенном каталоге Drive нет подходящего комплекта; в текущих выгрузках фото для VIN не найдены. Комплект L6 другой комплектации не подходит.",
-      "photo_folder": null,
+      "stage": "check_set",
+      "reason": "Подходящая папка на Drive есть (подтвердил Александр 17.11.2026); новая съёмка не нужна. Проверить загрузку комплекта.",
+      "photo_folder": {
+        "id": "1xtmgzfqZsQYrsWJG9uoI7QaBfee1Z-ZX",
+        "name": "L6 Ultra белый",
+        "url": "https://drive.google.com/drive/folders/1xtmgzfqZsQYrsWJG9uoI7QaBfee1Z-ZX"
+      },
       "cars": [
         {
           "vin": "EDEMB31B5TE102177",
@@ -761,16 +768,20 @@
       ]
     },
     {
-      "id": "tenet-plus-l6-ultra-serebristyy-shoot",
-      "queue": 1,
+      "id": "tenet-plus-l6-ultra-serebristyy-check-set",
+      "queue": 2,
       "brand": "TENET PLUS",
       "model": "L6",
       "trim": "Ультра",
       "drive": "2WD",
       "color": "серебристый",
-      "stage": "shoot",
-      "reason": "В проверенном каталоге Drive нет подходящего комплекта; в текущих выгрузках фото для VIN не найдены. Комплект L6 другой комплектации не подходит.",
-      "photo_folder": null,
+      "stage": "check_set",
+      "reason": "Подходящая папка на Drive есть (подтвердил Александр 17.11.2026); новая съёмка не нужна. Проверить загрузку комплекта.",
+      "photo_folder": {
+        "id": "1fhhj4gTq79fFNZQjT8z8q7zPldoee4rF",
+        "name": "L6 Ultra серебро",
+        "url": "https://drive.google.com/drive/folders/1fhhj4gTq79fFNZQjT8z8q7zPldoee4rF"
+      },
       "cars": [
         {
           "vin": "EDEMB31B0TE149732",
@@ -786,11 +797,11 @@
         },
         {
           "vin": "EDEMB31B0TE146572",
-          "state": "в пути"
+          "state": "в салоне"
         },
         {
           "vin": "EDEMB31B1TE102015",
-          "state": "в пути"
+          "state": "в салоне"
         }
       ]
     },
