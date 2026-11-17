@@ -148,6 +148,30 @@ PRIO_SOLD = {
 }
 
 
+T4_OUT_VIN = "EDEEB31B8TE003261"
+T7L_OUT_ROW = '{model:"Tiggo 7 L",vin:"",trim:"Active",year:"2025",color:"",extra:"",pay:0,sold:true,out:true}'
+
+
+def ensure_sold_out(text):
+    """T4 Prime 2025 (VIN EDEEB31…, model t4 — not T4L) and CHERY Tiggo 7L are sold out.
+    The sheet sync cannot see that, so keep the priority rows marked out:true."""
+    m = re.search(r'\{model:"T4",vin:"' + T4_OUT_VIN + r'"[^}]*\}', text)
+    if m and "out:true" not in m.group(0):
+        row = m.group(0)
+        if "sold:true" not in row:
+            row = row[:-1] + ",sold:true,out:true}"
+        else:
+            row = row[:-1] + ",out:true}"
+        text = text[:m.start()] + row + text[m.end():]
+        m = re.search(r'\{model:"T4",vin:"' + T4_OUT_VIN + r'"[^}]*\}', text)
+    sp = span(text, "TERMS_PRIO")
+    block = text[sp[0]:sp[1]] if sp else ""
+    if sp and 'model:"Tiggo 7 L"' not in block and m:
+        text = text[:m.end()] + ",\n      " + T7L_OUT_ROW + text[m.end():]
+        print("terms sync: Tiggo 7 L marked sold in TERMS_PRIO")
+    return text
+
+
 def ensure_prio_sold(text):
     for vin, seller in PRIO_SOLD.items():
         m = re.search(r'\{model:"[^"]*",vin:"' + vin + r'"[^}]*\}', text)
@@ -234,6 +258,7 @@ def drop_sold_tests(text):
 def ensure_local(text):
     text = drop_sold_tests(text)
     text = ensure_t9(text)
+    text = ensure_sold_out(text)
     text = ensure_prio_sold(text)
     text = text.replace(
         'vin:"EDEDD24B2SG003755",trim:"Ультра 4WD",year:"2025",color:"Светло-серый",extra:"",pay:500,bonus:3000,reserved:true,seller:"Спицын"',

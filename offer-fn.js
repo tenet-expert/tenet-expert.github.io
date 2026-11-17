@@ -54,7 +54,7 @@
         <div class="hub-grid offer-grid">${cards.map(([id,mark,title,lead])=>`<button class="card hub-card" data-offer-tab="${id}" type="button"><span class="hub-mark">${mark}</span><div class="txt"><h3>${title}</h3><p>${lead}</p></div></button>`).join("")}</div>`;
     }
     function offerDeal(){
-      const models=typeof KM_MODELS!=="undefined"?KM_MODELS:[];
+      const models=(typeof KM_MODELS!=="undefined"?KM_MODELS:[]).filter(x=>x.id!=="t4p"&&x.id!=="t7l");
       const seeded=!!(offerSeed && !document.getElementById("ofModel"));
       const S=seeded?offerSeed:null;
       if(seeded) offerSeed=null;
@@ -738,7 +738,7 @@
         ${offerField("Срок действия", `<input id="ofValid" value="${escape(d.valid)}" />`)}`;
     }
     function offerFromCalc(){
-      const models=typeof KM_MODELS!=="undefined"?KM_MODELS:[];
+      const models=(typeof KM_MODELS!=="undefined"?KM_MODELS:[]).filter(x=>x.id!=="t4p"&&x.id!=="t7l");
       const mid=(typeof kmId==="string" && models.some(x=>x.id===kmId))?kmId:(models[0]?models[0].id:"t7a");
       const m=models.find(x=>x.id===mid)||{};
       function num(id, def){
@@ -1307,9 +1307,9 @@
       return offerScreen("Оценка сервиса", offerFormNew(d), offerDocNew(d));
     }
     function offerLease(){
-      const models=typeof KM_MODELS!=="undefined"?KM_MODELS:[];
+      const models=(typeof KM_MODELS!=="undefined"?KM_MODELS:[]).filter(x=>x.id!=="t4p"&&x.id!=="t7l");
       const fset=typeof FLEET_BFS!=="undefined"?FLEET_BFS:{};
-      const fleetIds=Object.keys(fset);
+      const fleetIds=Object.keys(fset).filter(id=>id!=="t4p"&&id!=="t7l");
       const options=fleetIds.length?fleetIds.map(id=>{ const km=models.find(x=>x.id===id); return {id,brand:km&&km.brand,name:(fset[id]&&fset[id].name)||id,rrc:(fset[id]&&(fset[id].rrc||fset[id].tidy))||0}; }):models;
       const fid=offerVal("olModel", options[0]?options[0].id:(models[0]?models[0].id:"t7a"));
       const m=models.find(x=>x.id===fid)||options.find(x=>x.id===fid)||{id:fid,name:"TENET",rrc:0};
