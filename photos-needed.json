@@ -10,15 +10,13 @@
   },
   "summary": {
     "TENET": {
-      "check_set": 51,
+      "check_set": 58,
       "feed_photos_present": 24,
       "upload_error": 3,
-      "verify": 6,
-      "shoot": 10
+      "shoot": 9
     },
     "TENET PLUS": {
-      "check_set": 27,
-      "verify": 4,
+      "check_set": 31,
       "shoot": 8,
       "feed_photos_present": 8
     }
@@ -102,24 +100,6 @@
         },
         {
           "vin": "EDXGD34B8TE095641",
-          "state": "в салоне"
-        }
-      ]
-    },
-    {
-      "id": "tenet-t8-aktiv-5-mest-2wd-chernyy-shoot",
-      "queue": 1,
-      "brand": "TENET",
-      "model": "T8",
-      "trim": "Актив 5 мест 2WD",
-      "drive": "2WD",
-      "color": "чёрный",
-      "stage": "shoot",
-      "reason": "Подходящий комплект T8 Актив 2WD 5 мест на Drive не подтверждён; в текущих выгрузках фото VIN нет. Папка «Т8 Activ Черная» есть, но привод и число мест в названии не указаны — этого недостаточно, чтобы оставлять машину только на проверке. Поставить на съёмку.",
-      "photo_folder": null,
-      "cars": [
-        {
-          "vin": "EDXGB32BXTE087470",
           "state": "в салоне"
         }
       ]
@@ -279,36 +259,6 @@
       ]
     },
     {
-      "id": "tenet-t7-aktiv-seryy-verify",
-      "queue": 2,
-      "brand": "TENET",
-      "model": "T7",
-      "trim": "Актив",
-      "drive": "2WD",
-      "color": "серый",
-      "stage": "verify",
-      "reason": "«T7 2WD серый Тальков»: 45 WEBP, комплектация не подписана; соответствие Актив не подтверждено.",
-      "photo_folder": {
-        "id": "1HnDbimaqqA7TQ3cKTWWPJo0xrcvh2QKN",
-        "name": "T7 2WD серый Тальков",
-        "url": "https://drive.google.com/drive/folders/1HnDbimaqqA7TQ3cKTWWPJo0xrcvh2QKN"
-      },
-      "cars": [
-        {
-          "vin": "EDEFB32B7TE122342",
-          "state": "в салоне"
-        },
-        {
-          "vin": "EDEFB32B8TE122298",
-          "state": "в салоне"
-        },
-        {
-          "vin": "EDEFB32B8TE122317",
-          "state": "в салоне"
-        }
-      ]
-    },
-    {
       "id": "tenet-t7-praym-chernyy-check-set",
       "queue": 2,
       "brand": "TENET",
@@ -419,32 +369,6 @@
         {
           "vin": "EDEFD32B5TE149839",
           "state": "в пути"
-        }
-      ]
-    },
-    {
-      "id": "tenet-t4l-aktiv-svetlo-seryy-verify",
-      "queue": 2,
-      "brand": "TENET",
-      "model": "T4L",
-      "trim": "Актив",
-      "drive": "2WD",
-      "color": "светло-серый",
-      "stage": "verify",
-      "reason": "В каталоге только «серый», 11 JPEG; совпадение оттенка со светло-серым не подтверждено.",
-      "photo_folder": {
-        "id": "1HJP73kg74LubeWTFuLR1s9Hn3pf4G5LQ",
-        "name": "T4L Active 2WD серый Спицын",
-        "url": "https://drive.google.com/drive/folders/1HJP73kg74LubeWTFuLR1s9Hn3pf4G5LQ"
-      },
-      "cars": [
-        {
-          "vin": "EDELB31B7TE120188",
-          "state": "в салоне"
-        },
-        {
-          "vin": "EDELB31B5TE120142",
-          "state": "в салоне"
         }
       ]
     },
@@ -584,28 +508,6 @@
         },
         {
           "vin": "EDEHD24BXTE127576",
-          "state": "в салоне"
-        }
-      ]
-    },
-    {
-      "id": "tenet-t9-praym-4wd-svetlo-seryy-verify",
-      "queue": 2,
-      "brand": "TENET",
-      "model": "T9",
-      "trim": "Прайм 4WD",
-      "drive": "4WD",
-      "color": "светло-серый",
-      "stage": "verify",
-      "reason": "«Т9 Прайм 5 мест серая»: 36 HEIC; совпадение оттенка со светло-серым не подтверждено.",
-      "photo_folder": {
-        "id": "1zEu2VxTT5xPClgGGoo_7OIUjInl2GyNx",
-        "name": "Т9 Прайм 5 мест серая Демьянов",
-        "url": "https://drive.google.com/drive/folders/1zEu2VxTT5xPClgGGoo_7OIUjInl2GyNx"
-      },
-      "cars": [
-        {
-          "vin": "EDEHD24B2TE115115",
           "state": "в салоне"
         }
       ]
@@ -829,40 +731,6 @@
         {
           "vin": "EDEMB31B1TE136973",
           "state": "в салоне"
-        }
-      ]
-    },
-    {
-      "id": "tenet-plus-l6-ultra-chernyy-verify",
-      "queue": 2,
-      "brand": "TENET PLUS",
-      "model": "L6",
-      "trim": "Ультра",
-      "drive": "2WD",
-      "color": "чёрный",
-      "stage": "verify",
-      "reason": "Папка «L6 ultra черный» переименована 10.11 (раньше «Л6 Elegant черный»); комплектация по названию и содержимому не подтверждена, содержимое новых папок недоступно для чтения.",
-      "photo_folder": {
-        "id": "1V3G7Z7T8gk_eFoZJUuaaDcmmyGSMj6Se",
-        "name": "Л6 Elegant черный",
-        "url": "https://drive.google.com/drive/folders/1V3G7Z7T8gk_eFoZJUuaaDcmmyGSMj6Se"
-      },
-      "cars": [
-        {
-          "vin": "EDEMB31B0TE145552",
-          "state": "в пути"
-        },
-        {
-          "vin": "EDEMB31B2TE145519",
-          "state": "в пути"
-        },
-        {
-          "vin": "EDEMB31B3TE144489",
-          "state": "в пути"
-        },
-        {
-          "vin": "EDEMB31B0TE146409",
-          "state": "в пути"
         }
       ]
     },
@@ -1199,6 +1067,140 @@
         {
           "vin": "EFEDB21B1T3004257",
           "state": "в салоне"
+        }
+      ]
+    },
+    {
+      "id": "tenet-t8-aktiv-5-mest-2wd-chernyy-check-set",
+      "queue": 2,
+      "brand": "TENET",
+      "model": "T8",
+      "trim": "Актив 5 мест 2WD",
+      "drive": "2WD",
+      "color": "чёрный",
+      "stage": "check_set",
+      "reason": "Комплект есть, подтверждён Александром 17.11. Папка «Т8 Active 2wd 5 мест Черная»: 16 JPEG, 10 уникальных; привод и число мест указаны в названии.",
+      "photo_folder": {
+        "id": "1x9fzHrsWABN2YaEdJA8gNY2G6sI095tb",
+        "name": "Т8 Active 2wd 5 мест Черная",
+        "url": "https://drive.google.com/drive/folders/1x9fzHrsWABN2YaEdJA8gNY2G6sI095tb"
+      },
+      "cars": [
+        {
+          "vin": "EDXGB32BXTE087470",
+          "state": "в салоне"
+        }
+      ]
+    },
+    {
+      "id": "tenet-t7-aktiv-seryy-check-set",
+      "queue": 2,
+      "brand": "TENET",
+      "model": "T7",
+      "trim": "Актив",
+      "drive": "2WD",
+      "color": "серый",
+      "stage": "check_set",
+      "reason": "Комплект есть, подтверждён Александром 17.11. Папка «T7 2WD серый Тальков»: 45 WEBP, привод указан в названии.",
+      "photo_folder": {
+        "id": "1HnDbimaqqA7TQ3cKTWWPJo0xrcvh2QKN",
+        "name": "T7 2WD серый Тальков",
+        "url": "https://drive.google.com/drive/folders/1HnDbimaqqA7TQ3cKTWWPJo0xrcvh2QKN"
+      },
+      "cars": [
+        {
+          "vin": "EDEFB32B7TE122342",
+          "state": "в салоне"
+        },
+        {
+          "vin": "EDEFB32B8TE122298",
+          "state": "в салоне"
+        },
+        {
+          "vin": "EDEFB32B8TE122317",
+          "state": "в салоне"
+        }
+      ]
+    },
+    {
+      "id": "tenet-t4l-aktiv-svetlo-seryy-check-set",
+      "queue": 2,
+      "brand": "TENET",
+      "model": "T4L",
+      "trim": "Актив",
+      "drive": "2WD",
+      "color": "светло-серый",
+      "stage": "check_set",
+      "reason": "Комплект есть, подтверждён Александром 17.11. Папка «T4L Active 2WD серый Спицын»: 11 JPEG, привод указан в названии.",
+      "photo_folder": {
+        "id": "1HJP73kg74LubeWTFuLR1s9Hn3pf4G5LQ",
+        "name": "T4L Active 2WD серый Спицын",
+        "url": "https://drive.google.com/drive/folders/1HJP73kg74LubeWTFuLR1s9Hn3pf4G5LQ"
+      },
+      "cars": [
+        {
+          "vin": "EDELB31B7TE120188",
+          "state": "в салоне"
+        },
+        {
+          "vin": "EDELB31B5TE120142",
+          "state": "в салоне"
+        }
+      ]
+    },
+    {
+      "id": "tenet-t9-praym-4wd-svetlo-seryy-check-set",
+      "queue": 2,
+      "brand": "TENET",
+      "model": "T9",
+      "trim": "Прайм 4WD",
+      "drive": "4WD",
+      "color": "светло-серый",
+      "stage": "check_set",
+      "reason": "Комплект есть, подтверждён Александром 17.11. Папка «Т9 Прайм 5 мест серая Демьянов»: 36 HEIC.",
+      "photo_folder": {
+        "id": "1zEu2VxTT5xPClgGGoo_7OIUjInl2GyNx",
+        "name": "Т9 Прайм 5 мест серая Демьянов",
+        "url": "https://drive.google.com/drive/folders/1zEu2VxTT5xPClgGGoo_7OIUjInl2GyNx"
+      },
+      "cars": [
+        {
+          "vin": "EDEHD24B2TE115115",
+          "state": "в салоне"
+        }
+      ]
+    },
+    {
+      "id": "tenet-plus-l6-ultra-chernyy-check-set",
+      "queue": 2,
+      "brand": "TENET PLUS",
+      "model": "L6",
+      "trim": "Ультра",
+      "drive": "2WD",
+      "color": "чёрный",
+      "stage": "check_set",
+      "reason": "Комплект есть, подтверждён Александром 17.11. Папка «L6 ultra черный»: 13 JPEG, путь TENET PLUS / Авито.",
+      "photo_folder": {
+        "id": "1V3G7Z7T8gk_eFoZJUuaaDcmmyGSMj6Se",
+        "name": "L6 ultra черный",
+        "url": "https://drive.google.com/drive/folders/1V3G7Z7T8gk_eFoZJUuaaDcmmyGSMj6Se"
+      },
+      "cars": [
+        {
+          "vin": "EDEMB31B0TE145552",
+          "state": "в пути"
+        },
+        {
+          "vin": "EDEMB31B2TE145519",
+          "state": "в пути"
+        },
+        {
+          "vin": "EDEMB31B3TE144489",
+          "state": "в пути"
+        },
+        {
+          "vin": "EDEMB31B0TE146409",
+          "state": "в пути"
         }
       ]
     }
