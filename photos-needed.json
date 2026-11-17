@@ -13,8 +13,8 @@
       "check_set": 51,
       "feed_photos_present": 24,
       "upload_error": 3,
-      "verify": 7,
-      "shoot": 9
+      "verify": 6,
+      "shoot": 10
     },
     "TENET PLUS": {
       "check_set": 27,
@@ -107,20 +107,16 @@
       ]
     },
     {
-      "id": "tenet-t8-aktiv-5-mest-2wd-chernyy-verify",
-      "queue": 2,
+      "id": "tenet-t8-aktiv-5-mest-2wd-chernyy-shoot",
+      "queue": 1,
       "brand": "TENET",
       "model": "T8",
       "trim": "Актив 5 мест 2WD",
       "drive": "2WD",
       "color": "чёрный",
-      "stage": "verify",
-      "reason": "«Т8 Activ Черная»: привод и число мест в названии не указаны; проверить вариант.",
-      "photo_folder": {
-        "id": "1x9fzHrsWABN2YaEdJA8gNY2G6sI095tb",
-        "name": "Т8 Activ Черная ",
-        "url": "https://drive.google.com/drive/folders/1x9fzHrsWABN2YaEdJA8gNY2G6sI095tb"
-      },
+      "stage": "shoot",
+      "reason": "Подходящий комплект T8 Актив 2WD 5 мест на Drive не подтверждён; в текущих выгрузках фото VIN нет. Папка «Т8 Activ Черная» есть, но привод и число мест в названии не указаны — этого недостаточно, чтобы оставлять машину только на проверке. Поставить на съёмку.",
+      "photo_folder": null,
       "cars": [
         {
           "vin": "EDXGB32BXTE087470",
