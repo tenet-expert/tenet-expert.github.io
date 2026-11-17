@@ -429,7 +429,7 @@
     }
     if (typeof window.fleetPricesHtml==="function" && !window.fleetPricesHtml.__mpt) {
       const op = window.fleetPricesHtml;
-      const w2 = function(){ const h = op.apply(this, arguments); return fleetMptOn() ? h.replace("</summary>", '</summary><p class="fleet-note"><b>'+FLEET_MPT_NOTE+'</b> (Сбер Лизинг, С1): вместо субсидии 130 000 — 10% от цены BFS после ТИ.</p>') : h; };
+      const w2 = function(){ const h = op.apply(this, arguments); return fleetMptOn() ? h.replace("</summary>", '</summary><p class="fleet-note"><b>'+FLEET_MPT_NOTE+'</b> (Сбер Лизинг, С1): вместо субсидии 110 000 — 10% от цены BFS после ТИ.</p>') : h; };
       w2.__mpt = true; window.fleetPricesHtml = w2;
     }
   } catch(e) { console.warn("fleet-mpt", e); }
