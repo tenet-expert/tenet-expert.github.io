@@ -3507,6 +3507,27 @@ async function pingTelegram(body){
     let boardTimer = 0;
     let boardMode = "day";
     let boardPane = "table";
+    let boardTeam = "all";
+    const BOARD_TEAM_TENET = ["Ахмадуллин","Лавров","Тальков","Сидоров","Спицын","Волкодаев","Демьянов"];
+    const BOARD_TEAM_PLUS = ["Бикулов","Назарян","Ковалев"];
+    const BOARD_TEAM_OTHER = ["Леонтьев","Павлова","Извеков","Кокуркин","Без менеджера"];
+    function boardTeamNames(){
+      if(boardTeam==="tenet") return BOARD_TEAM_TENET;
+      if(boardTeam==="plus") return BOARD_TEAM_PLUS;
+      if(boardTeam==="other") return BOARD_TEAM_OTHER;
+      return null;
+    }
+    function boardSliceTeam(rank){
+      const names=boardTeamNames();
+      if(!names || !rank || !rank.list) return rank;
+      const pool={};
+      rank.list.forEach(p=>{
+        if(p.other) (p.people||[]).forEach(x=>{ pool[x.name]=x; });
+        else pool[p.name]=p;
+      });
+      const list=names.map(n=>pool[n]||Object.assign(boardBlank(),{name:n}));
+      return {list:list};
+    }
     let boardCache = null;
     function boardSurname(name){
       const s=String(name||"").trim();
@@ -3895,7 +3916,9 @@ async function pingTelegram(body){
         p.visit+=r.visit||0; p.call+=r.call||0; p.web+=r.web||0; p.meet+=r.meet||0; p.service+=r.service||0; p.td+=r.td||0; p.contract+=r.contract||0; p.issue+=r.issue||0;
       });
       const order=roster.concat(Object.keys(map).filter(n=>roster.indexOf(n)<0));
-      const people=order.map(n=>map[n]).filter(Boolean);
+      let people=order.map(n=>map[n]).filter(Boolean);
+      const teamNames=boardTeamNames();
+      if(teamNames) people=teamNames.map(n=>map[n]||Object.assign(boardBlank(),{name:n}));
       const sum=people.reduce((s,p)=>{ ["visit","call","web","meet","service","td","contract","issue"].forEach(k=>s[k]+=p[k]||0); return s; }, boardBlank());
       const all=p=>(p.visit||0)+(p.call||0)+(p.web||0);
       const share=n=>{
@@ -3929,10 +3952,11 @@ async function pingTelegram(body){
       return `<p class="eyebrow" style="margin:0 0 4px">Инфографика</p><h2 style="margin:0 0 12px">Ноябрь · 01–17.11</h2><div class="lb-info">${boardInfoCard("Отдел TENET", rank.tenet, rank.tenetSum, false)}${boardInfoCard("Отдел TENET+", rank.plus, rank.plusSum, true)}</div>`;
     }
     function boardHtml(cache){
-      if(boardMode==="day"||boardMode==="yday") return boardDayHtml(cache);
+      const teams=boardPane==="info"?"":boardTeamChips();
+      if(boardMode==="day"||boardMode==="yday") return teams+boardDayHtml(cache);
       const panes=`<div class="study-pick st-filters lb-modes">`+[["table","Таблица"],["info","Инфографика"]].map(([id,lab])=>`<button type="button" class="chip ${boardPane===id?"on":""}" data-board-pane="${id}">${lab}</button>`).join("")+`</div>`;
       const body=boardPane==="info"?boardInfoHtml():boardReportHtml();
-      return panes+`<div class="lb-sheet">${body}</div>`;
+      return panes+teams+`<div class="lb-sheet">${body}</div>`;
     }
     async function boardEnsure(){
       if(boardCache) return boardCache;
@@ -3942,14 +3966,21 @@ async function pingTelegram(body){
       boardCache={oct, sep:[], stamp:new Date().toLocaleString("ru-RU",{hour:"2-digit",minute:"2-digit",day:"2-digit",month:"2-digit"})};
       return boardCache;
     }
+    let boardLoadGen = 0;
     async function boardLoad(){
       const root=document.getElementById("boardRoot");
       if(!root || view!=="board") return;
+      const gen=++boardLoadGen;
+      const mode=boardMode;
       const paint=()=>{
+        if(gen!==boardLoadGen || view!=="board" || boardMode!==mode) return;
         root.innerHTML=boardHtml(boardCache||{oct:[],sep:[],stamp:""});
         boardBindFolds(root);
         root.querySelectorAll("[data-board-pane]").forEach(b=>{
           b.onclick=()=>{ boardPane=b.dataset.boardPane||"table"; boardLoad(); };
+        });
+        root.querySelectorAll("[data-board-team]").forEach(b=>{
+          b.onclick=()=>{ boardTeam=b.dataset.boardTeam||"all"; boardLoad(); };
         });
       };
       try{
@@ -3958,6 +3989,7 @@ async function pingTelegram(body){
         await boardEnsure();
         paint();
       }catch(err){
+        if(gen!==boardLoadGen) return;
         root.innerHTML=`<div class="card"><p>Не удалось прочитать трафик. ${escape(err&&err.message||"")}</p><button class="btn ivory" type="button" id="boardRetry">Ещё раз</button></div>`;
         const b=document.getElementById("boardRetry");
         if(b) b.onclick=()=>{ boardCache=null; boardLoad(); };
@@ -3966,6 +3998,10 @@ async function pingTelegram(body){
     function boardChips(){
       const items=[["day","Сегодня"],["yday","Вчера"],["month","Месяц"],["prev","Предыдущий месяц"]];
       return `<div class="study-pick st-filters lb-modes">`+items.map(([id,lab])=>`<button type="button" class="chip ${boardMode===id?"on":""}" data-board-mode="${id}">${lab}</button>`).join("")+`</div>`;
+    }
+    function boardTeamChips(){
+      const items=[["tenet","TENET"],["plus","TENET+"],["other","Другие"],["all","Весь ДЦ"]];
+      return `<div class="study-pick st-filters lb-modes">`+items.map(([id,lab])=>`<button type="button" class="chip ${boardTeam===id?"on":""}" data-board-team="${id}">${lab}</button>`).join("")+`</div>`;
     }
     function board(){
       if(needAuth()) return login();
@@ -3982,7 +4018,7 @@ async function pingTelegram(body){
         boardLoad();
       }, 40);
       return `<div class="lb-rep-page">`+banner("Leaderboard","Трафик · онлайн","TENET")+`
-        <p class="lead">Сегодня и вчера — из «Трафик октябрь». Месяц — воронка 01–17.11: TENET и TENET+ отдельно. Предыдущий месяц — итог октября. Контракт = выдача + действующий контракт + расторжение. В ноябре визиты со звонка и интернета не пришли, в этих колонках «—».</p>
+        <p class="lead">Сегодня и вчера — из «Трафик октябрь». Месяц — воронка 01–17.11, предыдущий месяц — итог октября. Выкладка режет тот же отчёт на TENET, TENET+, «Другие» или весь салон. Контракт = выдача + действующий контракт + расторжение.</p>
         ${boardChips()}
         <div id="boardRoot"><div class="card"><p>Загружаю таблицу…</p></div></div></div>`;
     }
@@ -4004,7 +4040,7 @@ async function pingTelegram(body){
     }
     function boardReportHtml(){
       const per=boardPeriod();
-      const rank=boardMode==="prev"?boardOctRank():(boardMode==="month"?boardNovRank():boardRank(per.rows, per.roster));
+      const rank=boardSliceTeam(boardMode==="prev"?boardOctRank():(boardMode==="month"?boardNovRank():boardRank(per.rows, per.roster)));
       if(boardMode==="day"||boardMode==="yday") boardApplyDayPlus(rank, per.title);
       const bucket=rank.list.find(p=>p.other)||boardBlank();
       const mains=rank.list.filter(p=>!p.other);
@@ -4022,7 +4058,9 @@ async function pingTelegram(body){
       total.name="Итого";
       const core=mains.reduce(boardAcc, boardBlank());
       const planOf=p=>{
+        if(BOARD_TEAM_OTHER.indexOf(p.name)>=0) return 0;
         if(p.name==="Спицын") return 5;
+        if(BOARD_TEAM_TENET.indexOf(p.name)>=0 || BOARD_TEAM_PLUS.indexOf(p.name)>=0) return BOARD_PLAN;
         return mains.some(n=>n.name===p.name)?BOARD_PLAN:0;
       };
       const planN=mains.reduce((s,p)=>s+planOf(p),0);
