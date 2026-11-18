@@ -1291,6 +1291,28 @@ tr.lb-fold-row.open{display:table-row}
 .lb-rep th+th,.lb-rep td+td{border-left:1px solid rgba(28,26,23,.09)}
 .lb-rep th.lb-key,.lb-rep td.lb-key{background:rgba(196,150,60,.11);border-left:2px solid rgba(28,26,23,.32);border-right:2px solid rgba(28,26,23,.32)}
 .lb-rep-note{margin:8px 0 0;font-size:11px;color:#6d6458}
+.lb-rep tr.lb-dept td{background:#1c1a17;color:#f6f1e8;font-weight:750;letter-spacing:.04em;text-transform:uppercase;font-size:11px;text-align:left;padding:8px 10px}
+.lb-rep tr.lb-subtot td{font-weight:750;background:rgba(200,30,43,.08);border-top:1px solid #1c1a17}
+.lb-info{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.lb-info-card{background:#16141a;color:#f6f1e8;border-radius:18px;padding:18px 16px 8px;border:1px solid #2a2420}
+.lb-info-card.plus{box-shadow:inset 0 3px 0 #c8960a}
+.lb-info-card h3{margin:0 0 12px;font-size:22px;letter-spacing:-.02em}
+.lb-info-date{margin:0 0 4px;color:#f0b4b8;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.lb-info-totals{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:0 0 14px}
+.lb-info-totals b{display:block;font-size:28px;line-height:1;color:#fff;font-variant-numeric:tabular-nums}
+.lb-info-totals span{display:block;margin-top:4px;font-size:11px;color:#b7aea4}
+.lb-info-row{padding:10px 0;border-top:1px solid #2c2824}
+.lb-info-name{display:flex;justify-content:space-between;gap:10px;align-items:baseline;margin-bottom:6px}
+.lb-info-name b{font-size:15px}
+.lb-info-name span{font-variant-numeric:tabular-nums;color:#f0b4b8;font-weight:750}
+.lb-info-bar{height:8px;border-radius:99px;background:#2c2824;overflow:hidden}
+.lb-info-bar i{display:block;height:100%;background:#c81e2b;border-radius:99px}
+.lb-info-meta{margin:6px 0 0;font-size:12px;color:#b7aea4;line-height:1.35}
+@media(max-width:800px){
+  .lb-info{grid-template-columns:1fr}
+  .lb-info-totals{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .lb-info-totals b{font-size:22px}
+}
 
 .lb-phone{display:none}
 .lb-sum{margin:0 0 8px;color:#6d6458;font-size:13px}
@@ -3484,6 +3506,7 @@ async function pingTelegram(body){
     const BOARD_ROSTER_SEP = ["Ахмадуллин","Коропец","Демьянов","Лавров","Сидоров","Спицын","Тальков"];
     let boardTimer = 0;
     let boardMode = "day";
+    let boardPane = "table";
     let boardCache = null;
     function boardSurname(name){
       const s=String(name||"").trim();
@@ -3704,6 +3727,49 @@ async function pingTelegram(body){
       }, boardBlank());
       return {list, sum};
     }
+    const BOARD_NOV_PLUS = [
+      {name:"Бикулов",call:15,web:9,visit:13,td:5,ecredit:4,service:4,issue:1,reserve:2,cancel:0},
+      {name:"Назарян",call:14,web:11,visit:8,td:5,ecredit:7,service:5,issue:2,reserve:0,cancel:0},
+      {name:"Ковалев",call:12,web:8,visit:7,td:1,ecredit:1,service:0,issue:1,reserve:0,cancel:0}
+    ];
+    const BOARD_NOV_FIXED = [
+      {name:"Ахмадуллин",call:19,web:21,visit:15,td:12,ecredit:6,service:9,issue:6,reserve:1,cancel:1},
+      {name:"Лавров",call:13,web:24,visit:13,td:13,ecredit:2,service:10,issue:3,reserve:1,cancel:0},
+      {name:"Тальков",call:15,web:28,visit:15,td:8,ecredit:6,service:6,issue:3,reserve:1,cancel:0},
+      {name:"Сидоров",call:17,web:16,visit:6,td:6,ecredit:3,service:7,issue:1,reserve:2,cancel:1},
+      {name:"Спицын",call:5,web:3,visit:8,td:8,ecredit:3,service:5,issue:3,reserve:0,cancel:0},
+      {name:"Волкодаев",call:14,web:25,visit:15,td:5,ecredit:2,service:8,issue:3,reserve:0,cancel:0},
+      {name:"Демьянов",call:13,web:18,visit:5,td:4,ecredit:4,service:6,issue:2,reserve:0,cancel:0}
+    ];
+    const BOARD_NOV_OTHER = [
+      {name:"Леонтьев",call:1,web:2,visit:7,td:2,reserve:2,issue:0,cancel:0},
+      {name:"Павлова",call:2,web:1,visit:1,issue:1,reserve:0,cancel:0},
+      {name:"Извеков",call:1,web:0,visit:0},
+      {name:"Кокуркин",call:1,web:0,visit:0},
+      {name:"Без менеджера",call:0,web:4,visit:1}
+    ];
+    function boardSumPeople(list){
+      const s=boardBlank();
+      ["traffic","visit","call","web","meet","td","contract","issue","cancel","reserve","service","ecredit","callVisit","webVisit","callContract","webContract"].forEach(k=>{
+        s[k]=list.reduce((n,p)=>n+(p[k]||0),0);
+      });
+      return s;
+    }
+    function boardByContract(a,b){
+      return (b.contract||0)-(a.contract||0) || (b.issue||0)-(a.issue||0) || a.name.localeCompare(b.name,"ru");
+    }
+    function boardNovRank(){
+      const plus=BOARD_NOV_PLUS.map(boardSepPerson).sort(boardByContract);
+      const tenet=BOARD_NOV_FIXED.map(boardSepPerson).sort(boardByContract);
+      const people=BOARD_NOV_OTHER.map(boardSepPerson).sort(boardByContract);
+      const other=boardSumPeople(people);
+      other.name="Другие"; other.other=true; other.people=people;
+      const plusSum=boardSumPeople(plus); plusSum.name="Итого TENET+"; plusSum.roll=true; plusSum.plan=plus.length*10;
+      const tenetSum=boardSumPeople(tenet); tenetSum.name="Итого TENET"; tenetSum.roll=true; tenetSum.plan=tenet.reduce((s,p)=>s+(p.name==="Спицын"?5:10),0);
+      const total=boardSumPeople(plus.concat(tenet, people));
+      total.name="Итого салона"; total.roll=true; total.plan=(plusSum.plan||0)+(tenetSum.plan||0);
+      return {plus, tenet, other, plusSum, tenetSum, sum:total, grouped:true, noFunnel:true, list:plus.concat(tenet, [other])};
+    }
     function boardSepRank(){
       const list=BOARD_SEP_FIXED.map(boardSepPerson).sort(boardCmp);
       const people=BOARD_SEP_OTHER.map(boardSepPerson).sort(boardCmp);
@@ -3839,9 +3905,25 @@ async function pingTelegram(body){
       const line=p=>`<tr class="${p.name==="Итого"?"sum":""}"><td class="nm">${escape(p.name)}</td><td class="g1 tot"><b>${all(p)}</b><i>${share(all(p))}</i></td><td class="g1">${p.call||0}</td><td class="g1">${p.visit||0}</td><td class="g1">${p.web||0}</td><td class="g2">${p.meet||0}</td><td class="g2">${p.service||0}</td><td class="g3">${p.td||0}<i>${tdPct(p)}</i></td><td class="g4">${p.contract||0}</td><td class="g5">${p.issue||0}</td></tr>`;
       return `<div class="lb-day-row"><div class="lb-sheet lb-day"><p class="eyebrow">${yest?"Вчера":"Сегодня"}</p><h2 style="margin:0 0 8px">${escape(key)}</h2><div class="lb-scroll"><table class="lb-day-sum"><thead><tr><th class="nm" rowspan="2">Менеджер</th><th class="g1" rowspan="2">Всего</th><th class="g1" colspan="3">Первичный трафик</th><th class="g2" colspan="2">Вторичный</th><th class="g3" rowspan="2">Тест-драйв</th><th class="g4" rowspan="2">Контракт</th><th class="g5" rowspan="2">Выдача</th></tr><tr><th class="g1">Звонок</th><th class="g1">Визит</th><th class="g1">Интернет</th><th class="g2">Встреча</th><th class="g2">Сервис</th></tr></thead><tbody>${people.map(line).join("")}${line(Object.assign(sum,{name:"Итого"}))}</tbody></table></div></div><div class="lb-tape">${boardTape(rows, yest?"Вчера":"Сегодня")}</div></div>`;
     }
+    function boardInfoCard(title, people, sum, plus){
+      const planOf=p=>p.name==="Спицын"?5:10;
+      const rows=people.slice().sort(boardByContract).map(p=>{
+        const plan=planOf(p);
+        const w=Math.max(0, Math.min(100, Math.round(100*(p.contract||0)/plan)));
+        return `<div class="lb-info-row"><div class="lb-info-name"><b>${escape(p.name)}</b><span>${p.contract||0} / ${plan}</span></div><div class="lb-info-bar"><i style="width:${w}%"></i></div><p class="lb-info-meta">трафик ${p.traffic||0} · ТД ${p.td||0} · e-credit ${p.ecredit||0} · оценки ${p.service||0} · ${p.issue||0}/${p.reserve||0}/${p.cancel||0} выдача/актив/расторж.</p></div>`;
+      }).join("");
+      const cell=(n,lab)=>`<div><b>${n}</b><span>${lab}</span></div>`;
+      return `<article class="lb-info-card${plus?" plus":""}"><p class="lb-info-date">01–17.11.2026</p><h3>${escape(title)}</h3><div class="lb-info-totals">${cell(sum.traffic||0,"трафик")}${cell(sum.td||0,"ТД")}${cell(sum.ecredit||0,"E-credit")}${cell(sum.service||0,"оценки CM")}${cell(sum.contract||0,"контракты")}</div>${rows}</article>`;
+    }
+    function boardInfoHtml(){
+      const rank=boardNovRank();
+      return `<p class="eyebrow" style="margin:0 0 4px">Инфографика</p><h2 style="margin:0 0 12px">Ноябрь · 01–17.11</h2><div class="lb-info">${boardInfoCard("Отдел TENET", rank.tenet, rank.tenetSum, false)}${boardInfoCard("Отдел TENET+", rank.plus, rank.plusSum, true)}</div>`;
+    }
     function boardHtml(cache){
       if(boardMode==="day"||boardMode==="yday") return boardDayHtml(cache);
-      return `<div class="lb-sheet">${boardReportHtml()}</div>`;
+      const panes=`<div class="study-pick st-filters lb-modes">`+[["table","Таблица"],["info","Инфографика"]].map(([id,lab])=>`<button type="button" class="chip ${boardPane===id?"on":""}" data-board-pane="${id}">${lab}</button>`).join("")+`</div>`;
+      const body=boardPane==="info"?boardInfoHtml():boardReportHtml();
+      return panes+`<div class="lb-sheet">${body}</div>`;
     }
     async function boardEnsure(){
       if(boardCache) return boardCache;
@@ -3859,6 +3941,9 @@ async function pingTelegram(body){
         await boardEnsure();
         root.innerHTML=boardHtml(boardCache);
         boardBindFolds(root);
+        root.querySelectorAll("[data-board-pane]").forEach(b=>{
+          b.onclick=()=>{ boardPane=b.dataset.boardPane||"table"; boardLoad(); };
+        });
       }catch(err){
         root.innerHTML=`<div class="card"><p>Не удалось прочитать трафик. ${escape(err&&err.message||"")}</p><button class="btn ivory" type="button" id="boardRetry">Ещё раз</button></div>`;
         const b=document.getElementById("boardRetry");
@@ -3884,14 +3969,14 @@ async function pingTelegram(body){
         boardLoad();
       }, 40);
       return `<div class="lb-rep-page">`+banner("Leaderboard","Трафик · онлайн","TENET")+`
-        <p class="lead">Сегодня и вчера — из «Трафик октябрь». Месяц — итог октября: звонки, визиты, интернет — журналы 1С (TENET + Chery, один отдел); тест-драйвы — журнал поездок; оценка — CM.Expert; визиты со звонка и интернета и e-credit — из воронки. Расторжение прибавлено к контракту.</p>
+        <p class="lead">Сегодня и вчера — из «Трафик октябрь». Месяц — воронка 01–17.11: TENET и TENET+ отдельно. Предыдущий месяц — итог октября. Контракт = выдача + действующий контракт + расторжение. В ноябре визиты со звонка и интернета не пришли, в этих колонках «—».</p>
         ${boardChips()}
         <div id="boardRoot"><div class="card"><p>Загружаю таблицу…</p></div></div></div>`;
     }
     function boardPeriod(){
       const cache=boardCache||{oct:[],sep:[]};
-      if(boardMode==="prev") return {rows:cache.sep||[], roster:BOARD_ROSTER_SEP, title:"Сентябрь", sub:"Предыдущий месяц"};
-      if(boardMode==="month") return {rows:cache.oct||[], roster:BOARD_ROSTER, title:"Октябрь", sub:"Месяц"};
+      if(boardMode==="prev") return {rows:cache.oct||[], roster:BOARD_ROSTER, title:"Октябрь", sub:"Предыдущий месяц"};
+      if(boardMode==="month") return {rows:[], roster:BOARD_ROSTER, title:"Ноябрь", sub:"Месяц · 01–17.11"};
       const yest=boardMode==="yday";
       const key=boardDayKey(yest?-1:0);
       return {rows:boardSlice(cache, key), roster:BOARD_ROSTER, title:key, sub:yest?"Вчера":"Сегодня"};
@@ -3899,18 +3984,14 @@ async function pingTelegram(body){
     function boardPace(fact, plan){
       if(boardMode!=="month" && boardMode!=="prev") return {n:"–", p:"–"};
       let days, passed;
-      if(boardMode==="prev"){ days=30; passed=30; }
-      else {
-        const now=new Date();
-        days=new Date(now.getFullYear(), now.getMonth()+1, 0).getDate();
-        passed=Math.min(days, Math.max(1, now.getDate()));
-      }
+      if(boardMode==="prev"){ days=31; passed=31; }
+      else { days=30; passed=17; }
       const n=Math.round(fact*days/passed);
       return {n:String(n), p:boardPct(n, plan)};
     }
     function boardReportHtml(){
       const per=boardPeriod();
-      const rank=boardMode==="prev"?boardSepRank():(boardMode==="month"?boardOctRank():boardRank(per.rows, per.roster));
+      const rank=boardMode==="prev"?boardOctRank():(boardMode==="month"?boardNovRank():boardRank(per.rows, per.roster));
       if(boardMode==="day"||boardMode==="yday") boardApplyDayPlus(rank, per.title);
       const bucket=rank.list.find(p=>p.other)||boardBlank();
       const mains=rank.list.filter(p=>!p.other);
@@ -3920,14 +4001,19 @@ async function pingTelegram(body){
         ["traffic","visit","call","web","meet","td","contract","issue","visitContract","callVisit","callContract","webVisit","webContract","cancel","reserve","service","ecredit"].forEach(k=>s[k]+=p[k]||0);
         return s;
       }, boardBlank());
-      total.name="Итого";
+      total.name=rank.grouped?"Итого салона":"Итого";
+      if(rank.grouped){ total.roll=true; total.plan=rank.sum.plan||0; }
       const core=mains.reduce((s,p)=>{
         ["traffic","visit","call","web","meet","td","contract","issue","visitContract","callVisit","callContract","webVisit","webContract","cancel","reserve","service","ecredit"].forEach(k=>s[k]+=p[k]||0);
         return s;
       }, boardBlank());
       const planOf=p=>{
+        if(p.plan!=null) return p.plan;
         if(p.name==="Спицын") return 5;
-        if(p.name==="Ахмадуллин" && boardMode==="prev") return 6;
+        if(rank.grouped){
+          if(rank.plus.some(n=>n.name===p.name) || rank.tenet.some(n=>n.name===p.name)) return p.name==="Спицын"?5:BOARD_PLAN;
+          return 0;
+        }
         return mains.some(n=>n.name===p.name)?BOARD_PLAN:0;
       };
       const planN=mains.reduce((s,p)=>s+planOf(p),0);
@@ -3941,13 +4027,13 @@ async function pingTelegram(body){
       };
       const sharePct=(num, den, p)=>{
         const text=boardPct(num, den);
-        if(text==="–" || p.name==="Итого") return text;
+        if(text==="–" || p.name==="Итого" || p.roll) return text;
         const v=100*num/den;
         return (v<10 || v>20)?`<span class="lb-bad">${text}</span>`:text;
       };
       const shareNum=(num, den, p)=>{
         const n=num||0;
-        if(p.name==="Итого" || !den) return String(n);
+        if(p.name==="Итого" || p.roll || !den) return String(n);
         const v=100*n/den;
         return (v<10 || v>20)?`<span class="lb-bad">${n}</span>`:String(n);
       };
@@ -3959,7 +4045,7 @@ async function pingTelegram(body){
       const sep=boardMode==="prev";
       const live=boardMode==="month";
       const who=p=>p.other?`<b>Другие</b>`:(p.kid?`<span class="lb-sub">${escape(p.name)}</span>`:escape(p.name));
-      const trAttr=p=>p.other?` class="lb-fold-btn" data-lb-fold="rep"`:(p.kid?` class="lb-fold-row" data-lb-panel="rep"`:(p.name==="Итого"?` class="sum"`:""));
+      const trAttr=p=>p.head?` class="lb-dept"`:(p.other?` class="lb-fold-btn" data-lb-fold="rep"`:(p.kid?` class="lb-fold-row" data-lb-panel="rep"`:(p.name==="Итого"||p.name==="Итого салона"?` class="sum"`:(p.roll?` class="lb-subtot"`:""))));
       const mainHead=["Менеджер","План","Факт","% плана","Контракты","Расторж."].concat(live?["Действ.","Выдачи+К","Прогноз","Прогноз %"]:[]).concat(["Трафик","% трафика","% визитов","% зв+инт","Конв. в контракт","Конв. в выдачу"]);
       const fromVisit=p=>Math.max(0,(p.contract||0)-(p.callContract||0)-(p.webContract||0));
       const rowMain=(p, plan)=>{
@@ -3982,27 +4068,39 @@ async function pingTelegram(body){
         return `<span class="lb-duo">${one(core)}<i>/</i>${one(total)}</span>`;
       };
       const allHead=["Менеджер","Всего","ТД","% ТД","Контракт","% в контракт","Оценка","E-credit"];
-      const rowAll=p=>`<tr${trAttr(p)}><td>${who(p)}</td><td>${shareNum(tdBase(p), tdBase(total), p)}</td><td>${shareNum(p.td, total.td, p)}</td><td>${convCell(p, x=>x.td||0, tdBase, "td")}</td><td>${shareNum(p.contract, total.contract, p)}</td><td>${convCell(p, x=>x.contract||0, tdBase, "conv")}</td><td>${ratioCell(p, x=>x.service, 70)}</td><td>${ratioCell(p, x=>x.ecredit, 60)}</td></tr>`;
+      const rowAll=p=>rank.noFunnel
+        ?`<tr${trAttr(p)}><td>${who(p)}</td><td>${p.visit||0}</td><td>${p.td||0}</td><td>—</td><td>${p.contract||0}</td><td>—</td><td>${p.service||0}</td><td>${p.ecredit||0}</td></tr>`
+        :`<tr${trAttr(p)}><td>${who(p)}</td><td>${shareNum(tdBase(p), tdBase(total), p)}</td><td>${shareNum(p.td, total.td, p)}</td><td>${convCell(p, x=>x.td||0, tdBase, "td")}</td><td>${shareNum(p.contract, total.contract, p)}</td><td>${convCell(p, x=>x.contract||0, tdBase, "conv")}</td><td>${ratioCell(p, x=>x.service, 70)}</td><td>${ratioCell(p, x=>x.ecredit, 60)}</td></tr>`;
       const visitHead=["Менеджер","Визит","Контракт с визита","Конв. с визита"];
-      const rowVisit=p=>`<tr${trAttr(p)}><td>${who(p)}</td><td>${shareNum(p.visit, total.visit, p)}</td><td>${shareNum(fromVisit(p), fromVisit(total), p)}</td><td>${convCell(p, fromVisit, x=>x.visit, "visit")}</td></tr>`;
+      const dash=rank.noFunnel?"—":"";
+      const rowVisit=p=>`<tr${trAttr(p)}><td>${who(p)}</td><td>${shareNum(p.visit, total.visit, p)}</td><td>${dash||shareNum(fromVisit(p), fromVisit(total), p)}</td><td>${dash||convCell(p, fromVisit, x=>x.visit, "visit")}</td></tr>`;
       const callHead=["Менеджер","Звонки","Визит со звонка","% в визит","Контракт со звонка","% в контракт"];
       const webHead=["Менеджер","Интернет","Визит с инт.","% в визит","Контракт с инт.","% в контракт"];
-      const rowCall=p=>`<tr${trAttr(p)}><td>${who(p)}</td><td>${shareNum(p.call, total.call, p)}</td><td>${shareNum(p.callVisit, total.callVisit, p)}</td><td>${convCell(p, x=>x.callVisit, x=>x.call, "callv")}</td><td>${shareNum(p.callContract, total.callContract, p)}</td><td>${convCell(p, x=>x.callContract, x=>x.call, "conv")}</td></tr>`;
-      const rowWeb=p=>`<tr${trAttr(p)}><td>${who(p)}</td><td>${shareNum(p.web, total.web, p)}</td><td>${shareNum(p.webVisit, total.webVisit, p)}</td><td>${convCell(p, x=>x.webVisit, x=>x.web, "webv")}</td><td>${shareNum(p.webContract, total.webContract, p)}</td><td>${convCell(p, x=>x.webContract, x=>x.web, "conv")}</td></tr>`;
-      const shown=mains.concat(kids.length?[Object.assign(bucket,{other:true})]:[]).concat(kids.map(p=>Object.assign(p,{kid:true}))).concat([total]);
-      const planNote=boardMode==="prev"?`Личный план — 10. Ахмадуллин — 6 (отпуск), Спицын — 5. Общий — ${planN}.`:`Личный план — 10, Спицын — 5. Общий — ${planN}.`;
+      const rowCall=p=>`<tr${trAttr(p)}><td>${who(p)}</td><td>${shareNum(p.call, total.call, p)}</td><td>${dash||shareNum(p.callVisit, total.callVisit, p)}</td><td>${dash||convCell(p, x=>x.callVisit, x=>x.call, "callv")}</td><td>${dash||shareNum(p.callContract, total.callContract, p)}</td><td>${dash||convCell(p, x=>x.callContract, x=>x.call, "conv")}</td></tr>`;
+      const rowWeb=p=>`<tr${trAttr(p)}><td>${who(p)}</td><td>${shareNum(p.web, total.web, p)}</td><td>${dash||shareNum(p.webVisit, total.webVisit, p)}</td><td>${dash||convCell(p, x=>x.webVisit, x=>x.web, "webv")}</td><td>${dash||shareNum(p.webContract, total.webContract, p)}</td><td>${dash||convCell(p, x=>x.webContract, x=>x.web, "conv")}</td></tr>`;
+      const shown=rank.grouped
+        ? [{name:"Отдел TENET+", head:true}].concat(rank.plus, [rank.plusSum], [{name:"Отдел TENET", head:true}], rank.tenet, [rank.tenetSum], kids.length?[Object.assign(bucket,{other:true})]:[], kids.map(p=>Object.assign({}, p, {kid:true})), [total])
+        : mains.concat(kids.length?[Object.assign(bucket,{other:true})]:[]).concat(kids.map(p=>Object.assign(p,{kid:true}))).concat([total]);
+      const planNote=rank.grouped?`Личный план — 10, в том числе TENET+. Спицын — 5. Общий — ${planN}.`:(boardMode==="prev"?`Личный план — 10, Спицын — 5. Общий — ${planN}.`:`Личный план — 10, Спицын — 5. Общий — ${planN}.`);
       const thead=h=>`<thead><tr>${h.map(x=>`<th${(x==="Факт"||x==="Конв. в контракт")?' class="lb-key"':""}>${x}</th>`).join("")}</tr></thead>`;
+      const body=(fn, heads, withPlan)=>shown.map(p=>{
+        if(p.head) return `<tr class="lb-dept"><td colspan="${heads.length}">${escape(p.name)}</td></tr>`;
+        return withPlan?fn(p, p.name==="Итого"?planN:planOf(p)):fn(p);
+      }).join("");
+      const monthNote=rank.noFunnel
+        ?"Ноябрь, 01–17.11: контракт = выдача + действующий контракт + расторжение. Два отдела, TENET+ и TENET, затем «Другие» и итог салона. Визиты со звонка и интернета и контракты с них в выгрузке нет — в этих колонках «—». Тест-драйв, оценка CM и e-credit — как в воронке."
+        :(sep?"Октябрь — итог месяца (TENET + Chery, один отдел): контракт = выдача + расторжение. Тест-драйвы — журнал поездок, 1 клиент = 1 ТД. Оценка — CM.Expert, 1 телефон = 1 оценка. Визиты со звонка и интернета и e-credit — из воронки.":"Октябрь — итог месяца.");
       return `<p class="eyebrow" style="margin:0 0 4px">${escape(per.sub)}</p><h2 style="margin:0 0 10px">${escape(per.title)}</h2>
         <div class="lb-blocks">
-          <section class="lb-block a"><p class="lb-rep-h">Выдачи и трафик</p><div class="lb-scroll"><table class="lb-rep">${thead(mainHead)}<tbody>${mains.map(p=>rowMain(p, planOf(p))).join("")}${kids.length?rowMain(bucket,0)+kids.map(p=>rowMain(p,0)).join(""):""}${rowMain(total, planN)}</tbody></table></div></section>
+          <section class="lb-block a"><p class="lb-rep-h">Выдачи и трафик</p><div class="lb-scroll"><table class="lb-rep">${thead(mainHead)}<tbody>${body(rowMain, mainHead, true)}</tbody></table></div></section>
           <div class="lb-pair">
-            <section class="lb-block e"><p class="lb-rep-h">Визит первичный</p><div class="lb-scroll"><table class="lb-rep">${thead(visitHead)}<tbody>${shown.map(rowVisit).join("")}</tbody></table></div></section>
-            <section class="lb-block c"><p class="lb-rep-h">Звонки в контракт</p><div class="lb-scroll"><table class="lb-rep">${thead(callHead)}<tbody>${shown.map(rowCall).join("")}</tbody></table></div></section>
-            <section class="lb-block d"><p class="lb-rep-h">Интернет в контракт</p><div class="lb-scroll"><table class="lb-rep">${thead(webHead)}<tbody>${shown.map(rowWeb).join("")}</tbody></table></div></section>
-            <section class="lb-block f"><p class="lb-rep-h">Визит всего</p><div class="lb-scroll"><table class="lb-rep">${thead(allHead)}<tbody>${shown.map(rowAll).join("")}</tbody></table></div></section>
+            <section class="lb-block e"><p class="lb-rep-h">Визит первичный</p><div class="lb-scroll"><table class="lb-rep">${thead(visitHead)}<tbody>${body(rowVisit, visitHead)}</tbody></table></div></section>
+            <section class="lb-block c"><p class="lb-rep-h">Звонки в контракт</p><div class="lb-scroll"><table class="lb-rep">${thead(callHead)}<tbody>${body(rowCall, callHead)}</tbody></table></div></section>
+            <section class="lb-block d"><p class="lb-rep-h">Интернет в контракт</p><div class="lb-scroll"><table class="lb-rep">${thead(webHead)}<tbody>${body(rowWeb, webHead)}</tbody></table></div></section>
+            <section class="lb-block f"><p class="lb-rep-h">Визит всего</p><div class="lb-scroll"><table class="lb-rep">${thead(allHead)}<tbody>${body(rowAll, allHead)}</tbody></table></div></section>
           </div>
         </div>
-        <p class="lb-rep-note">Как в «ОП CHERY». ${planNote} Трафик — визиты + звонки + интернет. Конв. в контракт: меньше 10% красным, меньше 15% жёлтым, иначе зелёным. Конв. с визита: ниже 20% красным, до 30% жёлтым, от 30% зелёным. Звонок в визит: ниже 10 / до 15 / от 15. Интернет в визит: ниже 5 / до 10 / от 10. Оценка — от 70% визитов, e-credit — от 60%, иначе красным. ТД ниже 70% — красным. Доля трафика, визитов и звонков с интернетом, а также объёмы в нижних блоках: меньше 10% или больше 20% — красным. В строке «Итого» конверсия: основной состав / весь отдел. ${sep?"Сентябрь: контракт = выдача + расторжение. Тест-драйв — только поездка с «движением клиента», без служебных, заправок и центра Hyundai. Повтор одного клиента и поездка мужа с женой считаются один раз. Визит со звонка и с интернета, оценка б/у и e-credit — из воронки, только менеджеры лидерборда.":"Октябрь — итог месяца (TENET + Chery, один отдел): контракт = выдача + расторжение. Тест-драйвы — журнал поездок, 1 клиент = 1 ТД. Оценка — CM.Expert, 1 телефон = 1 оценка. Визиты со звонка и интернета и e-credit — из воронки."} Обновлено ${escape((boardCache&&boardCache.stamp)||"")}</p>`;
+        <p class="lb-rep-note">Как в «ОП CHERY». ${planNote} Трафик — визиты + звонки + интернет. Конв. в контракт: меньше 10% красным, меньше 15% жёлтым, иначе зелёным. Конв. с визита: ниже 20% красным, до 30% жёлтым, от 30% зелёным. Звонок в визит: ниже 10 / до 15 / от 15. Интернет в визит: ниже 5 / до 10 / от 10. Оценка — от 70% визитов, e-credit — от 60%, иначе красным. ТД ниже 70% — красным. Доля трафика, визитов и звонков с интернетом, а также объёмы в нижних блоках: меньше 10% или больше 20% — красным. ${monthNote} Обновлено ${escape((boardCache&&boardCache.stamp)||"")}</p>`;
     }
     function boardBindFolds(root){
       if(!root) return;
