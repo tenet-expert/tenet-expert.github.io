@@ -2,7 +2,7 @@
 """КМ — фиксы, не коридор; без кредитной скидки 50/30 на T7 Prime 2WD (Александр, 27.10.2026 16:32).
 
 1. KM из Sheet вида «A / B» = две фиксированные суммы: A — с трейд-ином, B — без трейд-ина
-   (T7 «30 / 80» = 30 тыс. с ТИ, 80 тыс. без ТИ). Строго по позиции, без min/max.
+   (T7 «0 / 50» = 0 тыс. с ТИ, 50 тыс. без ТИ; с 18.11.2026). Строго по позиции, без min/max.
    Данные: KM_MODELS.kmMin = A (с ТИ), kmMax = B (без ТИ); prioMin/prioMax так же.
    Значения KM_CORRIDOR (сырьё Sheet) раскладываются по позиции и перекрывают kmMin/kmMax
    соответствующих моделей TENET — даже если синк записал их в другом порядке.
@@ -116,6 +116,115 @@ def pin_t9(text):
     return text[:sp[0]] + blk + text[sp[1]:]
 
 
+# 18.11.2026, указание Александра: модельный КМ T7 0/50, пять приоритетных VIN −50/0.
+# Chery Tiggo 7L (t7l) и кредитные поля (t7p/t7a4/t7p4 cr/crBack) не трогаются.
+# VIN-фиксы коридора (100/200, 50/100) не трогаются.
+T7_PRIO_VINS = (
+    "EDEFB32B8TE105355",
+    "EDXFD32B2TE042710",
+    "EDEFB32BXTE100707",
+    "EDEFB32B8TE099203",
+    "EDEFD32B5TE102522",
+)
+T7_PRIO_ROWS = {
+    "EDEFB32B8TE105355": '{model:"T7",vin:"EDEFB32B8TE105355",trim:"Актив",year:"2026",color:"Белый",extra:"",pay:1000,kmTi:-50,kmCash:0}',
+    "EDXFD32B2TE042710": '{model:"T7",vin:"EDXFD32B2TE042710",trim:"Актив 4WD",year:"2026",color:"Белый",extra:"",pay:1000,kmTi:-50,kmCash:0}',
+    "EDEFB32BXTE100707": '{model:"T7",vin:"EDEFB32BXTE100707",trim:"Актив",year:"2026",color:"Белый",extra:"",pay:1000,kmTi:-50,kmCash:0}',
+    "EDEFB32B8TE099203": '{model:"T7",vin:"EDEFB32B8TE099203",trim:"Прайм",year:"2026",color:"Белый",extra:"",pay:1000,kmTi:-50,kmCash:0}',
+    "EDEFD32B5TE102522": '{model:"T7",vin:"EDEFD32B5TE102522",trim:"Прайм 4WD",year:"2026",color:"Белый",extra:"",pay:1000,kmTi:-50,kmCash:0}',
+}
+T7_PRIO_NOTE = "5 VIN: EDEFB32B8TE105355, EDXFD32B2TE042710, EDEFB32BXTE100707, EDEFB32B8TE099203, EDEFD32B5TE102522; остальные приоритеты T7 — стандарт 0/50"
+T7_PRIO_CORRIDOR = '{model:"T7",trim:"Приоритет",km:"−50 / 0",note:"' + T7_PRIO_NOTE + '"}'
+T7_ROW_RE = re.compile(r'\{model:"T7",trim:"([^"]*)",km:"([^"]*)",note:"([^"]*)"\}')
+T7_PRIO_ITEM_RE = re.compile(r'\{model:"T7",vin:"([A-Z0-9]{17})"[^}]*\}')
+
+
+def pin_t7(text):
+    """18.11.2026: TENET T7 КМ = 0 / 50; 5 приоритетных VIN = −50 / 0.
+
+    Защищает живой сайт от отката следующим синкам (ту-google / patch_terms_sync),
+    если в Sheet снова окажется старое 30/80. Не меняет Chery Tiggo 7L и cr/crBack.
+    """
+    sp = _span(text, "KM_CORRIDOR")
+    if not sp:
+        return text
+    blk = text[sp[0]:sp[1]]
+    rows = list(T7_ROW_RE.finditer(blk))
+    has_prio = False
+    for m in rows:
+        trim = m.group(1)
+        if re.fullmatch(r"[A-HJ-NPR-Z0-9]{17}", trim):
+            continue  # VIN-фикс коридора не трогаем
+        if "приоритет" in trim.lower():
+            has_prio = True
+            blk = blk[:m.start()] + T7_PRIO_CORRIDOR + blk[m.end():]
+            rows = list(T7_ROW_RE.finditer(blk))  # refresh after replacement (same length not guaranteed)
+            break
+    if not has_prio:
+        # вставить строку приоритета перед первой общей строкой T7
+        m0 = T7_ROW_RE.search(blk)
+        if m0:
+            blk = blk[:m0.start()] + T7_PRIO_CORRIDOR + ",\n      " + blk[m0.start():]
+        else:
+            # коридор без T7 — вставим после T4L / в конец массива
+            ins = "      " + T7_PRIO_CORRIDOR + ",\n      {model:\"T7\",trim:\"Все\",km:\"0 / 50\",note:\"\"},\n"
+            end = blk.rfind("]")
+            blk = blk[:end] + ins + blk[end:]
+    # общие строки T7 (Все / Остальные / Любые) -> 0 / 50
+    def _gen(m):
+        trim = m.group(1)
+        if re.fullmatch(r"[A-HJ-NPR-Z0-9]{17}", trim):
+            return m.group(0)
+        if "приоритет" in trim.lower():
+            return m.group(0)
+        return '{model:"T7",trim:"%s",km:"0 / 50",note:"%s"}' % (trim, m.group(3))
+    blk = T7_ROW_RE.sub(_gen, blk)
+    text = text[:sp[0]] + blk + text[sp[1]:]
+
+    # TERMS_PRIO: 5 VIN −50/0; старый модельный 30/80 у прочих T7 -> 0/50
+    sp = _span(text, "TERMS_PRIO")
+    if sp:
+        blk = text[sp[0]:sp[1]]
+        seen = set()
+        def _prio(m):
+            vin = m.group(1)
+            row = m.group(0)
+            if vin in T7_PRIO_VINS:
+                seen.add(vin)
+                row = re.sub(r"kmTi:-?\d+", "kmTi:-50", row, count=1)
+                row = re.sub(r"kmCash:-?\d+", "kmCash:0", row, count=1)
+                if "kmTi:" not in row:
+                    row = row[:-1] + ",kmTi:-50,kmCash:0}"
+                return row
+            if re.search(r"kmTi:30\b", row) and re.search(r"kmCash:80\b", row):
+                row = re.sub(r"kmTi:30\b", "kmTi:0", row, count=1)
+                row = re.sub(r"kmCash:80\b", "kmCash:50", row, count=1)
+                return row
+            return row
+        blk = T7_PRIO_ITEM_RE.sub(_prio, blk)
+        missing = [v for v in T7_PRIO_VINS if v not in seen]
+        if missing:
+            # вставить недостающие приоритеты перед закрытием массива
+            ins = ",\n      ".join(T7_PRIO_ROWS[v] for v in missing)
+            end = blk.rfind("]")
+            # запятая перед вставкой, если последний элемент её не имеет
+            head = blk[:end].rstrip()
+            if not head.endswith(",") and not head.endswith("["):
+                head += ","
+            blk = head + "\n      " + ins + "\n    ];"
+        text = text[:sp[0]] + blk + text[sp[1]:]
+
+    # PRIO_VINS должен содержать эти 5 VIN
+    sp = _span(text, "PRIO_VINS")
+    if sp:
+        blk = text[sp[0]:sp[1]]
+        for v in T7_PRIO_VINS:
+            if '"%s"' % v not in blk and "'%s'" % v not in blk:
+                blk = blk.replace("])", ", \"%s\"])" % v, 1)
+        text = text[:sp[0]] + blk + text[sp[1]:]
+    return text
+
+
 def sync_vin_forks(text):
     """07.11: VIN > model. Rebuild at runtime from synchronized data, never a trim-wide override."""
     sp = _span(text, "KM_FORK")
@@ -125,7 +234,7 @@ def sync_vin_forks(text):
 
 
 def fix_data(text):
-    text = sync_vin_forks(pin_t9(text))
+    text = sync_vin_forks(pin_t7(pin_t9(text)))
     sp = _span(text, "KM_MODELS")
     if not sp:
         return text

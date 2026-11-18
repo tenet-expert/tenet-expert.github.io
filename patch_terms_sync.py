@@ -273,8 +273,9 @@ def ensure_local(text):
         )
     text = move_plus_specs(text)
     text = drop_sold_vin_specs(text)
-    # 27.10.2026: T7 Prime 2WD без «Выгодного кредита» 50 000 / 30 000 (синк из «Цены и поддержки»
-    # возвращает cr:50000,crBack:30000) и КМ «A / B» из Sheet = фикс A с ТИ / B без ТИ строго по позиции.
+    # 27.10.2026: КМ «A / B» из Sheet = фикс A с ТИ / B без ТИ строго по позиции.
+    # 18.11.2026: pin_t7 в patch_km_fix.fix_data держит T7 0/50 и 5 приоритетных VIN −50/0,
+    # даже если Sheet/канон вернут старое 30/80. Кредитные поля не меняются.
     try:
         import patch_km_fix
         text = patch_km_fix.fix_data(text)
