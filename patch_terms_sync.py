@@ -276,7 +276,7 @@ def ensure_local(text):
     # 27.10.2026: КМ «A / B» из Sheet = фикс A с ТИ / B без ТИ строго по позиции.
     # 18.11.2026: pin_t7 в patch_km_fix.fix_data держит T7 0/50 и 5 приоритетных VIN −50/0,
     # даже если Sheet/канон вернут старое 30/80.
-    # t7p: NO_CREDIT обнуляет cr/crBack (всегда 0/0; скидку 50/30 не возвращать). t7a4 и t7p4 не трогаются.
+    # Кредит T7 (18.11.2026): t7p/t7a4/t7p4 = 50/30; NO_CREDIT держит t7a (Актив 2WD) на cr 0 / crBack 0.
     try:
         import patch_km_fix
         text = patch_km_fix.fix_data(text)
