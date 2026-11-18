@@ -3936,14 +3936,18 @@ async function pingTelegram(body){
     async function boardLoad(){
       const root=document.getElementById("boardRoot");
       if(!root || view!=="board") return;
-      try{
-        if(!boardCache) root.innerHTML=`<div class="card"><p>Загружаю трафик…</p></div>`;
-        await boardEnsure();
-        root.innerHTML=boardHtml(boardCache);
+      const paint=()=>{
+        root.innerHTML=boardHtml(boardCache||{oct:[],sep:[],stamp:""});
         boardBindFolds(root);
         root.querySelectorAll("[data-board-pane]").forEach(b=>{
           b.onclick=()=>{ boardPane=b.dataset.boardPane||"table"; boardLoad(); };
         });
+      };
+      try{
+        if(boardMode==="month"||boardMode==="prev"){ paint(); return; }
+        if(!boardCache) root.innerHTML=`<div class="card"><p>Загружаю трафик…</p></div>`;
+        await boardEnsure();
+        paint();
       }catch(err){
         root.innerHTML=`<div class="card"><p>Не удалось прочитать трафик. ${escape(err&&err.message||"")}</p><button class="btn ivory" type="button" id="boardRetry">Ещё раз</button></div>`;
         const b=document.getElementById("boardRetry");
