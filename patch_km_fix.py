@@ -461,8 +461,253 @@ def js_ok(html):
     return True
 
 
+BG_START = "    /* TENET_BG_START 19.11.2026: аналог спеца до 30.11.2026 включительно, Europe/Samara. С 01.12.2026 termsBgActive()=false. */"
+BG_END = "    /* TENET_BG_END */"
+
+BG_BLOCK = r'''    /* TENET_BG_START 19.11.2026: аналог спеца до 30.11.2026 включительно, Europe/Samara. С 01.12.2026 termsBgActive()=false. */
+    const TERMS_BG_UNTIL = "2026-11-30";
+    const TERMS_BG = [
+      {model:"T7",trim:"Актив 2WD",price:"2 400 нал, 2 300 ТИ"},
+      {model:"T7",trim:"Прайм 2WD",price:"2 550 нал, 2 450 ТИ"},
+      {model:"T7",trim:"Актив 4WD",price:"2 600 нал, 2 500 ТИ"},
+      {model:"T7",trim:"Прайм 4WD",price:"2 800 нал, 2 700 ТИ"},
+      {model:"T8",trim:"Актив 2WD 5 мест",price:"2 800 нал, 2 700 ТИ"},
+      {model:"T8",trim:"Прайм 2WD 5 мест",price:"2 900 нал, 2 800 ТИ"},
+      {model:"T8",trim:"Прайм 4WD 7 мест",price:"3 200 нал, 3 100 ТИ"},
+      {model:"T8",trim:"Ультра 4WD 7 мест",price:"3 300 нал, 3 200 ТИ"},
+      {model:"A8",trim:"Ультра 2.0",price:"3 100 нал, 3 000 ТИ"},
+      {model:"T9",trim:"Прайм 5 мест",price:"3 500 нал, 3 400 ТИ"},
+      {model:"T9",trim:"Ультра 5 мест",price:"3 800 нал, 3 600 ТИ"},
+      {model:"T9",trim:"Ультра 7 мест",price:"3 900 нал, 3 700 ТИ"}
+    ];
+    const PANGO_BG = {
+      t7a:{cash:2400000,ti:2300000},
+      t7p:{cash:2550000,ti:2450000},
+      t7a4:{cash:2600000,ti:2500000},
+      t7p4:{cash:2800000,ti:2700000},
+      t8a:{cash:2800000,ti:2700000},
+      t8p:{cash:2900000,ti:2800000},
+      t8p4:{cash:3200000,ti:3100000},
+      t8u4:{cash:3300000,ti:3200000},
+      ta8u:{cash:3100000,ti:3000000},
+      tt9p:{cash:3500000,ti:3400000},
+      tt9u:{cash:3800000,ti:3600000},
+      tt9u7:{cash:3900000,ti:3700000}
+    };
+    function termsBgActive(){
+      /* Until 2026-11-30 inclusive, Europe/Samara (UTC+4, no DST). */
+      try{
+        const ymd=new Intl.DateTimeFormat("en-CA",{timeZone:"Europe/Samara",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
+        return ymd<=TERMS_BG_UNTIL;
+      }catch(e){
+        return new Date(Date.now()+4*3600*1000).toISOString().slice(0,10)<=TERMS_BG_UNTIL;
+      }
+    }
+    function pangoBetter(a,b){
+      if(!a) return b||null;
+      if(!b) return a;
+      return {cash:Math.min(a.cash,b.cash),ti:Math.min(a.ti,b.ti)};
+    }
+    function isPangoBg(car){
+      if(!car || typeof termsBgActive!=="function" || !termsBgActive() || typeof PANGO_BG==="undefined") return false;
+      const t=String(car.trim||"").toLowerCase();
+      if(t.includes("престиж")||t.includes("prestige")) return false;
+      const id=typeof kmIdFromCar==="function"?kmIdFromCar(car):"";
+      return !!(id && PANGO_BG[id]);
+    }
+    function isPangoDeal(car,id){
+      if(!car) return false;
+      if(car.invoice) return true;
+      return typeof isPangoBg==="function" && isPangoBg(car);
+    }
+    /* TENET_BG_END */
+'''
+
+PANGO_OF = '''    function pangoOf(id){
+      const vin=typeof kmVin==="string"?String(kmVin).toUpperCase():"";
+      const vinPrice=(vin && typeof EXCL_FIX!=="undefined" && EXCL_FIX[vin]) || (vin && typeof PANGO_VIN!=="undefined" && PANGO_VIN[vin]) || null;
+      const trimPrice=(typeof PANGO_FIX!=="undefined" && PANGO_FIX[id]) || null;
+      const bg=(typeof termsBgActive==="function" && termsBgActive() && typeof PANGO_BG!=="undefined" && PANGO_BG[id]) || null;
+      if(vinPrice) return pangoBetter(vinPrice, bg);
+      return pangoBetter(trimPrice, bg);
+    }
+'''
+
+PANGO_OF_RE = re.compile(r"    function pangoOf\(id\)\{.*?\n    \}\n", re.S)
+
+BG_SECTION = (
+    '`${typeof termsBgActive==="function"&&termsBgActive()&&typeof TERMS_BG!=="undefined"?`'
+    '<section class="terms-acc spec-bg"><h2 class="terms-acc-h">'
+    '<button type="button" class="terms-acc-btn" aria-expanded="false" aria-controls="spec-bg-panel">'
+    '<span class="terms-chevron" aria-hidden="true"></span>'
+    '<span class="terms-acc-title">Без границ · до 30.11</span></button></h2>'
+    '<div class="terms-acc-panel" id="spec-bg-panel" hidden><div class="terms-cards">`+termGroup(TERMS_BG,"price")+`</div></div></section>`:""}`+'
+)
+
+CSS_RULES = """
+.terms-spec .spec-bg{grid-column:1/-1;background:#eef6ee}
+.terms-spec .spec-bg h2,.terms-spec .spec-bg .terms-acc-title{color:#1e5c24}
+.terms-spec .spec-bg .terms-cards{grid-template-columns:repeat(4,1fr)}
+.terms-spec .spec-bg .term-card{background:#fff;border-color:#b7d4b9}
+.terms-spec .spec-bg .term-group{border:1.5px solid #7da87f;box-shadow:none}
+.terms-spec .spec-bg .term-group>b{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#1e5c24;border-bottom:1px solid #cde5ce;padding-bottom:6px}
+@media(max-width:800px){
+  .terms-spec .spec-bg .terms-cards{grid-template-columns:1fr}
+}
+"""
+
+TERMS_SPEC_OPEN = '`<div class="terms-spec">`+'
+
+
+def _insert_block(text):
+    if "TENET_BG_START" in text:
+        text = re.sub(
+            r"[ 	]*/\* TENET_BG_START .*?" + re.escape(BG_END),
+            BG_BLOCK.rstrip(),
+            text,
+            count=1,
+            flags=re.S,
+        )
+    else:
+        m = PANGO_OF_RE.search(text)
+        if m:
+            text = text[: m.end()] + "\n" + BG_BLOCK + text[m.end():]
+        else:
+            anchor = "    const TERMS_PRIO = ["
+            if anchor not in text:
+                print("borderless: no pangoOf/TERMS_PRIO anchor")
+                return text
+            text = text.replace(anchor, BG_BLOCK + "\n" + anchor, 1)
+    if PANGO_OF_RE.search(text):
+        text = PANGO_OF_RE.sub(PANGO_OF, text, count=1)
+    else:
+        print("borderless: pangoOf not replaced")
+    return text
+
+
+def _insert_terms_section(text):
+    if "spec-bg-panel" in text and "Без границ · до 30.11" in text:
+        return text
+    needle = '`<div class="terms-spec">`+\n        `<section class="terms-acc spec-tenet">'
+    if needle not in text:
+        needle2 = '`<div class="terms-spec">`+'
+        if needle2 not in text:
+            print("borderless: terms-spec accordion not found")
+            return text
+        text = text.replace(needle2, '`<div class="terms-spec">`+\n        ' + BG_SECTION + "\n        ", 1)
+        return text
+    text = text.replace(
+        needle,
+        '`<div class="terms-spec">`+\n        ' + BG_SECTION + "\n        " + '`<section class="terms-acc spec-tenet">',
+        1,
+    )
+    return text
+
+
+def _insert_css(text):
+    if ".terms-spec .spec-bg{" in text:
+        return text
+    anchor = ".terms-spec .spec-plus{background:#f4efe4}"
+    if anchor in text:
+        return text.replace(anchor, anchor + CSS_RULES, 1)
+    # fallback: before first @media for terms-spec
+    alt = "@media(max-width:800px){\n  .terms-spec{grid-template-columns:1fr}"
+    if alt in text:
+        return text.replace(alt, CSS_RULES + alt, 1)
+    print("borderless: CSS anchor not found")
+    return text
+
+
+def _rewire_invoice(text):
+    # Source index.html (kmPango variant, spaces around &&)
+    src_pair = (
+        "      const pShow=pangoOnly || !!(_pg && (showMpt || showSub || canSub));\n"
+        "      const kmPango=!!(pangoOnly || (selected && selected.invoice && _pg));"
+    )
+    src_pair_new = (
+        "      const kmPango=!!(pangoOnly || (selected && isPangoDeal(selected,m.id) && _pg));\n"
+        "      const pShow=pangoOnly || kmPango || !!(_pg && (showMpt || showSub || canSub));"
+    )
+    if src_pair in text:
+        text = text.replace(src_pair, src_pair_new)
+        print("borderless: kmPango/pShow rewired (source variant)")
+    elif "isPangoDeal(selected,m.id) && _pg" in text and "const kmPango=" in text:
+        pass
+    elif "const kmPango=" in text and "selected && selected.invoice" in text:
+        text = text.replace("selected && selected.invoice", "selected && isPangoDeal(selected,m.id)")
+        print("borderless: spaced selected.invoice rewired")
+
+    # Built page (compact &&, no kmPango): show PANGO when this VIN is on the deal
+    live_pshow = "const pShow=!!(_pg && (showMpt || showSub || canSub));"
+    live_pshow_new = "const pShow=!!(_pg && (showMpt || showSub || canSub || (selected&&isPangoDeal(selected,m.id))));"
+    if live_pshow in text:
+        text = text.replace(live_pshow, live_pshow_new)
+        print("borderless: pShow rewired (built variant)")
+
+    compact_old = "selected&&selected.invoice"
+    compact_new = "selected&&isPangoDeal(selected,m.id)"
+    n = text.count(compact_old)
+    if n:
+        text = text.replace(compact_old, compact_new)
+        print("borderless: rewired selected.invoice -> isPangoDeal", n)
+    return text
+
+
+def _badges(text):
+    old_calc = (
+        '${(typeof EXCL_FIX!=="undefined"&&EXCL_FIX[c.vin])?`<span class="mpt-tag super-tag">СУПЕРСПЕЦ</span>`:(c.invoice?`<span class="mpt-tag inv-tag">Спец инвойс</span>`:"")}'
+    )
+    new_calc = (
+        '${(typeof EXCL_FIX!=="undefined"&&EXCL_FIX[c.vin])?`<span class="mpt-tag super-tag">СУПЕРСПЕЦ</span>`:(c.invoice?`<span class="mpt-tag inv-tag">Спец инвойс</span>`:(typeof isPangoBg==="function"&&isPangoBg(c)?`<span class="mpt-tag inv-tag">Без границ</span>`:""))}'
+    )
+    if old_calc in text:
+        text = text.replace(old_calc, new_calc)
+        print("borderless: calc VIN badge updated")
+    elif "isPangoBg(c)?`<span class=\"mpt-tag inv-tag\">Без границ</span>`" in text or "isPangoBg(c)?`<span class='mpt-tag inv-tag'>Без границ</span>`" in text:
+        pass
+    else:
+        if "СУПЕРСПЕЦ</span>`:(c.invoice?" in text and "Без границ</span>`:\"\")}" not in text:
+            print("borderless: calc VIN badge anchor drifted")
+
+    old_meta = '${st}${(typeof EXCL_FIX!=="undefined"&&EXCL_FIX[c.vin])?" · СУПЕРСПЕЦ":(c.invoice?" · спец инвойс":"")}'
+    new_meta = '${st}${(typeof EXCL_FIX!=="undefined"&&EXCL_FIX[c.vin])?" · СУПЕРСПЕЦ":(c.invoice?" · спец инвойс":(typeof isPangoBg==="function"&&isPangoBg(c)?" · без границ":""))}'
+    if old_meta in text:
+        text = text.replace(old_meta, new_meta)
+        print("borderless: calc meta updated")
+
+    old_bits = 'else if(r.invoice) bits.push(`<span class="st inv">Спец инвойс</span>`);'
+    new_bits = (
+        'else if(r.invoice) bits.push(`<span class="st inv">Спец инвойс</span>`);\n'
+        '      else if(typeof isPangoBg==="function"&&isPangoBg(r)) bits.push(`<span class="st inv">Без границ</span>`);'
+    )
+    if old_bits in text and "Без границ</span>`);" not in text.split(old_bits, 1)[1][:200]:
+        text = text.replace(old_bits, new_bits)
+        print("borderless: stock table badge updated")
+    return text
+
+
+def ensure_borderless(text):
+    """Pin «Без границ» data, pangoOf, TУ block, PANGO deal path and badges."""
+    src = text
+    text = _insert_block(text)
+    text = _insert_terms_section(text)
+    text = _insert_css(text)
+    text = _rewire_invoice(text)
+    text = _badges(text)
+    if text != src:
+        print("borderless: applied")
+    else:
+        print("borderless: already in place")
+    return text
+
+
+def ensure_data_js(text):
+    """For terms-calc-data.js: data + helpers + pangoOf (EXCL_FIX-safe)."""
+    return _insert_block(text)
+
+
 def apply(text):
-    return rename_trims(fix_code(fix_data(text)))
+    return ensure_borderless(rename_trims(fix_code(fix_data(text))))
 
 
 def main():

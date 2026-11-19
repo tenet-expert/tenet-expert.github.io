@@ -331,6 +331,18 @@ def ensure_local(text):
     except Exception as e:
         print("terms sync: km-fix skipped:", e)
     text = ensure_l6u4(text)
+    # 19.11.2026: спец «Без границ» до 30.11. Пин, чтобы синк ТУ не стёр программу.
+    try:
+        if hasattr(patch_km_fix, "ensure_borderless"):
+            text = patch_km_fix.ensure_borderless(text)
+    except NameError:
+        try:
+            import patch_km_fix as _km
+            text = _km.ensure_borderless(text)
+        except Exception as e:
+            print("terms sync: borderless skipped:", e)
+    except Exception as e:
+        print("terms sync: borderless skipped:", e)
     return text
 
 
