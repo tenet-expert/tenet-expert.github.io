@@ -255,6 +255,54 @@ def drop_sold_tests(text):
     return text[:s[0]] + block + text[s[1]:]
 
 
+
+L6U4_ROW = '{id:"l6u4",brand:"TENET PLUS",name:"L6 Ultra 4WD",stock:"pl6",rrc:3290000,dealer:3138000,ti:100000,tiBack:70000,cr:0,crBack:0,bonus:0.022,vat:1.22,fee:0.01,kmMin:0,kmMax:50,prioMin:0,prioMax:50}'
+L6U4_NUMS = {
+    "rrc": 3290000, "dealer": 3138000, "ti": 100000, "tiBack": 70000,
+    "cr": 0, "crBack": 0, "bonus": 0.022, "vat": 1.22, "fee": 0.01,
+    "kmMin": 0, "kmMax": 50, "prioMin": 0, "prioMax": 50,
+}
+
+
+def ensure_l6u4(text):
+    """19.11.2026: L6 Ultra 4WD from Александр. Keep the row if Sheet/canon lag."""
+    sp = span(text, "KM_MODELS")
+    if not sp:
+        return text
+    block = text[sp[0]:sp[1]]
+    m = re.search(r'\{id:"l6u4"[^}]*\}', block)
+    if m:
+        row = m.group(0)
+        for k, v in L6U4_NUMS.items():
+            if re.search(r'\b' + k + r':-?\d+(?:\.\d+)?', row):
+                row = re.sub(r'\b' + k + r':-?\d+(?:\.\d+)?', f"{k}:{v}", row, count=1)
+            else:
+                row = row[:-1] + f",{k}:{v}" + "}"
+        if 'stock:"pl6"' not in row:
+            if "stock:" in row:
+                row = re.sub(r'stock:"[^"]*"', 'stock:"pl6"', row, count=1)
+            else:
+                row = row[:-1] + ',stock:"pl6"}'
+        if row == m.group(0):
+            return text
+        print("terms sync: pin L6 Ultra 4WD (l6u4) values")
+        return text[:sp[0]] + block[:m.start()] + row + block[m.end():] + text[sp[1]:]
+    loc = re.search(r'\{id:"l6u"[^}]*\}', block)
+    if loc:
+        new_block = block[:loc.end()] + ",\n      " + L6U4_ROW + block[loc.end():]
+    else:
+        close = block.rfind("]")
+        if close < 0:
+            return text
+        prefix = block[:close].rstrip()
+        if not prefix.endswith(","):
+            new_block = prefix + ",\n      " + L6U4_ROW + "\n    ];"
+        else:
+            new_block = prefix + "\n      " + L6U4_ROW + "\n    ];"
+    print("terms sync: add L6 Ultra 4WD (l6u4)")
+    return text[:sp[0]] + new_block + text[sp[1]:]
+
+
 def ensure_local(text):
     text = drop_sold_tests(text)
     text = ensure_t9(text)
@@ -282,6 +330,7 @@ def ensure_local(text):
         text = patch_km_fix.fix_data(text)
     except Exception as e:
         print("terms sync: km-fix skipped:", e)
+    text = ensure_l6u4(text)
     return text
 
 
