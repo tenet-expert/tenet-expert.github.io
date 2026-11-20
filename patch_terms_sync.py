@@ -303,6 +303,95 @@ def ensure_l6u4(text):
     return text[:sp[0]] + new_block + text[sp[1]:]
 
 
+
+TPLUS_CHOICE_EXTRA = 70000
+TPLUS_CHOICE_LABEL = "TENET Plus Выбор"
+TPLUS_CHOICE_START = "    /* TPLUS_CHOICE_START 20.11.2026: аналог «Без границ» для TENET PLUS. Цена = спец T+ + 70 000 ₽, нал и ТИ. Срока окончания нет. */"
+TPLUS_CHOICE_END = "    /* TPLUS_CHOICE_END */"
+
+
+def _pango_fix_map(text):
+    sp = span(text, "PANGO_FIX")
+    if not sp:
+        return {}
+    return {i: (int(c), int(ti)) for i, c, ti in re.findall(
+        r"([A-Za-z0-9]+):\{cash:(\d+),ti:(\d+)\}", text[sp[0]:sp[1]]
+    )}
+
+
+def _tplus_model_ids(text):
+    sp = span(text, "KM_MODELS")
+    if not sp:
+        return []
+    ids = []
+    for m in re.finditer(r'\{id:"([^"]+)",brand:"([^"]+)"', text[sp[0]:sp[1]]):
+        if m.group(2) == "TENET PLUS" and m.group(1) not in ids:
+            ids.append(m.group(1))
+    return ids
+
+
+def _tplus_choice_block(prices):
+    lines = [
+        TPLUS_CHOICE_START,
+        "    const TPLUS_CHOICE = {",
+        f'      label:"{TPLUS_CHOICE_LABEL}",',
+        f"      extra:{TPLUS_CHOICE_EXTRA},",
+        "      prices:{",
+    ]
+    for j, (i, (cash, ti)) in enumerate(prices):
+        comma = "," if j < len(prices) - 1 else ""
+        lines.append(f"        {i}:{{cash:{cash},ti:{ti}}}{comma}")
+    lines.extend(["      }", "    };", TPLUS_CHOICE_END])
+    return "\n".join(lines)
+
+
+def ensure_tplus_choice(text):
+    """20.11.2026: программа «TENET Plus Выбор». Цена = спеццена T+ + 70 000, нал и ТИ.
+    Пин, чтобы синк ТУ не стёр блок. Если спец T+ в PANGO_FIX меняется, цены
+    программы пересчитываются. Комплектации без спеца (например l6u4) не выдумываем."""
+    fix = _pango_fix_map(text)
+    prices = []
+    for i in _tplus_model_ids(text):
+        if i in fix:
+            cash, ti = fix[i]
+            prices.append((i, (cash + TPLUS_CHOICE_EXTRA, ti + TPLUS_CHOICE_EXTRA)))
+    if not prices:
+        print("terms sync: TPLUS_CHOICE skipped, no T+ specials in PANGO_FIX")
+        return text
+    block = _tplus_choice_block(prices)
+    if "TPLUS_CHOICE_START" in text:
+        new_text, n = re.subn(
+            r"[ \t]*/\* TPLUS_CHOICE_START .*?" + re.escape(TPLUS_CHOICE_END),
+            block,
+            text,
+            count=1,
+            flags=re.S,
+        )
+        if n:
+            if new_text != text:
+                print("terms sync: pin TPLUS_CHOICE (recalculated from PANGO_FIX + 70000)")
+            else:
+                print("terms sync: TPLUS_CHOICE already current")
+            return new_text
+    sp = span(text, "TPLUS_CHOICE")
+    if sp:
+        text = text[:sp[0]] + block + text[sp[1]:]
+        print("terms sync: pin TPLUS_CHOICE (replaced existing const)")
+        return text
+    anchor = "    /* TENET_BG_END */"
+    if anchor in text:
+        text = text.replace(anchor, anchor + "\n\n" + block, 1)
+        print("terms sync: add TPLUS_CHOICE after TENET_BG_END")
+        return text
+    anchor = "    const TERMS_PRIO = ["
+    if anchor in text:
+        text = text.replace(anchor, block + "\n\n" + anchor, 1)
+        print("terms sync: add TPLUS_CHOICE before TERMS_PRIO")
+        return text
+    print("terms sync: TPLUS_CHOICE anchor not found")
+    return text
+
+
 def ensure_pango_rates(text):
     """20.11.2026: Александр confirmed Pango rates. The Sheet/canon still has
     17.4 / 14.4, so pin 18.4 (без комиссий) and 15.4 (НСС в теле) after sync."""
@@ -342,6 +431,8 @@ def ensure_local(text):
         print("terms sync: km-fix skipped:", e)
     text = ensure_l6u4(text)
     text = ensure_pango_rates(text)
+    # 20.11.2026: «TENET Plus Выбор» = спец T+ + 70 000. Пин, чтобы синк не стёр программу.
+    text = ensure_tplus_choice(text)
     # 19.11.2026: спец «Без границ» до 30.11. Пин, чтобы синк ТУ не стёр программу.
     try:
         if hasattr(patch_km_fix, "ensure_borderless"):
