@@ -423,7 +423,10 @@ input,textarea{width:100%;background:#fff;border:1px solid var(--border);color:v
 .pay-col.pango .bank-row.pay-top .pay,.pay-col.mpt .bank-row:first-of-type .pay,.pay-col.sub .bank-row:first-of-type .pay{font-size:22px;line-height:1.1}
 .mpt-tag{display:block;color:#1b5e20;font-weight:700;font-size:12px;margin:4px 0 2px}
 
-.terms-spec{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin:0 0 18px;align-items:start}
+.terms-spec{display:block;margin:0 0 18px}
+.terms-spec .spec-all{background:#fbf6ee;border:1px solid #ead4b0;border-radius:16px;overflow:hidden}
+.terms-spec .spec-part{margin:0 12px 12px;border-radius:14px;padding:12px 12px 4px}
+.terms-spec .spec-part h3{margin:0 0 8px;font-size:15px;font-weight:800;letter-spacing:-.02em}
 .terms-spec section{border-radius:16px;padding:12px 12px 2px}
 .terms-spec h2{margin:0 0 8px}
 .terms-spec .terms-cards{margin-bottom:8px}
@@ -433,7 +436,7 @@ input,textarea{width:100%;background:#fff;border:1px solid var(--border);color:v
 .terms-spec .spec-tenet{background:#fbf6ee}
 .terms-spec .spec-plus{background:#f4efe4}
 .terms-spec .spec-bg{grid-column:1/-1;background:#eef6ee}
-.terms-spec .spec-bg h2,.terms-spec .spec-bg .terms-acc-title{color:#1e5c24}
+.terms-spec .spec-bg h2,.terms-spec .spec-bg h3,.terms-spec .spec-bg .terms-acc-title{color:#1e5c24}
 .terms-spec .spec-bg .terms-cards{grid-template-columns:repeat(4,1fr)}
 .terms-spec .spec-bg .term-card{background:#fff;border-color:#b7d4b9}
 .terms-spec .spec-bg .term-group{border:1.5px solid #7da87f;box-shadow:none}
@@ -442,7 +445,7 @@ input,textarea{width:100%;background:#fff;border:1px solid var(--border);color:v
   .terms-spec .spec-bg .terms-cards{grid-template-columns:1fr}
 }
 
-.terms-spec .spec-tenet h2,.terms-spec .spec-plus h2{color:#8a5a10}
+.terms-spec .spec-tenet h2,.terms-spec .spec-tenet h3,.terms-spec .spec-plus h2,.terms-spec .spec-plus h3{color:#8a5a10}
 .terms-spec .spec-tenet .term-card{background:#fffaf3;border-color:#ead4b0}
 .terms-spec .spec-plus .term-card{background:#fff;border-color:#e0c48a}
 .terms-spec .term-group{border:1.5px solid #c4a574;box-shadow:none}
@@ -5547,7 +5550,8 @@ async function pingTelegram(body){
       let pangoCol="";
       const _pgF=(m && typeof pangoOf==="function")?pangoOf(m.id):null;
       if(_pgF){
-        const pFix=useTi?_pgF.ti:_pgF.cash;
+        const pWithTi=!!(useTi||(typeof kmVal==="function"&&kmVal("kmUseDcTi", false)));
+        const pFix=pWithTi?_pgF.ti:_pgF.cash;
         const pDownP=Math.max(0, Math.min(pFix, down));
         const pBundle=typeof PANGO_BUNDLE==="number"?PANGO_BUNDLE:150000;
         const pRateA=typeof PANGO_RATE_A==="number"?PANGO_RATE_A:17.4;
@@ -5576,7 +5580,7 @@ async function pingTelegram(body){
             <div class="bank-row"><span>Тело с НСС</span><span class="pay">${rub(pCreditB)}</span></div>
             <details class="calc-more">
               <summary>Подробности расчёта</summary>
-              <p class="calc-note">Если машина по спеццене. Фикс ${useTi?"с трейд-ин":"без трейд-ин"} ${rub(pFix)}. Каско + GAP + ДМС ${rub(pBundle)} всегда в кредите.</p>
+              <p class="calc-note">Если машина по спеццене. Фикс ${pWithTi?"с трейд-ин":"без трейд-ин"} ${rub(pFix)}. Каско + GAP + ДМС ${rub(pBundle)} всегда в кредите.</p>
               <div class="bank-row"><span>Цена авто</span><span class="pay">${rub(pFix)}</span></div>
               <div class="bank-row"><span>Первый взнос</span><span class="pay">${rub(pDownP)}</span></div>
               <div class="bank-row"><span>Каско + GAP + ДМС</span><span class="pay">${rub(pBundle)}</span></div>
@@ -5922,11 +5926,12 @@ async function pingTelegram(body){
       return banner("Торговые условия","Файл «Торговые условия» · с "+TERMS_DATE,"TENET")+
         `<div class="terms-col">`+
         `<div class="terms-spec">`+
-        `${typeof termsBgActive==="function"&&termsBgActive()&&typeof TERMS_BG!=="undefined"?`<section class="terms-acc spec-bg"><h2 class="terms-acc-h"><button type="button" class="terms-acc-btn" aria-expanded="false" aria-controls="spec-bg-panel"><span class="terms-chevron" aria-hidden="true"></span><span class="terms-acc-title">Без границ · до 30.11</span></button></h2><div class="terms-acc-panel" id="spec-bg-panel" hidden><div class="terms-cards">`+termGroup(TERMS_BG,"price")+`</div></div></section>`:""}`+
-        `<section class="terms-acc spec-tenet"><h2 class="terms-acc-h"><button type="button" class="terms-acc-btn" aria-expanded="false" aria-controls="spec-tenet-panel"><span class="terms-chevron" aria-hidden="true"></span><span class="terms-acc-title">Спец · TENET</span></button></h2>`+
-        `<div class="terms-acc-panel" id="spec-tenet-panel" hidden><div class="terms-cards">`+termGroup(TERMS_INV,"price")+`</div></div></section>`+
-        `<section class="terms-acc spec-plus"><h2 class="terms-acc-h"><button type="button" class="terms-acc-btn" aria-expanded="false" aria-controls="spec-plus-panel"><span class="terms-chevron" aria-hidden="true"></span><span class="terms-acc-title">Спец · TENET+</span></button></h2>`+
-        `<div class="terms-acc-panel" id="spec-plus-panel" hidden><div class="terms-cards">`+termGroup(typeof TERMS_INV_PLUS!=="undefined"?TERMS_INV_PLUS:[],"price")+`</div></div></section>`+
+        `<section class="terms-acc spec-all"><h2 class="terms-acc-h"><button type="button" class="terms-acc-btn" aria-expanded="false" aria-controls="spec-all-panel"><span class="terms-chevron" aria-hidden="true"></span><span class="terms-acc-title">Спеццены · TENET, TENET+ и Без границ</span></button></h2>`+
+        `<div class="terms-acc-panel" id="spec-all-panel" hidden>`+
+        `${typeof termsBgActive==="function"&&termsBgActive()&&typeof TERMS_BG!=="undefined"?`<section class="spec-part spec-bg" id="spec-bg-panel"><h3>Без границ · до 30.11</h3><div class="terms-cards">`+termGroup(TERMS_BG,"price")+`</div></section>`:""}`+
+        `<section class="spec-part spec-tenet" id="spec-tenet-panel"><h3>Спец · TENET</h3><div class="terms-cards">`+termGroup(TERMS_INV,"price")+`</div></section>`+
+        `<section class="spec-part spec-plus" id="spec-plus-panel"><h3>Спец · TENET+</h3><div class="terms-cards">`+termGroup(typeof TERMS_INV_PLUS!=="undefined"?TERMS_INV_PLUS:[],"price")+`</div></section>`+
+        `</div></section>`+
         `</div>`+
         sberTermsHtml()+
         fleetPricesHtml()+
@@ -6338,9 +6343,10 @@ async function pingTelegram(body){
       const pangoOnly=!!(typeof PANGO_ONLY!=="undefined" && PANGO_ONLY[kmVin] && _pg);
       const kmPango=!!(pangoOnly || (selected && isPangoDeal(selected,m.id) && _pg));
       const pShow=pangoOnly || kmPango || !!(_pg && (showMpt || showSub || canSub));
+      const pWithTi=!!(useTi||useDcTi);
       let pFix=0, pDownP=0, pBundle=150000, pBase=0, pCreditB=0, pRateA=17.4, pRateB=14.4, pNss=0, pPayA=0, pPayB=0, pOverA=0, pOverB=0, pYears=0, pYearsLabel="0", pYearsWord="лет", pKm=km, pKmK=kmK, pOk=ok, pDiscount=0, pTiBack=0, pCard=0, pBonus=0, pMargin=0, pIron=0;
       if(_pg){
-        pFix=useTi?_pg.ti:_pg.cash;
+        pFix=pWithTi?_pg.ti:_pg.cash;
         pDownP=Math.max(0, Math.min(pFix, down));
         pBundle=typeof PANGO_BUNDLE==="number"?PANGO_BUNDLE:150000;
         pRateA=typeof PANGO_RATE_A==="number"?PANGO_RATE_A:17.4;
@@ -6498,7 +6504,7 @@ async function pingTelegram(body){
             ${useDcCr&&!dcCapped&&dcCr===0&&kmK+0.05<lo?`<div class="note-box">КМ ниже фикса ${lo} тыс. уже без скидки ДЦ — скидку ДЦ не даём.</div>`:""}
             <p class="calc-note">Скидка за кредит держит КМ у порога. Произвольная кладётся сверху и снижает ниже.</p>`}
             <label class="field" style="max-width:none"><span>Д/О, ₽</span><input id="kmDo" inputmode="numeric" value="${addons}" /></label>
-            ${pangoOnly?`<div class="note-box" style="margin-top:14px"><p class="eyebrow" style="margin:0 0 6px">Цена PANGO</p><div class="calc-out">${rub(pFix)} ₽</div><p class="calc-note">${_pg.cash===_pg.ti?"При любых условиях. Трейд-ин цену не меняет.":(useTi?"С трейд-ин.":"Без трейд-ин.")} Директ и флит не считаем.</p></div><div class="note-box">${escape(PANGO_ONLY[kmVin])}</div>`:`<div class="note-box" style="margin-top:14px">
+            ${pangoOnly?`<div class="note-box" style="margin-top:14px"><p class="eyebrow" style="margin:0 0 6px">Цена PANGO</p><div class="calc-out">${rub(pFix)} ₽</div><p class="calc-note">${_pg.cash===_pg.ti?"При любых условиях. Трейд-ин цену не меняет.":(pWithTi?"С трейд-ин.":"Без трейд-ин.")} Директ и флит не считаем.</p></div><div class="note-box">${escape(PANGO_ONLY[kmVin])}</div>`:`<div class="note-box" style="margin-top:14px">
               <p class="eyebrow" style="margin:0 0 6px">Итоговая цена для клиента</p>
               ${Math.round(rrc+addons)>Math.round(client)?`<div class="calc-out" style="text-decoration:line-through;opacity:.42;margin-bottom:2px">${rub(Math.round(rrc+addons))} ₽</div>`:""}
               <div class="calc-out">${rub(Math.round(client))} ₽</div>
@@ -6605,7 +6611,7 @@ async function pingTelegram(body){
             <div class="bank-row"><span>Тело с НСС</span><span class="pay">${rub(pCreditB)}</span></div>
             <details class="calc-more">
               <summary>Подробности расчёта</summary>
-              <p class="calc-note">${selected&&isPangoDeal(selected,m.id)?"Этот VIN по спеццене.":"Если машина по спеццене."} ${_pg&&_pg.cash===_pg.ti?"Фикс "+rub(pFix)+" при любых условиях.":"Фикс "+(useTi?"с трейд-ин ":"без трейд-ин ")+rub(pFix)+"."} Каско + GAP + ДМС ${rub(pBundle)} всегда в кредите.</p>
+              <p class="calc-note">${selected&&isPangoDeal(selected,m.id)?"Этот VIN по спеццене.":"Если машина по спеццене."} ${_pg&&_pg.cash===_pg.ti?"Фикс "+rub(pFix)+" при любых условиях.":"Фикс "+(pWithTi?"с трейд-ин ":"без трейд-ин ")+rub(pFix)+"."} Каско + GAP + ДМС ${rub(pBundle)} всегда в кредите.</p>
               <div class="bank-row"><span>Цена авто</span><span class="pay">${rub(pFix)}</span></div>
               <div class="bank-row"><span>Первый взнос</span><span class="pay">${rub(pDownP)}</span></div>
               <div class="bank-row"><span>Каско + GAP + ДМС</span><span class="pay">${rub(pBundle)}</span></div>
@@ -7373,7 +7379,7 @@ async function pingTelegram(body){
     function offerSpecCard(d, pg, n){
       const cash=Math.round(pg.cash||0);
       const ti=Math.round(pg.ti||0);
-      const fix=d.useTi?ti:cash;
+      const fix=(d.useTi||d.useDcTi)?ti:cash;
       const months=Math.max(1, Math.round(Number(d.months)||60));
       const down=Math.max(0, Math.min(fix, Math.round(Number(d.down)||0)));
       const bundle=typeof PANGO_BUNDLE==="number"?PANGO_BUNDLE:150000;

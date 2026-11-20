@@ -251,7 +251,8 @@
       let pangoCol="";
       const _pgF=(m && typeof pangoOf==="function")?pangoOf(m.id):null;
       if(_pgF){
-        const pFix=useTi?_pgF.ti:_pgF.cash;
+        const pWithTi=!!(useTi||(typeof kmVal==="function"&&kmVal("kmUseDcTi", false)));
+        const pFix=pWithTi?_pgF.ti:_pgF.cash;
         const pDownP=Math.max(0, Math.min(pFix, down));
         const pBundle=typeof PANGO_BUNDLE==="number"?PANGO_BUNDLE:150000;
         const pRateA=typeof PANGO_RATE_A==="number"?PANGO_RATE_A:17.4;

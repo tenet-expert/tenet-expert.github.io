@@ -286,7 +286,7 @@
     function offerSpecCard(d, pg, n){
       const cash=Math.round(pg.cash||0);
       const ti=Math.round(pg.ti||0);
-      const fix=d.useTi?ti:cash;
+      const fix=(d.useTi||d.useDcTi)?ti:cash;
       const months=Math.max(1, Math.round(Number(d.months)||60));
       const down=Math.max(0, Math.min(fix, Math.round(Number(d.down)||0)));
       const bundle=typeof PANGO_BUNDLE==="number"?PANGO_BUNDLE:150000;

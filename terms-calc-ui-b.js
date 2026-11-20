@@ -148,9 +148,10 @@
       }
       const _pg=(typeof pangoOf==="function")?pangoOf(m.id):null;
       const pShow=!!(_pg && (showMpt || showSub || canSub));
+      const pWithTi=!!(useTi||useDcTi);
       let pFix=0, pDownP=0, pBundle=150000, pBase=0, pCreditB=0, pRateA=17.4, pRateB=14.4, pNss=0, pPayA=0, pPayB=0, pOverA=0, pOverB=0, pYears=0, pYearsLabel="0", pYearsWord="лет", pKm=km, pKmK=kmK, pOk=ok, pDiscount=0, pTiBack=0, pCard=0, pBonus=0, pMargin=0, pIron=0;
       if(_pg){
-        pFix=useTi?_pg.ti:_pg.cash;
+        pFix=pWithTi?_pg.ti:_pg.cash;
         pDownP=Math.max(0, Math.min(pFix, down));
         pBundle=typeof PANGO_BUNDLE==="number"?PANGO_BUNDLE:150000;
         pRateA=typeof PANGO_RATE_A==="number"?PANGO_RATE_A:17.4;
@@ -323,7 +324,7 @@
             <div class="bank-row"><span>Тело с НСС</span><span class="pay">${rub(pCreditB)}</span></div>
             <details class="calc-more">
               <summary>Подробности расчёта</summary>
-              <p class="calc-note">${selected&&selected.invoice?"Этот VIN по спеццене.":"Если машина по спеццене."} Фикс ${useTi?"с трейд-ин":"без трейд-ин"} ${rub(pFix)}. Каско + GAP + ДМС ${rub(pBundle)} всегда в кредите.</p>
+              <p class="calc-note">${selected&&selected.invoice?"Этот VIN по спеццене.":"Если машина по спеццене."} Фикс ${pWithTi?"с трейд-ин":"без трейд-ин"} ${rub(pFix)}. Каско + GAP + ДМС ${rub(pBundle)} всегда в кредите.</p>
               <div class="bank-row"><span>Цена авто</span><span class="pay">${rub(pFix)}</span></div>
               <div class="bank-row"><span>Первый взнос</span><span class="pay">${rub(pDownP)}</span></div>
               <div class="bank-row"><span>Каско + GAP + ДМС</span><span class="pay">${rub(pBundle)}</span></div>
