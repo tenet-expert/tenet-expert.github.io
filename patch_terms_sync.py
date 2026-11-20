@@ -306,7 +306,8 @@ def ensure_l6u4(text):
 
 TPLUS_CHOICE_EXTRA = 70000
 TPLUS_CHOICE_LABEL = "TENET Plus Выбор"
-TPLUS_CHOICE_START = "    /* TPLUS_CHOICE_START 20.11.2026: аналог «Без границ» для TENET PLUS. Цена = спец T+ + 70 000 ₽, нал и ТИ. Срока окончания нет. */"
+TPLUS_CHOICE_UNTIL = "2026-11-30"
+TPLUS_CHOICE_START = "    /* TPLUS_CHOICE_START 20.11.2026: аналог «Без границ» для TENET PLUS. Цена = спец T+ + 70 000 ₽, нал и ТИ. До 30.11.2026 включительно, Europe/Samara. */"
 TPLUS_CHOICE_END = "    /* TPLUS_CHOICE_END */"
 
 
@@ -335,6 +336,7 @@ def _tplus_choice_block(prices):
         TPLUS_CHOICE_START,
         "    const TPLUS_CHOICE = {",
         f'      label:"{TPLUS_CHOICE_LABEL}",',
+        f'      until:"{TPLUS_CHOICE_UNTIL}",',
         f"      extra:{TPLUS_CHOICE_EXTRA},",
         "      prices:{",
     ]
@@ -347,8 +349,9 @@ def _tplus_choice_block(prices):
 
 def ensure_tplus_choice(text):
     """20.11.2026: программа «TENET Plus Выбор». Цена = спеццена T+ + 70 000, нал и ТИ.
-    Пин, чтобы синк ТУ не стёр блок. Если спец T+ в PANGO_FIX меняется, цены
-    программы пересчитываются. Комплектации без спеца (например l6u4) не выдумываем."""
+    Срок до 30.11.2026 включительно, поле until. Пин, чтобы синк ТУ не стёр блок.
+    Если спец T+ в PANGO_FIX меняется, цены пересчитываются. Комплектации без спеца
+    (например l6u4) не выдумываем."""
     fix = _pango_fix_map(text)
     prices = []
     for i in _tplus_model_ids(text):
