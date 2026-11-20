@@ -494,6 +494,18 @@ BG_BLOCK = r'''    /* TENET_BG_START 19.11.2026: аналог спеца до 30
       tt9u:{cash:3800000,ti:3600000},
       tt9u7:{cash:3900000,ti:3700000}
     };
+    const TERMS_PLUS = [
+      {model:"L4",trim:"Стайл",price:"2 270 нал, 2 070 ТИ"},
+      {model:"L4",trim:"Элегант",price:"2 420 нал, 2 270 ТИ"},
+      {model:"L6",trim:"Элегант",price:"2 570 нал, 2 420 ТИ"},
+      {model:"L6",trim:"Ультра",price:"2 670 нал, 2 520 ТИ"}
+    ];
+    const PANGO_PLUS = {
+      l4s:{cash:2270000,ti:2070000},
+      l4e:{cash:2420000,ti:2270000},
+      l6e:{cash:2570000,ti:2420000},
+      l6u:{cash:2670000,ti:2520000}
+    };
     function termsBgActive(){
       /* Until 2026-11-30 inclusive, Europe/Samara (UTC+4, no DST). */
       try{
@@ -515,10 +527,16 @@ BG_BLOCK = r'''    /* TENET_BG_START 19.11.2026: аналог спеца до 30
       const id=typeof kmIdFromCar==="function"?kmIdFromCar(car):"";
       return !!(id && PANGO_BG[id]);
     }
+    function isPangoPlus(car){
+      if(!car || typeof termsBgActive!=="function" || !termsBgActive() || typeof PANGO_PLUS==="undefined") return false;
+      const id=typeof kmIdFromCar==="function"?kmIdFromCar(car):"";
+      return !!(id && PANGO_PLUS[id]);
+    }
     function isPangoDeal(car,id){
       if(!car) return false;
       if(car.invoice) return true;
-      return typeof isPangoBg==="function" && isPangoBg(car);
+      if(typeof isPangoBg==="function" && isPangoBg(car)) return true;
+      return typeof isPangoPlus==="function" && isPangoPlus(car);
     }
     /* TENET_BG_END */
 '''
@@ -528,8 +546,10 @@ PANGO_OF = '''    function pangoOf(id){
       const vinPrice=(vin && typeof EXCL_FIX!=="undefined" && EXCL_FIX[vin]) || (vin && typeof PANGO_VIN!=="undefined" && PANGO_VIN[vin]) || null;
       const trimPrice=(typeof PANGO_FIX!=="undefined" && PANGO_FIX[id]) || null;
       const bg=(typeof termsBgActive==="function" && termsBgActive() && typeof PANGO_BG!=="undefined" && PANGO_BG[id]) || null;
-      if(vinPrice) return pangoBetter(vinPrice, bg);
-      return pangoBetter(trimPrice, bg);
+      const plus=(typeof termsBgActive==="function" && termsBgActive() && typeof PANGO_PLUS!=="undefined" && PANGO_PLUS[id]) || null;
+      const camp=pangoBetter(bg, plus);
+      if(vinPrice) return pangoBetter(vinPrice, camp);
+      return pangoBetter(trimPrice, camp);
     }
 '''
 
@@ -658,7 +678,7 @@ def _badges(text):
         '${(typeof EXCL_FIX!=="undefined"&&EXCL_FIX[c.vin])?`<span class="mpt-tag super-tag">СУПЕРСПЕЦ</span>`:(c.invoice?`<span class="mpt-tag inv-tag">Спец инвойс</span>`:"")}'
     )
     new_calc = (
-        '${(typeof EXCL_FIX!=="undefined"&&EXCL_FIX[c.vin])?`<span class="mpt-tag super-tag">СУПЕРСПЕЦ</span>`:(c.invoice?`<span class="mpt-tag inv-tag">Спец инвойс</span>`:(typeof isPangoBg==="function"&&isPangoBg(c)?`<span class="mpt-tag inv-tag">Без границ</span>`:""))}'
+        '${(typeof EXCL_FIX!=="undefined"&&EXCL_FIX[c.vin])?`<span class="mpt-tag super-tag">СУПЕРСПЕЦ</span>`:(c.invoice?`<span class="mpt-tag inv-tag">Спец инвойс</span>`:(typeof isPangoBg==="function"&&isPangoBg(c)?`<span class="mpt-tag inv-tag">Без границ</span>`:(typeof isPangoPlus==="function"&&isPangoPlus(c)?`<span class="mpt-tag inv-tag">Выбор</span>`:"")))}'
     )
     if old_calc in text:
         text = text.replace(old_calc, new_calc)
@@ -670,7 +690,7 @@ def _badges(text):
             print("borderless: calc VIN badge anchor drifted")
 
     old_meta = '${st}${(typeof EXCL_FIX!=="undefined"&&EXCL_FIX[c.vin])?" · СУПЕРСПЕЦ":(c.invoice?" · спец инвойс":"")}'
-    new_meta = '${st}${(typeof EXCL_FIX!=="undefined"&&EXCL_FIX[c.vin])?" · СУПЕРСПЕЦ":(c.invoice?" · спец инвойс":(typeof isPangoBg==="function"&&isPangoBg(c)?" · без границ":""))}'
+    new_meta = '${st}${(typeof EXCL_FIX!=="undefined"&&EXCL_FIX[c.vin])?" · СУПЕРСПЕЦ":(c.invoice?" · спец инвойс":(typeof isPangoBg==="function"&&isPangoBg(c)?" · без границ":(typeof isPangoPlus==="function"&&isPangoPlus(c)?" · выбор":"")))}'
     if old_meta in text:
         text = text.replace(old_meta, new_meta)
         print("borderless: calc meta updated")
@@ -678,11 +698,67 @@ def _badges(text):
     old_bits = 'else if(r.invoice) bits.push(`<span class="st inv">Спец инвойс</span>`);'
     new_bits = (
         'else if(r.invoice) bits.push(`<span class="st inv">Спец инвойс</span>`);\n'
-        '      else if(typeof isPangoBg==="function"&&isPangoBg(r)) bits.push(`<span class="st inv">Без границ</span>`);'
+        '      else if(typeof isPangoBg==="function"&&isPangoBg(r)) bits.push(`<span class="st inv">Без границ</span>`);\n'
+        '      else if(typeof isPangoPlus==="function"&&isPangoPlus(r)) bits.push(`<span class="st inv">Выбор</span>`);'
     )
-    if old_bits in text and "Без границ</span>`);" not in text.split(old_bits, 1)[1][:200]:
+    if old_bits in text and "Без границ</span>`);" not in text.split(old_bits, 1)[1][:280]:
         text = text.replace(old_bits, new_bits)
         print("borderless: stock table badge updated")
+    bg_tag = 'isPangoBg(c)?`<span class="mpt-tag inv-tag">Без границ</span>`:""'
+    plus_tag = 'isPangoBg(c)?`<span class="mpt-tag inv-tag">Без границ</span>`:(typeof isPangoPlus==="function"&&isPangoPlus(c)?`<span class="mpt-tag inv-tag">Выбор</span>`:"")'
+    if bg_tag in text:
+        text = text.replace(bg_tag, plus_tag)
+        print("borderless: calc badge gained Выбор")
+    bg_meta = 'isPangoBg(c)?" · без границ":""'
+    plus_meta = 'isPangoBg(c)?" · без границ":(typeof isPangoPlus==="function"&&isPangoPlus(c)?" · выбор":"")'
+    if bg_meta in text:
+        text = text.replace(bg_meta, plus_meta)
+        print("borderless: calc meta gained выбор")
+    bg_bits = 'else if(typeof isPangoBg==="function"&&isPangoBg(r)) bits.push(`<span class="st inv">Без границ</span>`);'
+    plus_bits = bg_bits + '\n      else if(typeof isPangoPlus==="function"&&isPangoPlus(r)) bits.push(`<span class="st inv">Выбор</span>`);'
+    if bg_bits in text and "Выбор</span>`);" not in text:
+        text = text.replace(bg_bits, plus_bits)
+        print("borderless: stock badge gained Выбор")
+    return text
+
+
+def _insert_plus_section(text):
+    """TENET Plus Выбор sits in the same спеццены block as «Без границ»."""
+    if "TENET Plus Выбор" in text and "spec-vybor-panel" in text:
+        return text
+    needle = 'id="spec-bg-panel"><h3>Без границ · до 30.11</h3><div class="terms-cards">`+termGroup(TERMS_BG,"price")+`</div></section>`:""}`+'
+    section = (
+        needle + "\n        "
+        '`${typeof termsBgActive==="function"&&termsBgActive()&&typeof TERMS_PLUS!=="undefined"?'
+        '`<section class="spec-part spec-vybor" id="spec-vybor-panel"><h3>TENET Plus Выбор</h3>'
+        '<div class="terms-cards">`+termGroup(TERMS_PLUS,"price")+`</div></section>`:""}`+'
+    )
+    if needle in text:
+        text = text.replace(needle, section, 1)
+        print("borderless: TENET Plus Выбор section inserted")
+        return text
+    print("borderless: Выбор section anchor not found")
+    return text
+
+
+def _insert_plus_css(text):
+    if ".terms-spec .spec-vybor{" in text:
+        return text
+    css = """
+.terms-spec .spec-vybor{background:#f4f7ee}
+.terms-spec .spec-vybor h3{color:#1e5c24}
+.terms-spec .spec-vybor .terms-cards{grid-template-columns:1fr 1fr}
+.terms-spec .spec-vybor .term-card{background:#fff;border-color:#c5d4b0}
+.terms-spec .spec-vybor .term-group{border:1.5px solid #8aa87d;box-shadow:none}
+.terms-spec .spec-vybor .term-group>b{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#1e5c24;border-bottom:1px solid #d5e5cd;padding-bottom:6px}
+@media(max-width:800px){
+  .terms-spec .spec-vybor .terms-cards{grid-template-columns:1fr}
+}
+"""
+    anchor = ".terms-spec .spec-bg .term-group>b{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#1e5c24;border-bottom:1px solid #cde5ce;padding-bottom:6px}"
+    if anchor in text:
+        return text.replace(anchor, anchor + css, 1)
+    print("borderless: Выбор CSS anchor not found")
     return text
 
 
@@ -691,7 +767,9 @@ def ensure_borderless(text):
     src = text
     text = _insert_block(text)
     text = _insert_terms_section(text)
+    text = _insert_plus_section(text)
     text = _insert_css(text)
+    text = _insert_plus_css(text)
     text = _rewire_invoice(text)
     text = _badges(text)
     if text != src:

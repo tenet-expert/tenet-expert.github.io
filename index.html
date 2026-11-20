@@ -436,7 +436,15 @@ input,textarea{width:100%;background:#fff;border:1px solid var(--border);color:v
 .terms-spec .spec-tenet{background:#fbf6ee}
 .terms-spec .spec-plus{background:#f4efe4}
 .terms-spec .spec-bg{grid-column:1/-1;background:#eef6ee}
-.terms-spec .spec-bg h2,.terms-spec .spec-bg h3,.terms-spec .spec-bg .terms-acc-title{color:#1e5c24}
+.terms-spec .spec-bg h2,.terms-spec .spec-bg h3,.terms-spec .spec-bg .terms-acc-title,.terms-spec .spec-vybor h3{color:#1e5c24}
+.terms-spec .spec-vybor{background:#f4f7ee}
+.terms-spec .spec-vybor .terms-cards{grid-template-columns:1fr 1fr}
+.terms-spec .spec-vybor .term-card{background:#fff;border-color:#c5d4b0}
+.terms-spec .spec-vybor .term-group{border:1.5px solid #8aa87d;box-shadow:none}
+.terms-spec .spec-vybor .term-group>b{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#1e5c24;border-bottom:1px solid #d5e5cd;padding-bottom:6px}
+@media(max-width:800px){
+  .terms-spec .spec-vybor .terms-cards{grid-template-columns:1fr}
+}
 .terms-spec .spec-bg .terms-cards{grid-template-columns:repeat(4,1fr)}
 .terms-spec .spec-bg .term-card{background:#fff;border-color:#b7d4b9}
 .terms-spec .spec-bg .term-group{border:1.5px solid #7da87f;box-shadow:none}
@@ -4569,8 +4577,10 @@ async function pingTelegram(body){
       const vinPrice=(vin && typeof EXCL_FIX!=="undefined" && EXCL_FIX[vin]) || (vin && typeof PANGO_VIN!=="undefined" && PANGO_VIN[vin]) || null;
       const trimPrice=(typeof PANGO_FIX!=="undefined" && PANGO_FIX[id]) || null;
       const bg=(typeof termsBgActive==="function" && termsBgActive() && typeof PANGO_BG!=="undefined" && PANGO_BG[id]) || null;
-      if(vinPrice) return pangoBetter(vinPrice, bg);
-      return pangoBetter(trimPrice, bg);
+      const plus=(typeof termsBgActive==="function" && termsBgActive() && typeof PANGO_PLUS!=="undefined" && PANGO_PLUS[id]) || null;
+      const camp=pangoBetter(bg, plus);
+      if(vinPrice) return pangoBetter(vinPrice, camp);
+      return pangoBetter(trimPrice, camp);
     }
 
     /* TENET_BG_START 19.11.2026: аналог спеца до 30.11.2026 включительно, Europe/Samara. С 01.12.2026 termsBgActive()=false. */
@@ -4603,6 +4613,18 @@ async function pingTelegram(body){
       tt9u:{cash:3800000,ti:3600000},
       tt9u7:{cash:3900000,ti:3700000}
     };
+    const TERMS_PLUS = [
+      {model:"L4",trim:"Стайл",price:"2 270 нал, 2 070 ТИ"},
+      {model:"L4",trim:"Элегант",price:"2 420 нал, 2 270 ТИ"},
+      {model:"L6",trim:"Элегант",price:"2 570 нал, 2 420 ТИ"},
+      {model:"L6",trim:"Ультра",price:"2 670 нал, 2 520 ТИ"}
+    ];
+    const PANGO_PLUS = {
+      l4s:{cash:2270000,ti:2070000},
+      l4e:{cash:2420000,ti:2270000},
+      l6e:{cash:2570000,ti:2420000},
+      l6u:{cash:2670000,ti:2520000}
+    };
     function termsBgActive(){
       /* Until 2026-11-30 inclusive, Europe/Samara (UTC+4, no DST). */
       try{
@@ -4624,10 +4646,16 @@ async function pingTelegram(body){
       const id=typeof kmIdFromCar==="function"?kmIdFromCar(car):"";
       return !!(id && PANGO_BG[id]);
     }
+    function isPangoPlus(car){
+      if(!car || typeof termsBgActive!=="function" || !termsBgActive() || typeof PANGO_PLUS==="undefined") return false;
+      const id=typeof kmIdFromCar==="function"?kmIdFromCar(car):"";
+      return !!(id && PANGO_PLUS[id]);
+    }
     function isPangoDeal(car,id){
       if(!car) return false;
       if(car.invoice) return true;
-      return typeof isPangoBg==="function" && isPangoBg(car);
+      if(typeof isPangoBg==="function" && isPangoBg(car)) return true;
+      return typeof isPangoPlus==="function" && isPangoPlus(car);
     }
     /* TENET_BG_END */
     const TERMS_PRIO = [
@@ -5949,6 +5977,7 @@ async function pingTelegram(body){
         `<section class="terms-acc spec-all"><h2 class="terms-acc-h"><button type="button" class="terms-acc-btn" aria-expanded="false" aria-controls="spec-all-panel"><span class="terms-chevron" aria-hidden="true"></span><span class="terms-acc-title">Спеццены · TENET, TENET+ и Без границ</span></button></h2>`+
         `<div class="terms-acc-panel" id="spec-all-panel" hidden>`+
         `${typeof termsBgActive==="function"&&termsBgActive()&&typeof TERMS_BG!=="undefined"?`<section class="spec-part spec-bg" id="spec-bg-panel"><h3>Без границ · до 30.11</h3><div class="terms-cards">`+termGroup(TERMS_BG,"price")+`</div></section>`:""}`+
+        `${typeof termsBgActive==="function"&&termsBgActive()&&typeof TERMS_PLUS!=="undefined"?`<section class="spec-part spec-vybor" id="spec-vybor-panel"><h3>TENET Plus Выбор</h3><div class="terms-cards">`+termGroup(TERMS_PLUS,"price")+`</div></section>`:""}`+
         `<section class="spec-part spec-tenet" id="spec-tenet-panel"><h3>Спец · TENET</h3><div class="terms-cards">`+termGroup(TERMS_INV,"price")+`</div></section>`+
         `<section class="spec-part spec-plus" id="spec-plus-panel"><h3>Спец · TENET+</h3><div class="terms-cards">`+termGroup(typeof TERMS_INV_PLUS!=="undefined"?TERMS_INV_PLUS:[],"price")+`</div></section>`+
         `</div></section>`+
@@ -6108,9 +6137,9 @@ async function pingTelegram(body){
         const st=c.status==="in"?"в наличии":"в пути";
         return `<button type="button" class="stock-car${prio?" prio":""}${rec?" rec":""}${(typeof carIsMpt==="function"?carIsMpt(c):c.mpt)?" mpt":""}${(typeof carIsCorp==="function"?carIsCorp(c):(c.corp||(typeof kmIsCorp==="function"&&kmIsCorp(c.vin))))?" corp":""}${c.demo?" demo":""}${c.invoice?" invoice":""}${on?" on":""}" data-km-vin="${escape(c.vin)}">
           <b>${escape(c.color||"—")} · ${escape(c.trim||"")}${prio?" · приоритет":""}${(typeof EXCL_FIX!=="undefined"&&EXCL_FIX[c.vin])?" · СУПЕРСПЕЦ":""}</b>
-          ${(typeof EXCL_FIX!=="undefined"&&EXCL_FIX[c.vin])?`<span class="mpt-tag super-tag">СУПЕРСПЕЦ</span>`:(c.invoice?`<span class="mpt-tag inv-tag">Спец инвойс</span>`:(typeof isPangoBg==="function"&&isPangoBg(c)?`<span class="mpt-tag inv-tag">Без границ</span>`:""))}${(typeof carIsCorp==="function"?carIsCorp(c):(c.corp||(typeof kmIsCorp==="function"&&kmIsCorp(c.vin))))?`<span class="mpt-tag corp-tag">Корп · лизинг</span>`:""}${c.demo?`<span class="mpt-tag demo-tag">ДЕМО</span>`:""}
+          ${(typeof EXCL_FIX!=="undefined"&&EXCL_FIX[c.vin])?`<span class="mpt-tag super-tag">СУПЕРСПЕЦ</span>`:(c.invoice?`<span class="mpt-tag inv-tag">Спец инвойс</span>`:(typeof isPangoBg==="function"&&isPangoBg(c)?`<span class="mpt-tag inv-tag">Без границ</span>`:(typeof isPangoPlus==="function"&&isPangoPlus(c)?`<span class="mpt-tag inv-tag">Выбор</span>`:"")))}${(typeof carIsCorp==="function"?carIsCorp(c):(c.corp||(typeof kmIsCorp==="function"&&kmIsCorp(c.vin))))?`<span class="mpt-tag corp-tag">Корп · лизинг</span>`:""}${c.demo?`<span class="mpt-tag demo-tag">ДЕМО</span>`:""}
           <span class="vin">${escape(c.vin)}</span>
-          <span class="stock-meta">${st}${(typeof EXCL_FIX!=="undefined"&&EXCL_FIX[c.vin])?" · СУПЕРСПЕЦ":(c.invoice?" · спец инвойс":(typeof isPangoBg==="function"&&isPangoBg(c)?" · без границ":""))}${(typeof carIsCorp==="function"?carIsCorp(c):c.corp)?" · корп":""}${c.demo?" · ДЕМО":""}${c.note?" · "+escape(c.note):""}</span>
+          <span class="stock-meta">${st}${(typeof EXCL_FIX!=="undefined"&&EXCL_FIX[c.vin])?" · СУПЕРСПЕЦ":(c.invoice?" · спец инвойс":(typeof isPangoBg==="function"&&isPangoBg(c)?" · без границ":(typeof isPangoPlus==="function"&&isPangoPlus(c)?" · выбор":"")))}${(typeof carIsCorp==="function"?carIsCorp(c):c.corp)?" · корп":""}${c.demo?" · ДЕМО":""}${c.note?" · "+escape(c.note):""}</span>
         </button>`;
       };
       if(!cars.length && !recOther.length){
@@ -6742,6 +6771,7 @@ async function pingTelegram(body){
       else if(wayDual) bits.push(`<span class="st inv">Спец</span> <span class="st mpt">Директ/флит</span>`);
       else if(r.invoice) bits.push(`<span class="st inv">Спец инвойс</span>`);
       else if(typeof isPangoBg==="function"&&isPangoBg(r)) bits.push(`<span class="st inv">Без границ</span>`);
+      else if(typeof isPangoPlus==="function"&&isPangoPlus(r)) bits.push(`<span class="st inv">Выбор</span>`);
       else {
         if(typeof carIsMpt==="function"?carIsMpt(r):r.mpt) bits.push(`<span class="st mpt">МПТ</span>`);
         if(typeof carIsCorp==="function"?carIsCorp(r):(r.corp || (typeof CORP_VINS!=="undefined" && CORP_VINS.has(r.vin)))) bits.push(`<span class="st corp">Корпоративный</span>`);

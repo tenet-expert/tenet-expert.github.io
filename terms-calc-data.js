@@ -84,8 +84,10 @@
       const vinPrice=(vin && typeof EXCL_FIX!=="undefined" && EXCL_FIX[vin]) || (vin && typeof PANGO_VIN!=="undefined" && PANGO_VIN[vin]) || null;
       const trimPrice=(typeof PANGO_FIX!=="undefined" && PANGO_FIX[id]) || null;
       const bg=(typeof termsBgActive==="function" && termsBgActive() && typeof PANGO_BG!=="undefined" && PANGO_BG[id]) || null;
-      if(vinPrice) return pangoBetter(vinPrice, bg);
-      return pangoBetter(trimPrice, bg);
+      const plus=(typeof termsBgActive==="function" && termsBgActive() && typeof PANGO_PLUS!=="undefined" && PANGO_PLUS[id]) || null;
+      const camp=pangoBetter(bg, plus);
+      if(vinPrice) return pangoBetter(vinPrice, camp);
+      return pangoBetter(trimPrice, camp);
     }
 
     /* TENET_BG_START 19.11.2026: аналог спеца до 30.11.2026 включительно, Europe/Samara. С 01.12.2026 termsBgActive()=false. */
@@ -118,6 +120,18 @@
       tt9u:{cash:3800000,ti:3600000},
       tt9u7:{cash:3900000,ti:3700000}
     };
+    const TERMS_PLUS = [
+      {model:"L4",trim:"Стайл",price:"2 270 нал, 2 070 ТИ"},
+      {model:"L4",trim:"Элегант",price:"2 420 нал, 2 270 ТИ"},
+      {model:"L6",trim:"Элегант",price:"2 570 нал, 2 420 ТИ"},
+      {model:"L6",trim:"Ультра",price:"2 670 нал, 2 520 ТИ"}
+    ];
+    const PANGO_PLUS = {
+      l4s:{cash:2270000,ti:2070000},
+      l4e:{cash:2420000,ti:2270000},
+      l6e:{cash:2570000,ti:2420000},
+      l6u:{cash:2670000,ti:2520000}
+    };
     function termsBgActive(){
       /* Until 2026-11-30 inclusive, Europe/Samara (UTC+4, no DST). */
       try{
@@ -139,10 +153,16 @@
       const id=typeof kmIdFromCar==="function"?kmIdFromCar(car):"";
       return !!(id && PANGO_BG[id]);
     }
+    function isPangoPlus(car){
+      if(!car || typeof termsBgActive!=="function" || !termsBgActive() || typeof PANGO_PLUS==="undefined") return false;
+      const id=typeof kmIdFromCar==="function"?kmIdFromCar(car):"";
+      return !!(id && PANGO_PLUS[id]);
+    }
     function isPangoDeal(car,id){
       if(!car) return false;
       if(car.invoice) return true;
-      return typeof isPangoBg==="function" && isPangoBg(car);
+      if(typeof isPangoBg==="function" && isPangoBg(car)) return true;
+      return typeof isPangoPlus==="function" && isPangoPlus(car);
     }
     /* TENET_BG_END */
 
