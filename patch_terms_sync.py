@@ -307,7 +307,7 @@ def ensure_l6u4(text):
 TPLUS_CHOICE_EXTRA = 70000
 TPLUS_CHOICE_LABEL = "TENET Plus Выбор"
 TPLUS_CHOICE_UNTIL = "2026-11-30"
-TPLUS_CHOICE_START = "    /* TPLUS_CHOICE_START 20.11.2026: аналог «Без границ» для TENET PLUS. Цена = спец T+ + 70 000 ₽, нал и ТИ. До 30.11.2026 включительно, Europe/Samara. */"
+TPLUS_CHOICE_START = "    /* TPLUS_CHOICE_START 20.11.2026: аналог «Без границ» для TENET PLUS. Цена = спец T+ + 70 000 ₽, нал и ТИ. До 30.11.2026 включительно, Europe/Samara. С 01.12.2026 tplusChoiceOn()=false. */"
 TPLUS_CHOICE_END = "    /* TPLUS_CHOICE_END */"
 
 
@@ -331,12 +331,30 @@ def _tplus_model_ids(text):
     return ids
 
 
-def _tplus_choice_block(prices):
+def _tplus_until(text):
+    """Keep an already set end date; default TPLUS_CHOICE_UNTIL if the block has none."""
+    chunk = text
+    if "TPLUS_CHOICE_START" in text and TPLUS_CHOICE_END in text:
+        a = text.find("TPLUS_CHOICE_START")
+        b = text.find(TPLUS_CHOICE_END, a)
+        if a != -1 and b != -1:
+            chunk = text[a:b]
+    m = re.search(r'const TPLUS_CHOICE_UNTIL = "(\d{4}-\d{2}-\d{2})"', chunk)
+    if m:
+        return m.group(1)
+    m = re.search(r'\buntil:"(\d{4}-\d{2}-\d{2})"', chunk)
+    if m:
+        return m.group(1)
+    return TPLUS_CHOICE_UNTIL
+
+
+def _tplus_choice_block(prices, until):
     lines = [
         TPLUS_CHOICE_START,
+        f'    const TPLUS_CHOICE_UNTIL = "{until}";',
         "    const TPLUS_CHOICE = {",
         f'      label:"{TPLUS_CHOICE_LABEL}",',
-        f'      until:"{TPLUS_CHOICE_UNTIL}",',
+        f'      until:"{until}",',
         f"      extra:{TPLUS_CHOICE_EXTRA},",
         "      prices:{",
     ]
@@ -349,9 +367,9 @@ def _tplus_choice_block(prices):
 
 def ensure_tplus_choice(text):
     """20.11.2026: программа «TENET Plus Выбор». Цена = спеццена T+ + 70 000, нал и ТИ.
-    Срок до 30.11.2026 включительно, поле until. Пин, чтобы синк ТУ не стёр блок.
-    Если спец T+ в PANGO_FIX меняется, цены пересчитываются. Комплектации без спеца
-    (например l6u4) не выдумываем."""
+    Срок до 30.11.2026 включительно (Europe/Samara); с 01.12 tplusChoiceOn()=false.
+    Пин сохраняет until / TPLUS_CHOICE_UNTIL при пересчёте цен из PANGO_FIX + 70 000.
+    Комплектации без спеца (например l6u4) не выдумываем."""
     fix = _pango_fix_map(text)
     prices = []
     for i in _tplus_model_ids(text):
@@ -361,7 +379,8 @@ def ensure_tplus_choice(text):
     if not prices:
         print("terms sync: TPLUS_CHOICE skipped, no T+ specials in PANGO_FIX")
         return text
-    block = _tplus_choice_block(prices)
+    until = _tplus_until(text)
+    block = _tplus_choice_block(prices, until)
     if "TPLUS_CHOICE_START" in text:
         new_text, n = re.subn(
             r"[ \t]*/\* TPLUS_CHOICE_START .*?" + re.escape(TPLUS_CHOICE_END),
