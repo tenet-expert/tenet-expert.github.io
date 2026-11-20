@@ -237,6 +237,15 @@ PAIRS += [
 ]
 
 
+
+# Pages на каждом деплое подменяет Ikon T4L на Landspider (старая пара после снятия
+# префикса «Автошина»). Страховка: вернуть Ikon, оставить Pirelli из сверки 20.11.
+PAIRS += [
+    ('["T4L / L6",[["Автошины Triangle TRIN PL01 225/60 R18 104R липучка",11500,46000,"2"],["Автошина 225/60 R18 Landspider 104T XL Arctictraxx TL BSW (шип.) ",13000,52000,"3"],["Автошина 225/60 R18 Pirelli Formula 104T XL Ice TL (шип.)",15500,62000,"2"]]]',
+     '["T4L / L6",[["Автошины Triangle TRIN PL01 225/60 R18 104R липучка",11500,46000,"2"],["Автошина 225/60 R18 Ikon 104T XL Character Ice 7 SUV TL /шипованная/",16000,64000,"3"],["Автошина 225/60 R18 Pirelli Formula 104T XL Ice TL (шип.)",15500,62000,"2"]]]'),
+]
+
+
 def patch(path: Path) -> bool:
     if not path.exists():
         return False
