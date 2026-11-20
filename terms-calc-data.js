@@ -79,12 +79,22 @@
     const PANGO_NSS = 0.0089;
     const PANGO_VIN = {
     };
+    function tplusChoiceOn(){
+      if(typeof TPLUS_CHOICE==="undefined" || !TPLUS_CHOICE.prices) return false;
+      const until=TPLUS_CHOICE.until||"2026-11-30";
+      try{
+        const ymd=new Intl.DateTimeFormat("en-CA",{timeZone:"Europe/Samara",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
+        return ymd<=until;
+      }catch(e){
+        return new Date(Date.now()+4*3600*1000).toISOString().slice(0,10)<=until;
+      }
+    }
     function pangoOf(id){
       const vin=typeof kmVin==="string"?String(kmVin).toUpperCase():"";
       const vinPrice=(vin && typeof EXCL_FIX!=="undefined" && EXCL_FIX[vin]) || (vin && typeof PANGO_VIN!=="undefined" && PANGO_VIN[vin]) || null;
       const trimPrice=(typeof PANGO_FIX!=="undefined" && PANGO_FIX[id]) || null;
       const bg=(typeof termsBgActive==="function" && termsBgActive() && typeof PANGO_BG!=="undefined" && PANGO_BG[id]) || null;
-      const plus=(typeof TPLUS_CHOICE!=="undefined" && TPLUS_CHOICE.prices && TPLUS_CHOICE.prices[id]) || null;
+      const plus=(typeof tplusChoiceOn==="function" && tplusChoiceOn() && TPLUS_CHOICE.prices[id]) || null;
       const camp=pangoBetter(bg, plus);
       if(vinPrice) return pangoBetter(vinPrice, camp);
       return pangoBetter(trimPrice, camp);
@@ -142,7 +152,7 @@
       return !!(id && PANGO_BG[id]);
     }
     function isPangoPlus(car){
-      if(!car || typeof TPLUS_CHOICE==="undefined" || !TPLUS_CHOICE.prices) return false;
+      if(!car || typeof tplusChoiceOn!=="function" || !tplusChoiceOn()) return false;
       const id=typeof kmIdFromCar==="function"?kmIdFromCar(car):"";
       return !!(id && TPLUS_CHOICE.prices[id]);
     }
@@ -154,9 +164,10 @@
     }
     /* TENET_BG_END */
 
-    /* TPLUS_CHOICE_START 20.11.2026: аналог «Без границ» для TENET PLUS. Цена = спец T+ + 70 000 ₽, нал и ТИ. Срока окончания нет. */
+    /* TPLUS_CHOICE_START 20.11.2026: аналог «Без границ» для TENET PLUS. Цена = спец T+ + 70 000 ₽, нал и ТИ. До 30.11.2026 включительно, Europe/Samara. */
     const TPLUS_CHOICE = {
       label:"TENET Plus Выбор",
+      until:"2026-11-30",
       extra:70000,
       prices:{
         l4s:{cash:2270000,ti:2070000},

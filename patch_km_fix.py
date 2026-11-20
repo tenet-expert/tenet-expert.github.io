@@ -516,7 +516,7 @@ BG_BLOCK = r'''    /* TENET_BG_START 19.11.2026: аналог спеца до 30
       return !!(id && PANGO_BG[id]);
     }
     function isPangoPlus(car){
-      if(!car || typeof TPLUS_CHOICE==="undefined" || !TPLUS_CHOICE.prices) return false;
+      if(!car || typeof tplusChoiceOn!=="function" || !tplusChoiceOn()) return false;
       const id=typeof kmIdFromCar==="function"?kmIdFromCar(car):"";
       return !!(id && TPLUS_CHOICE.prices[id]);
     }
@@ -534,7 +534,7 @@ PANGO_OF = '''    function pangoOf(id){
       const vinPrice=(vin && typeof EXCL_FIX!=="undefined" && EXCL_FIX[vin]) || (vin && typeof PANGO_VIN!=="undefined" && PANGO_VIN[vin]) || null;
       const trimPrice=(typeof PANGO_FIX!=="undefined" && PANGO_FIX[id]) || null;
       const bg=(typeof termsBgActive==="function" && termsBgActive() && typeof PANGO_BG!=="undefined" && PANGO_BG[id]) || null;
-      const plus=(typeof TPLUS_CHOICE!=="undefined" && TPLUS_CHOICE.prices && TPLUS_CHOICE.prices[id]) || null;
+      const plus=(typeof tplusChoiceOn==="function" && tplusChoiceOn() && TPLUS_CHOICE.prices[id]) || null;
       const camp=pangoBetter(bg, plus);
       if(vinPrice) return pangoBetter(vinPrice, camp);
       return pangoBetter(trimPrice, camp);
@@ -717,8 +717,8 @@ def _insert_plus_section(text):
     needle = 'id="spec-bg-panel"><h3>Без границ · до 30.11</h3><div class="terms-cards">`+termGroup(TERMS_BG,"price")+`</div></section>`:""}`+'
     section = (
         needle + "\n        "
-        '`${typeof TPLUS_CHOICE!=="undefined"&&TPLUS_CHOICE.prices?'
-        '`<section class="spec-part spec-vybor" id="spec-vybor-panel"><h3>${escape(TPLUS_CHOICE.label||"TENET Plus Выбор")}</h3>'
+        '`${typeof tplusChoiceOn==="function"&&tplusChoiceOn()?'
+        '`<section class="spec-part spec-vybor" id="spec-vybor-panel"><h3>${escape(tplusChoiceTitle())}</h3>'
         '<div class="terms-cards">`+termGroup(tplusChoiceRows(),"price")+`</div></section>`:""}`+'
     )
     if needle in text:
