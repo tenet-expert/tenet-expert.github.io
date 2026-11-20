@@ -286,14 +286,14 @@
     function offerSpecCard(d, pg, n){
       const cash=Math.round(pg.cash||0);
       const ti=Math.round(pg.ti||0);
-      const fix=d.useTi?ti:cash;
+      const fix=(d.useTi||d.useDcTi)?ti:cash;
       const months=Math.max(1, Math.round(Number(d.months)||60));
       const down=Math.max(0, Math.min(fix, Math.round(Number(d.down)||0)));
       const bundle=typeof PANGO_BUNDLE==="number"?PANGO_BUNDLE:150000;
       const base=Math.max(0, fix-down)+bundle;
       const nss=Math.round(base*0.0089*(months/12));
-      const payA=typeof calcPay==="function"?Math.round(calcPay(base+down, down, months, 17.4)):0;
-      const payB=typeof calcPay==="function"?Math.round(calcPay(base+nss+down, down, months, 14.4)):0;
+      const payA=typeof calcPay==="function"?Math.round(calcPay(base+down, down, months, 18.4)):0;
+      const payB=typeof calcPay==="function"?Math.round(calcPay(base+nss+down, down, months, 15.4)):0;
       return {
         title:"Спеццена",
         pay:payA?rub(payA)+" ₽ / мес.":"",
@@ -301,8 +301,8 @@
           "Без трейд-ина "+rub(cash)+" ₽",
           "С трейд-ином "+rub(ti)+" ₽",
           "Каско, GAP и ДМС "+rub(bundle)+" всегда в кредите",
-          "17,4% без комиссий"+(payA?" · "+rub(payA)+" ₽":""),
-          "14,4% · комиссия в теле"+(payB?" · "+rub(payB)+" ₽ · тело "+rub(base+nss)+" ₽":"")
+          "18,4% без комиссий"+(payA?" · "+rub(payA)+" ₽":""),
+          "15,4% · комиссия в теле"+(payB?" · "+rub(payB)+" ₽ · тело "+rub(base+nss)+" ₽":"")
         ]
       };
     }

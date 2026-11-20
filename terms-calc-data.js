@@ -74,8 +74,8 @@
       l6u:{cash:2600000,ti:2450000}
     };
     const PANGO_BUNDLE = 150000;
-    const PANGO_RATE_A = 17.4;
-    const PANGO_RATE_B = 14.4;
+    const PANGO_RATE_A = 18.4;
+    const PANGO_RATE_B = 15.4;
     const PANGO_NSS = 0.0089;
     const PANGO_VIN = {
     };
