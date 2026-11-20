@@ -17,7 +17,7 @@
       ["EDEHD24","tt9"],["EDEDD24","t9"],
       ["EDXDC24","ta8"],
       ["LVVDC21","a8"],
-      ["EFEDB21","pl4"],["EDEMB31","pl6"]
+      ["EFEDB21","pl4"],["EDEMB31","pl6"],["EDEMD","pl6"]
     ];
     function eptsCleanVin(v){
       return String(v||"").toUpperCase().replace(/[^A-HJ-NPR-Z0-9]/g,"").slice(0,17);
