@@ -92,7 +92,7 @@
           label: "TENET+ · Anastasiia.Klimanova@agr.auto"
         };
       }
-      const who=off?"Коллеги, добрый день! ":"Антон, добрый день! ";
+      const who=off?"Коллеги, добрый день! ":"Екатерина, добрый день! ";
       return {
         weekend: off,
         to: off?EPTS_TO_WEEKEND:EPTS_TO_WORK,
