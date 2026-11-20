@@ -303,6 +303,16 @@ def ensure_l6u4(text):
     return text[:sp[0]] + new_block + text[sp[1]:]
 
 
+def ensure_pango_rates(text):
+    """20.11.2026: Александр confirmed Pango rates. The Sheet/canon still has
+    17.4 / 14.4, so pin 18.4 (без комиссий) and 15.4 (НСС в теле) after sync."""
+    text2, n1 = re.subn(r"(const PANGO_RATE_A = )[\d.]+;", r"\g<1>18.4;", text, count=1)
+    text2, n2 = re.subn(r"(const PANGO_RATE_B = )[\d.]+;", r"\g<1>15.4;", text2, count=1)
+    if n1 or n2:
+        print("terms sync: pin Pango rates 18.4 / 15.4")
+    return text2
+
+
 def ensure_local(text):
     text = drop_sold_tests(text)
     text = ensure_t9(text)
@@ -331,6 +341,7 @@ def ensure_local(text):
     except Exception as e:
         print("terms sync: km-fix skipped:", e)
     text = ensure_l6u4(text)
+    text = ensure_pango_rates(text)
     # 19.11.2026: спец «Без границ» до 30.11. Пин, чтобы синк ТУ не стёр программу.
     try:
         if hasattr(patch_km_fix, "ensure_borderless"):
