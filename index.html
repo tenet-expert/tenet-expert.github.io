@@ -4577,7 +4577,7 @@ async function pingTelegram(body){
       const vinPrice=(vin && typeof EXCL_FIX!=="undefined" && EXCL_FIX[vin]) || (vin && typeof PANGO_VIN!=="undefined" && PANGO_VIN[vin]) || null;
       const trimPrice=(typeof PANGO_FIX!=="undefined" && PANGO_FIX[id]) || null;
       const bg=(typeof termsBgActive==="function" && termsBgActive() && typeof PANGO_BG!=="undefined" && PANGO_BG[id]) || null;
-      const plus=(typeof termsBgActive==="function" && termsBgActive() && typeof PANGO_PLUS!=="undefined" && PANGO_PLUS[id]) || null;
+      const plus=(typeof TPLUS_CHOICE!=="undefined" && TPLUS_CHOICE.prices && TPLUS_CHOICE.prices[id]) || null;
       const camp=pangoBetter(bg, plus);
       if(vinPrice) return pangoBetter(vinPrice, camp);
       return pangoBetter(trimPrice, camp);
@@ -4613,18 +4613,6 @@ async function pingTelegram(body){
       tt9u:{cash:3800000,ti:3600000},
       tt9u7:{cash:3900000,ti:3700000}
     };
-    const TERMS_PLUS = [
-      {model:"L4",trim:"Стайл",price:"2 270 нал, 2 070 ТИ"},
-      {model:"L4",trim:"Элегант",price:"2 420 нал, 2 270 ТИ"},
-      {model:"L6",trim:"Элегант",price:"2 570 нал, 2 420 ТИ"},
-      {model:"L6",trim:"Ультра",price:"2 670 нал, 2 520 ТИ"}
-    ];
-    const PANGO_PLUS = {
-      l4s:{cash:2270000,ti:2070000},
-      l4e:{cash:2420000,ti:2270000},
-      l6e:{cash:2570000,ti:2420000},
-      l6u:{cash:2670000,ti:2520000}
-    };
     function termsBgActive(){
       /* Until 2026-11-30 inclusive, Europe/Samara (UTC+4, no DST). */
       try{
@@ -4647,9 +4635,9 @@ async function pingTelegram(body){
       return !!(id && PANGO_BG[id]);
     }
     function isPangoPlus(car){
-      if(!car || typeof termsBgActive!=="function" || !termsBgActive() || typeof PANGO_PLUS==="undefined") return false;
+      if(!car || typeof TPLUS_CHOICE==="undefined" || !TPLUS_CHOICE.prices) return false;
       const id=typeof kmIdFromCar==="function"?kmIdFromCar(car):"";
-      return !!(id && PANGO_PLUS[id]);
+      return !!(id && TPLUS_CHOICE.prices[id]);
     }
     function isPangoDeal(car,id){
       if(!car) return false;
@@ -4658,6 +4646,19 @@ async function pingTelegram(body){
       return typeof isPangoPlus==="function" && isPangoPlus(car);
     }
     /* TENET_BG_END */
+
+    /* TPLUS_CHOICE_START 20.11.2026: аналог «Без границ» для TENET PLUS. Цена = спец T+ + 70 000 ₽, нал и ТИ. Срока окончания нет. */
+    const TPLUS_CHOICE = {
+      label:"TENET Plus Выбор",
+      extra:70000,
+      prices:{
+        l4s:{cash:2270000,ti:2070000},
+        l4e:{cash:2420000,ti:2270000},
+        l6e:{cash:2570000,ti:2420000},
+        l6u:{cash:2670000,ti:2520000}
+      }
+    };
+    /* TPLUS_CHOICE_END */
     const TERMS_PRIO = [
       {model:"T4",vin:"EDEEB31B8TE003261",trim:"Прайм",year:"2026",color:"Светло-серый",extra:"",pay:1000,kmTi:-50,kmCash:0,sold:true,out:true},
       {model:"Tiggo 7 L",vin:"",trim:"Active",year:"2025",color:"",extra:"",pay:0,sold:true,out:true},
@@ -5688,6 +5689,21 @@ async function pingTelegram(body){
     function termCard(title, value, note){
       return `<article class="term-card"><b>${escape(title)}</b>${value?`<div class="num">${value}</div>`:""}${note?`<small>${note}</small>`:""}</article>`;
     }
+    function tplusThou(n){
+      const t=Math.round(Number(n)/1000);
+      return String(t).replace(/\B(?=(\d{3})+(?!\d))/g," ");
+    }
+    function tplusChoiceRows(){
+      const ch=typeof TPLUS_CHOICE==="undefined"?null:TPLUS_CHOICE;
+      if(!ch || !ch.prices) return [];
+      return Object.keys(ch.prices).map(id=>{
+        const m=(typeof KM_MODELS!=="undefined"?KM_MODELS:[]).find(x=>x.id===id);
+        const name=(m&&m.name)||id;
+        const sp=name.indexOf(" ");
+        const p=ch.prices[id];
+        return {model:sp<0?name:name.slice(0,sp), trim:sp<0?"":name.slice(sp+1), price:tplusThou(p.cash)+" нал, "+tplusThou(p.ti)+" ТИ"};
+      });
+    }
     function termGroup(rows, valKey){
       const order=[], map={};
       rows.forEach(r=>{
@@ -5977,7 +5993,7 @@ async function pingTelegram(body){
         `<section class="terms-acc spec-all"><h2 class="terms-acc-h"><button type="button" class="terms-acc-btn" aria-expanded="false" aria-controls="spec-all-panel"><span class="terms-chevron" aria-hidden="true"></span><span class="terms-acc-title">Спеццены · TENET, TENET+ и Без границ</span></button></h2>`+
         `<div class="terms-acc-panel" id="spec-all-panel" hidden>`+
         `${typeof termsBgActive==="function"&&termsBgActive()&&typeof TERMS_BG!=="undefined"?`<section class="spec-part spec-bg" id="spec-bg-panel"><h3>Без границ · до 30.11</h3><div class="terms-cards">`+termGroup(TERMS_BG,"price")+`</div></section>`:""}`+
-        `${typeof termsBgActive==="function"&&termsBgActive()&&typeof TERMS_PLUS!=="undefined"?`<section class="spec-part spec-vybor" id="spec-vybor-panel"><h3>TENET Plus Выбор</h3><div class="terms-cards">`+termGroup(TERMS_PLUS,"price")+`</div></section>`:""}`+
+        `${typeof TPLUS_CHOICE!=="undefined"&&TPLUS_CHOICE.prices?`<section class="spec-part spec-vybor" id="spec-vybor-panel"><h3>${escape(TPLUS_CHOICE.label||"TENET Plus Выбор")}</h3><div class="terms-cards">`+termGroup(tplusChoiceRows(),"price")+`</div></section>`:""}`+
         `<section class="spec-part spec-tenet" id="spec-tenet-panel"><h3>Спец · TENET</h3><div class="terms-cards">`+termGroup(TERMS_INV,"price")+`</div></section>`+
         `<section class="spec-part spec-plus" id="spec-plus-panel"><h3>Спец · TENET+</h3><div class="terms-cards">`+termGroup(typeof TERMS_INV_PLUS!=="undefined"?TERMS_INV_PLUS:[],"price")+`</div></section>`+
         `</div></section>`+
