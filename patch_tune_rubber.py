@@ -224,6 +224,19 @@ PAIRS += [
 ]
 
 
+
+# Drive 19.11.2026 (сверка 20.11): T8 R19 Royal Black → Sailun RoadX 15 000/60 000 ×1,
+# Goodride 13 000/52 000; T7 R18 Sailun остаток 1; T4L / L6 Landspider → Pirelli Formula 15 500/62 000 ×2
+PAIRS += [
+    ('["T8 R19",[["Royal Black Royalstud II 235/50 R19 103T, шип.",15500,62000,"1"],["Ikon Tyres 235/50 R19 103T XL Autograph Snow 3 SUV TL лип",21000,84000,"2"],["Fortune 235/50R19 103T Polaro Ice TL, шип.",15500,62000,"2"],["Автошина Goodride 235/50R19 99H SW618 TL лип",12500,50000,"1"]]]',
+     '["T8 R19",[["Автошина 235/50 R19 Sailun RoadX 103T XL RXFrost WH12 TL (шип.)",15000,60000,"1"],["Ikon Tyres 235/50 R19 103T XL Autograph Snow 3 SUV TL лип",21000,84000,"2"],["Fortune 235/50R19 103T Polaro Ice TL, шип.",15500,62000,"2"],["Автошина Goodride 235/50R19 99H SW618 TL лип",13000,52000,"1"]]]'),
+    ('["Sailun RoadX 225/55 R18 98T RXFrost WH12 TL, шип.",12500,50000,"2"]',
+     '["Sailun RoadX 225/55 R18 98T RXFrost WH12 TL, шип.",12500,50000,"1"]'),
+    ('["Автошина 225/60 R18 Landspider 104T XL Arctictraxx TL BSW (шип.) ",13000,52000,"3"]',
+     '["Автошина 225/60 R18 Pirelli Formula 104T XL Ice TL (шип.)",15500,62000,"2"]'),
+]
+
+
 def patch(path: Path) -> bool:
     if not path.exists():
         return False
