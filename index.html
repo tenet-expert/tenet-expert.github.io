@@ -8710,6 +8710,7 @@ async function pingTelegram(body){
           </div>`;
         }).join("")}</div>`;
     }
+    let eptsRows=[{vin:"", model:""}];
     let eptsVin="";
     let eptsModel="";
     let eptsStep=1;
@@ -8780,9 +8781,12 @@ async function pingTelegram(body){
     }
     function eptsMailPack(draft){
       const off=eptsIsOffHours();
-      const vin=draft.vin;
+      const cars=(draft.cars&&draft.cars.length>1)?draft.cars:null;
+      const vin=cars?cars.map(c=>c.vin).join(", "):draft.vin;
       const pay=draft.payBy;
-      const line="Прошу согласовать передачу ЭПТС для заключения договора с клиентом. Оплата до "+pay+", отзывных нет, гарантийное письмо во вложении.";
+      const line=cars
+        ?"Прошу согласовать передачу ЭПТС для заключения договоров с клиентами. Оплата до "+pay+", отзывных нет, гарантийное письмо во вложении.\n\n"+cars.map(c=>c.mailLine).join("\n")
+        :"Прошу согласовать передачу ЭПТС для заключения договора с клиентом. Оплата до "+pay+", отзывных нет, гарантийное письмо во вложении.\n\nVIN "+vin;
       const subj="ЭКСПЕРТ АВТО САМАРА_ЭПТС VIN "+vin;
       if(eptsIsPlus(draft)){
         if(off){
@@ -8791,7 +8795,7 @@ async function pingTelegram(body){
             to: EPTS_TO_WEEKEND,
             cc: [EPTS_PLUS_TO].concat(EPTS_PLUS_CC).join(", "),
             subj,
-            body: "Коллеги, добрый день! "+line+"\n\nVIN "+vin,
+            body: "Коллеги, добрый день! "+line,
             label: "TENET+ · выходные/после 17:00 МСК · team.elpts@chery.ru"
           };
         }
@@ -8800,7 +8804,7 @@ async function pingTelegram(body){
           to: EPTS_PLUS_TO,
           cc: EPTS_PLUS_CC.join(", "),
           subj,
-          body: "Анастасия, добрый день! "+line+"\n\nVIN "+vin,
+          body: "Анастасия, добрый день! "+line,
           label: "TENET+ · Anastasiia.Klimanova@agr.auto"
         };
       }
@@ -8810,7 +8814,7 @@ async function pingTelegram(body){
         to: off?EPTS_TO_WEEKEND:EPTS_TO_WORK,
         cc: (off?[EPTS_TO_WORK]:[]).concat(EPTS_CC).join(", "),
         subj,
-        body: who+line+"\n\nVIN "+vin,
+        body: who+line,
         label: off?"Выходные/после 17:00 МСК · team.elpts@chery.ru":"Рабочий день · Ekaterina.Bulatetskaya@tenet.ru"
       };
     }
@@ -8828,7 +8832,7 @@ async function pingTelegram(body){
       if(m) return m.brand+" "+m.name;
       return fallback||"TENET";
     }
-    function eptsLookup(vinRaw){
+    function eptsLookup(vinRaw, modelId){
       const vin=eptsCleanVin(vinRaw);
       if(!vin) return {vin:"", ok:false};
       const stock=(typeof STOCK!=="undefined"?STOCK:[]).find(x=>String(x.vin||"").toUpperCase()===vin);
@@ -8852,19 +8856,21 @@ async function pingTelegram(body){
           trim:"", color:"", note:"Модель по префиксу VIN, в складе салона нет.", status:""
         };
       }
-      if(eptsModel && MODELS[eptsModel]){
-        const m=MODELS[eptsModel];
+      const chosen=modelId||eptsModel;
+      const known=MODELS[chosen]||(chosen==="pl4"?{brand:"TENET PLUS",name:"L4"}:chosen==="pl6"?{brand:"TENET PLUS",name:"L6"}:null);
+      if(chosen && known){
+        const m=known;
         return {
-          vin, ok:vin.length>=11, fromStock:false, model:eptsModel,
-          letter:eptsLetterName(eptsModel),
+          vin, ok:vin.length>=11, fromStock:false, model:chosen,
+          letter:eptsLetterName(chosen),
           title:m.brand+" "+m.name,
           trim:"", color:"", note:"Модель указана вручную.", status:""
         };
       }
       return {vin, ok:false, note:"VIN не найден. Выберите модель вручную."};
     }
-    function eptsLookupHtml(vinRaw){
-      const hit=eptsLookup(vinRaw);
+    function eptsLookupHtml(vinRaw, modelId){
+      const hit=eptsLookup(vinRaw, modelId);
       if(!hit.vin) return `<p class="lead" style="margin-top:12px">17 символов, латиница и цифры. Склад подставит модель сам.</p>`;
       if(!hit.ok && !hit.model){
         return `<div class="epts-found"><b>VIN не распознан</b><span>${escape(hit.note||"Выберите модель чипом ниже.")}</span></div>`;
@@ -8974,7 +8980,15 @@ async function pingTelegram(body){
       });
       y+=8;
       ctx.font="700 28px Tinos, 'Times New Roman', Times, serif";
-      ctx.fillText(draft.carLine, L, y); y+=44;
+      const carLines=(draft.cars&&draft.cars.length>1)?draft.cars.map(c=>c.carLine):[draft.carLine];
+      if(carLines.length<2){
+        ctx.fillText(draft.carLine, L, y); y+=44;
+      }else{
+        carLines.forEach(line=>{
+          eptsWrap(ctx, line, maxW).forEach(ln=>{ ctx.fillText(ln, L, y); y+=36; });
+          y+=8;
+        });
+      }
       ctx.font="400 28px Tinos, 'Times New Roman', Times, serif";
       const body2="ООО «ЭКСПЕРТ АВТО САМАРА» обязуется оплатить вышеуказанные а/м до "+draft.payBy+" и гарантирует передачу перечисленных а/м конечным покупателям только после проведения сервисных мероприятий и авторизации ЭПТС в системе электронных паспортов.";
       eptsWrap(ctx, body2, maxW).forEach(ln=>{ ctx.fillText(ln, L, y); y+=36; });
@@ -9068,7 +9082,7 @@ async function pingTelegram(body){
       const pdf=eptsJpegToPdf(jpeg, canvas.width, canvas.height);
       const blob=new Blob([pdf],{type:"application/pdf"});
       const url=URL.createObjectURL(blob);
-      return {blob,url,bytes:pdf,preview:dataUrl,name:"EPTS-"+draft.vin+"-"+draft.issued.replace(/\./g,"")+".pdf"};
+      return {blob,url,bytes:pdf,preview:dataUrl,name:"EPTS-"+(draft.cars&&draft.cars.length>1?draft.cars.length+"vin-"+draft.cars[0].vin:draft.vin)+"-"+draft.issued.replace(/\./g,"")+".pdf"};
     }
     function eptsB64(bytes){
       let s="", chunk=0x8000;
@@ -9139,22 +9153,77 @@ async function pingTelegram(body){
       if(bodyEl) draft.body=bodyEl.value;
       return draft;
     }
+    function eptsBrandKey(hit){
+      return eptsIsPlus({model:hit&&hit.model, letter:hit&&hit.letter})?"plus":"tenet";
+    }
+    function eptsSyncPrimary(){
+      const r=eptsRows[0]||{vin:"",model:""};
+      eptsVin=r.vin||"";
+      eptsModel=r.model||"";
+    }
+    function eptsModelChoices(){
+      const out=[];
+      Object.values(MODELS).forEach(m=>{
+        if(m.id==="plus"){
+          out.push({id:"pl4", brand:"TENET PLUS", name:"L4"});
+          out.push({id:"pl6", brand:"TENET PLUS", name:"L6"});
+        }else out.push(m);
+      });
+      return out;
+    }
+    function eptsStockCars(modelId){
+      const all=(typeof STOCK!=="undefined"?STOCK:[])||[];
+      if(!modelId) return all;
+      return all.filter(x=>x&&x.model===modelId);
+    }
+    function eptsFilledRows(){
+      return eptsRows.map((r,i)=>({i, vin:eptsCleanVin(r.vin), model:r.model||""})).filter(r=>r.vin);
+    }
+    function eptsMixHint(){
+      const brands=new Set(eptsFilledRows().map(r=>{
+        const hit=eptsLookup(r.vin, r.model);
+        return hit&&hit.model?eptsBrandKey(hit):"";
+      }).filter(Boolean));
+      return brands.size>1;
+    }
     async function eptsMakeDraft(){
-      const hit=eptsLookup(eptsVin);
-      if(!hit.vin || hit.vin.length<11) throw new Error("Введите VIN — не короче 11 символов.");
-      if(!hit.ok && !hit.model) throw new Error("VIN не распознан. Выберите модель чипом.");
+      const filled=eptsFilledRows();
+      if(!filled.length) throw new Error("Введите VIN — не короче 11 символов.");
+      const seen={};
+      const hits=[];
+      for(const row of filled){
+        if(row.vin.length<11) throw new Error("VIN "+row.vin+" короче 11 символов.");
+        if(seen[row.vin]) throw new Error("VIN "+row.vin+" уже добавлен.");
+        seen[row.vin]=1;
+        const hit=eptsLookup(row.vin, row.model);
+        if(!hit.ok && !hit.model) throw new Error("VIN "+row.vin+" не распознан. Выберите модель.");
+        hits.push(hit);
+      }
+      const brands=new Set(hits.map(eptsBrandKey));
+      if(brands.size>1) throw new Error("В одном письме только один бренд.");
       const msk=eptsMoscowNow();
       const issuedDt=eptsUtcDate(msk.y,msk.m,msk.d);
       const payDt=eptsPayBy(issuedDt);
+      const cars=hits.map(hit=>{
+        const detail=[hit.letter, hit.trim, hit.color].filter(Boolean).join(" · ");
+        return {
+          vin:hit.vin, model:hit.model, letter:hit.letter, trim:hit.trim||"", color:hit.color||"",
+          carLine:hits.length>1?(detail+" · VIN "+hit.vin):(hit.letter+" "+hit.vin),
+          mailLine:detail+" · VIN "+hit.vin,
+          hit
+        };
+      });
+      const first=cars[0];
       const draft={
-        vin:hit.vin,
-        model:hit.model||eptsModel,
-        letter:hit.letter,
-        carLine:hit.letter+" "+hit.vin,
+        vin:first.vin,
+        model:first.model,
+        letter:first.letter,
+        carLine:first.carLine,
+        cars,
         issued:eptsFmt(issuedDt),
         payBy:eptsFmt(payDt),
         issuedDt, payDt,
-        hit
+        hit:first.hit
       };
       const pdf=await eptsBuildPdf(draft);
       draft.pdf=pdf;
@@ -9177,25 +9246,30 @@ async function pingTelegram(body){
       const hit=eptsLookup(eptsVin);
       const d=eptsDraft;
       const step1body = eptsStep===1 ? `<div class="epts-body">
-        <label class="field" style="max-width:none;margin-top:0"><span>VIN</span>
-          <input id="eptsVin" class="epts-vin" maxlength="17" placeholder="EDEFB32B4TE105370" value="${escape(eptsVin)}" autocomplete="off" list="eptsVinList" />
-        </label>
-        <datalist id="eptsVinList">${(STOCK||[]).map(x=>`<option value="${escape(x.vin)}">${escape(x.name)} ${escape(x.trim||"")} · ${escape(x.color||"")}</option>`).join("")}</datalist>
-        <div id="eptsLookup">${eptsLookupHtml(eptsVin)}</div>
-        <div class="study-pick" style="margin-top:12px">
-          ${Object.values(MODELS).map(m=>`<button class="chip ${eptsModel===m.id?"on":""}" type="button" data-epts-model="${m.id}">${escape(m.brand)} ${escape(m.name)}</button>`).join("")}
-        </div>
+        ${eptsRows.map((row,i)=>`<div class="epts-vin-row" data-epts-row="${i}" style="margin-top:${i?"16px":"0"}">
+          <div class="study-pick">
+            ${eptsModelChoices().map(m=>`<button class="chip ${row.model===m.id?"on":""}" type="button" data-epts-model="${m.id}" data-epts-i="${i}">${escape(m.brand)} ${escape(m.name)}</button>`).join("")}
+          </div>
+          <label class="field" style="max-width:none;margin-top:8px"><span>VIN${eptsRows.length>1?" "+(i+1):""}</span>
+            <input class="epts-vin" data-epts-vin="${i}" maxlength="17" placeholder="EDEFB32B4TE105370" value="${escape(row.vin)}" autocomplete="off" list="eptsVinList${i}" />
+          </label>
+          <datalist id="eptsVinList${i}">${eptsStockCars(row.model).map(x=>`<option value="${escape(x.vin)}">${escape(x.name)} ${escape(x.trim||"")} · ${escape(x.color||"")}</option>`).join("")}</datalist>
+          <div id="eptsLookup${i}">${eptsLookupHtml(row.vin, row.model)}</div>
+          ${eptsRows.length>1?`<button class="btn ghost" type="button" data-epts-del="${i}">Убрать VIN</button>`:""}
+        </div>`).join("")}
+        ${eptsRows.length<3?`<div class="who-line"><button class="btn ghost" id="eptsAdd" type="button">+ добавить VIN</button></div>`:""}
+        ${eptsMixHint() && !(eptsMsg||"").includes("один бренд")?`<p id="loginErr" style="color:var(--primary);font-size:13px">В одном письме только один бренд.</p>`:""}
         ${eptsMsg?`<p id="loginErr" style="color:var(--primary);font-size:13px">${escape(eptsMsg)}</p>`:""}
         <div class="who-line">
           <button class="btn ivory" id="eptsBuild" type="button">Собрать письмо</button>
         </div>
-      </div>` : (d?`<div class="epts-body"><div class="epts-found"><b>${escape(d.carLine)}</b><span>Можно вернуться и поправить VIN.</span></div>
+      </div>` : (d?`<div class="epts-body"><div class="epts-found"><b>${escape((d.cars||[{carLine:d.carLine}]).map(c=>c.carLine).join(" · "))}</b><span>Можно вернуться и поправить VIN.</span></div>
         <div class="who-line"><button class="btn ghost" id="eptsBack1" type="button">Изменить VIN</button></div></div>`:"");
       const step2body = eptsStep>=2 && d ? `<div class="epts-body">
         <div class="epts-meta">
           <div class="card"><h4>Исх. б/н</h4><b>${escape(d.issued)}</b><p class="lead" style="margin-top:6px">Сегодня по Москве. Так стоит в шапке письма.</p></div>
           <div class="card"><h4>Оплатить до</h4><b>${escape(d.payBy)}</b><p class="lead" style="margin-top:6px">3 рабочих дня включая сегодня. Выходные не считаются: с пятницы срок падает на вторник.</p></div>
-          <div class="card"><h4>Авто</h4><b>${escape(d.letter)}</b><p class="lead" style="margin-top:6px">${escape(d.vin)}</p></div>
+          <div class="card"><h4>Авто</h4><b>${escape((d.cars&&d.cars.length>1)?d.cars.length+" а/м":d.letter)}</b><p class="lead" style="margin-top:6px">${escape((d.cars||[{vin:d.vin,carLine:d.carLine}]).map(c=>c.carLine||c.vin).join(" · "))}</p></div>
         </div>
         <div class="epts-sheet-wrap">
           <img alt="Гарантийное письмо PDF" src="${d.pdf.preview}" />
@@ -9254,27 +9328,51 @@ async function pingTelegram(body){
         </div>`;
     }
     function eptsBind(){
-      const vinEl=document.getElementById("eptsVin");
-      if(vinEl){
+      document.querySelectorAll("[data-epts-vin]").forEach(vinEl=>{
         vinEl.oninput=()=>{
-          eptsVin=eptsCleanVin(vinEl.value);
-          if(vinEl.value!==eptsVin){ const c=vinEl.selectionStart; vinEl.value=eptsVin; try{ vinEl.setSelectionRange(c,c);}catch(e){} }
-          const box=document.getElementById("eptsLookup");
-          if(box) box.innerHTML=eptsLookupHtml(eptsVin);
+          const i=Number(vinEl.dataset.eptsVin)||0;
+          const row=eptsRows[i]; if(!row) return;
+          row.vin=eptsCleanVin(vinEl.value);
+          if(vinEl.value!==row.vin){ const c=vinEl.selectionStart; vinEl.value=row.vin; try{ vinEl.setSelectionRange(c,c);}catch(e){} }
+          eptsSyncPrimary();
+          const box=document.getElementById("eptsLookup"+i);
+          if(box) box.innerHTML=eptsLookupHtml(row.vin, row.model);
+          const mix=document.getElementById("eptsMix");
+          if(mix) mix.hidden=!eptsMixHint();
         };
-      }
+      });
       document.querySelectorAll("[data-epts-model]").forEach(b=>b.onclick=()=>{
-        eptsModel=b.dataset.eptsModel;
+        const i=Number(b.dataset.eptsI)||0;
+        if(!eptsRows[i]) return;
+        eptsRows[i].model=b.dataset.eptsModel;
         eptsMsg="";
+        eptsSyncPrimary();
         view="epts"; render();
-        const el=document.getElementById("eptsVin"); if(el){ el.focus(); el.value=eptsVin; }
+        const el=document.querySelector('[data-epts-vin="'+i+'"]'); if(el) el.focus();
+      });
+      const add=document.getElementById("eptsAdd");
+      if(add) add.onclick=()=>{
+        if(eptsRows.length>=3) return;
+        eptsRows.push({vin:"", model:""});
+        view="epts"; render();
+      };
+      document.querySelectorAll("[data-epts-del]").forEach(b=>b.onclick=()=>{
+        const i=Number(b.dataset.eptsDel)||0;
+        if(eptsRows.length<2) return;
+        eptsRows.splice(i,1);
+        eptsSyncPrimary();
+        view="epts"; render();
       });
       const build=document.getElementById("eptsBuild");
       if(build) build.onclick=async()=>{
         eptsMsg="";
         build.disabled=true; build.textContent="Собираю PDF…";
         try{
-          eptsVin=eptsCleanVin((document.getElementById("eptsVin")||{}).value||eptsVin);
+          document.querySelectorAll("[data-epts-vin]").forEach(el=>{
+            const i=Number(el.dataset.eptsVin)||0;
+            if(eptsRows[i]) eptsRows[i].vin=eptsCleanVin(el.value);
+          });
+          eptsSyncPrimary();
           if(eptsDraft && eptsDraft.pdf && eptsDraft.pdf.url){ try{ URL.revokeObjectURL(eptsDraft.pdf.url);}catch(e){} }
           eptsDraft=await eptsMakeDraft();
           eptsStep=2;
