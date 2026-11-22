@@ -256,12 +256,14 @@ def drop_sold_tests(text):
 
 
 
-L6U4_ROW = '{id:"l6u4",brand:"TENET PLUS",name:"L6 Ultra 4WD",stock:"pl6",rrc:3290000,dealer:3138000,ti:100000,tiBack:70000,cr:0,crBack:0,bonus:0.022,vat:1.22,fee:0.01,kmMin:0,kmMax:50,prioMin:0,prioMax:50}'
+L6U4_ROW = '{id:"l6u4",brand:"TENET PLUS",name:"L6 Ultra 4WD",stock:"pl6",rrc:3290000,dealer:3138000,ti:100000,tiBack:70000,cr:0,crBack:0,bonus:0.022,vat:1.22,fee:0.01,kmMin:0,kmMax:0,prioMin:0,prioMax:0,noKM:true,dcMax:0,cascoGapMin:200000}'
 L6U4_NUMS = {
     "rrc": 3290000, "dealer": 3138000, "ti": 100000, "tiBack": 70000,
     "cr": 0, "crBack": 0, "bonus": 0.022, "vat": 1.22, "fee": 0.01,
-    "kmMin": 0, "kmMax": 50, "prioMin": 0, "prioMax": 50,
+    "kmMin": 0, "kmMax": 0, "prioMin": 0, "prioMax": 0,
+    "dcMax": 0, "cascoGapMin": 200000,
 }
+L6U4_FLAGS = {"noKM": "true"}
 
 
 def ensure_l6u4(text):
@@ -276,6 +278,11 @@ def ensure_l6u4(text):
         for k, v in L6U4_NUMS.items():
             if re.search(r'\b' + k + r':-?\d+(?:\.\d+)?', row):
                 row = re.sub(r'\b' + k + r':-?\d+(?:\.\d+)?', f"{k}:{v}", row, count=1)
+            else:
+                row = row[:-1] + f",{k}:{v}" + "}"
+        for k, v in L6U4_FLAGS.items():
+            if re.search(r"\b" + k + r":[^,}\s]+", row):
+                row = re.sub(r"\b" + k + r":[^,}\s]+", f"{k}:{v}", row, count=1)
             else:
                 row = row[:-1] + f",{k}:{v}" + "}"
         if 'stock:"pl6"' not in row:
