@@ -4485,7 +4485,7 @@ async function pingTelegram(body){
             </div>
           </button>`).join("")}</div>`;
     }
-    const TERMS_DATE = "19.11.2026";
+    const TERMS_DATE = "22.11.2026";
     const KM_CORRIDOR = [
       {model:"T4L",trim:"Все",km:"0 / 50",note:""},
       {model:"T7",trim:"Приоритет",km:"−50 / 0",note:"5 VIN: EDEFB32B8TE105355, EDXFD32B2TE042710, EDEFB32BXTE100707, EDEFB32B8TE099203, EDEFD32B5TE102522; остальные приоритеты T7 — стандарт 0/50"},
@@ -4499,7 +4499,7 @@ async function pingTelegram(body){
       {model:"T8",trim:"Остальные",km:"0 / 30",note:""},
       {model:"T9",trim:"Все",km:"0 / 30",note:""},
       {model:"A8",trim:"Все",km:"0 / 30",note:""},
-      {model:"L6",trim:"Все",km:"0 / 50",note:""},
+      {model:"L6",trim:"Кроме Ultra 4WD",km:"100 / 200",note:"фикс: с ТИ 100, без ТИ 200"},
       {model:"L4",trim:"Все",km:"−30 / 50",note:""}
     ];
     const TERMS_BONUS = [
@@ -4702,8 +4702,8 @@ async function pingTelegram(body){
       {id:"t7l",brand:"CHERY",name:"Tiggo 7 L Active",stock:"t7l",rrc:2735000,dealer:2620000,ti:100000,tiBack:70000,cr:0,crBack:0,bonus:0.02,vat:1.2,fee:0.02,kmMin:0,kmMax:30,prioMin:0,prioMax:30},
       {id:"l4s",brand:"TENET PLUS",name:"L4 Style",stock:"pl4",rrc:2540000,dealer:2438400,ti:150000,tiBack:150000,cr:0,crBack:0,bonus:0.022,vat:1.22,fee:0.01,kmMin:-30,kmMax:50,prioMin:-30,prioMax:50},
       {id:"l4e",brand:"TENET PLUS",name:"L4 Elegant",stock:"pl4",rrc:2690000,dealer:2582400,ti:150000,tiBack:150000,cr:0,crBack:0,bonus:0.022,vat:1.22,fee:0.01,kmMin:-30,kmMax:50,prioMin:-30,prioMax:50},
-      {id:"l6e",brand:"TENET PLUS",name:"L6 Elegant",stock:"pl6",rrc:2890000,dealer:2745500,ti:100000,tiBack:70000,cr:0,crBack:0,bonus:0.022,vat:1.22,fee:0.01,kmMin:0,kmMax:50,prioMin:0,prioMax:50},
-      {id:"l6u",brand:"TENET PLUS",name:"L6 Ultra",stock:"pl6",rrc:3040000,dealer:2888000,ti:100000,tiBack:70000,cr:0,crBack:0,bonus:0.022,vat:1.22,fee:0.01,kmMin:0,kmMax:50,prioMin:0,prioMax:50},
+      {id:"l6e",brand:"TENET PLUS",name:"L6 Elegant",stock:"pl6",rrc:2890000,dealer:2745500,ti:100000,tiBack:70000,cr:0,crBack:0,bonus:0.022,vat:1.22,fee:0.01,kmMin:100,kmMax:200,prioMin:100,prioMax:200},
+      {id:"l6u",brand:"TENET PLUS",name:"L6 Ultra",stock:"pl6",rrc:3040000,dealer:2888000,ti:100000,tiBack:70000,cr:0,crBack:0,bonus:0.022,vat:1.22,fee:0.01,kmMin:100,kmMax:200,prioMin:100,prioMax:200},
       {id:"l6u4",brand:"TENET PLUS",name:"L6 Ultra 4WD",stock:"pl6",rrc:3290000,dealer:3138000,ti:100000,tiBack:70000,cr:0,crBack:0,bonus:0.022,vat:1.22,fee:0.01,kmMin:0,kmMax:50,prioMin:0,prioMax:50}
     ];
     const PRIO_VINS = new Set(["EDEEB31B8TE003261", "EDXGD34B5TE095631", "EDXGD34B8TE095347", "EDEFB32BXTE100707", "EDEFB32B8TE099203", "EDEFB32B8TE105355", "EDXFD32B2TE042710", "EDXGB32B8TE110275", "EDXGB32B1TE110196", "EDXGB32B0TE089261", "EDEFD32B1TE101190", "EDEFD32B5TE102522", "EDEFB32B2TE105500"]);
@@ -6310,17 +6310,20 @@ async function pingTelegram(body){
       const showDealCr=hasDealCr && (!dealCrNeedsLoan || useLoan);
       const useCr=showDealCr && kmVal("kmUseCr", false);
       const spec=kmVal("kmSpec", 0);
-      const useDcTi=kmVal("kmUseDcTi", false);/*fleet-dcti*/
-      const useDcCr=useLoan?kmVal("kmUseDcCr", false):kmVal("kmUseDcCash", false);/*km-cash-fix*/
+      const l6u4=m.id==="l6u4";/*l6u4-lock*/
+      const useDcTi=l6u4?false:kmVal("kmUseDcTi", false);/*fleet-dcti*/
+      const useDcCr=l6u4?false:(useLoan?kmVal("kmUseDcCr", false):kmVal("kmUseDcCash", false));/*km-cash-fix*/
       const dcTi=useDcTi?kmVal("kmDcTi", typeof KM_DC_DEF==="number"?KM_DC_DEF:100000):0;
       const addons=kmVal("kmDo", 70000);
       let casco=0, card=0, pack=0;
       if(useLoan){
-        pack=kmVal("kmPack", 150000);
+        pack=kmVal("kmPack", l6u4?200000:150000);
+        if(l6u4 && pack<200000) pack=200000;/*l6u4-casco*/
         casco=Math.min(pack, 80000);
         card=Math.max(0, pack-80000);
       }else{
-        casco=kmVal("kmCasco", 80000);
+        casco=kmVal("kmCasco", l6u4?200000:80000);
+        if(l6u4 && casco<200000) casco=200000;/*l6u4-casco*/
         card=0;
       }
       const prio=PRIO_VINS.has(kmVin);
@@ -6574,18 +6577,18 @@ async function pingTelegram(body){
             <label class="field" style="max-width:none"><span>Сумма счёта, ₽ · из условий ${TERMS_DATE}</span><input id="kmInv" inputmode="numeric" value="${invoice}" /></label>
             <div class="check-pair">
               <label class="check-row"><input id="kmUseTi" type="checkbox" ${useTi?"checked":""} /> <span>Трейд-ин ${m.ti?rub(m.ti):""}</span></label>
-              <label class="check-row"><input id="kmUseDcTi" type="checkbox" ${useDcTi?"checked":""} /> <span>Трейд-ин от ДЦ ${rub(KM_DC_DEF)}</span></label>
+              ${l6u4?"":`<label class="check-row"><input id="kmUseDcTi" type="checkbox" ${useDcTi?"checked":""} /> <span>Трейд-ин от ДЦ ${rub(KM_DC_DEF)}</span></label>`}
             </div>
             ${(m.stock==="pl4"||m.stock==="pl6")?`<label class="check-row"><input id="kmUseLoyal" type="checkbox" ${useLoyal?"checked":""} /> <span>Лояльный трейд-ин · Elegant (Mazda / KIA / Hyundai) ${rub(100000)}</span></label>`:""}
-            <label class="check-row"><input id="kmUseDcCr" type="checkbox" ${useDcCr?"checked":""} /> <span>Скидка за кредит${dcFit?` · до ${rub(dcFit)} в коридоре`:""}</span></label>
+            ${l6u4?`<p class="calc-note">Скидка ДЦ на L6 Ultra 4WD не применяется.</p>`:`<label class="check-row"><input id="kmUseDcCr" type="checkbox" ${useDcCr?"checked":""} /> <span>Скидка за кредит${dcFit?` · до ${rub(dcFit)} в коридоре`:""}</span></label>`}
             ${pangoOnly?"":`<label class="field" style="max-width:none"><span>Произвольная скидка, ₽ · снижает ниже порога</span><input id="kmSpec" inputmode="numeric" value="${spec}" /></label>
             ${useDcTi?`<label class="field" style="max-width:none"><span>Сумма скидки ДЦ за трейд-ин, ₽</span><input id="kmDcTi" inputmode="numeric" value="${dcTi||KM_DC_DEF}" /></label>`:""}
             ${useDcCr?`<label class="field" style="max-width:none"><span>Сумма скидки за кредит, ₽ · догоняет порог</span><input id="kmDcCr" inputmode="numeric" value="${dcCr}" /></label>`:""}
-            ${!useLoan?`<label class="check-row"><input id="kmUseDcCash" type="checkbox" ${useDcCr?"checked":""} /> <span>Скидка от ДЦ под фикс КМ ${lo} тыс. ${useTi?"с трейд-ином":"без трейд-ина"}</span></label>`:""}
+            ${!useLoan&&!l6u4?`<label class="check-row"><input id="kmUseDcCash" type="checkbox" ${useDcCr?"checked":""} /> <span>Скидка от ДЦ под фикс КМ ${lo} тыс. ${useTi?"с трейд-ином":"без трейд-ина"}</span></label>`:""}
             ${!useLoan&&useDcCr?`<label class="field" style="max-width:none"><span>Скидка ДЦ (нал), ₽ · подобрана под КМ ${lo} тыс.</span><input id="kmDcCr" inputmode="numeric" value="${dcCr}" /></label>`:""}
             ${dcCapped?`<div class="note-box">Фикс КМ ${lo} тыс. недостижим: потолок скидки T9 — 30% от РРЦ (${rub(Math.round(rrc*0.3))}). Скидка ДЦ ограничена ${rub(dcCap)}.</div>`:""}
             ${useDcCr&&!dcCapped&&dcCr===0&&kmK+0.05<lo?`<div class="note-box">КМ ниже фикса ${lo} тыс. уже без скидки ДЦ — скидку ДЦ не даём.</div>`:""}
-            <p class="calc-note">Скидка за кредит держит КМ у порога. Произвольная кладётся сверху и снижает ниже.</p>`}
+            ${l6u4?"":`<p class="calc-note">Скидка за кредит держит КМ у порога. Произвольная кладётся сверху и снижает ниже.</p>`}`}
             <label class="field" style="max-width:none"><span>Д/О, ₽</span><input id="kmDo" inputmode="numeric" value="${addons}" /></label>
             ${pangoOnly?`<div class="note-box" style="margin-top:14px"><p class="eyebrow" style="margin:0 0 6px">Цена PANGO</p><div class="calc-out">${rub(pFix)} ₽</div><p class="calc-note">${_pg.cash===_pg.ti?"При любых условиях. Трейд-ин цену не меняет.":(pWithTi?"С трейд-ин.":"Без трейд-ин.")} Директ и флит не считаем.</p></div><div class="note-box">${escape(PANGO_ONLY[kmVin])}</div>`:`<div class="note-box" style="margin-top:14px">
               <p class="eyebrow" style="margin:0 0 6px">Итоговая цена для клиента</p>
@@ -6595,10 +6598,10 @@ async function pingTelegram(body){
             </div>`}
             ${_pg&&!pangoOnly?`<div class="note-box">${(typeof EXCL_FIX!=="undefined"&&EXCL_FIX[kmVin])?"СУПЕРСПЕЦ":"Спеццена"} ${rub(_pg.cash)} без трейд-ин · ${rub(_pg.ti)} с трейд-ин. ${(selected&&isPangoDeal(selected,m.id))?"Этот VIN по этой цене — блок PANGO.":"Блок PANGO — спеццена для сравнения."}</div>`:""}
             ${useLoan
-              ?`<label class="field" style="max-width:none"><span>Каско расширенное, ₽</span><input id="kmPack" inputmode="numeric" value="${pack}" /></label>`
-              :`<label class="field" style="max-width:none"><span>КАСКО, ₽</span><input id="kmCasco" inputmode="numeric" value="${casco}" /></label>`}
-            ${prio?`<div class="note-box">Приоритетный VIN ${escape(kmVin)}. КМ ${kmBandTxt(lo,hi)}${useTi?" с трейд-ином":" без трейд-ина"}.</div>`:""}
-            ${!prio && band.lock?`<div class="note-box">Для VIN ${escape(kmVin)} КМ ${kmBandTxt(lo,hi)}${useTi?" с трейд-ином":" без трейд-ина"}.</div>`:""}
+              ?`<label class="field" style="max-width:none"><span>Каско расширенное, ₽${l6u4?" · минимум 200 000":""}</span><input id="kmPack" inputmode="numeric" value="${pack}" /></label>`
+              :`<label class="field" style="max-width:none"><span>КАСКО, ₽${l6u4?" · минимум 200 000":""}</span><input id="kmCasco" inputmode="numeric" value="${casco}" /></label>`}
+            ${!l6u4&&prio?`<div class="note-box">Приоритетный VIN ${escape(kmVin)}. КМ ${kmBandTxt(lo,hi)}${useTi?" с трейд-ином":" без трейд-ина"}.</div>`:""}
+            ${!l6u4&&!prio && band.lock?`<div class="note-box">Для VIN ${escape(kmVin)} КМ ${kmBandTxt(lo,hi)}${useTi?" с трейд-ином":" без трейд-ина"}.</div>`:""}
             ${useLoan&&!showSplit&&!pShow?`<p class="eyebrow" style="margin-top:12px">Первый взнос</p>
               <div class="down-mode">
                 <button type="button" class="chip ${downMode==="sum"?"on":""}" data-down-mode="sum">Сумма, ₽</button>
@@ -6636,7 +6639,7 @@ async function pingTelegram(body){
                 <p class="calc-note">Обычный. Цена ${rub(ordDeal.price)} · ПВ ${rub(ordDeal.down)} · тело ${rub(ordDeal.credit)}</p>
               </div>
               ${directPairs}
-              <div class="pay-cell"><p class="calc-note">КМ ${kmFixK(ordDeal.km/1000)} тыс. · фикс ${typeof kmBandTxt==="function"?kmBandTxt(ob.lo,ob.hi):ob.lo+" тыс."}${useTi?" с трейд-ином":" без трейд-ина"}</p></div>
+              ${l6u4?"":`<div class="pay-cell"><p class="calc-note">КМ ${kmFixK(ordDeal.km/1000)} тыс. · фикс ${typeof kmBandTxt==="function"?kmBandTxt(ob.lo,ob.hi):ob.lo+" тыс."}${useTi?" с трейд-ином":" без трейд-ина"}</p></div>`}
             </div>
             <p class="calc-note">${isPlus?"Ставки TENET PLUS, ИП 1938/И (пролонгирована).":"Ставки TENET ФИНАНС, ИП 2641/И."}</p>
             
@@ -6723,9 +6726,9 @@ async function pingTelegram(body){
         </div>
         <div class="${(useLoan&&showSplit)||pShow?"km-bottom":""}">
           <div class="card dc-result ${(kmPango?pOk:ok)?"ok":"bad"}">
-            <p class="eyebrow">КМ без НДС${kmPango?" · спеццена":""}</p>
+            ${l6u4?"":`<p class="eyebrow">КМ без НДС${kmPango?" · спеццена":""}</p>
             <div class="calc-out">${rub(kmFixK((kmPango?pKm:km)/1000)*1000)} ₽</div>
-            <p class="calc-note">КМ ${typeof kmFixPair==="function"?kmFixPair(kmVin, prio, m):kmBandTxt(lo,hi)} · сейчас ${kmFixK(kmPango?pKmK:kmK)} тыс. · ${kmGate(kmPango?pKmK:kmK).word}</p>
+            <p class="calc-note">КМ ${typeof kmFixPair==="function"?kmFixPair(kmVin, prio, m):kmBandTxt(lo,hi)} · сейчас ${kmFixK(kmPango?pKmK:kmK)} тыс. · ${kmGate(kmPango?pKmK:kmK).word}</p>`}
             <div class="note-box">${kmPango?`Спеццена <b>${rub(pFix)} ₽</b> · скидка от РРЦ ${rub(pDiscount)}<br/>Маржа 1С ${rub(Math.round(pMargin))} · бонус ${rub(Math.round(pBonus))} · доход на железе ${rub(Math.round(pIron))}<br/>Каско 80 000 + GAP/ДМС ${rub(pCard)} внутри PANGO${useTi?" · возмещение трейд-ин "+rub(pTiBack):""}`:`Цена авто <b>${rub(Math.round(carPrice))} ₽</b> · клиенту с Д/О <b>${rub(Math.round(client))} ₽</b><br/>Скидка ${rub(Math.round(discount))} · маржа 1С ${rub(Math.round(margin))}<br/>Бонус ${rub(Math.round(bonus))} (${Math.round(m.bonus*100)}%) · доход на железе ${rub(Math.round(iron))}<br/>НДС ${m.vat===1.22?"22%":"20%"} · сбор ${Math.round(m.fee*100)}% от цены авто${prio?" · приоритет":""}`}</div>
           </div>
           ${(useLoan&&showSplit)||pShow?kmSideList(m, price, downPct, months, extras, {useTi, spec, useDcTi, dcTi, useDcCr, dcCr, downMode, down, finDelta, useLoan}):""}
@@ -7246,17 +7249,22 @@ async function pingTelegram(body){
       const showDealCr=(m.cr||0)>0 && (m.id!=="t7p" || useLoan);
       const useCr=showDealCr && (S?!!S.useCr:offerOn("ofCr"));
       const spec=S?(Number(S.spec)||0):(offerNum("ofSpec", 0)||0);
-      const useDcTi=(S?!!S.useDcTi:offerOn("ofDcTi"));
-      const useDcCr=(S?!!S.useDcCr:offerOn("ofDcCr"));/*km-cash-fix*/
+      const l6u4=m.id==="l6u4";/*l6u4-lock*/
+      const useDcTi=l6u4?false:(S?!!S.useDcTi:offerOn("ofDcTi"));
+      const useDcCr=l6u4?false:(S?!!S.useDcCr:offerOn("ofDcCr"));/*km-cash-fix*/
       const dcDef=typeof KM_DC_DEF==="number"?KM_DC_DEF:100000;
       const dcTi=useDcTi?(S?(Number(S.dcTi)||0):(offerNum("ofDcTiAmt", dcDef)||0)):0;
       const dcCr=useDcCr?(S?(Number(S.dcCr)||0):(offerNum("ofDcCrAmt", dcDef)||0)):0;
       const addons=S?(Number(S.addons)||0):(offerNum("ofDo", 0)||0);
       let casco=0, pack=0;
       if(useLoan){
-        pack=S?(Number(S.pack)||0):(offerNum("ofPack", 150000)||0);
+        pack=S?(Number(S.pack)||0):(offerNum("ofPack", l6u4?200000:150000)||0);
+        if(l6u4 && pack<200000) pack=200000;/*l6u4-casco*/
         casco=Math.min(pack, 80000);
-      }else casco=S?(Number(S.casco)||0):(offerNum("ofCasco", 0)||0);
+      }else{
+        casco=S?(Number(S.casco)||0):(offerNum("ofCasco", l6u4?200000:0)||0);
+        if(l6u4 && casco<200000) casco=200000;/*l6u4-casco*/
+      }
       const months=S?(Number(S.months)||60):(offerNum("ofMonths", 60)||60);
       const downMode=S?(S.downMode==="sum"?"sum":"pct"):offerVal("ofDownMode","pct");
       let downPct=S?(Number(S.downPct)||0):offerNum("ofDownPct", 20);
@@ -7907,12 +7915,13 @@ async function pingTelegram(body){
         <label class="check-row"><input id="ofLoan" type="checkbox" ${d.useLoan?"checked":""} /> <span>Кредит</span></label>
         ${d.showDealCr?`<label class="check-row"><input id="ofCr" type="checkbox" ${d.useCr?"checked":""} /> <span>${d.m.id==="t7p"?"Выгодный кредит":"Программа кредита"} · ${rub(d.m.cr||0)}</span></label>`:""}
         ${offerField("Спецпредложение, ₽", `<input id="ofSpec" inputmode="numeric" value="${d.spec}" />`)}
-        ${true?`<label class="check-row"><input id="ofDcTi" type="checkbox" ${d.useDcTi?"checked":""} /> <span>Скидка ДЦ за трейд-ин</span></label>`:""}
-        ${d.useDcTi?offerField("Скидка ДЦ за трейд-ин, ₽", `<input id="ofDcTiAmt" inputmode="numeric" value="${d.dcTi||d.dcDef}" />`):""}
-        <label class="check-row"><input id="ofDcCr" type="checkbox" ${d.useDcCr?"checked":""} /> <span>${d.useLoan?"Скидка ДЦ за кредит":"Скидка ДЦ"}</span></label>
-        ${d.useDcCr?offerField(d.useLoan?"Скидка ДЦ за кредит, ₽":"Скидка ДЦ, ₽", `<input id="ofDcCrAmt" inputmode="numeric" value="${d.dcCr||d.dcDef}" />`):""}
+        ${d.m.id==="l6u4"?`<p class="calc-note">Скидка ДЦ на L6 Ultra 4WD не применяется.</p>`:""}
+        ${d.m.id==="l6u4"?"":`<label class="check-row"><input id="ofDcTi" type="checkbox" ${d.useDcTi?"checked":""} /> <span>Скидка ДЦ за трейд-ин</span></label>`}
+        ${(d.m.id!=="l6u4" && d.useDcTi)?offerField("Скидка ДЦ за трейд-ин, ₽", `<input id="ofDcTiAmt" inputmode="numeric" value="${d.dcTi||d.dcDef}" />`):""}
+        ${d.m.id==="l6u4"?"":`<label class="check-row"><input id="ofDcCr" type="checkbox" ${d.useDcCr?"checked":""} /> <span>${d.useLoan?"Скидка ДЦ за кредит":"Скидка ДЦ"}</span></label>`}
+        ${(d.m.id!=="l6u4" && d.useDcCr)?offerField(d.useLoan?"Скидка ДЦ за кредит, ₽":"Скидка ДЦ, ₽", `<input id="ofDcCrAmt" inputmode="numeric" value="${d.dcCr||d.dcDef}" />`):""}
         ${offerField("Д/О, ₽", `<input id="ofDo" inputmode="numeric" value="${d.addons}" />`)}
-        ${d.useLoan?offerField("Каско расширенное, ₽", `<input id="ofPack" inputmode="numeric" value="${d.pack}" />`):offerField("КАСКО, ₽", `<input id="ofCasco" inputmode="numeric" value="${d.casco}" />`)}
+        ${d.useLoan?offerField("Каско расширенное, ₽"+(d.m.id==="l6u4"?" · минимум 200 000":""), `<input id="ofPack" inputmode="numeric" value="${d.pack}" />`):offerField("КАСКО, ₽"+(d.m.id==="l6u4"?" · минимум 200 000":""), `<input id="ofCasco" inputmode="numeric" value="${d.casco}" />`)}
         ${d.useLoan?`<p class="eyebrow">Кредит</p><div class="down-mode"><button type="button" class="chip ${d.downMode==="sum"?"on":""}" data-offer-down="sum">Сумма, ₽</button><button type="button" class="chip ${d.downMode!=="sum"?"on":""}" data-offer-down="pct">Проценты</button></div><input type="hidden" id="ofDownMode" value="${d.downMode==="sum"?"sum":"pct"}" />${d.downMode==="sum"?offerField("Первый взнос, ₽", `<input id="ofDown" inputmode="numeric" value="${d.down}" />`):offerField("Первый взнос, %", `<input id="ofDownPct" inputmode="decimal" value="${d.downPct}" />`)}${offerField("Срок, мес.", `<input id="ofMonths" inputmode="numeric" value="${d.months}" />`)}`:""}
         ${offerField("Срок действия", `<input id="ofValid" value="${escape(d.valid)}" />`)}`;
     }

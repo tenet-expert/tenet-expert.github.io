@@ -233,8 +233,45 @@ def sync_vin_forks(text):
     return text[:sp[0]] + "\n    const KM_FORK = " + 'Object.fromEntries([\n      ...KM_CORRIDOR.filter(r=>/^[A-HJ-NPR-Z0-9]{17}$/.test(r.trim)).map(r=>{\n        const pair=r.km.replace(/[−–]/g,"-").split("/").map(Number);\n        return [r.trim,{ti:pair[0],cash:pair[1]}];\n      }),\n      ...TERMS_PRIO.filter(r=>Number.isFinite(r.kmTi)&&Number.isFinite(r.kmCash)).map(r=>[r.vin,{ti:r.kmTi,cash:r.kmCash}])\n    ])' + ";" + text[sp[1]:]
 
 
+L6_KM_TI = 100
+L6_KM_CASH = 200
+L6_KM_IDS = ("l6e", "l6u")  # Ultra 4WD (l6u4) без фикса КМ
+L6_CORRIDOR_ROW = '{model:"L6",trim:"Кроме Ultra 4WD",km:"100 / 200",note:"фикс: с ТИ 100, без ТИ 200"}'
+L6_CORRIDOR_RE = re.compile(r'\{model:"L6",trim:"[^"]*",km:"[^"]*",note:"[^"]*"\}')
+
+
+def pin_l6(text):
+    """22.11.2026: L6 Elegant/Ultra КМ 100 с ТИ / 200 без ТИ.
+    L6 Ultra 4WD (l6u4) в коридор и в этот фикс не входит.
+    Один источник чисел — константы выше. Вызывается после синка Sheet."""
+    sp = _span(text, "KM_CORRIDOR")
+    if sp:
+        blk = text[sp[0]:sp[1]]
+        if L6_CORRIDOR_RE.search(blk):
+            blk = L6_CORRIDOR_RE.sub(L6_CORRIDOR_ROW, blk, count=1)
+        elif '{model:"L4"' in blk:
+            blk = blk.replace('{model:"L4"', L6_CORRIDOR_ROW + ",\n      " + '{model:"L4"', 1)
+        text = text[:sp[0]] + blk + text[sp[1]:]
+    sp = _span(text, "KM_MODELS")
+    if not sp:
+        return text
+    blk = text[sp[0]:sp[1]]
+
+    def _row(m):
+        row = m.group(0)
+        for key, val in (("kmMin", L6_KM_TI), ("kmMax", L6_KM_CASH), ("prioMin", L6_KM_TI), ("prioMax", L6_KM_CASH)):
+            if re.search(r"\b" + key + r":-?\d+(?:\.\d+)?", row):
+                row = re.sub(r"\b" + key + r":-?\d+(?:\.\d+)?", "%s:%s" % (key, val), row, count=1)
+            else:
+                row = row[:-1] + ",%s:%s}" % (key, val)
+        return row
+
+    blk = re.sub(r'\{id:"(?:l6e|l6u)"(?!4)[^}]*\}', _row, blk)
+    return text[:sp[0]] + blk + text[sp[1]:]
+
+
 def fix_data(text):
-    text = sync_vin_forks(pin_t7(pin_t9(text)))
+    text = pin_l6(sync_vin_forks(pin_t7(pin_t9(text))))
     sp = _span(text, "KM_MODELS")
     if not sp:
         return text

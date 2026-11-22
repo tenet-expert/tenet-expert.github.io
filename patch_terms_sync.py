@@ -414,6 +414,18 @@ def ensure_tplus_choice(text):
     return text
 
 
+def ensure_terms_date(text):
+    """22.11.2026. Более позднюю дату из мастера не откатываем."""
+    m = re.search(r'const TERMS_DATE = "(\d{2})\.(\d{2})\.(\d{4})"', text)
+    if not m:
+        return text
+    d, mo, y = int(m.group(1)), int(m.group(2)), int(m.group(3))
+    if (y, mo, d) >= (2026, 11, 22):
+        return text
+    print("terms sync: pin TERMS_DATE 22.11.2026")
+    return text[:m.start()] + 'const TERMS_DATE = "22.11.2026"' + text[m.end():]
+
+
 def ensure_pango_rates(text):
     """20.11.2026: Александр confirmed Pango rates. The Sheet/canon still has
     17.4 / 14.4, so pin 18.4 (без комиссий) and 15.4 (НСС в теле) after sync."""
@@ -452,6 +464,12 @@ def ensure_local(text):
     except Exception as e:
         print("terms sync: km-fix skipped:", e)
     text = ensure_l6u4(text)
+    text = ensure_terms_date(text)
+    try:
+        import patch_km_fix
+        text = patch_km_fix.pin_l6(text)
+    except Exception as e:
+        print("terms sync: l6 pin skipped:", e)
     text = ensure_pango_rates(text)
     # 20.11.2026: «TENET Plus Выбор» = спец T+ + 70 000. Пин, чтобы синк не стёр программу.
     text = ensure_tplus_choice(text)
