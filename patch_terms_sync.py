@@ -468,6 +468,8 @@ def ensure_local(text):
     try:
         import patch_km_fix
         text = patch_km_fix.pin_l6(text)
+        if hasattr(patch_km_fix, "pin_l6u4_ui"):
+            text = patch_km_fix.pin_l6u4_ui(text)
     except Exception as e:
         print("terms sync: l6 pin skipped:", e)
     text = ensure_pango_rates(text)
