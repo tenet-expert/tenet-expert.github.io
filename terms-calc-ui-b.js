@@ -27,6 +27,7 @@
       if(typeof kmId!=="string" || !KM_MODELS.some(x=>x.id===kmId && !kmOff[x.id])){ kmId=(KM_MODELS.find(x=>!kmOff[x.id])||KM_MODELS[0]).id; kmVin=""; }
       if(typeof kmVin!=="string") kmVin="";
       const m=KM_MODELS.find(x=>x.id===kmId)||KM_MODELS[0];
+      const noKM=!!(m&&m.noKM);/*noKM*/
       if(typeof kmIsCorp==="function" && kmIsCorp(kmVin) && typeof calcFleet==="function") return calcFleet(m);
       const fresh=(typeof kmShown==="undefined")||kmShown!==kmId;
       kmShown=kmId;
@@ -42,15 +43,16 @@
       const spec=kmVal("kmSpec", 0);
       const useDcTi=useTi && kmVal("kmUseDcTi", false);
       const useDcCr=useLoan && kmVal("kmUseDcCr", false);
-      const dcTi=useDcTi?kmVal("kmDcTi", typeof KM_DC_DEF==="number"?KM_DC_DEF:100000):0;
+      const dcTi=noKM?0:(useDcTi?kmVal("kmDcTi", typeof KM_DC_DEF==="number"?KM_DC_DEF:100000):0);
       const addons=kmVal("kmDo", 70000);
+      const cascoMin=noKM?Math.max(0, Number(m.cascoGapMin)||200000):0;
       let casco=0, card=0, pack=0;
       if(useLoan){
-        pack=kmVal("kmPack", 150000);
+        pack=Math.max(cascoMin, kmVal("kmPack", cascoMin||150000));
         casco=Math.min(pack, 80000);
         card=Math.max(0, pack-80000);
       }else{
-        casco=kmVal("kmCasco", 80000);
+        casco=Math.max(cascoMin, kmVal("kmCasco", cascoMin||80000));
         card=0;
       }
       const prio=PRIO_VINS.has(kmVin);
@@ -67,7 +69,7 @@
       const dcMin=typeof kmDcCrMin==="function"?kmDcCrMin(dcPack, hi):0;
       const dcDef=typeof KM_DC_DEF==="number"?KM_DC_DEF:100000;
       let dcCr=0;
-      if(useDcCr){
+      if(useDcCr && !noKM){
         const typedEl=document.getElementById("kmDcCr");
         const typed=typedEl?kmVal("kmDcCr", NaN):NaN;
         const want=(fresh || !typedEl || !Number.isFinite(typed))?dcDef:typed;
@@ -89,7 +91,9 @@
       const price=Math.round(carPrice);
       const fee=typeof KM_BANK_FEE==="number"?KM_BANK_FEE:30000;
       const _pgTrim=(typeof pangoOf==="function")?pangoOf(m.id):null;
-      if(_pgTrim && !useLoan) pack=150000;
+      if(_pgTrim && !useLoan && !noKM) pack=150000;
+      if(noKM && pack<cascoMin) pack=cascoMin;
+      if(noKM && !useLoan && casco<cascoMin) casco=cascoMin;
       const extras=(useLoan||_pgTrim)?(addons+(pack||0)+fee):0;
       const finDelta=(addons-70000)+((useLoan||_pgTrim)?((pack||0)-150000):0);
       const months=kmVal("cMonths", 60);
@@ -250,10 +254,10 @@
             <label class="check-row"><input id="kmUseLoan" type="checkbox" ${useLoan?"checked":""} /> <span>Кредит</span></label>
             ${showDealCr?`<label class="check-row"><input id="kmUseCr" type="checkbox" ${useCr?"checked":""} /> <span>${dealCrLabel} · ${rub(m.cr)}${m.crBack?` / возмещение ${rub(m.crBack)}`:""}</span></label>`:""}
             <label class="field" style="max-width:none"><span>Спецпредложение, ₽</span><input id="kmSpec" inputmode="numeric" value="${spec}" /></label>
-            ${useTi?`<label class="check-row"><input id="kmUseDcTi" type="checkbox" ${useDcTi?"checked":""} /> <span>Скидка от ДЦ за трейд-ин ${rub(KM_DC_DEF)}</span></label>`:""}
-            ${useTi&&useDcTi?`<label class="field" style="max-width:none"><span>Сумма скидки ДЦ за трейд-ин, ₽</span><input id="kmDcTi" inputmode="numeric" value="${dcTi||KM_DC_DEF}" /></label>`:""}
-            ${useLoan?`<label class="check-row"><input id="kmUseDcCr" type="checkbox" ${useDcCr?"checked":""} /> <span>Скидка от ДЦ за кредит${dcFit?` · до ${rub(dcFit)} в коридоре`:""}</span></label>`:""}
-            ${useLoan&&useDcCr?`<label class="field" style="max-width:none"><span>Сумма скидки ДЦ за кредит, ₽ · коридор от ${lo} тыс.</span><input id="kmDcCr" inputmode="numeric" value="${dcCr}" /></label>`:""}
+            ${noKM?"":`${useTi?`<label class="check-row"><input id="kmUseDcTi" type="checkbox" ${useDcTi?"checked":""} /> <span>Скидка от ДЦ за трейд-ин ${rub(KM_DC_DEF)}</span></label>`:""}`}
+            ${noKM?"":`${useTi&&useDcTi?`<label class="field" style="max-width:none"><span>Сумма скидки ДЦ за трейд-ин, ₽</span><input id="kmDcTi" inputmode="numeric" value="${dcTi||KM_DC_DEF}" /></label>`:""}`}
+            ${noKM?"":`${useLoan?`<label class="check-row"><input id="kmUseDcCr" type="checkbox" ${useDcCr?"checked":""} /> <span>Скидка от ДЦ за кредит${dcFit?` · до ${rub(dcFit)} в коридоре`:""}</span></label>`:""}`}
+            ${noKM?"":`${useLoan&&useDcCr?`<label class="field" style="max-width:none"><span>Сумма скидки ДЦ за кредит, ₽ · коридор от ${lo} тыс.</span><input id="kmDcCr" inputmode="numeric" value="${dcCr}" /></label>`:""}`}
             <label class="field" style="max-width:none"><span>Д/О, ₽</span><input id="kmDo" inputmode="numeric" value="${addons}" /></label>
             <div class="note-box" style="margin-top:14px">
               <p class="eyebrow" style="margin:0 0 6px">Итоговая цена для клиента</p>
@@ -263,9 +267,9 @@
             </div>
             ${_pg?`<div class="note-box">Спеццена ${rub(_pg.cash)} без трейд-ин · ${rub(_pg.ti)} с трейд-ин. ${(selected&&selected.invoice)?"Этот VIN по спеццене — блок PANGO.":"Блок PANGO — спеццена для сравнения."}</div>`:""}
             ${useLoan
-              ?`<label class="field" style="max-width:none"><span>Каско расширенное, ₽</span><input id="kmPack" inputmode="numeric" value="${pack}" /></label>`
-              :`<label class="field" style="max-width:none"><span>КАСКО, ₽</span><input id="kmCasco" inputmode="numeric" value="${casco}" /></label>`}
-            ${prio?`<div class="note-box">Приоритетный VIN ${escape(kmVin)}. Коридор ${lo} … ${hi} тыс.</div>`:""}
+              ?`<label class="field" style="max-width:none"><span>Каско расширенное, ₽${noKM?" · минимум "+rub(cascoMin):""}</span><input id="kmPack" inputmode="numeric" value="${pack}" /></label>`
+              :`<label class="field" style="max-width:none"><span>КАСКО, ₽${noKM?" · минимум "+rub(cascoMin):""}</span><input id="kmCasco" inputmode="numeric" value="${casco}" /></label>`}
+            ${!noKM&&prio?`<div class="note-box">Приоритетный VIN ${escape(kmVin)}. Коридор ${lo} … ${hi} тыс.</div>`:""}
             ${useLoan&&!showSplit&&!pShow?`<p class="eyebrow" style="margin-top:12px">Первый взнос</p>
               <div class="down-mode">
                 <button type="button" class="chip ${downMode==="sum"?"on":""}" data-down-mode="sum">Сумма, ₽</button>
@@ -353,9 +357,9 @@
         </div>
         <div class="${(useLoan&&showSplit)||pShow?"km-bottom":""}">
           <div class="card dc-result ${(selected&&selected.invoice&&_pg?pOk:ok)?"ok":"bad"}">
-            <p class="eyebrow">КМ без НДС${selected&&selected.invoice&&_pg?" · спеццена":""}</p>
+            ${noKM?"":`<p class="eyebrow">КМ без НДС${selected&&selected.invoice&&_pg?" · спеццена":""}</p>
             <div class="calc-out">${rub(Math.round((selected&&selected.invoice&&_pg?pKm:km)/1000)*1000)} ₽</div>
-            <p class="calc-note">${lo===hi?"Фикс "+lo:"Коридор "+lo+" … "+hi} тыс. · сейчас ${Math.round(selected&&selected.invoice&&_pg?pKmK:kmK)} тыс. · ${(selected&&selected.invoice&&_pg?pOk:ok)?(lo===hi?"на фиксе":"в коридоре"):"вне коридора"}</p>
+            <p class="calc-note">${(m.id==="l6e"||m.id==="l6u")&&typeof kmFixPair==="function"?("КМ "+kmFixPair(kmVin, prio, m)+" · "):""}${lo===hi?"Фикс "+lo:"Коридор "+lo+" … "+hi} тыс. · сейчас ${Math.round(selected&&selected.invoice&&_pg?pKmK:kmK)} тыс. · ${(selected&&selected.invoice&&_pg?pOk:ok)?(lo===hi?"на фиксе":"в коридоре"):"вне коридора"}</p>`}
             <div class="note-box">${selected&&selected.invoice&&_pg?`Спеццена <b>${rub(pFix)} ₽</b> · скидка от РРЦ ${rub(pDiscount)}<br/>Маржа 1С ${rub(Math.round(pMargin))} · бонус ${rub(Math.round(pBonus))} · доход на железе ${rub(Math.round(pIron))}<br/>Каско 80 000 + GAP/ДМС ${rub(pCard)} внутри PANGO${useTi?" · возмещение трейд-ин "+rub(pTiBack):""}`:`Цена авто <b>${rub(Math.round(carPrice))} ₽</b> · клиенту с Д/О <b>${rub(Math.round(client))} ₽</b><br/>Скидка ${rub(Math.round(discount))} · маржа 1С ${rub(Math.round(margin))}<br/>Бонус ${rub(Math.round(bonus))} (${Math.round(m.bonus*100)}%) · доход на железе ${rub(Math.round(iron))}<br/>НДС ${m.vat===1.22?"22%":"20%"} · сбор ${Math.round(m.fee*100)}% от цены авто${prio?" · приоритет":""}`}</div>
           </div>
           ${(useLoan&&showSplit)||pShow?kmSideList(m, price, downPct, months, extras, {useTi, spec, useDcTi, dcTi, useDcCr, dcCr, downMode, down, finDelta, useLoan}):""}

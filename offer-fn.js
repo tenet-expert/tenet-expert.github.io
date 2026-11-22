@@ -60,6 +60,7 @@
       if(seeded) offerSeed=null;
       const mid=S?S.mid:offerVal("ofModel", models[0]?models[0].id:"t7a");
       const m=models.find(x=>x.id===mid)||models[0]||{id:"t7a",name:"TENET",rrc:0,ti:0,cr:0};
+      const noKM=!!(m&&m.noKM);/*noKM*/
       const prevModel=S?mid:offerVal("ofPrevModel", mid);
       const client=offerVal("ofClient","");
       const color=offerVal("ofColor","");
@@ -73,14 +74,15 @@
       const useDcTi=useTi && (S?!!S.useDcTi:offerOn("ofDcTi"));
       const useDcCr=useLoan && (S?!!S.useDcCr:offerOn("ofDcCr"));
       const dcDef=typeof KM_DC_DEF==="number"?KM_DC_DEF:100000;
-      const dcTi=useDcTi?(S?(Number(S.dcTi)||0):(offerNum("ofDcTiAmt", dcDef)||0)):0;
-      const dcCr=useDcCr?(S?(Number(S.dcCr)||0):(offerNum("ofDcCrAmt", dcDef)||0)):0;
+      const dcTi=noKM?0:(useDcTi?(S?(Number(S.dcTi)||0):(offerNum("ofDcTiAmt", dcDef)||0)):0);
+      const dcCr=noKM?0:(useDcCr?(S?(Number(S.dcCr)||0):(offerNum("ofDcCrAmt", dcDef)||0)):0);
       const addons=S?(Number(S.addons)||0):(offerNum("ofDo", 0)||0);
+      const cascoMin=noKM?Math.max(0, Number(m.cascoGapMin)||200000):0;
       let casco=0, pack=0;
       if(useLoan){
-        pack=S?(Number(S.pack)||0):(offerNum("ofPack", 150000)||0);
+        pack=Math.max(cascoMin, S?(Number(S.pack)||0):(offerNum("ofPack", cascoMin||150000)||0));
         casco=Math.min(pack, 80000);
-      }else casco=S?(Number(S.casco)||0):(offerNum("ofCasco", 0)||0);
+      }else casco=Math.max(cascoMin, S?(Number(S.casco)||0):(offerNum("ofCasco", cascoMin||0)||0));
       const months=S?(Number(S.months)||60):(offerNum("ofMonths", 60)||60);
       const downMode=S?(S.downMode==="sum"?"sum":"pct"):offerVal("ofDownMode","pct");
       let downPct=S?(Number(S.downPct)||0):offerNum("ofDownPct", 20);
@@ -120,7 +122,7 @@
         offerOwnVal=Number.isFinite(n)?Math.max(0, Math.round(n)):0;
       }
       const service=offerTab==="service";
-      return {m, mid, models, client, color, price, useTi, useLoan, showDealCr, useCr, spec, useDcTi, useDcCr, dcDef, dcTi, dcCr, addons, casco, pack, months, downMode, downPct, down, carPrice, clientPay, credit, fee, valid, packEq, banks, discs, discount, rivals, service, ownCar:offerOwnCar, ownVal:service?offerOwnVal:0};
+      return {m, mid, models, client, color, price, useTi, useLoan, showDealCr, useCr, spec, noKM, cascoMin, useDcTi, useDcCr, dcDef, dcTi, dcCr, addons, casco, pack, months, downMode, downPct, down, carPrice, clientPay, credit, fee, valid, packEq, banks, discs, discount, rivals, service, ownCar:offerOwnCar, ownVal:service?offerOwnVal:0};
     }
     function offerDash(v){ const s=String(v||"").trim(); return s||"—"; }
     function offerPhotoKey(id){
@@ -728,12 +730,12 @@
         <label class="check-row"><input id="ofLoan" type="checkbox" ${d.useLoan?"checked":""} /> <span>Кредит</span></label>
         ${d.showDealCr?`<label class="check-row"><input id="ofCr" type="checkbox" ${d.useCr?"checked":""} /> <span>${d.m.id==="t7p"?"Выгодный кредит":"Программа кредита"} · ${rub(d.m.cr||0)}</span></label>`:""}
         ${offerField("Спецпредложение, ₽", `<input id="ofSpec" inputmode="numeric" value="${d.spec}" />`)}
-        ${d.useTi?`<label class="check-row"><input id="ofDcTi" type="checkbox" ${d.useDcTi?"checked":""} /> <span>Скидка ДЦ за трейд-ин</span></label>`:""}
-        ${d.useTi&&d.useDcTi?offerField("Скидка ДЦ за трейд-ин, ₽", `<input id="ofDcTiAmt" inputmode="numeric" value="${d.dcTi||d.dcDef}" />`):""}
-        ${d.useLoan?`<label class="check-row"><input id="ofDcCr" type="checkbox" ${d.useDcCr?"checked":""} /> <span>Скидка ДЦ за кредит</span></label>`:""}
-        ${d.useLoan&&d.useDcCr?offerField("Скидка ДЦ за кредит, ₽", `<input id="ofDcCrAmt" inputmode="numeric" value="${d.dcCr||d.dcDef}" />`):""}
+        ${d.noKM?"":`${d.useTi?`<label class="check-row"><input id="ofDcTi" type="checkbox" ${d.useDcTi?"checked":""} /> <span>Скидка ДЦ за трейд-ин</span></label>`:""}`}
+        ${d.noKM?"":`${d.useTi&&d.useDcTi?offerField("Скидка ДЦ за трейд-ин, ₽", `<input id="ofDcTiAmt" inputmode="numeric" value="${d.dcTi||d.dcDef}" />`):""}`}
+        ${d.noKM?"":`${d.useLoan?`<label class="check-row"><input id="ofDcCr" type="checkbox" ${d.useDcCr?"checked":""} /> <span>Скидка ДЦ за кредит</span></label>`:""}`}
+        ${d.noKM?"":`${d.useLoan&&d.useDcCr?offerField("Скидка ДЦ за кредит, ₽", `<input id="ofDcCrAmt" inputmode="numeric" value="${d.dcCr||d.dcDef}" />`):""}`}
         ${offerField("Д/О, ₽", `<input id="ofDo" inputmode="numeric" value="${d.addons}" />`)}
-        ${d.useLoan?offerField("Каско расширенное, ₽", `<input id="ofPack" inputmode="numeric" value="${d.pack}" />`):offerField("КАСКО, ₽", `<input id="ofCasco" inputmode="numeric" value="${d.casco}" />`)}
+        ${d.useLoan?offerField("Каско расширенное, ₽"+(d.noKM?" · минимум "+rub(d.cascoMin||200000):""), `<input id="ofPack" inputmode="numeric" value="${d.pack}" />`):offerField("КАСКО, ₽"+(d.noKM?" · минимум "+rub(d.cascoMin||200000):""), `<input id="ofCasco" inputmode="numeric" value="${d.casco}" />`)}
         ${d.useLoan?`<p class="eyebrow">Кредит</p><div class="down-mode"><button type="button" class="chip ${d.downMode==="sum"?"on":""}" data-offer-down="sum">Сумма, ₽</button><button type="button" class="chip ${d.downMode!=="sum"?"on":""}" data-offer-down="pct">Проценты</button></div><input type="hidden" id="ofDownMode" value="${d.downMode==="sum"?"sum":"pct"}" />${d.downMode==="sum"?offerField("Первый взнос, ₽", `<input id="ofDown" inputmode="numeric" value="${d.down}" />`):offerField("Первый взнос, %", `<input id="ofDownPct" inputmode="decimal" value="${d.downPct}" />`)}${offerField("Срок, мес.", `<input id="ofMonths" inputmode="numeric" value="${d.months}" />`)}`:""}
         ${offerField("Срок действия", `<input id="ofValid" value="${escape(d.valid)}" />`)}`;
     }

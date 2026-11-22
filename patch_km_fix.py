@@ -833,15 +833,37 @@ def _sub(text, old, new, label):
 
 
 def pin_l6u4_ui(text):
-    """22.11.2026: L6 Ultra 4WD — без КМ, скидка ДЦ = 0 и скрыта, КАСКО+GAP не ниже 200 000.
-    Сборка подменяет calcKm/КП шаблоном, поэтому пин ставится после неё."""
+    """22.11.2026: модель с noKM — без строки КМ, скидка ДЦ = 0 и скрыта, КАСКО+GAP от cascoGapMin.
+    Сборка подменяет calcKm/КП шаблоном, поэтому пин дочитывает флаг после неё."""
+    if "/*noKM*/" in text:
+        text = _sub(
+            text,
+            '      const useDcTi=kmVal("kmUseDcTi", false);/*fleet-dcti*/\n'
+            '      const useDcCr=useLoan?kmVal("kmUseDcCr", false):kmVal("kmUseDcCash", false);/*km-cash-fix*/',
+            '      const useDcTi=noKM?false:kmVal("kmUseDcTi", false);/*fleet-dcti*/\n'
+            '      const useDcCr=noKM?false:(useLoan?kmVal("kmUseDcCr", false):kmVal("kmUseDcCash", false));/*km-cash-fix*/',
+            "noKM dc",
+        )
+        text = _sub(
+            text,
+            '${!useLoan?`<label class="check-row"><input id="kmUseDcCash"',
+            '${!noKM&&!useLoan?`<label class="check-row"><input id="kmUseDcCash"',
+            "noKM cash",
+        )
+        text = _sub(
+            text,
+            '${!useLoan&&useDcCr?`<label class="field" style="max-width:none"><span>Скидка ДЦ (нал)',
+            '${!noKM&&!useLoan&&useDcCr?`<label class="field" style="max-width:none"><span>Скидка ДЦ (нал)',
+            "noKM cash amt",
+        )
+        return text
     text = _sub(
         text,
         '      const useDcTi=kmVal("kmUseDcTi", false);/*fleet-dcti*/\n'
         '      const useDcCr=useLoan?kmVal("kmUseDcCr", false):kmVal("kmUseDcCash", false);/*km-cash-fix*/',
-        '      const l6u4=m.id==="l6u4";/*l6u4-lock*/\n'
-        '      const useDcTi=l6u4?false:kmVal("kmUseDcTi", false);/*fleet-dcti*/\n'
-        '      const useDcCr=l6u4?false:(useLoan?kmVal("kmUseDcCr", false):kmVal("kmUseDcCash", false));/*km-cash-fix*/',
+        '      const noKM=!!(m&&m.noKM);/*noKM*/\n'
+        '      const useDcTi=noKM?false:kmVal("kmUseDcTi", false);/*fleet-dcti*/\n'
+        '      const useDcCr=noKM?false:(useLoan?kmVal("kmUseDcCr", false):kmVal("kmUseDcCash", false));/*km-cash-fix*/',
         "calc dc",
     )
     text = _sub(
