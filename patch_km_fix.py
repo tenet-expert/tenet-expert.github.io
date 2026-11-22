@@ -825,8 +825,138 @@ def ensure_data_js(text):
     return _insert_block(text)
 
 
+def _sub(text, old, new, label):
+    if old not in text:
+        return text
+    print("l6u4 ui:", label)
+    return text.replace(old, new, 1)
+
+
+def pin_l6u4_ui(text):
+    """22.11.2026: L6 Ultra 4WD — без КМ, скидка ДЦ = 0 и скрыта, КАСКО+GAP не ниже 200 000.
+    Сборка подменяет calcKm/КП шаблоном, поэтому пин ставится после неё."""
+    text = _sub(
+        text,
+        '      const useDcTi=kmVal("kmUseDcTi", false);/*fleet-dcti*/\n'
+        '      const useDcCr=useLoan?kmVal("kmUseDcCr", false):kmVal("kmUseDcCash", false);/*km-cash-fix*/',
+        '      const l6u4=m.id==="l6u4";/*l6u4-lock*/\n'
+        '      const useDcTi=l6u4?false:kmVal("kmUseDcTi", false);/*fleet-dcti*/\n'
+        '      const useDcCr=l6u4?false:(useLoan?kmVal("kmUseDcCr", false):kmVal("kmUseDcCash", false));/*km-cash-fix*/',
+        "calc dc",
+    )
+    text = _sub(
+        text,
+        '        pack=kmVal("kmPack", 150000);\n        casco=Math.min(pack, 80000);',
+        '        pack=kmVal("kmPack", l6u4?200000:150000);\n'
+        '        if(l6u4 && pack<200000) pack=200000;/*l6u4-casco*/\n'
+        '        casco=Math.min(pack, 80000);',
+        "calc pack",
+    )
+    text = _sub(
+        text,
+        '        casco=kmVal("kmCasco", 80000);',
+        '        casco=kmVal("kmCasco", l6u4?200000:80000);\n'
+        '        if(l6u4 && casco<200000) casco=200000;/*l6u4-casco*/',
+        "calc casco",
+    )
+    text = _sub(
+        text,
+        '      if(_pgTrim && !useLoan) pack=150000;',
+        '      if(_pgTrim && !useLoan && !l6u4) pack=150000;\n'
+        '      if(l6u4 && pack<200000) pack=200000;',
+        "calc pango pack",
+    )
+    text = _sub(
+        text,
+        '${true?`<label class="check-row"><input id="kmUseDcTi" type="checkbox" ${useDcTi?"checked":""} /> <span>Скидка от ДЦ за трейд-ин ${rub(KM_DC_DEF)}</span></label>`:""}',
+        '${l6u4?`<p class="calc-note">Скидка ДЦ на L6 Ultra 4WD не применяется.</p>`:`<label class="check-row"><input id="kmUseDcTi" type="checkbox" ${useDcTi?"checked":""} /> <span>Скидка от ДЦ за трейд-ин ${rub(KM_DC_DEF)}</span></label>`}',
+        "calc dc ti",
+    )
+    text = _sub(
+        text,
+        '${useLoan?`<label class="check-row"><input id="kmUseDcCr"',
+        '${!l6u4&&useLoan?`<label class="check-row"><input id="kmUseDcCr"',
+        "calc dc credit",
+    )
+    text = _sub(
+        text,
+        '${!useLoan?`<label class="check-row"><input id="kmUseDcCash"',
+        '${!l6u4&&!useLoan?`<label class="check-row"><input id="kmUseDcCash"',
+        "calc dc cash",
+    )
+    text = _sub(
+        text,
+        '${useLoan\n'
+        '              ?`<label class="field" style="max-width:none"><span>Каско расширенное, ₽</span><input id="kmPack" inputmode="numeric" value="${pack}" /></label>`\n'
+        '              :`<label class="field" style="max-width:none"><span>КАСКО, ₽</span><input id="kmCasco" inputmode="numeric" value="${casco}" /></label>`}',
+        '${useLoan\n'
+        '              ?`<label class="field" style="max-width:none"><span>Каско расширенное, ₽${l6u4?" · минимум 200 000":""}</span><input id="kmPack" inputmode="numeric" value="${pack}" /></label>`\n'
+        '              :`<label class="field" style="max-width:none"><span>КАСКО, ₽${l6u4?" · минимум 200 000":""}</span><input id="kmCasco" inputmode="numeric" value="${casco}" /></label>`}',
+        "calc casco label",
+    )
+    text = _sub(
+        text,
+        '${prio?`<div class="note-box">Приоритетный VIN ${escape(kmVin)}. Коридор ${lo} … ${hi} тыс.</div>`:""}',
+        '${!l6u4&&prio?`<div class="note-box">Приоритетный VIN ${escape(kmVin)}. Коридор ${lo} … ${hi} тыс.</div>`:""}',
+        "calc prio km",
+    )
+    text = _sub(
+        text,
+        '<p class="eyebrow">КМ без НДС${selected&&isPangoDeal(selected,m.id)&&_pg?" · спеццена":""}</p>\n'
+        '            <div class="calc-out">${rub(Math.round((selected&&isPangoDeal(selected,m.id)&&_pg?pKm:km)/1000)*1000)} ₽</div>\n'
+        '            <p class="calc-note">${lo===hi?"Фикс "+lo:"Коридор "+lo+" … "+hi} тыс. · сейчас ${Math.round(selected&&isPangoDeal(selected,m.id)&&_pg?pKmK:kmK)} тыс. · ${(selected&&isPangoDeal(selected,m.id)&&_pg?pOk:ok)?(lo===hi?"на фиксе":"в коридоре"):"вне коридора"}</p>',
+        '${l6u4?"":`<p class="eyebrow">КМ без НДС${selected&&isPangoDeal(selected,m.id)&&_pg?" · спеццена":""}</p>\n'
+        '            <div class="calc-out">${rub(Math.round((selected&&isPangoDeal(selected,m.id)&&_pg?pKm:km)/1000)*1000)} ₽</div>\n'
+        '            <p class="calc-note">${(m.id==="l6e"||m.id==="l6u")&&typeof kmFixPair==="function"?("КМ "+kmFixPair(kmVin, prio, m)+" · "):""}${lo===hi?"Фикс "+lo:"Коридор "+lo+" … "+hi} тыс. · сейчас ${Math.round(selected&&isPangoDeal(selected,m.id)&&_pg?pKmK:kmK)} тыс. · ${(selected&&isPangoDeal(selected,m.id)&&_pg?pOk:ok)?(lo===hi?"на фиксе":"в коридоре"):"вне коридора"}</p>`}',
+        "calc km block",
+    )
+    text = _sub(
+        text,
+        '      const useDcTi=(S?!!S.useDcTi:offerOn("ofDcTi"));\n'
+        '      const useDcCr=(S?!!S.useDcCr:offerOn("ofDcCr"));/*km-cash-fix*/',
+        '      const l6u4=m.id==="l6u4";/*l6u4-lock*/\n'
+        '      const useDcTi=l6u4?false:(S?!!S.useDcTi:offerOn("ofDcTi"));\n'
+        '      const useDcCr=l6u4?false:(S?!!S.useDcCr:offerOn("ofDcCr"));/*km-cash-fix*/',
+        "offer dc",
+    )
+    text = _sub(
+        text,
+        '        pack=S?(Number(S.pack)||0):(offerNum("ofPack", 150000)||0);\n'
+        '        casco=Math.min(pack, 80000);\n'
+        '      }else casco=S?(Number(S.casco)||0):(offerNum("ofCasco", 0)||0);',
+        '        pack=S?(Number(S.pack)||0):(offerNum("ofPack", l6u4?200000:150000)||0);\n'
+        '        if(l6u4 && pack<200000) pack=200000;/*l6u4-casco*/\n'
+        '        casco=Math.min(pack, 80000);\n'
+        '      }else{\n'
+        '        casco=S?(Number(S.casco)||0):(offerNum("ofCasco", l6u4?200000:0)||0);\n'
+        '        if(l6u4 && casco<200000) casco=200000;/*l6u4-casco*/\n'
+        '      }',
+        "offer casco",
+    )
+    text = _sub(
+        text,
+        '${true?`<label class="check-row"><input id="ofDcTi" type="checkbox" ${d.useDcTi?"checked":""} /> <span>Скидка ДЦ за трейд-ин</span></label>`:""}\n'
+        '        ${d.useDcTi?offerField("Скидка ДЦ за трейд-ин, ₽", `<input id="ofDcTiAmt" inputmode="numeric" value="${d.dcTi||d.dcDef}" />`):""}\n'
+        '        <label class="check-row"><input id="ofDcCr" type="checkbox" ${d.useDcCr?"checked":""} /> <span>${d.useLoan?"Скидка ДЦ за кредит":"Скидка ДЦ"}</span></label>\n'
+        '        ${d.useDcCr?offerField(d.useLoan?"Скидка ДЦ за кредит, ₽":"Скидка ДЦ, ₽", `<input id="ofDcCrAmt" inputmode="numeric" value="${d.dcCr||d.dcDef}" />`):""}',
+        '${d.m.id==="l6u4"?`<p class="calc-note">Скидка ДЦ на L6 Ultra 4WD не применяется.</p>`:""}\n'
+        '        ${d.m.id==="l6u4"?"":`<label class="check-row"><input id="ofDcTi" type="checkbox" ${d.useDcTi?"checked":""} /> <span>Скидка ДЦ за трейд-ин</span></label>`}\n'
+        '        ${(d.m.id!=="l6u4" && d.useDcTi)?offerField("Скидка ДЦ за трейд-ин, ₽", `<input id="ofDcTiAmt" inputmode="numeric" value="${d.dcTi||d.dcDef}" />`):""}\n'
+        '        ${d.m.id==="l6u4"?"":`<label class="check-row"><input id="ofDcCr" type="checkbox" ${d.useDcCr?"checked":""} /> <span>${d.useLoan?"Скидка ДЦ за кредит":"Скидка ДЦ"}</span></label>`}\n'
+        '        ${(d.m.id!=="l6u4" && d.useDcCr)?offerField(d.useLoan?"Скидка ДЦ за кредит, ₽":"Скидка ДЦ, ₽", `<input id="ofDcCrAmt" inputmode="numeric" value="${d.dcCr||d.dcDef}" />`):""}',
+        "offer form",
+    )
+    text = _sub(
+        text,
+        '${d.useLoan?offerField("Каско расширенное, ₽", `<input id="ofPack" inputmode="numeric" value="${d.pack}" />`):offerField("КАСКО, ₽", `<input id="ofCasco" inputmode="numeric" value="${d.casco}" />`)}',
+        '${d.useLoan?offerField("Каско расширенное, ₽"+(d.m.id==="l6u4"?" · минимум 200 000":""), `<input id="ofPack" inputmode="numeric" value="${d.pack}" />`):offerField("КАСКО, ₽"+(d.m.id==="l6u4"?" · минимум 200 000":""), `<input id="ofCasco" inputmode="numeric" value="${d.casco}" />`)}',
+        "offer casco label",
+    )
+    return text
+
+
 def apply(text):
-    return ensure_borderless(rename_trims(fix_code(fix_data(text))))
+    return pin_l6u4_ui(ensure_borderless(rename_trims(fix_code(fix_data(text)))))
 
 
 def main():
