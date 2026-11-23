@@ -246,6 +246,13 @@ PAIRS += [
 ]
 
 
+# Drive 22.11.2026 (сверка 23.11): T9 R19 Fortune 235/55 — остаток 0 (было 1)
+PAIRS += [
+    ('["Автошина 235/55 R19 Fortune 105T Polaro Ice TL (шип.)",14000,56000,"1"]',
+     '["Автошина 235/55 R19 Fortune 105T Polaro Ice TL (шип.)",14000,56000,"0"]'),
+]
+
+
 def patch(path: Path) -> bool:
     if not path.exists():
         return False
