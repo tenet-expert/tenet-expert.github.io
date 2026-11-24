@@ -306,7 +306,7 @@ select.km-term:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3
               ${downMode==="sum"
                 ?`<label class="field" style="max-width:none"><span>Первый взнос, ₽</span><input id="cDown" inputmode="numeric" value="${down}" /></label>`
                 :`<label class="field" style="max-width:none"><span>Первый взнос, %</span><input id="cDownPct" type="number" inputmode="numeric" min="1" max="99" step="1" value="${downPct}" /></label>`}
-              <p class="calc-note">${rub(down)} ₽${downMode==="pct"?" · "+downPct+"% от цены авто":""}${(showMpt||showSub||showFleet)?` · ${showFleet?"флит":"субс. бренда"}: ${rub(priceMpt)} − ПВ в авто ${rub(downMptCar)} = тело ${rub(creditMpt)}`:""}</p>
+              <p class="calc-note">${rub(down)} ₽${downMode==="pct"?" · "+downPct+"% от цены авто":" · ≈ "+downPct+"%"}${(showMpt||showSub||showFleet)?` · ${showFleet?"флит":"субс. бренда"}: ${rub(priceMpt)} − ПВ в авто ${rub(downMptCar)} = тело ${rub(creditMpt)}`:""}</p>
               <label class="field" style="max-width:none"><span>Срок, мес.</span><select id="cMonths" class="km-term">${kmTermOptions(months)}</select></label>`:""}
             <button type="button" class="btn ivory" id="kmToOffer" style="margin-top:16px;width:100%">Сформировать КП</button>
           </div>
@@ -323,7 +323,7 @@ select.km-term:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3
             <label class="field"><span>Срок, мес.</span><select id="cMonths" class="km-term">${kmTermOptions(months)}</select></label>
           </div>
           <input type="hidden" id="cDownMode" value="${downMode}" />
-          <p class="calc-note">${rub(down)} ₽${downMode==="pct"?" · "+downPct+"% от цены авто":""}${(showMpt||showSub||showFleet)?` · ${showFleet?"флит":"субс. бренда"}: ${rub(priceMpt)} − ПВ в авто ${rub(downMptCar)} = тело ${rub(creditMpt)}`:""}</p>
+          <p class="calc-note">${rub(down)} ₽${downMode==="pct"?" · "+downPct+"% от цены авто":" · ≈ "+downPct+"%"}${(showMpt||showSub||showFleet)?` · ${showFleet?"флит":"субс. бренда"}: ${rub(priceMpt)} − ПВ в авто ${rub(downMptCar)} = тело ${rub(creditMpt)}`:""}</p>
         </div>${altPick}<div class="km-pays">
           <div class="pay-col std km-pay">
             <p class="eyebrow">Директ</p>
