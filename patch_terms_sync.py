@@ -132,7 +132,9 @@ def move_plus_specs(text):
     unique = {}
     for row in [m.group(0) for m in PLUS_ROW.finditer(plus)] + rows:
         unique[key(row)] = row  # canonical row wins, including its price
-    keep = [unique[k] for k in sorted(unique)]
+    # L4: Style, затем Elegant. Алфавит ставил Elegant первым.
+    plus_order = {("L4", "style"): 0, ("L4", "elegant"): 1, ("L6", "elegant"): 2, ("L6", "ultra"): 3}
+    keep = [unique[k] for k in sorted(unique, key=lambda k: (plus_order.get(k, 50), k))]
     new_plus = "    const TERMS_INV_PLUS = [\n" + ",\n".join("      " + r for r in keep) + "\n    ];"
     a, b = (s_inv, s_plus) if s_inv[0] < s_plus[0] else (s_plus, s_inv)
     na, nb = (new_inv, new_plus) if s_inv[0] < s_plus[0] else (new_plus, new_inv)
@@ -311,10 +313,10 @@ def ensure_l6u4(text):
 
 
 
-TPLUS_CHOICE_EXTRA = 70000
+TPLUS_CHOICE_EXTRA = 0
 TPLUS_CHOICE_LABEL = "TENET Plus Выбор"
 TPLUS_CHOICE_UNTIL = "2026-11-30"
-TPLUS_CHOICE_START = "    /* TPLUS_CHOICE_START 20.11.2026: аналог «Без границ» для TENET PLUS. Цена = спец T+ + 70 000 ₽, нал и ТИ. До 30.11.2026 включительно, Europe/Samara. С 01.12.2026 tplusChoiceOn()=false. */"
+TPLUS_CHOICE_START = "    /* TPLUS_CHOICE_START 24.11.2026: «Выбор» совпадает со спецценой T+ (меньшее из двух). До 30.11.2026 включительно, Europe/Samara. С 01.12.2026 tplusChoiceOn()=false. */"
 TPLUS_CHOICE_END = "    /* TPLUS_CHOICE_END */"
 
 
@@ -373,16 +375,18 @@ def _tplus_choice_block(prices, until):
 
 
 def ensure_tplus_choice(text):
-    """20.11.2026: программа «TENET Plus Выбор». Цена = спеццена T+ + 70 000, нал и ТИ.
+    """24.11.2026: «Выбор» = спеццена T+ (меньшее значение, надбавка 0).
     Срок до 30.11.2026 включительно (Europe/Samara); с 01.12 tplusChoiceOn()=false.
-    Пин сохраняет until / TPLUS_CHOICE_UNTIL при пересчёте цен из PANGO_FIX + 70 000.
+    Пин сохраняет until и пишет цены из PANGO_FIX. L4: Style (l4s), затем Elegant (l4e).
     Комплектации без спеца (например l6u4) не выдумываем."""
     fix = _pango_fix_map(text)
+    plus_order = {"l4s": 0, "l4e": 1, "l6e": 2, "l6u": 3}
+    ids = [i for i in _tplus_model_ids(text) if i in fix]
+    ids.sort(key=lambda i: (plus_order.get(i, 50), i))
     prices = []
-    for i in _tplus_model_ids(text):
-        if i in fix:
-            cash, ti = fix[i]
-            prices.append((i, (cash + TPLUS_CHOICE_EXTRA, ti + TPLUS_CHOICE_EXTRA)))
+    for i in ids:
+        cash, ti = fix[i]
+        prices.append((i, (cash + TPLUS_CHOICE_EXTRA, ti + TPLUS_CHOICE_EXTRA)))
     if not prices:
         print("terms sync: TPLUS_CHOICE skipped, no T+ specials in PANGO_FIX")
         return text
@@ -398,7 +402,7 @@ def ensure_tplus_choice(text):
         )
         if n:
             if new_text != text:
-                print("terms sync: pin TPLUS_CHOICE (recalculated from PANGO_FIX + 70000)")
+                print("terms sync: pin TPLUS_CHOICE (aligned to PANGO_FIX)")
             else:
                 print("terms sync: TPLUS_CHOICE already current")
             return new_text
@@ -482,7 +486,7 @@ def ensure_local(text):
     except Exception as e:
         print("terms sync: l6 pin skipped:", e)
     text = ensure_pango_rates(text)
-    # 20.11.2026: «TENET Plus Выбор» = спец T+ + 70 000. Пин, чтобы синк не стёр программу.
+    # 24.11.2026: «TENET Plus Выбор» = спец T+. Пин, чтобы синк не вернул +70 000.
     text = ensure_tplus_choice(text)
     # 19.11.2026: спец «Без границ» до 30.11. Пин, чтобы синк ТУ не стёр программу.
     try:
