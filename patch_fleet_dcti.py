@@ -410,7 +410,7 @@ def normalize_l6_awd(car):
     car["model"] = "pl6"
     if not car.get("name"):
         car["name"] = "L6"
-    if not car.get("rrc") or car.get("rrc") in (3040000, "3040000"):
+    if not car.get("rrc") or car.get("rrc") in (3040000, "3040000", 3060000, "3060000"):
         car["rrc"] = L6U4_RRC
     trim = str(car.get("trim") or "")
     if "4wd" not in trim.lower() and ("ультра" in trim.lower() or "ultra" in trim.lower() or not trim.strip()):
@@ -566,7 +566,7 @@ def ensure_l6u4_match(text):
     rrc_old = "    function stockRrc(r){\n      if(r && r.rrc) return Number(r.rrc)||0;"
     rrc_new = (
         "    function stockRrc(r){\n"
-        "      if(typeof isL6Awd===\"function\" && isL6Awd(r) && (!r||!r.rrc||Number(r.rrc)===3040000)) return 3290000;\n"
+        "      if(typeof isL6Awd===\"function\" && isL6Awd(r) && (!r||!r.rrc||Number(r.rrc)===3040000||Number(r.rrc)===3060000)) return 3290000;\n"
         "      if(r && r.rrc) return Number(r.rrc)||0;"
     )
     if rrc_old in out and "isL6Awd(r) && (!r||!r.rrc||Number(r.rrc)===3040000)" not in out:
