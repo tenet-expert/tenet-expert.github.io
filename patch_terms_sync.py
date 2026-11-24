@@ -466,7 +466,7 @@ def pin_t7_prime_spec(text):
             print("terms sync: pin T7 Prime spec = borderless")
     sp = span(text, "TERMS_INV")
     if not sp:
-        return text
+        return pin_a8_ultra_spec(text)
     block = text[sp[0]:sp[1]]
     block2 = re.sub(
         r'(\{model:"T7",trim:"(?:Prime 2WD|Прайм 2WD)",price:")[^"]+("\})',
@@ -495,6 +495,46 @@ def pin_t7_prime_spec(text):
         print("terms sync: pin T7 Prime 4WD spec row")
     if block2 != block:
         text = text[:sp[0]] + block2 + text[sp[1]:]
+    return pin_a8_ultra_spec(text)
+
+
+def pin_a8_ultra_spec(text):
+    """24.11.2026: A8 Ультра в PANGO_FIX (как канон 2b4b459), не в без границ.
+    Строка таблицы «Спец» тоже держится пином: синк TERMS_INV её не приносит."""
+    sp = span(text, "PANGO_FIX")
+    if sp:
+        block = text[sp[0]:sp[1]]
+        if "ta8u:" not in block:
+            needle = "t8u4:{cash:3300000,ti:3200000}"
+            block2 = block.replace(
+                needle,
+                needle + ",\n      ta8u:{cash:3100000,ti:3000000}",
+                1,
+            ) if needle in block else block
+        else:
+            block2 = re.sub(
+                r"ta8u:\{cash:\d+,ti:\d+\}",
+                "ta8u:{cash:3100000,ti:3000000}",
+                block,
+                count=1,
+            )
+        if block2 != block:
+            text = text[:sp[0]] + block2 + text[sp[1]:]
+            print("terms sync: pin A8 Ultra ta8u in PANGO_FIX")
+    sp = span(text, "TERMS_INV")
+    if not sp:
+        return text
+    block = text[sp[0]:sp[1]]
+    if 'model:"A8"' in block:
+        return text
+    row = '{model:"A8",trim:"Ультра 2.0",price:"3 100 нал, 3 000 ТИ"}'
+    if re.search(r'\{model:"T9"', block):
+        block2 = re.sub(r'(\{model:"T9")', row + ",\n      " + r"\1", block, count=1)
+    else:
+        block2 = block
+    if block2 != block:
+        text = text[:sp[0]] + block2 + text[sp[1]:]
+        print("terms sync: pin A8 Ultra spec row")
     return text
 
 
