@@ -290,25 +290,28 @@ def pin_l6(text):
 # 24.11.2026 (Александр, группа «Авито»): РРЦ модельного года 2026.
 # t7a 2 830 000 (уже в KM_MODELS с 13.11, прайс PRICE_ROWS/T7_DEAL/FLEET_CAT/SBER_ROWS
 # ещё держал 2 805 000). l6u (передний привод) 3 060 000 в KM_MODELS и прайсе.
-# Dealer, скидки и КМ не трогаем. L6 Ultra 4WD (l6u4) и цены 2025 не трогаем.
+# l6u dealer 2 907 000 (LS 24.11, 95% от РРЦ). t7a dealer 2 690 000 не трогаем.
+# Скидки и КМ не трогаем. L6 Ultra 4WD (l6u4) и цены 2025 не трогаем.
 T7A_RRC = 2830000
 L6U_RRC = 3060000
+L6U_DEALER = 2907000  # 24.11.2026 LS: списочный закуп L6 Ультра FWD = 95% от РРЦ
 
 
 def pin_rrc_2026(text):
-    """Keep MY2026 RRC for t7a and l6u after Sheet/canon sync."""
+    """Keep MY2026 RRC for t7a/l6u and l6u dealer after Sheet/canon sync."""
 
-    def _set_rrc(row, val):
-        if re.search(r"\brrc:-?\d+", row):
-            return re.sub(r"\brrc:-?\d+", "rrc:%s" % val, row, count=1)
-        return row[:-1] + ",rrc:%s}" % val
+    def _set_num(row, key, val):
+        if re.search(r"\b" + key + r":-?\d+", row):
+            return re.sub(r"\b" + key + r":-?\d+", "%s:%s" % (key, val), row, count=1)
+        return row[:-1] + ",%s:%s}" % (key, val)
 
     def _models(m):
         mid = m.group(1)
         if mid == "t7a":
-            return _set_rrc(m.group(0), T7A_RRC)
+            return _set_num(m.group(0), "rrc", T7A_RRC)
         if mid == "l6u":
-            return _set_rrc(m.group(0), L6U_RRC)
+            row = _set_num(m.group(0), "rrc", L6U_RRC)
+            return _set_num(row, "dealer", L6U_DEALER)
         return m.group(0)
 
     text = re.sub(r'\{id:"(t7a|l6u)"(?!4)[^}]*\}', _models, text)
@@ -316,9 +319,12 @@ def pin_rrc_2026(text):
     def _fleet(m):
         mid, body = m.group(1), m.group(0)
         val = T7A_RRC if mid == "t7a" else L6U_RRC
-        return re.sub(r"\brrc:-?\d+", "rrc:%s" % val, body, count=1)
+        body = re.sub(r"\brrc:-?\d+", "rrc:%s" % val, body, count=1)
+        if mid == "l6u":
+            body = re.sub(r"\bdealer:-?\d+", "dealer:%s" % L6U_DEALER, body, count=1)
+        return body
 
-    text = re.sub(r'\b(t7a|l6u):\{name:"[^"]*",rrc:-?\d+', _fleet, text)
+    text = re.sub(r'\b(t7a|l6u):\{name:"[^"]*",rrc:-?\d+(?:,dealer:-?\d+)?', _fleet, text)
 
     text = re.sub(
         r'(\{model:"t7", brand:"TENET", name:"T7 Актив 2WD", motor:"1\.6 150 DCT7", price:)\d+\}',
