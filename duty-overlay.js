@@ -64,7 +64,7 @@
       return h+12;
     }
     const W=1240;
-    const H=Math.max(2200, 280+cars.length*224+560+avitoCardH(avitoPack, avitoRows)+(toLay.lines.length*36+40)+80);
+    const H=Math.max(2200, 280+cars.length*224+560+avitoCardH(avitoPack, avitoRows)+(toLay.height||0)+80);
     const c=document.createElement("canvas");
     c.width=W; c.height=H;
     const ctx=c.getContext("2d");
@@ -193,24 +193,16 @@
     ctx.fillStyle="#5c5346"; ctx.font="500 16px Inter, Arial, sans-serif";
     ctx.fillText("\u0417\u0430\u043c\u0435\u0442\u043a\u0430: "+(d.note||"\u2014"), pad, y+8);
     y+=28;
-    if(toLay.lines.length){
-      ctx.fillStyle="#8a7d6e"; ctx.font="800 13px Inter, Arial, sans-serif";
-      ctx.fillText("ТО ТЕСТОВЫХ АВТО", pad, y);
-      y+=18;
-      toLay.lines.forEach(function(line){
-        if(line.head){
-          ctx.fillStyle="#111"; ctx.font="700 16px Inter, Arial, sans-serif";
-          ctx.fillText(fitText(line.label, inner), pad, y);
-          y+=26;
-        }else{
-          var on=(typeof dutyOk==="function")?dutyOk(d[line.key]):(d[line.key]==="ok"||d[line.key]===true);
-          tick(pad, y, !!on);
-          ctx.fillStyle="#111"; ctx.font="500 16px Inter, Arial, sans-serif";
-          ctx.fillText(fitText(line.label, inner-36), pad+28, y);
-          y+=34;
-        }
-      });
-      y+=8;
+    if(toLay.height && typeof window.dutyToPaint==="function"){
+      y+=window.dutyToPaint(ctx,{x:pad,y:y,w:inner,plus:plus,data:d,panel:function(px,py,pw,ph){
+        ctx.fillStyle="#f7f1e7";
+        roundRect(px,py,pw,ph,14); ctx.fill();
+        ctx.strokeStyle="#eadfcf"; ctx.lineWidth=1;
+        roundRect(px,py,pw,ph,14); ctx.stroke();
+      },rr:function(rx,ry,rw,rh){
+        ctx.strokeStyle="#1a1a1a"; ctx.lineWidth=1.4;
+        ctx.strokeRect(rx,ry,rw,rh);
+      }});
     }
     function fitLine(s, maxW){
       s=String(s||"");

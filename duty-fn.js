@@ -326,22 +326,8 @@
       box(pad,"Дилерский центр",[["dc_light","Свет"],["dc_music","Музыка"],["dc_price_hold","Прайсхолдеры"],["dc_desk","Столы"]], d.dc_note);
       box(pad+footW+gap,"Шоурум",[["dm_body","Кузов"],["dm_mats","Коврики"],["dm_trunk","Багажник"],["dm_dust","Нет пыли"],["dm_wheel","Колёса"],["dm_bat","АКБ"]], d.note);
       y+=footH+20;
-      if(toLay.height){
-        panel(pad,y,hw,toLay.height-8);
-        ctx.fillStyle="#161618"; ctx.font="800 16px Inter, Arial, sans-serif";
-        ctx.fillText("ТО тестовых авто", pad+16, y+30);
-        let iy=y+44;
-        toLay.lines.forEach(function(line){
-          if(line.head){
-            ctx.fillStyle="#5c5346"; ctx.font="700 13px Inter, Arial, sans-serif";
-            ctx.fillText(String(line.label||"").slice(0,90), pad+16, iy+14);
-            iy+=22;
-          }else{
-            item(pad+14, iy, hw-28, line.label, d[line.key]);
-            iy+=28;
-          }
-        });
-        y+=toLay.height;
+      if(toLay.height && typeof window.dutyToPaint==="function"){
+        y+=window.dutyToPaint(ctx,{x:pad,y:y,w:hw,plus:plus,data:d,panel:panel,rr:rr});
       }
       function fitLine(s, maxW){
         s=String(s||"");
