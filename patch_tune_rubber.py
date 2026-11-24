@@ -253,6 +253,28 @@ PAIRS += [
 ]
 
 
+# Drive 23.11.2026 (сверка 24.11): T9 R19 Formula лип вместо Fortune;
+# T7 R18 Ikon остаток 8, Sailun → Pirelli Formula; T4L Ikon без цены остаток 0;
+# T4 R17 Triangle 12 500/50 000, Fortune без цены остаток 0
+PAIRS += [
+    ('["Автошина 235/55 R19 Fortune 105T Polaro Ice TL (шип.)",14000,56000,"0"]',
+     '["Автошина 235/55 R19 Formula 105H XL Ice FR TL лип",16000,64000,"1"]'),
+    ('["T7 R18",[["Ikon Tyres 225/55 R18 Ikon Character Ice 7 SUV 102T XL (шип.)",16000,64000,"3"],["Sailun RoadX 225/55 R18 98T RXFrost WH12 TL, шип.",12500,50000,"1"]]]',
+     '["T7 R18",[["Ikon Tyres 225/55 R18 Ikon Character Ice 7 SUV 102T XL (шип.)",16000,64000,"8"],["Автошина 225/55 R18 Pirelli Formula 102T XL Ice TL (шип.)",14500,58000,"1"]]]'),
+    ('["Автошина 225/60 R18 Ikon 104T XL Character Ice 7 SUV TL /шипованная/",16000,64000,"3"]',
+     '["Автошина 225/60 R18 Ikon 104T XL Character Ice 7 SUV TL /шипованная/",null,null,"0"]'),
+    ('["T4 R17 / L4",[["Triangle 215/60R17 100T XL IcelynX TI501 TL M+S 3PMSF (шип.)",11500,46000,"2"],["Автошина Fortune 215/60R17 100T Polaro Ice TL ( шип.)",11000,44000,"1"]]]',
+     '["T4 R17 / L4",[["Triangle 215/60R17 100T XL IcelynX TI501 TL M+S 3PMSF (шип.)",12500,50000,"2"],["Автошина Fortune 215/60R17 100T Polaro Ice TL ( шип.)",null,null,"0"]]]'),
+]
+
+# Страховка: пара от 27.10 срезает префикс «Автошина» у Ikon T4L на каждом деплое
+# (матчит имя без цен). Вернуть префикс для текущих null/остаток 0.
+PAIRS += [
+    ('["225/60 R18 Ikon 104T XL Character Ice 7 SUV TL /шипованная/",null,null,"0"]',
+     '["Автошина 225/60 R18 Ikon 104T XL Character Ice 7 SUV TL /шипованная/",null,null,"0"]'),
+]
+
+
 def patch(path: Path) -> bool:
     if not path.exists():
         return False
