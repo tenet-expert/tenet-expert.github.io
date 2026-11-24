@@ -1,16 +1,20 @@
 /* Фото для Авито в чек-листе дежурного.
    Список не зашит: страница читает photos-needed.json.
-   TENET+ (Назарян, Бикулов, Ковалев) видит только L4/L6, остальные — прочие группы.
-   stage: shoot — нужен комплект/съёмка; verify — соответствие не подтверждено;
-   upload_error — ошибка загрузки, не съёмка; check_set — проверить общий комплект,
-   это не пересъёмка. id групп не переписываются. */
+   В чек-лист попадают только машины в наличии (салон или склад) по stock.json
+   и window.__dutyStock (тот же STOCK, что на сайте, включая TENET+).
+   Статус way и машины, которых нет в складе, не показываются.
+   Блоки upload_error и check_set в чек-лист не выводятся; файл не меняется.
+   TENET+ (Назарян, Бикулов, Ковалев) видит только L4/L6, остальные — прочие группы. */
 (function(){
   if (window.__avitoPhotosBoot) return;
   window.__avitoPhotosBoot = true;
 
   var KEY = "tenet-avito-photo";
   var loadGen = 0;
-  var STAGE_ORDER = ["shoot", "verify", "upload_error", "check_set"];
+  var stockByVin = null;
+  var stockFailed = false;
+  var STAGE_HIDDEN = { upload_error: 1, check_set: 1 };
+  var STAGE_ORDER = ["shoot", "verify"];
   var STAGE_META = {
     shoot: {
       title: "Нужен комплект/съёмка",
@@ -39,6 +43,15 @@
   };
 
   function samaraDate(){
+    if (window.__dutyDateOverride && /^\d{4}-\d{2}-\d{2}$/.test(String(window.__dutyDateOverride))) {
+      return String(window.__dutyDateOverride);
+    }
+    if (typeof window.dutyToISO === "function") {
+      try {
+        var iso = window.dutyToISO();
+        if (/^\d{4}-\d{2}-\d{2}$/.test(iso)) return iso;
+      } catch (e) {}
+    }
     try {
       var s = new Intl.DateTimeFormat("en-CA", {
         timeZone: "Europe/Samara",
@@ -134,6 +147,47 @@
     return "";
   }
 
+  function onHand(stockCar){
+    if (!stockCar) return false;
+    var st = String(stockCar.status || "").toLowerCase();
+    var note = String(stockCar.note || "").toLowerCase();
+    if (st === "way" || note.indexOf("пути") >= 0) return false;
+    if (st === "in" || st === "hold") return true;
+    if (note.indexOf("салон") >= 0 || note.indexOf("склад") >= 0 || note.indexOf("наличи") >= 0) return true;
+    return false;
+  }
+
+  function handLabel(stockCar){
+    var note = String(stockCar && stockCar.note || "").toLowerCase();
+    if (note.indexOf("склад") >= 0 && note.indexOf("салон") < 0) return "на складе";
+    if (String(stockCar && stockCar.status || "") === "hold") return "бронь";
+    return "в салоне";
+  }
+
+  function indexStock(list, map){
+    (list || []).forEach(function(c){
+      var vin = String(c && c.vin || "").toUpperCase();
+      if (vin) map[vin] = c;
+    });
+  }
+
+  function loadStockMap(){
+    var map = {};
+    var page = Array.isArray(window.__dutyStock) ? window.__dutyStock : [];
+    indexStock(page, map);
+    return fetch("stock.json?" + Date.now()).then(function(r){
+      if (!r.ok) throw new Error(String(r.status));
+      return r.json();
+    }).then(function(data){
+      var cars = data && Array.isArray(data.cars) ? data.cars : (Array.isArray(data) ? data : []);
+      window.__dutyStockFile = cars;
+      indexStock(cars, map);
+      return { map: map, failed: false };
+    }).catch(function(){
+      return { map: map, failed: !page.length && !Object.keys(map).length };
+    });
+  }
+
   function carsOf(g){
     return g && Array.isArray(g.cars) ? g.cars : [];
   }
@@ -143,9 +197,11 @@
     (groups || []).forEach(function(g){
       carsOf(g).forEach(function(c){
         n++;
-        var s = carState(c);
+        var vin = String(c && c.vin || "").toUpperCase();
+        var hit = stockByVin && vin ? stockByVin[vin] : null;
+        var s = hit ? handLabel(hit) : carState(c);
         if (s.indexOf("пути") >= 0) way++;
-        else if (s.indexOf("салон") >= 0) inn++;
+        else inn++;
       });
     });
     return { groups: (groups || []).length, cars: n, salon: inn, way: way };
@@ -153,7 +209,7 @@
 
   function countLine(t){
     var bits = [t.groups + " гр.", t.cars + " авто"];
-    if (t.salon) bits.push(t.salon + " в салоне");
+    if (t.salon) bits.push(t.salon + " в наличии");
     if (t.way) bits.push(t.way + " в пути");
     return bits.join(" · ");
   }
@@ -179,8 +235,20 @@
     return { url: url, name: String(f.name || "").trim() || "Папка Drive" };
   }
 
+  function keptCars(g){
+    return carsOf(g).filter(function(c){
+      var vin = String(c && c.vin || "").toUpperCase();
+      if (!vin || !stockByVin) return false;
+      return onHand(stockByVin[vin]);
+    });
+  }
+
   function brandBlocks(data){
-    var groups = visibleGroups(data);
+    var groups = visibleGroups(data).filter(function(g){
+      return !STAGE_HIDDEN[stageOf(g)];
+    }).map(function(g){
+      return Object.assign({}, g, { cars: keptCars(g) });
+    }).filter(function(g){ return carsOf(g).length; });
     var picks = loadPicks();
     var blocks = [];
     STAGE_ORDER.forEach(function(stage){
@@ -209,7 +277,8 @@
             vins: cars.map(function(c){ return c && c.vin ? String(c.vin) : ""; }).filter(Boolean),
             states: cars.map(function(c){
               var vin = c && c.vin ? String(c.vin) : "";
-              var st = carState(c);
+              var hit = vin && stockByVin ? stockByVin[vin.toUpperCase()] : null;
+              var st = hit ? handLabel(hit) : carState(c);
               return vin ? (st ? vin + " · " + st : vin) : "";
             }).filter(Boolean),
             on: picks.indexOf(id) >= 0,
@@ -224,22 +293,22 @@
     });
     var summary = summaryFor(data);
     var feed = summary && typeof summary.feed_photos_present === "number" ? summary.feed_photos_present : null;
-    var pending = groups.some(function(g){ return stageOf(g) !== "shoot"; });
-    if (summary) {
-      ["verify", "check_set", "upload_error"].forEach(function(k){
-        if ((summary[k] || 0) > 0) pending = true;
-      });
-    }
+    var pending = groups.some(function(g){ return stageOf(g) === "verify"; });
     var shoot = blocks.filter(function(b){ return b.stage === "shoot"; })[0] || { rows: [] };
+    var note = stockFailed
+      ? "Не удалось сверить наличие со складом. Список съёмки скрыт, это не значит, что фото готовы."
+      : "Только машины в наличии: в салоне или на складе. В пути и не найденные в складе не показываются.";
     return {
       ready: true,
       pending: pending,
-      note: data && data.note ? String(data.note) : "",
+      note: note,
       updated: data && data.updated ? String(data.updated) : "",
-      subtitle: "в салоне и в пути",
+      subtitle: "в наличии",
       badge: shoot.rows.length ? (shoot.count || "") : "0",
       feedNote: feed == null ? "" : ("В выгрузке есть фото: " + feed + " авто. Это не подтверждение загрузки на Авито."),
-      emptyText: "Съёмка по этому списку не требуется. Это не значит, что фото на Авито готовы.",
+      emptyText: stockFailed
+        ? "Список скрыт: не удалось сверить наличие."
+        : "Съёмка по этому списку не требуется. Это не значит, что фото на Авито готовы.",
       rows: shoot.rows,
       blocks: blocks
     };
@@ -416,6 +485,11 @@
     if (pack.feedNote) html += "<p class=\"cl-avito-feed\">" + esc(pack.feedNote) + "</p>";
     if (!html) html = "<p class=\"cl-avito-empty\">" + esc(pack.emptyText) + "</p>";
     list.innerHTML = html;
+    var nCars = 0;
+    (pack.blocks || []).forEach(function(b){
+      (b.rows || []).forEach(function(row){ nCars += (row.vins && row.vins.length) || 0; });
+    });
+    list.setAttribute("data-avito-cars", String(nCars));
     syncPrint();
   }
 
@@ -423,13 +497,18 @@
     var n = ++loadGen;
     var box = document.getElementById("avitoPhotosList");
     if (box) box.innerHTML = '<p class="cl-avito-empty">Загрузка…</p>';
-    fetch("photos-needed.json?" + Date.now()).then(function(r){
-      if (!r.ok) throw new Error(String(r.status));
-      return r.json();
-    }).then(function(data){
+    Promise.all([
+      fetch("photos-needed.json?" + Date.now()).then(function(r){
+        if (!r.ok) throw new Error(String(r.status));
+        return r.json();
+      }),
+      loadStockMap()
+    ]).then(function(pair){
       if (n !== loadGen) return;
-      window.__avitoPhotosData = data;
-      renderList(data);
+      window.__avitoPhotosData = pair[0];
+      stockByVin = pair[1].map;
+      stockFailed = !!pair[1].failed;
+      renderList(pair[0]);
     }).catch(function(){
       if (n !== loadGen) return;
       window.__avitoPhotosData = null;
@@ -473,7 +552,7 @@
     sec.innerHTML =
       '<h2 class="cl-sec-title">Фото для Авито</h2>' +
       '<div class="cl-avito-card">' +
-        '<div class="cl-avito-head"><span>В салоне и в пути</span><span class="cl-avito-count" id="avitoPhotosCount"></span></div>' +
+        '<div class="cl-avito-head"><span>В наличии</span><span class="cl-avito-count" id="avitoPhotosCount"></span></div>' +
         '<p class="cl-avito-note" id="avitoPhotosNote"></p>' +
         '<div class="cl-avito-list" id="avitoPhotosList"><p class="cl-avito-empty">Загрузка…</p></div>' +
         '<p class="cl-avito-today" id="avitoPhotosToday" hidden></p>' +

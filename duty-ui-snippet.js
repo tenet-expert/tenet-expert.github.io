@@ -50,6 +50,7 @@
             <h2 class="cl-sec-title">Тестовые автомобили</h2>
             <div class="cl-cars">${cards}</div>
           </section>
+          ${(typeof window.dutyToSection==="function")?window.dutyToSection(d, plus, dutyItem):""}
           <section class="cl-sec cl-salon">
             <h2 class="cl-sec-title">Салон</h2>
             <div class="cl-foot">

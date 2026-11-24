@@ -12,6 +12,7 @@
     }
     function stockMptSovcom(c){ return !!(c && c.mpt && stockHasSovcom(c)); }
     function dutyToday(){
+      if(typeof window.dutyToToday==="function") return window.dutyToToday();
       const d=new Date();
       const p=n=>String(n).padStart(2,"0");
       return p(d.getDate())+"."+p(d.getMonth()+1)+"."+String(d.getFullYear()).slice(-2);
@@ -194,9 +195,10 @@
       const W=1240;
       const pad=36, gap=14;
       const carH=348, footH=268;
+      const toLay=(typeof window.dutyToLayout==="function")?window.dutyToLayout(plus):{lines:[],height:0};
       const avitoH=18+avitoCardH(avitoPack, avitoRows)+40;
       const carRows=Math.max(1, Math.ceil((cars&&cars.length)||1)/3);
-      const H=Math.max(1754, 154+carRows*(carH+gap)+footH+20+avitoH+64);
+      const H=Math.max(1754, 154+carRows*(carH+gap)+footH+20+(toLay.height||0)+avitoH+64);
       const c=document.createElement("canvas");
       c.width=W; c.height=H;
       const ctx=c.getContext("2d");
@@ -324,6 +326,23 @@
       box(pad,"Дилерский центр",[["dc_light","Свет"],["dc_music","Музыка"],["dc_price_hold","Прайсхолдеры"],["dc_desk","Столы"]], d.dc_note);
       box(pad+footW+gap,"Шоурум",[["dm_body","Кузов"],["dm_mats","Коврики"],["dm_trunk","Багажник"],["dm_dust","Нет пыли"],["dm_wheel","Колёса"],["dm_bat","АКБ"]], d.note);
       y+=footH+20;
+      if(toLay.height){
+        panel(pad,y,hw,toLay.height-8);
+        ctx.fillStyle="#161618"; ctx.font="800 16px Inter, Arial, sans-serif";
+        ctx.fillText("ТО тестовых авто", pad+16, y+30);
+        let iy=y+44;
+        toLay.lines.forEach(function(line){
+          if(line.head){
+            ctx.fillStyle="#5c5346"; ctx.font="700 13px Inter, Arial, sans-serif";
+            ctx.fillText(String(line.label||"").slice(0,90), pad+16, iy+14);
+            iy+=22;
+          }else{
+            item(pad+14, iy, hw-28, line.label, d[line.key]);
+            iy+=28;
+          }
+        });
+        y+=toLay.height;
+      }
       function fitLine(s, maxW){
         s=String(s||"");
         if(ctx.measureText(s).width<=maxW) return s;
@@ -484,6 +503,10 @@
         tot+=2; if(String(d[car.id+"_km"]==null?"":d[car.id+"_km"]).trim()) on++; { const fv=d[car.id+"_fuel"]; const fn=Number(fv); if(fv!=null && String(fv).trim()!=="" && Number.isFinite(fn) && fn>0) on++; }
       });
       ["dc_light","dc_music","dc_price_hold","dc_desk","dm_body","dm_mats","dm_trunk","dm_dust","dm_wheel","dm_bat"].forEach(k=>{ tot++; if(dutyOk(d[k])) on++; });
+      if(typeof window.dutyToKeys==="function"){
+        const plus=(typeof dutyIsPlus==="function")&&dutyIsPlus();
+        window.dutyToKeys(plus).forEach(k=>{ tot++; if(dutyOk(d[k])) on++; });
+      }
       return {on, tot};
     }
     function dutyPaintProg(){
@@ -576,6 +599,7 @@
             <input data-duty="note" placeholder="Заметка: помыть T7, T4L" value="${escape(d.note||"")}" style="width:100%;margin-top:8px;min-height:34px" />
             </div>
           </div>
+          ${(typeof window.dutyToSection==="function")?window.dutyToSection(d, plus, dutyItem):""}
           <div class="cl-print" id="dutyPrintBar">
             <button type="button" class="btn ivory" id="dutyPrint" disabled>Печать / сохранить</button>
             <p class="cl-print-hint" id="dutyPrintHint">Загрузка списка фото</p>

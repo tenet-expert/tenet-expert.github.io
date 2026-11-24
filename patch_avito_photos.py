@@ -12,7 +12,7 @@ from pathlib import Path
 import shutil
 
 ROOT = Path(__file__).resolve().parent
-TAG = '<script src="avito-photos.js?v=6"></script>'
+TAG = '<script src="avito-photos.js?v=7"></script>'
 MARKER = "avito-photos.js"
 
 
@@ -22,6 +22,7 @@ def ensure_script(html: str) -> str:
     html = html.replace('<script src="avito-photos.js?v=3"></script>', TAG)
     html = html.replace('<script src="avito-photos.js?v=4"></script>', TAG)
     html = html.replace('<script src="avito-photos.js?v=5"></script>', TAG)
+    html = html.replace('<script src="avito-photos.js?v=6"></script>', TAG)
     if MARKER in html:
         return html
     if "</body>" in html:
@@ -34,6 +35,8 @@ def main():
     site.mkdir(exist_ok=True)
     src_json = ROOT / "photos-needed.json"
     src_js = ROOT / "avito-photos.js"
+    src_stock = ROOT / "stock.json"
+    src_to = ROOT / "duty-to.js"
     if src_json.is_file():
         shutil.copyfile(src_json, site / "photos-needed.json")
         print("avito-photos: copied photos-needed.json", src_json.stat().st_size)
@@ -44,6 +47,12 @@ def main():
         print("avito-photos: copied avito-photos.js", src_js.stat().st_size)
     else:
         print("avito-photos: avito-photos.js missing")
+    if src_stock.is_file():
+        shutil.copyfile(src_stock, site / "stock.json")
+        print("avito-photos: copied stock.json", src_stock.stat().st_size)
+    if src_to.is_file():
+        shutil.copyfile(src_to, site / "duty-to.js")
+        print("avito-photos: copied duty-to.js", src_to.stat().st_size)
     for p in (ROOT / "index.html", site / "index.html"):
         if not p.is_file() or p.stat().st_size < 1000:
             print("avito-photos: skip", p)
