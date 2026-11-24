@@ -26,7 +26,7 @@
       function kmCreditPct(v){
         let n=Math.round(Number(v));
         if(!Number.isFinite(n)) n=20;
-        if(n<0) n=0;
+        if(n<1) n=1;
         if(n>99) n=99;
         return n;
       }
@@ -39,7 +39,7 @@
         return best;
       }
       function kmTermOptions(months){
-        return [12,24,36,48,60,72,84,96].map(t=>`<option value="${t}"${t===months?" selected":""}>${t}</option>`).join("");
+        return [12,24,36,48,60,72,84,96].map(t=>`<option value="${t}"${t===months?" selected":""}>${t} мес.</option>`).join("");
       }
       const kmOff={t4p:1,t7l:1,t9p:1,a8a:1,a8u:1};
       if(typeof kmId!=="string" || !KM_MODELS.some(x=>x.id===kmId && !kmOff[x.id])){ kmId=(KM_MODELS.find(x=>!kmOff[x.id])||KM_MODELS[0]).id; kmVin=""; }
@@ -116,9 +116,13 @@
       const finDelta=(addons-70000)+((useLoan||_pgTrim)?((pack||0)-150000):0);
       const months=kmCreditTerm(kmVal("cMonths", 60));
       const _down=kmDownRead(price, fresh);
-      const downMode="pct";
-      let downPct=kmCreditPct(_down.downPct);
-      let down=Math.round(Math.max(0, Number(price)||0)*downPct/100);
+      const downMode=_down.downMode==="sum"?"sum":"pct";
+      let downPct=_down.downPct;
+      let down=_down.down;
+      if(downMode==="pct"){
+        downPct=kmCreditPct(downPct);
+        down=Math.round(Math.max(0, Number(price)||0)*downPct/100);
+      }
       const credit=Math.max(0,price-down+extras);
       const rateGroup=typeof kmRateGroup==="function"?kmRateGroup(m):"t4l_t7";
       const stockCars=typeof kmStockCars==="function"?kmStockCars(m):[];
@@ -259,7 +263,12 @@
           plusAltFleet=`<div class="${altCls}"><p class="eyebrow">${head}</p>${altQ&&typeof fleetBodyTop==="function"?fleetBodyTop(altQ):""}<div class="bank-row"><span><b>Совкомбанк</b><br/><small>${altRate}% · ${altQ&&altQ.early?altQ.termAfter+" мес. вместо "+altQ.term+" · досрочное не меняет платёж":altTerm+" мес."+(altTerm!==months&&!(altQ&&altQ.early)?" · считаем "+altTerm+" мес.":"")} · переплата ~${rub(Math.round(altOver))}</small></span><span class="pay">${rub(Math.round(altPay))} ₽</span></div><div class="bank-row"><span>${useTi?"Флит + трейд-ин":"Флит"}${altSub?" · субсидия −"+rub(altSub):""}</span><span class="pay">${rub(altFleetPrice)}</span></div>${altQ&&typeof fleetBodyRows==="function"?fleetBodyRows(altQ):`<div class="bank-row"><span>Тело кредита</span><span class="pay">${rub(altFleetCredit)}</span></div>`}${altQ&&altQ.early?`<div class="bank-row"><span>Досрочно · сокращает срок</span><span class="pay">${rub(altQ.early)}</span></div>`:""}<p class="calc-note">${wantPlus?"Панго нет. ":""}${altQ?fleetSubNote(altQ):"ПВ "+rub(altDown)+" · каско и Д/О из взноса."}</p></div>`;
         }
       }
-      return banner("Калькулятор","КМ и платёж · база "+TERMS_DATE,"TENET")+`
+      return `<style>
+select.km-term{appearance:none;-webkit-appearance:none;width:100%;box-sizing:border-box;background-color:#fff;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path fill='%236b645b' d='M1.2 1.4 6 6.2 10.8 1.4' stroke='%236b645b' stroke-width='1.4' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");background-repeat:no-repeat;background-position:right 12px center;border:1px solid var(--border);color:var(--fg);border-radius:10px;padding:12px 36px 12px 12px;font:15px Inter,sans-serif;cursor:pointer;line-height:1.2}
+.km-disc select.km-term,.km-pv select.km-term{padding:8px 34px 8px 10px;font-size:14px}
+select.km-term:hover{border-color:#b7a894}
+select.km-term:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(200,30,43,.16)}
+</style>`+banner("Калькулятор","КМ и платёж · база "+TERMS_DATE,"TENET")+`
         <p class="lead">${pShow?"Три расчёта рядом: директ, флит с субсидией бренда и спеццена PANGO.":"Сначала комплектация. Кредит и СЖ открываются галочкой «Кредит»."}</p>
         <div class="km-stage${pShow?" km-4":useLoan&&showSplit?" km-3":""}">
         <div class="km-chips">${kmChipGroups(m.id)}</div>
@@ -289,20 +298,32 @@
               :`<label class="field" style="max-width:none"><span>КАСКО, ₽${noKM?" · минимум "+rub(cascoMin):""}</span><input id="kmCasco" inputmode="numeric" value="${casco}" /></label>`}
             ${!noKM&&prio?`<div class="note-box">Приоритетный VIN ${escape(kmVin)}. Коридор ${lo} … ${hi} тыс.</div>`:""}
             ${useLoan&&!showSplit&&!pShow?`<p class="eyebrow" style="margin-top:12px">Первый взнос</p>
-              <input type="hidden" id="cDownMode" value="pct" />
-              <label class="field" style="max-width:none"><span>Первый взнос, %</span><input id="cDownPct" type="number" inputmode="numeric" min="0" max="99" step="1" value="${downPct}" /></label>
-              <p class="calc-note">${rub(down)} ₽ · ${downPct}% от цены авто${(showMpt||showSub||showFleet)?` · ${showFleet?"флит":"субс. бренда"}: ${rub(priceMpt)} − ПВ в авто ${rub(downMptCar)} = тело ${rub(creditMpt)}`:""}</p>
-              <label class="field" style="max-width:none"><span>Срок, мес.</span><select id="cMonths" class="of-select">${kmTermOptions(months)}</select></label>`:""}
+              <div class="down-mode">
+                <button type="button" class="chip ${downMode==="sum"?"on":""}" data-down-mode="sum">Сумма, ₽</button>
+                <button type="button" class="chip ${downMode!=="sum"?"on":""}" data-down-mode="pct">Проценты</button>
+              </div>
+              <input type="hidden" id="cDownMode" value="${downMode}" />
+              ${downMode==="sum"
+                ?`<label class="field" style="max-width:none"><span>Первый взнос, ₽</span><input id="cDown" inputmode="numeric" value="${down}" /></label>`
+                :`<label class="field" style="max-width:none"><span>Первый взнос, %</span><input id="cDownPct" type="number" inputmode="numeric" min="1" max="99" step="1" value="${downPct}" /></label>`}
+              <p class="calc-note">${rub(down)} ₽${downMode==="pct"?" · "+downPct+"% от цены авто":""}${(showMpt||showSub||showFleet)?` · ${showFleet?"флит":"субс. бренда"}: ${rub(priceMpt)} − ПВ в авто ${rub(downMptCar)} = тело ${rub(creditMpt)}`:""}</p>
+              <label class="field" style="max-width:none"><span>Срок, мес.</span><select id="cMonths" class="km-term">${kmTermOptions(months)}</select></label>`:""}
             <button type="button" class="btn ivory" id="kmToOffer" style="margin-top:16px;width:100%">Сформировать КП</button>
           </div>
           ${(useLoan&&showSplit)||pShow?`<div class="km-credit"><div class="card km-pv">
           <p class="eyebrow">Первый взнос</p>
           <div class="km-pv-row">
-            <label class="field"><span>Первый взнос, %</span><input id="cDownPct" type="number" inputmode="numeric" min="0" max="99" step="1" value="${downPct}" /></label>
-            <label class="field"><span>Срок, мес.</span><select id="cMonths" class="of-select">${kmTermOptions(months)}</select></label>
+            <div class="down-mode">
+              <button type="button" class="chip ${downMode==="sum"?"on":""}" data-down-mode="sum">Сумма, ₽</button>
+              <button type="button" class="chip ${downMode!=="sum"?"on":""}" data-down-mode="pct">Проценты</button>
+            </div>
+            ${downMode==="sum"
+              ?`<label class="field"><span>Первый взнос, ₽</span><input id="cDown" inputmode="numeric" value="${down}" /></label>`
+              :`<label class="field"><span>Первый взнос, %</span><input id="cDownPct" type="number" inputmode="numeric" min="1" max="99" step="1" value="${downPct}" /></label>`}
+            <label class="field"><span>Срок, мес.</span><select id="cMonths" class="km-term">${kmTermOptions(months)}</select></label>
           </div>
-          <input type="hidden" id="cDownMode" value="pct" />
-          <p class="calc-note">${rub(down)} ₽ · ${downPct}% от цены авто${(showMpt||showSub||showFleet)?` · ${showFleet?"флит":"субс. бренда"}: ${rub(priceMpt)} − ПВ в авто ${rub(downMptCar)} = тело ${rub(creditMpt)}`:""}</p>
+          <input type="hidden" id="cDownMode" value="${downMode}" />
+          <p class="calc-note">${rub(down)} ₽${downMode==="pct"?" · "+downPct+"% от цены авто":""}${(showMpt||showSub||showFleet)?` · ${showFleet?"флит":"субс. бренда"}: ${rub(priceMpt)} − ПВ в авто ${rub(downMptCar)} = тело ${rub(creditMpt)}`:""}</p>
         </div>${altPick}<div class="km-pays">
           <div class="pay-col std km-pay">
             <p class="eyebrow">Директ</p>
