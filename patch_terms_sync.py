@@ -313,10 +313,10 @@ def ensure_l6u4(text):
 
 
 
-TPLUS_CHOICE_EXTRA = 0
+TPLUS_CHOICE_EXTRA = 70000
 TPLUS_CHOICE_LABEL = "TENET Plus Выбор"
 TPLUS_CHOICE_UNTIL = "2026-11-30"
-TPLUS_CHOICE_START = "    /* TPLUS_CHOICE_START 24.11.2026: «Выбор» совпадает со спецценой T+ (меньшее из двух). До 30.11.2026 включительно, Europe/Samara. С 01.12.2026 tplusChoiceOn()=false. */"
+TPLUS_CHOICE_START = "    /* TPLUS_CHOICE_START 24.11.2026: «Выбор» = спец T+ + 70 000 ₽, нал и ТИ. До 30.11.2026 включительно, Europe/Samara. С 01.12.2026 tplusChoiceOn()=false. */"
 TPLUS_CHOICE_END = "    /* TPLUS_CHOICE_END */"
 
 
@@ -375,9 +375,9 @@ def _tplus_choice_block(prices, until):
 
 
 def ensure_tplus_choice(text):
-    """24.11.2026: «Выбор» = спеццена T+ (меньшее значение, надбавка 0).
+    """24.11.2026: «Выбор» = спеццена T+ + 70 000, нал и ТИ.
     Срок до 30.11.2026 включительно (Europe/Samara); с 01.12 tplusChoiceOn()=false.
-    Пин сохраняет until и пишет цены из PANGO_FIX. L4: Style (l4s), затем Elegant (l4e).
+    Пин пишет цены из PANGO_FIX + TPLUS_CHOICE_EXTRA. L4: Style (l4s), затем Elegant (l4e).
     Комплектации без спеца (например l6u4) не выдумываем."""
     fix = _pango_fix_map(text)
     plus_order = {"l4s": 0, "l4e": 1, "l6e": 2, "l6u": 3}
@@ -448,7 +448,10 @@ def ensure_pango_rates(text):
 
 
 def pin_t7_prime_spec(text):
-    """24.11.2026: T7 Прайм в «Спец» равен «Без границ». Актив в без границ снимает BG_BLOCK."""
+    """24.11.2026: T7 Прайм в «Спец» равен «Без границ».
+    T7 Актив 2WD в «Без границ» нет.
+    T7 Актив 4WD снова в «Без границ» 2 600 000 / 2 500 000 (t7a4 в PANGO_BG, строка в BG_BLOCK).
+    «Спец» Актив 4WD не меняется: 2 700 000 / 2 600 000 (t7a4 в PANGO_FIX)."""
     sp = span(text, "PANGO_FIX")
     if sp:
         block = text[sp[0]:sp[1]]

@@ -581,12 +581,13 @@ def js_ok(html):
     return True
 
 
-BG_START = "    /* TENET_BG_START 19.11.2026: аналог спеца до 30.11.2026 включительно, Europe/Samara. С 01.12.2026 termsBgActive()=false. */"
+BG_START = "    /* TENET_BG_START 19.11.2026: аналог спеца до 30.11.2026 включительно, Europe/Samara. С 01.12.2026 termsBgActive()=false. T7 Актив 4WD в «Без границ» 2 600 000 / 2 500 000 (t7a4); спец Актив 4WD остаётся 2 700 000 / 2 600 000. */"
 BG_END = "    /* TENET_BG_END */"
 
-BG_BLOCK = r'''    /* TENET_BG_START 19.11.2026: аналог спеца до 30.11.2026 включительно, Europe/Samara. С 01.12.2026 termsBgActive()=false. */
+BG_BLOCK = r'''    /* TENET_BG_START 19.11.2026: аналог спеца до 30.11.2026 включительно, Europe/Samara. С 01.12.2026 termsBgActive()=false. T7 Актив 4WD в «Без границ» 2 600 000 / 2 500 000 (t7a4); спец Актив 4WD остаётся 2 700 000 / 2 600 000. */
     const TERMS_BG_UNTIL = "2026-11-30";
     const TERMS_BG = [
+      {model:"T7",trim:"Актив 4WD",price:"2 600 нал, 2 500 ТИ"},
       {model:"T7",trim:"Прайм 2WD",price:"2 550 нал, 2 450 ТИ"},
       {model:"T7",trim:"Прайм 4WD",price:"2 800 нал, 2 700 ТИ"},
       {model:"T8",trim:"Актив 2WD 5 мест",price:"2 800 нал, 2 700 ТИ"},
@@ -598,6 +599,7 @@ BG_BLOCK = r'''    /* TENET_BG_START 19.11.2026: аналог спеца до 30
       {model:"T9",trim:"Ультра 7 мест",price:"3 900 нал, 3 700 ТИ"}
     ];
     const PANGO_BG = {
+      t7a4:{cash:2600000,ti:2500000},
       t7p:{cash:2550000,ti:2450000},
       t7p4:{cash:2800000,ti:2700000},
       t8a:{cash:2800000,ti:2700000},
@@ -1038,8 +1040,41 @@ def pin_l6u4_ui(text):
     return text
 
 
+TPLUS_CHOICE_EXTRA = 70000
+
+
+def pin_tplus_extra(text):
+    """Выбор = спец T+ + 70 000. Держит надбавку, если в файле ещё extra:0."""
+    a = text.find("TPLUS_CHOICE_START")
+    b = text.find("TPLUS_CHOICE_END", a if a >= 0 else 0)
+    if a < 0 or b < 0:
+        return text
+    block = text[a:b]
+    m = re.search(r"const PANGO_FIX = \{([\s\S]*?)\n    \};", text)
+    if not m:
+        return text
+    fix = {i: (int(c), int(ti)) for i, c, ti in re.findall(
+        r"([A-Za-z0-9]+):\{cash:(\d+),ti:(\d+)\}", m.group(1))}
+    block2 = re.sub(r"extra:\d+", "extra:%d" % TPLUS_CHOICE_EXTRA, block, count=1)
+    for i in ("l4s", "l4e", "l6e", "l6u"):
+        if i not in fix:
+            continue
+        cash = fix[i][0] + TPLUS_CHOICE_EXTRA
+        ti = fix[i][1] + TPLUS_CHOICE_EXTRA
+        block2 = re.sub(
+            r"%s:\{cash:\d+,ti:\d+\}" % i,
+            "%s:{cash:%d,ti:%d}" % (i, cash, ti),
+            block2,
+            count=1,
+        )
+    if block2 != block:
+        text = text[:a] + block2 + text[b:]
+        print("km-fix: pin TPLUS_CHOICE extra", TPLUS_CHOICE_EXTRA)
+    return text
+
+
 def apply(text):
-    return pin_l6u4_ui(ensure_borderless(rename_trims(fix_code(fix_data(text)))))
+    return pin_tplus_extra(pin_l6u4_ui(ensure_borderless(rename_trims(fix_code(fix_data(text))))))
 
 
 def main():
