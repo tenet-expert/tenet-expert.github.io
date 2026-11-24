@@ -5775,16 +5775,18 @@ async function pingTelegram(body){
       return alias[k]||k;
     }
     function specPairTable(primary, secondary, headA, headB){
-      const rows=[], idx={};
+      const idx={}, groups={};
       function take(list, field){
         (list||[]).forEach(r=>{
           if(!r) return;
           const k=specFold(r.model, r.trim);
-          if(idx[k]==null){
-            idx[k]=rows.length;
-            rows.push({model:r.model||"", trim:r.trim||"", a:"", b:""});
+          const m=String(r.model||"").toLowerCase().replace(/ё/g,"е");
+          if(!idx[k]){
+            if(!groups[m]) groups[m]=[];
+            idx[k]={model:r.model||"", trim:r.trim||"", a:"", b:""};
+            groups[m].push(idx[k]);
           }
-          const row=rows[idx[k]];
+          const row=idx[k];
           row[field]=r.price||row[field]||"";
           if(field==="b" && r.trim && String(r.trim).length>String(row.trim).length){
             row.model=r.model||row.model;
@@ -5794,7 +5796,12 @@ async function pingTelegram(body){
       }
       take(primary, "a");
       take(secondary, "b");
-      const body=rows.map(r=>`<tr><td>${escape(r.model)}</td><td>${escape(r.trim)}</td><td class="num">${r.a?escape(r.a):"—"}</td><td class="num">${r.b?escape(r.b):"—"}</td></tr>`).join("");
+      const rank=["t4l","t4","t7","t8","a8","t9","l4","l6"];
+      const keys=Object.keys(groups).sort((a,b)=>{
+        const ia=rank.indexOf(a), ib=rank.indexOf(b);
+        return (ia<0?99:ia)-(ib<0?99:ib);
+      });
+      const body=keys.flatMap(k=>groups[k]).map(r=>`<tr><td>${escape(r.model)}</td><td>${escape(r.trim)}</td><td class="num">${r.a?escape(r.a):"—"}</td><td class="num">${r.b?escape(r.b):"—"}</td></tr>`).join("");
       return `<div class="spec-scroll"><table class="spec-table"><thead><tr><th>Модель</th><th>Комплектация</th><th>${headA}</th><th>${headB}</th></tr></thead><tbody>${body}</tbody></table></div>`;
     }
     function prioList(){
