@@ -447,6 +447,57 @@ def ensure_pango_rates(text):
     return text2
 
 
+def pin_t7_prime_spec(text):
+    """24.11.2026: T7 Прайм в «Спец» равен «Без границ». Актив в без границ снимает BG_BLOCK."""
+    sp = span(text, "PANGO_FIX")
+    if sp:
+        block = text[sp[0]:sp[1]]
+        block2 = re.sub(r"t7p:\{cash:\d+,ti:\d+\}", "t7p:{cash:2550000,ti:2450000}", block, count=1)
+        if "t7p4:" not in block2:
+            block2 = block2.replace(
+                "t7a4:{cash:2700000,ti:2600000}",
+                "t7a4:{cash:2700000,ti:2600000},\n      t7p4:{cash:2800000,ti:2700000}",
+                1,
+            )
+        else:
+            block2 = re.sub(r"t7p4:\{cash:\d+,ti:\d+\}", "t7p4:{cash:2800000,ti:2700000}", block2, count=1)
+        if block2 != block:
+            text = text[:sp[0]] + block2 + text[sp[1]:]
+            print("terms sync: pin T7 Prime spec = borderless")
+    sp = span(text, "TERMS_INV")
+    if not sp:
+        return text
+    block = text[sp[0]:sp[1]]
+    block2 = re.sub(
+        r'(\{model:"T7",trim:"(?:Prime 2WD|Прайм 2WD)",price:")[^"]+("\})',
+        r"\g<1>2 550 нал, 2 450 ТИ\2",
+        block,
+        count=1,
+    )
+    if not re.search(r'model:"T7",trim:"(?:Prime 4WD|Прайм 4WD)"', block2):
+        row_en = '{model:"T7",trim:"Prime 4WD",price:"2 800 нал, 2 700 ТИ"}'
+        row_ru = '{model:"T7",trim:"Прайм 4WD",price:"2 800 нал, 2 700 ТИ"}'
+        if '{model:"T7",trim:"Active 4WD"' in block2:
+            block2 = block2.replace(
+                '{model:"T7",trim:"Active 4WD",price:"2 700 нал, 2 600 ТИ"}',
+                '{model:"T7",trim:"Active 4WD",price:"2 700 нал, 2 600 ТИ"},\n      ' + row_en,
+                1,
+            )
+        elif '{model:"T7",trim:"Актив 4WD"' in block2:
+            block2 = re.sub(
+                r'(\{model:"T7",trim:"Актив 4WD",price:"[^"]+"\})',
+                r"\1,\n      " + row_ru,
+                block2,
+                count=1,
+            )
+        else:
+            block2 = re.sub(r'(\{model:"T8")', row_en + ",\n      " + r"\1", block2, count=1)
+        print("terms sync: pin T7 Prime 4WD spec row")
+    if block2 != block:
+        text = text[:sp[0]] + block2 + text[sp[1]:]
+    return text
+
+
 def ensure_local(text):
     text = drop_sold_tests(text)
     text = ensure_t9(text)
@@ -486,6 +537,7 @@ def ensure_local(text):
     except Exception as e:
         print("terms sync: l6 pin skipped:", e)
     text = ensure_pango_rates(text)
+    text = pin_t7_prime_spec(text)
     # 24.11.2026: «TENET Plus Выбор» = спец T+. Пин, чтобы синк не вернул +70 000.
     text = ensure_tplus_choice(text)
     # 19.11.2026: спец «Без границ» до 30.11. Пин, чтобы синк ТУ не стёр программу.

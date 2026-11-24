@@ -43,8 +43,9 @@
       {model:"T4L",trim:"Active",price:"2 150 нал, 2 100 ТИ"},
       {model:"T4L",trim:"Prime",price:"2 250 нал, 2 200 ТИ"},
       {model:"T7",trim:"Active 2WD",price:"2 450 нал, 2 350 ТИ"},
-      {model:"T7",trim:"Prime 2WD",price:"2 600 нал, 2 500 ТИ"},
+      {model:"T7",trim:"Prime 2WD",price:"2 550 нал, 2 450 ТИ"},
       {model:"T7",trim:"Active 4WD",price:"2 700 нал, 2 600 ТИ"},
+      {model:"T7",trim:"Prime 4WD",price:"2 800 нал, 2 700 ТИ"},
       {model:"T8",trim:"Active 2WD",price:"2 800 нал, 2 700 ТИ"},
       {model:"T8",trim:"Prime 4WD",price:"3 200 нал, 3 100 ТИ"},
       {model:"T8",trim:"Ultra 4WD",price:"3 300 нал, 3 200 ТИ"},
@@ -60,8 +61,9 @@
       t4la:{cash:2150000,ti:2100000},
       t4lp:{cash:2250000,ti:2200000},
       t7a:{cash:2450000,ti:2350000},
-      t7p:{cash:2600000,ti:2500000},
+      t7p:{cash:2550000,ti:2450000},
       t7a4:{cash:2700000,ti:2600000},
+      t7p4:{cash:2800000,ti:2700000},
       t8a:{cash:2800000,ti:2700000},
       t8p4:{cash:3200000,ti:3100000},
       t8u4:{cash:3300000,ti:3200000},
@@ -103,9 +105,7 @@
     /* TENET_BG_START 19.11.2026: аналог спеца до 30.11.2026 включительно, Europe/Samara. С 01.12.2026 termsBgActive()=false. */
     const TERMS_BG_UNTIL = "2026-11-30";
     const TERMS_BG = [
-      {model:"T7",trim:"Актив 2WD",price:"2 400 нал, 2 300 ТИ"},
       {model:"T7",trim:"Прайм 2WD",price:"2 550 нал, 2 450 ТИ"},
-      {model:"T7",trim:"Актив 4WD",price:"2 600 нал, 2 500 ТИ"},
       {model:"T7",trim:"Прайм 4WD",price:"2 800 нал, 2 700 ТИ"},
       {model:"T8",trim:"Актив 2WD 5 мест",price:"2 800 нал, 2 700 ТИ"},
       {model:"T8",trim:"Прайм 2WD 5 мест",price:"2 900 нал, 2 800 ТИ"},
@@ -117,9 +117,7 @@
       {model:"T9",trim:"Ультра 7 мест",price:"3 900 нал, 3 700 ТИ"}
     ];
     const PANGO_BG = {
-      t7a:{cash:2400000,ti:2300000},
       t7p:{cash:2550000,ti:2450000},
-      t7a4:{cash:2600000,ti:2500000},
       t7p4:{cash:2800000,ti:2700000},
       t8a:{cash:2800000,ti:2700000},
       t8p:{cash:2900000,ti:2800000},
