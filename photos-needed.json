@@ -1,24 +1,24 @@
 {
- "updated": "24.11.2026",
+ "updated": "25.11.2026",
  "note": "Полный склад LS: в наличии и в пути. Съёмка, неподтверждённые комплекты и проверка загрузки показаны отдельно. Наличие фото в выгрузке не доказывает их загрузку на Авито.",
  "sources": {
-  "stock": "Встроенный JSON склада на https://tenet-expert.github.io/ (STOCK_META 23.11.2026, 163 авто: в наличии 94 и в пути 69; утренний синк LS 23.11.2026 ~08:40 Самара, TENET 121 + TENET PLUS 42, составы совпадают). Относительно версии 23.11 состав VIN тот же (163), выбывших и новых нет. Утреннего синка LS 24.11 на момент запуска (07:2x Самара) нет — ночные изменения возможны.",
-  "drive": "Папки Drive «Авито фото» и TENET PLUS/Авито: каталог пересобран живым поиском папок 24.11.2026 (mime=folder, title_only: T7/Т7, T8, T4/T4L, T9/Т9, Ультра, A8/Arrizo, L4, L6; все владельцы) — новых подходящих папок нет, все папки прежних комплектов на месте, только чтение.",
+  "stock": "Встроенный JSON склада на https://tenet-expert.github.io/ (STOCK_META 24.11.2026, 166 авто: в наличии 103, в пути 63; вечерний синк LS 24.11.2026 17:16 МСК). Утреннего синка LS 25.11 на момент запуска (07:2x Самара) нет — ночные изменения возможны.",
+  "drive": "Каталог Drive «Авито фото» и TENET PLUS/Авито пересобран живым поиском папок 25.11.2026 (mime=folder, title_only: T4/T4L, T7, T8, T9, A8, L4, L6, Прайм/Актив/Ультра и др.; все владельцы). Новая папка: «Т9 ультра темно-зеленый» (24.11, vadim.sidorov163). Только чтение.",
   "feeds": "Файл 1 CM.Expert (XML, снимок 24.11.2026 06:52 Самара) и отчёт автозагрузки Авито 24.11.2026 06:50 (файл 1 + файл 2, оба кабинета); не равно факту активной публикации",
   "avito_errors": "Отчёт Авито API 24.11.2026 06:50 Самара: ошибка фото 1409 (partial) у T8 EDXGD34B8TE095641 и EDXGB32B8TE110275; T8 EDXGD34B5TE095631 с 06:54 возвращён в файл 2 (объявление 8418302651), результат не подтверждён",
-  "limitations": "Содержимое папок Drive не открывалось (комплекты определены по названию модель/комплектация/цвет). Новые позиции в пути (T7 Прайм красный, T9, A8, L6 Ультра 4WD) без объявлений. T9 Ультра светло-серый сопоставлен с папкой «Т9 Серая Ультра» (правило серый/светло-серый). EDELB31B4TE106023 (T4L Прайм белый, продана 20.11) исключён из очереди: объявление 8417918328 из файла 2 с 17 фото (отчёт 24.11 06:50)."
+  "limitations": "Содержимое папок Drive не открывалось (комплекты по названию модель/комплектация/цвет). Фото в выгрузках не пересчитывались (feed_photos_present перенесён с 24.11). Новые T4L 4WD без РРЦ. Старые машины в салоне, которых нет в очереди, оставлены как в версии 24.11."
  },
  "summary": {
   "TENET": {
-   "check_set": 85,
-   "feed_photos_present": 21,
-   "shoot": 12,
-   "upload_error": 3
+   "check_set": 93,
+   "upload_error": 3,
+   "shoot": 11,
+   "feed_photos_present": 21
   },
   "TENET PLUS": {
-   "check_set": 30,
-   "feed_photos_present": 10,
-   "shoot": 2
+   "shoot": 2,
+   "check_set": 28,
+   "feed_photos_present": 10
   }
  },
  "groups": [
@@ -131,10 +131,6 @@
     {
      "vin": "EDELB31B7TE137640",
      "state": "в пути"
-    },
-    {
-     "vin": "EDELB31B2TE146648",
-     "state": "в пути"
     }
    ]
   },
@@ -230,6 +226,14 @@
     },
     {
      "vin": "EDELB31B7TE153935",
+     "state": "в пути"
+    },
+    {
+     "vin": "EDELB31B3TE153706",
+     "state": "в пути"
+    },
+    {
+     "vin": "EDELB31B8TE153488",
      "state": "в пути"
     }
    ]
@@ -365,12 +369,8 @@
    },
    "cars": [
     {
-     "vin": "EDEFD32BXTE143888",
-     "state": "в салоне"
-    },
-    {
      "vin": "EDEFD32B9TE151948",
-     "state": "в пути"
+     "state": "в салоне"
     },
     {
      "vin": "EDEFD32B6TE152796",
@@ -378,28 +378,6 @@
     },
     {
      "vin": "EDEFD32B5TE152787",
-     "state": "в пути"
-    }
-   ]
-  },
-  {
-   "id": "tenet-t8-praym-5-mest-2wd-chernyy-check-set",
-   "queue": 2,
-   "brand": "TENET",
-   "model": "T8",
-   "trim": "Прайм 5 мест 2WD",
-   "drive": "2WD",
-   "color": "чёрный",
-   "stage": "check_set",
-   "reason": "Подходящая папка на Drive есть; фото данного VIN в текущих выгрузках не найдены. Проверить комплект и возможность использования/загрузки, не считать автоматически новой съёмкой.",
-   "photo_folder": {
-    "id": "1BLiS7bhaIuxkpsT-6hhpYAyfbYNt0tfq",
-    "name": "T8 Prime 1.6 2WD черный 21.08 Сидоров",
-    "url": "https://drive.google.com/drive/folders/1BLiS7bhaIuxkpsT-6hhpYAyfbYNt0tfq"
-   },
-   "cars": [
-    {
-     "vin": "EDXGB32B0TE147241",
      "state": "в пути"
     }
    ]
@@ -452,11 +430,11 @@
     },
     {
      "vin": "EDEFD32B4TE152246",
-     "state": "в пути"
+     "state": "в салоне"
     },
     {
      "vin": "EDEFD32B2TE152262",
-     "state": "в пути"
+     "state": "в салоне"
     },
     {
      "vin": "EDEFD32B7TE152046",
@@ -587,16 +565,20 @@
    ]
   },
   {
-   "id": "tenet-t9-ultra-4wd-temno-zelenyy-shoot",
-   "queue": 1,
+   "id": "tenet-t9-ultra-4wd-temno-zelenyy-check-set",
+   "queue": 2,
    "brand": "TENET",
    "model": "T9",
    "trim": "Ультра 4WD",
    "drive": "4WD",
    "color": "тёмно-зелёный",
-   "stage": "shoot",
-   "reason": "В проверенном каталоге Drive нет подходящего комплекта; в текущих выгрузках фото для VIN не найдены. Фото другой комплектации/числа мест не подходят.",
-   "photo_folder": null,
+   "stage": "check_set",
+   "reason": "Подходящая папка на Drive есть (новая, создана 24.11, владелец vadim.sidorov163; содержимое не открывалось, число мест в названии не указано); фото данного VIN в текущих выгрузках не найдены. Проверить комплект и возможность использования/загрузки, не считать новой съёмкой.",
+   "photo_folder": {
+    "id": "1duaoIIPhsGoAWOpPqycqZdNuRKrvA24o",
+    "name": "Т9 ультра темно-зеленый",
+    "url": "https://drive.google.com/drive/folders/1duaoIIPhsGoAWOpPqycqZdNuRKrvA24o"
+   },
    "cars": [
     {
      "vin": "EDEHD24B8TE106287",
@@ -686,6 +668,14 @@
     },
     {
      "vin": "EDELB31B4TE153682",
+     "state": "в пути"
+    },
+    {
+     "vin": "EDELB31B0TE154098",
+     "state": "в пути"
+    },
+    {
+     "vin": "EDELB31B1TE154515",
      "state": "в пути"
     }
    ]
@@ -834,11 +824,11 @@
     },
     {
      "vin": "EDEFB32B1TE150606",
-     "state": "в пути"
+     "state": "в салоне"
     },
     {
      "vin": "EDEFB32B9TE150630",
-     "state": "в пути"
+     "state": "в салоне"
     },
     {
      "vin": "EDEFB32B2TE153210",
@@ -846,7 +836,7 @@
     },
     {
      "vin": "EDEFB32B7TE153235",
-     "state": "в пути"
+     "state": "в салоне"
     },
     {
      "vin": "EDEFB32B7TE153204",
@@ -943,6 +933,10 @@
     {
      "vin": "EDEFD32B7TE151964",
      "state": "в пути"
+    },
+    {
+     "vin": "EDEFD32B8TE152007",
+     "state": "в пути"
     }
    ]
   },
@@ -1008,6 +1002,10 @@
    "cars": [
     {
      "vin": "EDEFD32B0TE152678",
+     "state": "в салоне"
+    },
+    {
+     "vin": "EDEFD32B4TE154904",
      "state": "в пути"
     }
    ]
@@ -1053,6 +1051,10 @@
     {
      "vin": "EDXGD34B3TE150433",
      "state": "в пути"
+    },
+    {
+     "vin": "EDXGD34B8TE150394",
+     "state": "в пути"
     }
    ]
   },
@@ -1070,10 +1072,6 @@
    "cars": [
     {
      "vin": "EDXDC24B2TG053356",
-     "state": "в пути"
-    },
-    {
-     "vin": "EDXDC24B0TG053355",
      "state": "в пути"
     }
    ]
@@ -1300,15 +1298,15 @@
    "cars": [
     {
      "vin": "EDEMB31B5TE102177",
-     "state": "в пути"
+     "state": "в салоне"
     },
     {
      "vin": "EDEMB31B0TE150315",
-     "state": "в пути"
+     "state": "в салоне"
     },
     {
      "vin": "EDEMB31B0TE150346",
-     "state": "в пути"
+     "state": "в салоне"
     }
    ]
   },
@@ -1330,7 +1328,7 @@
    "cars": [
     {
      "vin": "EDEMB31B2TE145519",
-     "state": "в пути"
+     "state": "в салоне"
     },
     {
      "vin": "EDEMB31B0TE146409",
@@ -1360,15 +1358,7 @@
    "cars": [
     {
      "vin": "EDEMB31B0TE149732",
-     "state": "в пути"
-    },
-    {
-     "vin": "EDEMB31B0TE149729",
-     "state": "в пути"
-    },
-    {
-     "vin": "EDEMB31B1TE149707",
-     "state": "в пути"
+     "state": "в салоне"
     }
    ]
   },
@@ -1483,6 +1473,90 @@
     {
      "vin": "EFEDB21B1T3004257",
      "state": "в салоне"
+    }
+   ]
+  },
+  {
+   "id": "tenet-t9-praym-4wd-chernyy-check-set",
+   "queue": 2,
+   "brand": "TENET",
+   "model": "T9",
+   "trim": "Прайм 4WD",
+   "drive": "4WD",
+   "color": "чёрный",
+   "stage": "check_set",
+   "reason": "Подходящая папка на Drive есть; фото данного VIN в текущих выгрузках не найдены. Проверить комплект и возможность использования/загрузки, не считать автоматически новой съёмкой.",
+   "photo_folder": {
+    "id": "1ZJw-DC-vflqbOXZw-jsXDDXcf-ZgteF8",
+    "name": "T9 Prime 4WD черный Тальков 18.10",
+    "url": "https://drive.google.com/drive/folders/1ZJw-DC-vflqbOXZw-jsXDDXcf-ZgteF8"
+   },
+   "cars": [
+    {
+     "vin": "EDEHD24B0TE149179",
+     "state": "в пути"
+    }
+   ]
+  },
+  {
+   "id": "tenet-t9-praym-4wd-temno-zelenyy-shoot",
+   "queue": 1,
+   "brand": "TENET",
+   "model": "T9",
+   "trim": "Прайм 4WD",
+   "drive": "4WD",
+   "color": "тёмно-зелёный",
+   "stage": "shoot",
+   "reason": "В проверенном каталоге Drive нет подходящего комплекта; в текущих выгрузках фото для VIN не найдены. Фото другой комплектации/числа мест не подходят.",
+   "photo_folder": null,
+   "cars": [
+    {
+     "vin": "EDEHD24B5TE149257",
+     "state": "в пути"
+    }
+   ]
+  },
+  {
+   "id": "tenet-t4l-praym-4wd-belyy-check-set",
+   "queue": 2,
+   "brand": "TENET",
+   "model": "T4L",
+   "trim": "Прайм 4WD",
+   "drive": "4WD",
+   "color": "белый",
+   "stage": "check_set",
+   "reason": "Подходящая папка на Drive есть; фото данного VIN в текущих выгрузках не найдены. Проверить комплект и возможность использования/загрузки, не считать автоматически новой съёмкой. Папка названа T4 (без L), сопоставлена по комплектации/приводу/цвету; у машины пока нет РРЦ.",
+   "photo_folder": {
+    "id": "1mDZfpahRSxC9Rh7O0PDJq9Riqsv4prtF",
+    "name": "T4 Prime 4x4 белый Спицын 11.01",
+    "url": "https://drive.google.com/drive/folders/1mDZfpahRSxC9Rh7O0PDJq9Riqsv4prtF"
+   },
+   "cars": [
+    {
+     "vin": "EDELD31B3TE143302",
+     "state": "в пути"
+    }
+   ]
+  },
+  {
+   "id": "tenet-t4l-aktiv-4wd-belyy-check-set",
+   "queue": 2,
+   "brand": "TENET",
+   "model": "T4L",
+   "trim": "Актив 4WD",
+   "drive": "4WD",
+   "color": "белый",
+   "stage": "check_set",
+   "reason": "Подходящая папка на Drive есть; фото данного VIN в текущих выгрузках не найдены. Проверить комплект и возможность использования/загрузки, не считать автоматически новой съёмкой. Папка названа T4 (без L), сопоставлена по комплектации/приводу/цвету; у машины пока нет РРЦ.",
+   "photo_folder": {
+    "id": "1WmndxBr4lXACEDfzbf2PDrDA2-kqklal",
+    "name": "T4 Active 4x4 белый Селезнев 09.01",
+    "url": "https://drive.google.com/drive/folders/1WmndxBr4lXACEDfzbf2PDrDA2-kqklal"
+   },
+   "cars": [
+    {
+     "vin": "EDELD31B6TE155198",
+     "state": "в пути"
     }
    ]
   }
