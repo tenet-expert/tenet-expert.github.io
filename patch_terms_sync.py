@@ -155,23 +155,28 @@ T7L_OUT_ROW = '{model:"Tiggo 7 L",vin:"",trim:"Active",year:"2025",color:"",extr
 
 
 def ensure_sold_out(text):
-    """T4 Prime 2025 (VIN EDEEB31…, model t4 — not T4L) and CHERY Tiggo 7L are sold out.
-    The sheet sync cannot see that, so keep the priority rows marked out:true."""
-    m = re.search(r'\{model:"T4",vin:"' + T4_OUT_VIN + r'"[^}]*\}', text)
-    if m and "out:true" not in m.group(0):
-        row = m.group(0)
-        if "sold:true" not in row:
-            row = row[:-1] + ",sold:true,out:true}"
-        else:
-            row = row[:-1] + ",out:true}"
-        text = text[:m.start()] + row + text[m.end():]
-        m = re.search(r'\{model:"T4",vin:"' + T4_OUT_VIN + r'"[^}]*\}', text)
+    """26.11.2026: приоритет — 13 VIN. T4 Prime снова в списке, Tiggo 7 L убран.
+    Старый пин помечал T4 проданным и возвращал пустую строку Tiggo 7 L."""
     sp = span(text, "TERMS_PRIO")
-    block = text[sp[0]:sp[1]] if sp else ""
-    if sp and 'model:"Tiggo 7 L"' not in block and m:
-        text = text[:m.end()] + ",\n      " + T7L_OUT_ROW + text[m.end():]
-        print("terms sync: Tiggo 7 L marked sold in TERMS_PRIO")
-    return text
+    if not sp:
+        return text
+    block = text[sp[0]:sp[1]]
+    block2 = re.sub(r'\n\s*\{model:"Tiggo 7 L"[^}]*\},?', "", block)
+    def unsell_t4(m):
+        row = m.group(0)
+        row = re.sub(r",sold:true", "", row)
+        row = re.sub(r",out:true", "", row)
+        return row
+    block2 = re.sub(
+        r'\{model:"T4",vin:"EDEEB31B8TE003261"[^}]*\}',
+        unsell_t4,
+        block2,
+        count=1,
+    )
+    if block2 == block:
+        return text
+    print("terms sync: priority 26.11, drop Tiggo 7 L, T4 stays active")
+    return text[:sp[0]] + block2 + text[sp[1]:]
 
 
 def ensure_prio_sold(text):

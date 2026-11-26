@@ -143,8 +143,8 @@
         `<div class="terms-cards">`+TERMS_INV.map(r=>termCard(r.model+" · "+r.trim, escape(r.price), "")).join("")+`</div></section>`+
         `</div>`+
         (typeof stockTestHtml==="function"?stockTestHtml():"")+
-        `<h2>Приоритет · октябрь · ${TERMS_PRIO.length} авто</h2>`+
-        `<p class="lead">Личная победа — 2 машины. Командная — 12. Шкала показывает, сколько уже есть и сколько осталось.</p>`+
+        `<h2>Приоритет · 26.11 · ${TERMS_PRIO.length} авто</h2>`+
+        `<p class="lead">Личный план — нет. Командный план — 13.</p>`+
         prioList()+
         `<p class="lead">Доплата за 4WD на T7 — 205 000 ₽. Мотор T7 везде 1.6T 150.</p>`+
         `<div class="who-line"><button class="btn ivory" data-go="calc">В калькулятор</button><button class="btn ghost" data-go="docs">Документы</button></div>`+

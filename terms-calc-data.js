@@ -180,8 +180,7 @@
     /* TPLUS_CHOICE_END */
 
     const TERMS_PRIO = [
-      {model:"T4",vin:"EDEEB31B8TE003261",trim:"Прайм",year:"2026",color:"Светло-серый",extra:"",pay:1000,kmTi:-50,kmCash:0,sold:true,out:true},
-      {model:"Tiggo 7 L",vin:"",trim:"Active",year:"2025",color:"",extra:"",pay:0,sold:true,out:true},
+      {model:"T4",vin:"EDEEB31B8TE003261",trim:"Прайм",year:"2026",color:"Светло-серый",extra:"",pay:1000,kmTi:-50,kmCash:0},
       {model:"T8",vin:"EDXGD34B5TE095631",trim:"Прайм 7 мест 4WD",year:"2026",color:"Чёрный",extra:"",pay:1000,kmTi:-50,kmCash:0},
       {model:"T8",vin:"EDXGD34B8TE095347",trim:"Прайм 7 мест 4WD",year:"2026",color:"Белый",extra:"",pay:1000,kmTi:-50,kmCash:0},
       {model:"T7",vin:"EDEFB32BXTE100707",trim:"Актив",year:"2026",color:"Белый",extra:"",pay:1000,kmTi:-50,kmCash:0},
@@ -190,7 +189,7 @@
       {model:"T7",vin:"EDXFD32B2TE042710",trim:"Актив 4WD",year:"2026",color:"Белый",extra:"",pay:1000,kmTi:-50,kmCash:0},
       {model:"T8",vin:"EDXGB32B8TE110275",trim:"Прайм 5 мест 2WD",year:"2026",color:"Чёрный",extra:"",pay:1000,kmTi:0,kmCash:30},
       {model:"T8",vin:"EDXGB32B1TE110196",trim:"Прайм 5 мест 2WD",year:"2026",color:"Белый",extra:"",pay:1000,kmTi:0,kmCash:30},
-      {model:"T8",vin:"EDXGB32B0TE089261",trim:"Актив 5 мест 2WD",year:"2026",color:"Светло-серый",extra:"",pay:1000,kmTi:0,kmCash:30},
+      {model:"T8",vin:"EDXGB32B0TE089261",trim:"Прайм 5 мест 2WD",year:"2026",color:"Светло-серый",extra:"",pay:1000,kmTi:0,kmCash:30},
       {model:"T7",vin:"EDEFD32B1TE101190",trim:"Прайм 4WD",year:"2026",color:"Белый",extra:"",pay:1000,kmTi:0,kmCash:50},
       {model:"T7",vin:"EDEFD32B5TE102522",trim:"Прайм 4WD",year:"2026",color:"Белый",extra:"",pay:1000,kmTi:-50,kmCash:0},
       {model:"T7",vin:"EDEFB32B2TE105500",trim:"Актив",year:"2026",color:"Чёрный",extra:"",pay:1000,kmTi:0,kmCash:50}
