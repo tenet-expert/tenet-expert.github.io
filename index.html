@@ -6543,62 +6543,105 @@ async function pingTelegram(body){
         </div></div>`;
     }
     function calcKm(){
-      const testHit=typeof testSaleOf==="function"?testSaleOf(kmId):null;
-      if(testHit) return calcTestSale(testHit);
+      function kmCreditPct(v){
+        let n=Math.round(Number(v));
+        if(!Number.isFinite(n)) n=20;
+        if(n<1) n=1;
+        if(n>99) n=99;
+        return n;
+      }
+      function kmTermList(){
+        const fallback=[12,24,36,48,60,72,84,96,108,120];
+        const table=typeof KM_BANK_MONTHS!=="undefined"?KM_BANK_MONTHS:null;
+        if(!table) return fallback;
+        const set=new Set();
+        Object.keys(table).forEach(id=>{ (table[id]||[]).forEach(t=>{ const n=Number(t); if(n>0) set.add(n); }); });
+        const list=[...set].sort((a,b)=>a-b);
+        if(list.length) return list;
+        return Array.isArray(table.sber)&&table.sber.length?table.sber.slice():fallback;
+      }
+      function kmCreditTerm(v){
+        const terms=kmTermList();
+        const n=Math.round(Number(v)||0);
+        if(terms.indexOf(n)>=0) return n;
+        let best=terms.indexOf(60)>=0?60:terms[0], dist=1e9;
+        terms.forEach(t=>{ const d=Math.abs(t-n); if(d<dist){ dist=d; best=t; } });
+        return best;
+      }
+      function kmTermOptions(months){
+        return kmTermList().map(t=>`<option value="${t}"${t===months?" selected":""}>${t} мес.</option>`).join("");
+      }
+      function kmBankHasTerm(bankId, months){
+        const table=typeof KM_BANK_MONTHS!=="undefined"?KM_BANK_MONTHS:null;
+        const list=table&&table[bankId];
+        if(!list||!list.length) return true;
+        return list.indexOf(months)>=0;
+      }
       const kmOff={t4p:1,t7l:1,t9p:1,a8a:1,a8u:1};
       if(typeof kmId!=="string" || !KM_MODELS.some(x=>x.id===kmId && !kmOff[x.id])){ kmId=(KM_MODELS.find(x=>!kmOff[x.id])||KM_MODELS[0]).id; kmVin=""; }
       if(typeof kmVin!=="string") kmVin="";
+      function kmRopUser(){
+        try{
+          const blob=String(((typeof state!=="undefined"&&state&&state.surname)||"")+" "+((typeof state!=="undefined"&&state&&state.display)||"")).toLowerCase().replace(/ё/g,"е");
+          return blob.indexOf("леонтьев")>=0;
+        }catch(e){ return false; }
+      }
+      function kmRopOn(){
+        if(!kmRopUser()) return false;
+        if(typeof kmRopFlag==="boolean") return kmRopFlag;
+        try{ return localStorage.getItem("tenet-km-rop")==="1"; }catch(e){ return false; }
+      }
+      const ropUser=kmRopUser();
+      const ropOn=kmRopOn();
       const m=KM_MODELS.find(x=>x.id===kmId)||KM_MODELS[0];
+      const noKM=!!(m&&m.noKM)&&!ropOn;/*noKM*//*km-rop*/
       if(typeof kmIsCorp==="function" && kmIsCorp(kmVin) && typeof calcFleet==="function") return calcFleet(m);
       const fresh=(typeof kmShown==="undefined")||kmShown!==kmId;
       kmShown=kmId;
       const rrc=fresh?m.rrc:kmVal("kmRrc", m.rrc);
       const invoice=fresh?m.dealer:kmVal("kmInv", m.dealer);
       const useTi=kmVal("kmUseTi", false);
-      const useLoan=true;
+      const useLoan=kmVal("kmUseLoan", false);
       const hasDealCr=m.cr>0;
       const dealCrLabel=["t7p","t7a4","t7p4"].includes(m.id)?"Выгодный кредит":"Прямая скидка";
       const dealCrNeedsLoan=["t7p","t7a4","t7p4"].includes(m.id);
       const showDealCr=hasDealCr && (!dealCrNeedsLoan || useLoan);
       const useCr=showDealCr && kmVal("kmUseCr", false);
       const spec=kmVal("kmSpec", 0);
-      const l6u4=m.id==="l6u4";/*l6u4-lock*/
-      const useDcTi=l6u4?false:kmVal("kmUseDcTi", false);/*fleet-dcti*/
-      const useDcCr=l6u4?false:(useLoan?kmVal("kmUseDcCr", false):kmVal("kmUseDcCash", false));/*km-cash-fix*/
-      const dcTi=useDcTi?kmVal("kmDcTi", typeof KM_DC_DEF==="number"?KM_DC_DEF:100000):0;
+      const useDcTi=useTi && kmVal("kmUseDcTi", false);
+      const useDcCr=useLoan && kmVal("kmUseDcCr", false);
+      const dcTi=noKM?0:(useDcTi?kmVal("kmDcTi", typeof KM_DC_DEF==="number"?KM_DC_DEF:100000):0);
       const addons=kmVal("kmDo", 70000);
+      const cascoMin=noKM?Math.max(0, Number(m.cascoGapMin)||200000):0;
       let casco=0, card=0, pack=0;
       if(useLoan){
-        pack=kmVal("kmPack", l6u4?200000:150000);
-        if(l6u4 && pack<200000) pack=200000;/*l6u4-casco*/
+        pack=Math.max(cascoMin, kmVal("kmPack", cascoMin||150000));
         casco=Math.min(pack, 80000);
         card=Math.max(0, pack-80000);
       }else{
-        casco=kmVal("kmCasco", l6u4?200000:80000);
-        if(l6u4 && casco<200000) casco=200000;/*l6u4-casco*/
+        casco=Math.max(cascoMin, kmVal("kmCasco", cascoMin||80000));
         card=0;
       }
       const prio=PRIO_VINS.has(kmVin);
-      const useLoyal=(m.stock==="pl4"||m.stock==="pl6") && kmVal("kmUseLoyal", false);
-      const tiAmt=(useTi?m.ti:0)+(useLoyal?100000:0);
-      const tiBack=(useTi?m.tiBack:0)+(useLoyal?100000:0);
+      const tiAmt=useTi?m.ti:0;
+      const tiBack=useTi?m.tiBack:0;
       const crAmt=useCr?m.cr:0;
       const crBack=useCr?m.crBack:0;
-      const band=typeof kmBand==="function"?kmBand(kmVin, useTi, prio, m):{lo:prio?m.prioMin:m.kmMin, hi:prio?m.prioMax:m.kmMax, lock:false};
-      const lo=band.lo, hi=band.hi;
+      let lo=prio?m.prioMin:m.kmMin;
+      let hi=prio?m.prioMax:m.kmMax;
+      const fix=useTi?lo:hi;
+      lo=fix; hi=fix;
       const dcPack={rrc,invoice,vat:m.vat,fee:m.fee,bonus:m.bonus,tiAmt,tiBack,spec:0,dcTi,crAmt,crBack,addons,casco,card};
       const dcFit=typeof kmDcCrFit==="function"?kmDcCrFit(dcPack, lo):(typeof KM_DC_DEF==="number"?KM_DC_DEF:100000);
       const dcMin=typeof kmDcCrMin==="function"?kmDcCrMin(dcPack, hi):0;
       const dcDef=typeof KM_DC_DEF==="number"?KM_DC_DEF:100000;
       let dcCr=0;
-      if(useDcCr){
+      if(useDcCr && !noKM){
         const typedEl=document.getElementById("kmDcCr");
         const typed=typedEl?kmVal("kmDcCr", NaN):NaN;
-        if(typeof kmDcKeep!=="number") kmDcKeep=NaN;
-        const want=Number.isFinite(typed)?typed:(Number.isFinite(kmDcKeep)?kmDcKeep:dcFit);
+        const want=(fresh || !typedEl || !Number.isFinite(typed))?dcDef:typed;
         dcCr=Math.min(Math.max(0, want, dcMin), dcFit);
         dcCr=Math.max(0, Math.round(dcCr));
-        kmDcKeep=dcCr;
       }
       const dcCap=(m.stock==="tt9"||/^T9 /.test(m.name||""))?Math.max(0, Math.floor((rrc*0.3-(tiAmt+spec+dcTi+crAmt))/1000)*1000):Infinity;
       const dcCapped=useDcCr && dcCr>dcCap;
@@ -6611,20 +6654,25 @@ async function pingTelegram(body){
       const iron=margin-discount+tiBack+crBack+bonus*1.2;
       const km=(addons*0.3+casco*0.3+card*0.8+iron)/m.vat-carPrice*m.fee;
       const kmK=km/1000;
-      const kmFixK=raw=>Math.round(raw);/*km-round real*/
-      const kmGate=k=>({ok:k+0.05>=lo, word:k+0.05<lo?"ниже фикса":(k-1>hi?"выше фикса":"по фиксу")});
-      const ok=kmGate(kmK).ok;
+      const ok=kmK+0.05>=lo && kmK-0.05<=hi;
       const price=Math.round(carPrice);
-      const fee=typeof KM_BANK_FEE==="number"?KM_BANK_FEE:30000;
+      const feeDefault=typeof KM_BANK_FEE==="number"?KM_BANK_FEE:100000;
+      const fee=feeDefault;
       const _pgTrim=(typeof pangoOf==="function")?pangoOf(m.id):null;
-      if(_pgTrim && !useLoan) pack=150000;
+      if(_pgTrim && !useLoan && !noKM) pack=150000;
+      if(noKM && pack<cascoMin) pack=cascoMin;
+      if(noKM && !useLoan && casco<cascoMin) casco=cascoMin;
       const extras=(useLoan||_pgTrim)?(addons+(pack||0)+fee):0;
       const finDelta=(addons-70000)+((useLoan||_pgTrim)?((pack||0)-150000):0);
-      const months=kmVal("cMonths", 60);
+      const months=kmCreditTerm(kmVal("cMonths", 60));
       const _down=kmDownRead(price, fresh);
-      const downMode=_down.downMode;
+      const downMode=_down.downMode==="sum"?"sum":"pct";
       let downPct=_down.downPct;
       let down=_down.down;
+      if(downMode==="pct"){
+        downPct=kmCreditPct(downPct);
+        down=Math.round(Math.max(0, Number(price)||0)*downPct/100);
+      }
       const credit=Math.max(0,price-down+extras);
       const rateGroup=typeof kmRateGroup==="function"?kmRateGroup(m):"t4l_t7";
       const stockCars=typeof kmStockCars==="function"?kmStockCars(m):[];
@@ -6632,8 +6680,6 @@ async function pingTelegram(body){
       const hasMpt=mptCars.length>0;
       const hasReg=stockCars.some(c=>!(typeof carIsMpt==="function"?carIsMpt(c):c.mpt)) || !stockCars.length;
       const selected=(typeof STOCK!=="undefined"?STOCK:[]).find(c=>c && c.vin===kmVin);
-      if(selected && typeof EXCL_FIX!=="undefined" && EXCL_FIX[selected.vin]) selected.invoice=true;
-      if(selected && typeof NOT_INVOICE!=="undefined" && NOT_INVOICE[selected.vin]) selected.invoice=false;
       const pickMpt=!!(selected && (typeof carIsMpt==="function"?carIsMpt(selected):selected.mpt));
       const fMpt=typeof fleetOf==="function"?fleetOf(m.id):null;
       const canSub=typeof kmHasBrandSub==="function"?kmHasBrandSub(m):!!(fMpt&&(fMpt.sub||0)>0);
@@ -6645,42 +6691,44 @@ async function pingTelegram(body){
       const mptSample=mptCars[0]||(pickMpt&&selected?selected:null);
       const mptRrc=fMpt&&fMpt.rrc?fMpt.rrc:price;
       const mptTidy=fMpt&&fMpt.tidy?fMpt.tidy:mptRrc;
-      const tiMpt=useDcTi?(typeof FLEET_TI==="number"?FLEET_TI:100000):0;
-      const fleetPin=(typeof FLEET_PIN!=="undefined" && FLEET_PIN[kmVin])||0;
+      const tiMpt=useTi?(typeof FLEET_TI==="number"?FLEET_TI:100000):0;
       const fleetBase=Math.max(0, mptTidy-tiMpt);
-      let subAmt=(showSub && fMpt && fMpt.sub)||0;
-      const mptVin=typeof fleetMptFor==="function" && fleetMptFor(m.id, kmVin);
-      if(mptVin) subAmt=typeof fleetMptAmt==="function"?fleetMptAmt(fleetBase):Math.round(fleetBase/10);
-      const qFleet=typeof fleetSubQuote==="function"?fleetSubQuote(fleetBase, subAmt, down, addons, pack||0, months, !!(showSub && subAmt), 22.5):{price:fleetBase, pv:down, pvCar:down, credit:Math.max(0,fleetBase-down), term:Math.min(months,84), termAfter:Math.min(months,84), rate:22.5, pay:0, over:0, doCasco:(addons||0)+(pack||0), pvExtras:0, extrasCredit:0, early:0, earlyOver:0, limited:false, sub:subAmt, base:fleetBase, cap49:0, earlyCap:0};
+      const subAmt=(showSub && fMpt && fMpt.sub)||0;
+      const qFleet=typeof fleetSubQuote==="function"?fleetSubQuote(fleetBase, subAmt, down, addons, pack||0, months, !!(showSub && subAmt)):{price:fleetBase, pv:down, pvCar:down, credit:Math.max(0,fleetBase-down), term:Math.min(months,84), termAfter:Math.min(months,84), rate:19.2, pay:0, over:0, doCasco:(addons||0)+(pack||0), pvExtras:0, extrasCredit:0, early:0, earlyOver:0, limited:false, sub:subAmt, base:fleetBase, cap49:0, earlyCap:0};
       const priceMpt=qFleet.price;
       const downMptShow=qFleet.pv;
       const downMptCar=qFleet.pvCar;
       const creditMpt=qFleet.credit;
       const mptTerm=qFleet.termAfter;
-      const qFleetSber=typeof fleetSubQuote==="function"?fleetSubQuote(fleetBase, subAmt, down, addons, pack||0, months, !!(showSub && subAmt), 24):null;
-      const banksMpt=typeof fleetBanksFrom==="function"?fleetBanksFrom(qFleet, qFleetSber, months):[{id:"sovcom", name:"Совкомбанк", rate:qFleet.rate, term:qFleet.termAfter, capped:!qFleet.early && qFleet.term!==months, termNote:"", payMpt:qFleet.pay, overMpt:qFleet.over}];
-      const mptBreak=typeof fleetSubBreak==="function"?fleetSubBreak(qFleet, {name:(fMpt&&fMpt.name)||m.name, stock:mptSample?escape(mptSample.color||"—")+" · "+escape(mptSample.vin||""):"", rrc:mptRrc, trade:!!useDcTi}):"";
+      const banksMpt=[{id:"sovcom", name:"Совкомбанк", rate:qFleet.rate, term:qFleet.termAfter, capped:!qFleet.early && qFleet.term!==months, termNote:qFleet.early?(qFleet.termAfter+" мес. вместо "+qFleet.term+" · досрочное не меняет платёж"):"", payMpt:qFleet.pay, overMpt:qFleet.over}];
+      const mptBreak=typeof fleetSubBreak==="function"?fleetSubBreak(qFleet, {name:(fMpt&&fMpt.name)||m.name, stock:mptSample?escape(mptSample.color||"—")+" · "+escape(mptSample.vin||""):"", rrc:mptRrc, trade:!!useTi}):"";
       const banks=(typeof KM_BANKS!=="undefined"?KM_BANKS:[]).map(b=>{
+        const bFee=b.fee??feeDefault;
+        const bExtras=(useLoan||_pgTrim)?(addons+(pack||0)+bFee):0;
+        const bCredit=Math.max(0, price-down+bExtras);
+        if(!kmBankHasTerm(b.id, months)) return Object.assign({}, b, {fee:bFee, rate:0, term:months, capped:false, na:true, pay:0, over:0});
         const look=typeof kmBankRate==="function"?kmBankRate(b.id, rateGroup, months, downPct):{rate:b.rate||0, term:months, capped:false};
-        if(look&&look.na) return null;
         const term=look.term||months;
-        const pay=calcPay(price+extras, down, term, look.rate);
-        return Object.assign({}, b, {rate:look.rate, term, capped:!!look.capped, pay, over:pay*term-credit});
-      }).filter(Boolean);
+        const pay=calcPay(price+bExtras, down, term, look.rate);
+        return Object.assign({}, b, {fee:bFee, rate:look.rate, term, capped:!!look.capped, na:false, pay, over:pay*term-bCredit});
+      });
       function kmPayRows(list, payKey, overKey){
         return list.map(b=>{
           const yearsWant=Math.round(months/12);
           const yearsHave=Math.round(b.term/12);
-          const note=b.termNote?b.termNote:(b.capped?`нет ${yearsWant} ${yearsWant===1?"года":"лет"} · считаем ${b.term} мес. (${yearsHave} ${yearsHave===1?"год":yearsHave<5?"года":"лет"})`: `${b.term} мес.`);
-          const pay=Math.round(b[payKey]||0);
-          const over=Math.round(b[overKey]||0);
-          return `<div class="bank-row"><span><b>${escape(b.name)}</b><br/><small>${b.rate}% · ${note} · переплата ~${rub(over)}</small></span><span class="pay">${rub(pay)} ₽</span></div>`;
+          const note=b.na?"нет срока":(b.termNote?b.termNote:(b.capped?`нет ${yearsWant} ${yearsWant===1?"года":"лет"} · считаем ${b.term} мес. (${yearsHave} ${yearsHave===1?"год":yearsHave<5?"года":"лет"})`: `${b.term} мес.`));
+          const pay=b.na?0:Math.round(b[payKey]||0);
+          const over=b.na?0:Math.round(b[overKey]||0);
+          const isSov=b.id==="sovcom" || /совком/i.test(b.name||"");
+          const cls=isSov?"bank-row sovcom-priority":"bank-row";
+          const style=isSov?' style="background:#fff8e6;border-radius:10px;padding:12px 14px;margin:4px -6px;box-shadow:0 0 0 2px #f5a623"':'';
+          const badge=isSov?' <span style="background:#f5a623;color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;margin-left:6px;letter-spacing:.04em">ПРИОРИТЕТ</span>':'';
+          if(b.na) return `<div class="${cls}"${style}><span><b>${escape(b.name)}</b>${badge}<br/><small>нет срока</small></span><span class="pay">—</span></div>`;
+          return `<div class="${cls}"${style}><span><b>${escape(b.name)}</b>${badge}<br/><small>${b.rate}% · ${note} · переплата ~${rub(over)}</small></span><span class="pay"${isSov?' style="font-size:20px;color:#c47d00"':''}>${rub(pay)} ₽</span></div>`;
         }).join("");
       }
       const _pg=(typeof pangoOf==="function")?pangoOf(m.id):null;
-      const pangoOnly=!!(typeof PANGO_ONLY!=="undefined" && PANGO_ONLY[kmVin] && _pg);
-      const kmPango=!!(pangoOnly || (selected && isPangoDeal(selected,m.id) && _pg));
-      const pShow=pangoOnly || kmPango || !!(_pg && (showMpt || showSub || canSub));
+      const pShow=!!(_pg && (showMpt || showSub || canSub));
       const pWithTi=!!(useTi||useDcTi);
       let pFix=0, pDownP=0, pBundle=150000, pBase=0, pCreditB=0, pRateA=18.4, pRateB=15.4, pNss=0, pPayA=0, pPayB=0, pOverA=0, pOverB=0, pYears=0, pYearsLabel="0", pYearsWord="лет", pKm=km, pKmK=kmK, pOk=ok, pDiscount=0, pTiBack=0, pCard=0, pBonus=0, pMargin=0, pIron=0;
       if(_pg){
@@ -6709,10 +6757,11 @@ async function pingTelegram(body){
         pIron=pMargin-pDiscount+pTiBack+pBonus*1.2;
         pKm=(pCasco*0.3+pCard*0.8+pIron)/m.vat-pFix*m.fee;
         pKmK=pKm/1000;
-        pOk=kmGate(pKmK).ok;
+        pOk=pKmK+0.05>=lo && pKmK-0.05<=hi;
       }
       let plusAltDirect="", plusAltFleet="", altPick="";
-      if(false && useLoan && (isPlus || m.brand==="TENET")){
+      const hideAlt=true;
+      if(!hideAlt && useLoan && (isPlus || m.brand==="TENET")){
         const wantPlus=!isPlus;
         const alts=(typeof KM_MODELS!=="undefined"?KM_MODELS:[]).filter(x=>x && x.brand===(wantPlus?"TENET PLUS":"TENET"));
         if(typeof kmAltFor!=="string") kmAltFor="";
@@ -6738,19 +6787,21 @@ async function pingTelegram(body){
           const altGroup=wantPlus?(alt.stock==="pl6"?"plusL6":"plusL4"):(typeof kmRateGroup==="function"?kmRateGroup(alt):"t4l_t7");
           const altCredit=Math.max(0, altPrice-altDown+extras);
           const altBanks=(typeof KM_BANKS!=="undefined"?KM_BANKS:[]).map(b=>{
+            const bFee=b.fee??feeDefault;
+            const bExtras=(addons+(pack||0)+bFee);
+            const bCredit=Math.max(0, altPrice-altDown+bExtras);
+            if(!kmBankHasTerm(b.id, months)) return Object.assign({}, b, {fee:bFee, rate:0, term:months, capped:false, na:true, pay:0, over:0});
             const look=typeof kmBankRate==="function"?kmBankRate(b.id, altGroup, months, altPct):{rate:0, term:months, capped:false};
-            if(look&&look.na) return null;
             const term=look.term||months;
-            const pay=calcPay(altPrice+extras, altDown, term, look.rate);
-            return Object.assign({}, b, {rate:look.rate, term, capped:!!look.capped, pay, over:pay*term-altCredit});
-          }).filter(Boolean);
+            const pay=calcPay(altPrice+bExtras, altDown, term, look.rate);
+            return Object.assign({}, b, {fee:bFee, rate:look.rate, term, capped:!!look.capped, na:false, pay, over:pay*term-bCredit});
+          });
           const fAlt=typeof fleetOf==="function"?fleetOf(alt.id):null;
           const altSub=(fAlt&&fAlt.sub)||0;
           const altTidy=(fAlt&&fAlt.tidy)||alt.rrc;
-          const altTi=useDcTi?(typeof FLEET_TI==="number"?FLEET_TI:100000):0;
+          const altTi=useTi?(typeof FLEET_TI==="number"?FLEET_TI:100000):0;
           const altBase=Math.max(0, altTidy-altTi);
-          const altQ=typeof fleetSubQuote==="function"?fleetSubQuote(altBase, altSub, altDown, addons, pack||0, months, altSub>0, 22.5):null;
-          const altQSber=typeof fleetSubQuote==="function"?fleetSubQuote(altBase, altSub, altDown, addons, pack||0, months, altSub>0, 24):null;
+          const altQ=typeof fleetSubQuote==="function"?fleetSubQuote(altBase, altSub, altDown, addons, pack||0, months, altSub>0):null;
           const altFleetPrice=altQ?altQ.price:Math.max(0, altBase-altSub);
           const altFleetCredit=altQ?altQ.credit:Math.max(0, altFleetPrice-altDown);
           const altTerm=altQ?altQ.termAfter:Math.min(Math.max(1, months), 84);
@@ -6768,104 +6819,55 @@ async function pingTelegram(body){
           const altOpts=alts.map(x=>`<option value="${x.id}"${x.id===alt.id?" selected":""}>${escape(x.name)} · РРЦ ${rub(x.rrc)}${auto&&x.id===auto.id?" · ближе по цене":""}</option>`).join("");
           altPick=`<label class="plus-alt-pick"><span>Сравнить с</span><select id="kmAltId">${altOpts}</select></label>`;
           plusAltDirect=`<div class="${altCls}"><p class="eyebrow">${head}</p><p class="calc-note">${altKind} · РРЦ ${rub(alt.rrc)} · ${altDisc} · цена ${rub(altPrice)} · ПВ ${rub(altDown)} · ${altPct}% · тело ${rub(altCredit)}</p>${kmPayRows(altBanks,"pay","over")}<p class="calc-note">Тот же процент взноса и срок. ${altRule}</p><button type="button" class="chip" data-km-id="${alt.id}">Открыть ${escape(alt.name)}</button></div>`;
-          plusAltFleet=`<div class="${altCls}"><p class="eyebrow">${head}</p>${altQ&&typeof fleetBodyTop==="function"?fleetBodyTop(altQ):""}<div class="bank-row"><span><b>Совкомбанк</b><br/><small>${altRate}% · ${altQ&&altQ.early?altQ.termAfter+" мес. вместо "+altQ.term+" · досрочное не меняет платёж":altTerm+" мес."+(altTerm!==months&&!(altQ&&altQ.early)?" · считаем "+altTerm+" мес.":"")} · переплата ~${rub(Math.round(altOver))}</small></span><span class="pay">${rub(Math.round(altPay))} ₽</span></div>${altQSber?`<div class="bank-row"><span><b>Сбер</b><br/><small>24% · ${altQSber.early?altQSber.termAfter+" мес. вместо "+altQSber.term+" · досрочное не меняет платёж":altQSber.termAfter+" мес."} · переплата ~${rub(Math.round(altQSber.over))}</small></span><span class="pay">${rub(Math.round(altQSber.pay))} ₽</span></div>`:""}<div class="bank-row"><span>${useDcTi?"Флит + трейд-ин":"Флит"}${altSub?" · субсидия −"+rub(altSub):""}</span><span class="pay">${rub(altFleetPrice)}</span></div>${altQ&&typeof fleetBodyRows==="function"?fleetBodyRows(altQ):`<div class="bank-row"><span>Тело кредита</span><span class="pay">${rub(altFleetCredit)}</span></div>`}${altQ&&altQ.early?`<div class="bank-row"><span>Досрочно · сокращает срок</span><span class="pay">${rub(altQ.early)}</span></div>`:""}<p class="calc-note">${wantPlus?"Панго нет. ":""}${altQ?fleetSubNote(altQ):"ПВ "+rub(altDown)+" · каско и Д/О из взноса."}</p></div>`;
+          plusAltFleet=`<div class="${altCls}"><p class="eyebrow">${head}</p>${altQ&&typeof fleetBodyTop==="function"?fleetBodyTop(altQ):""}<div class="bank-row"><span><b>Совкомбанк</b><br/><small>${altRate}% · ${altQ&&altQ.early?altQ.termAfter+" мес. вместо "+altQ.term+" · досрочное не меняет платёж":altTerm+" мес."+(altTerm!==months&&!(altQ&&altQ.early)?" · считаем "+altTerm+" мес.":"")} · переплата ~${rub(Math.round(altOver))}</small></span><span class="pay">${rub(Math.round(altPay))} ₽</span></div><div class="bank-row"><span>${useTi?"Флит + трейд-ин":"Флит"}${altSub?" · субсидия −"+rub(altSub):""}</span><span class="pay">${rub(altFleetPrice)}</span></div>${altQ&&typeof fleetBodyRows==="function"?fleetBodyRows(altQ):`<div class="bank-row"><span>Тело кредита</span><span class="pay">${rub(altFleetCredit)}</span></div>`}${altQ&&altQ.early?`<div class="bank-row"><span>Досрочно · сокращает срок</span><span class="pay">${rub(altQ.early)}</span></div>`:""}<p class="calc-note">${wantPlus?"Панго нет. ":""}${altQ?fleetSubNote(altQ):"ПВ "+rub(altDown)+" · каско и Д/О из взноса."}</p></div>`;
         }
       }
-      const ob=typeof kmBand==="function"?kmBand(kmVin, useTi, false, m):{lo:m.kmMin, hi:m.kmMax};
-      const obFit=typeof kmDcCrFit==="function"?kmDcCrFit(dcPack, ob.lo):dcFit;
-      const obMin=typeof kmDcCrMin==="function"?kmDcCrMin(dcPack, ob.hi):0;
-      let ordDc=0;
-      if(useDcCr){
-        const typedEl=document.getElementById("kmDcCr");
-        const typed=typedEl?kmVal("kmDcCr", NaN):NaN;
-        const want=(fresh || !typedEl || !Number.isFinite(typed))?dcDef:typed;
-        ordDc=Math.min(Math.max(0, want, obMin), obFit);
-        ordDc=Math.max(0, Math.round(ordDc)); if(typeof dcCap==="number" && ordDc>dcCap) ordDc=dcCap;
-      }
-      const prioDc=Math.max(0, Math.round(typeof kmDcCrAt==="function"?kmDcCrAt(dcPack, kmBand(kmVin, useTi, true, m).lo*1000, Math.round):0));
-      function kmDeal(dc){
-        const d=Math.max(0, Math.round(dc||0));
-        const pr=Math.max(0, Math.round(rrc-(tiAmt+spec+dcTi+d+crAmt)));
-        const dn=downMode==="pct"?Math.round(pr*Math.max(0, downPct)/100):Math.max(0, Math.min(pr, down));
-        const cr=Math.max(0, pr-dn+extras);
-        const pct=pr>0?Math.round(dn*1000/pr)/10:0;
-        const list=(typeof KM_BANKS!=="undefined"?KM_BANKS:[]).map(b=>{
-          const look=typeof kmBankRate==="function"?kmBankRate(b.id, rateGroup, months, downMode==="pct"?downPct:pct):{rate:b.rate||0, term:months, capped:false};
-          if(look&&look.na) return null;
-          const term=look.term||months;
-          const pay=calcPay(pr+extras, dn, term, look.rate);
-          return Object.assign({}, b, {rate:look.rate, term, capped:!!look.capped, pay, over:pay*term-cr});
-        }).filter(Boolean);
-        const k=typeof kmProfit==="function"?kmProfit(Object.assign({}, dcPack, {dcCr:d})):0;
-        return {dc:d, price:pr, down:dn, credit:cr, banks:list, km:k};
-      }
-      const ordDeal=kmDeal(ordDc);
-      const prioDeal=kmDeal(prioDc);
-      const prioInStock=(typeof kmStockCars==="function"?kmStockCars(m):[]).some(c=>c.status==="in" && typeof PRIO_VINS!=="undefined" && PRIO_VINS.has(c.vin));
-      function kmBankCell(b){
-        const yearsWant=Math.round(months/12);
-        const yearsHave=Math.round((b.term||months)/12);
-        const note=b.termNote?b.termNote:(b.capped?`нет ${yearsWant} ${yearsWant===1?"года":"лет"} · считаем ${b.term} мес. (${yearsHave} ${yearsHave===1?"год":yearsHave<5?"года":"лет"})`:`${b.term} мес.`);
-        return `<div class="bank-row"><span><b>${escape(b.name)}</b><br/><small>${b.rate}% · ${note} · переплата ~${rub(Math.round(b.over||0))}</small></span><span class="pay">${rub(Math.round(b.pay||0))} ₽</span></div>`;
-      }
-      const directPairs=(ordDeal.banks||[]).map(b=>`<div class="pay-cell">${kmBankCell(b)}</div>`).join("");
-      const qFleetPrio=(m.id==="t7a" && typeof fleetSubQuote==="function")?fleetSubQuote(Math.max(0, 2333000-tiMpt), subAmt, down, addons, pack||0, months, !!(showSub && subAmt), 22.5):null;
-      const qFleetPrioSber=qFleetPrio?fleetSubQuote(Math.max(0, 2333000-tiMpt), subAmt, down, addons, pack||0, months, !!(showSub && subAmt), 24):null;
-      const banksMptPrio=qFleetPrio&&typeof fleetBanksFrom==="function"?fleetBanksFrom(qFleetPrio, qFleetPrioSber, months):[];
-      const prioKmTxt=useTi?"−100 тыс. с трейд-ин":"0 тыс. без трейд-ин";
-      const fleetNeed=(qFleet&&qFleet.base)||0;
-      const fleetOn=showSub||showFleet||isPlus;
-      const fleetWarn=fleetOn?pvMinBox(fleetPvHave(qFleet), fleetNeed, 20, "ПВ в авто + субсидия"):{low:false,html:""};
-      const fleetPrioWarn=qFleetPrio?pvMinBox(fleetPvHave(qFleetPrio), qFleetPrio.base||2333000, 20, "ПВ в авто + субсидия"):{low:false,html:""};
-      const pangoWarn=(_pg&&pFix>0)?pvMinBox(pDownP, pFix, 10, "первый взнос"):{low:false,html:""};
-      return banner("Калькулятор","КМ и платёж · база "+TERMS_DATE,"TENET")+`
-        <p class="lead">${pangoOnly?"Только спеццена PANGO. Директ и флит для этого VIN не считаем.":pShow?"Три расчёта рядом: директ, флит с субсидией бренда и спеццена PANGO.":"Сначала комплектация. Кредит и СЖ открываются галочкой «Кредит»."}</p>
-        <div class="km-stage${pangoOnly?" km-pango":pShow?" km-4":useLoan&&showSplit?" km-3":""}">
+      return `<style>
+select.km-term{appearance:none;-webkit-appearance:none;width:100%;box-sizing:border-box;background-color:#fff;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path fill='%236b645b' d='M1.2 1.4 6 6.2 10.8 1.4' stroke='%236b645b' stroke-width='1.4' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");background-repeat:no-repeat;background-position:right 12px center;border:1px solid var(--border);color:var(--fg);border-radius:10px;padding:12px 36px 12px 12px;font:15px Inter,sans-serif;cursor:pointer;line-height:1.2}
+.km-disc select.km-term,.km-pv select.km-term{padding:8px 34px 8px 10px;font-size:14px}
+select.km-term:hover{border-color:#b7a894}
+select.km-term:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(200,30,43,.16)}
+</style>`+banner("Калькулятор","КМ и платёж · база "+TERMS_DATE,"TENET")+`
+        <p class="lead">${pShow?"Три расчёта рядом: директ, флит с субсидией бренда и спеццена PANGO.":"Сначала комплектация. Кредит и СЖ открываются галочкой «Кредит»."}</p>
+        <div class="km-stage${pShow?" km-4":useLoan&&showSplit?" km-3":""}">
         <div class="km-chips">${kmChipGroups(m.id)}</div>
-        <div class="km-layout${pangoOnly?" km-pango":pShow?" km-4":useLoan&&showSplit?" km-3":""}">
+        <div class="km-layout${pShow?" km-4":useLoan&&showSplit?" km-3":""}">
           <div class="card km-disc">
             <p class="eyebrow">Калькулятор КМ · ${escape(m.name)}</p>
+            ${ropUser?`<label class="check-row"><input id="kmRop" type="checkbox" ${ropOn?"checked":""} onchange="kmRopFlag=this.checked;try{localStorage.setItem('tenet-km-rop',this.checked?'1':'0')}catch(e){};view='calc';if(typeof render==='function')render();" /> <span>РОП</span></label>`:""}
             <label class="field" style="max-width:none;margin-top:8px"><span>РРЦ, ₽ · из условий ${TERMS_DATE}</span><input id="kmRrc" inputmode="numeric" value="${rrc}" /></label>
             <label class="field" style="max-width:none"><span>Сумма счёта, ₽ · из условий ${TERMS_DATE}</span><input id="kmInv" inputmode="numeric" value="${invoice}" /></label>
-            <div class="check-pair">
-              <label class="check-row"><input id="kmUseTi" type="checkbox" ${useTi?"checked":""} /> <span>Трейд-ин ${m.ti?rub(m.ti):""}</span></label>
-              ${l6u4?"":`<label class="check-row"><input id="kmUseDcTi" type="checkbox" ${useDcTi?"checked":""} /> <span>Трейд-ин от ДЦ ${rub(KM_DC_DEF)}</span></label>`}
-            </div>
-            ${(m.stock==="pl4"||m.stock==="pl6")?`<label class="check-row"><input id="kmUseLoyal" type="checkbox" ${useLoyal?"checked":""} /> <span>Лояльный трейд-ин · Elegant (Mazda / KIA / Hyundai) ${rub(100000)}</span></label>`:""}
-            ${l6u4?`<p class="calc-note">Скидка ДЦ на L6 Ultra 4WD не применяется.</p>`:`<label class="check-row"><input id="kmUseDcCr" type="checkbox" ${useDcCr?"checked":""} /> <span>Скидка за кредит${dcFit?` · до ${rub(dcFit)} в коридоре`:""}</span></label>`}
-            ${pangoOnly?"":`<label class="field" style="max-width:none"><span>Произвольная скидка, ₽ · снижает ниже порога</span><input id="kmSpec" inputmode="numeric" value="${spec}" /></label>
-            ${useDcTi?`<label class="field" style="max-width:none"><span>Сумма скидки ДЦ за трейд-ин, ₽</span><input id="kmDcTi" inputmode="numeric" value="${dcTi||KM_DC_DEF}" /></label>`:""}
-            ${useDcCr?`<label class="field" style="max-width:none"><span>Сумма скидки за кредит, ₽ · догоняет порог</span><input id="kmDcCr" inputmode="numeric" value="${dcCr}" /></label>`:""}
-            ${!useLoan&&!l6u4?`<label class="check-row"><input id="kmUseDcCash" type="checkbox" ${useDcCr?"checked":""} /> <span>Скидка от ДЦ под фикс КМ ${lo} тыс. ${useTi?"с трейд-ином":"без трейд-ина"}</span></label>`:""}
-            ${!useLoan&&useDcCr?`<label class="field" style="max-width:none"><span>Скидка ДЦ (нал), ₽ · подобрана под КМ ${lo} тыс.</span><input id="kmDcCr" inputmode="numeric" value="${dcCr}" /></label>`:""}
-            ${dcCapped?`<div class="note-box">Фикс КМ ${lo} тыс. недостижим: потолок скидки T9 — 30% от РРЦ (${rub(Math.round(rrc*0.3))}). Скидка ДЦ ограничена ${rub(dcCap)}.</div>`:""}
-            ${useDcCr&&!dcCapped&&dcCr===0&&kmK+0.05<lo?`<div class="note-box">КМ ниже фикса ${lo} тыс. уже без скидки ДЦ — скидку ДЦ не даём.</div>`:""}
-            ${l6u4?"":`<p class="calc-note">Скидка за кредит держит КМ у порога. Произвольная кладётся сверху и снижает ниже.</p>`}`}
+            <label class="check-row"><input id="kmUseTi" type="checkbox" ${useTi?"checked":""} /> <span>Трейд-ин ${m.ti?rub(m.ti)+" / возмещение "+rub(m.tiBack):"нет в базе"}</span></label>
+            <label class="check-row"><input id="kmUseLoan" type="checkbox" ${useLoan?"checked":""} /> <span>Кредит</span></label>
+            ${showDealCr?`<label class="check-row"><input id="kmUseCr" type="checkbox" ${useCr?"checked":""} /> <span>${dealCrLabel} · ${rub(m.cr)}${m.crBack?` / возмещение ${rub(m.crBack)}`:""}</span></label>`:""}
+            <label class="field" style="max-width:none"><span>Спецпредложение, ₽</span><input id="kmSpec" inputmode="numeric" value="${spec}" /></label>
+            ${noKM?"":`${useTi?`<label class="check-row"><input id="kmUseDcTi" type="checkbox" ${useDcTi?"checked":""} /> <span>Скидка от ДЦ за трейд-ин ${rub(KM_DC_DEF)}</span></label>`:""}`}
+            ${noKM?"":`${useTi&&useDcTi?`<label class="field" style="max-width:none"><span>Сумма скидки ДЦ за трейд-ин, ₽</span><input id="kmDcTi" inputmode="numeric" value="${dcTi||KM_DC_DEF}" /></label>`:""}`}
+            ${noKM?"":`${useLoan?`<label class="check-row"><input id="kmUseDcCr" type="checkbox" ${useDcCr?"checked":""} /> <span>Скидка от ДЦ за кредит${dcFit?` · до ${rub(dcFit)} в коридоре`:""}</span></label>`:""}`}
+            ${noKM?"":`${useLoan&&useDcCr?`<label class="field" style="max-width:none"><span>Сумма скидки ДЦ за кредит, ₽ · коридор от ${lo} тыс.</span><input id="kmDcCr" inputmode="numeric" value="${dcCr}" /></label>`:""}`}
             <label class="field" style="max-width:none"><span>Д/О, ₽</span><input id="kmDo" inputmode="numeric" value="${addons}" /></label>
-            ${pangoOnly?`<div class="note-box" style="margin-top:14px"><p class="eyebrow" style="margin:0 0 6px">Цена PANGO</p><div class="calc-out">${rub(pFix)} ₽</div><p class="calc-note">${_pg.cash===_pg.ti?"При любых условиях. Трейд-ин цену не меняет.":(pWithTi?"С трейд-ин.":"Без трейд-ин.")} Директ и флит не считаем.</p></div><div class="note-box">${escape(PANGO_ONLY[kmVin])}</div>`:`<div class="note-box" style="margin-top:14px">
+            <div class="note-box" style="margin-top:14px">
               <p class="eyebrow" style="margin:0 0 6px">Итоговая цена для клиента</p>
               ${Math.round(rrc+addons)>Math.round(client)?`<div class="calc-out" style="text-decoration:line-through;opacity:.42;margin-bottom:2px">${rub(Math.round(rrc+addons))} ₽</div>`:""}
               <div class="calc-out">${rub(Math.round(client))} ₽</div>
               <p class="calc-note">Авто ${rub(Math.round(carPrice))} + Д/О ${rub(Math.round(addons))}. Каско не входит.${discount?` Скидка ${rub(Math.round(discount))}.`:""}</p>
-            </div>`}
-            ${_pg&&!pangoOnly?`<div class="note-box">${(typeof EXCL_FIX!=="undefined"&&EXCL_FIX[kmVin])?"СУПЕРСПЕЦ":"Спеццена"} ${rub(_pg.cash)} без трейд-ин · ${rub(_pg.ti)} с трейд-ин. ${(selected&&isPangoDeal(selected,m.id))?"Этот VIN по этой цене — блок PANGO.":"Блок PANGO — спеццена для сравнения."}</div>`:""}
+            </div>
+            ${_pg?`<div class="note-box">Спеццена ${rub(_pg.cash)} без трейд-ин · ${rub(_pg.ti)} с трейд-ин. ${(selected&&selected.invoice)?"Этот VIN по спеццене — блок PANGO.":"Блок PANGO — спеццена для сравнения."}</div>`:""}
             ${useLoan
-              ?`<label class="field" style="max-width:none"><span>Каско расширенное, ₽${l6u4?" · минимум 200 000":""}</span><input id="kmPack" inputmode="numeric" value="${pack}" /></label>`
-              :`<label class="field" style="max-width:none"><span>КАСКО, ₽${l6u4?" · минимум 200 000":""}</span><input id="kmCasco" inputmode="numeric" value="${casco}" /></label>`}
-            ${!l6u4&&prio?`<div class="note-box">Приоритетный VIN ${escape(kmVin)}. КМ ${kmBandTxt(lo,hi)}${useTi?" с трейд-ином":" без трейд-ина"}.</div>`:""}
-            ${!l6u4&&!prio && band.lock?`<div class="note-box">Для VIN ${escape(kmVin)} КМ ${kmBandTxt(lo,hi)}${useTi?" с трейд-ином":" без трейд-ина"}.</div>`:""}
+              ?`<label class="field" style="max-width:none"><span>Каско расширенное, ₽${noKM?" · минимум "+rub(cascoMin):""}</span><input id="kmPack" inputmode="numeric" value="${pack}" /></label>`
+              :`<label class="field" style="max-width:none"><span>КАСКО, ₽${noKM?" · минимум "+rub(cascoMin):""}</span><input id="kmCasco" inputmode="numeric" value="${casco}" /></label>`}
+            ${!noKM&&prio?`<div class="note-box">Приоритетный VIN ${escape(kmVin)}. Коридор ${lo} … ${hi} тыс.</div>`:""}
             ${useLoan&&!showSplit&&!pShow?`<p class="eyebrow" style="margin-top:12px">Первый взнос</p>
               <div class="down-mode">
                 <button type="button" class="chip ${downMode==="sum"?"on":""}" data-down-mode="sum">Сумма, ₽</button>
                 <button type="button" class="chip ${downMode!=="sum"?"on":""}" data-down-mode="pct">Проценты</button>
               </div>
-              <input type="hidden" id="cDownMode" value="${downMode==="sum"?"sum":"pct"}" />
+              <input type="hidden" id="cDownMode" value="${downMode}" />
               ${downMode==="sum"
                 ?`<label class="field" style="max-width:none"><span>Первый взнос, ₽</span><input id="cDown" inputmode="numeric" value="${down}" /></label>`
-                :`<label class="field" style="max-width:none"><span>Первый взнос, %</span><input id="cDownPct" inputmode="decimal" value="${downPct}" /></label>`}
-              <p class="calc-note">${rub(down)} ₽ · ${downPct}% от цены авто ${rub(price)}${(showMpt||showSub||showFleet)?` · ${showFleet?"флит":"субс. бренда"}: ${rub(priceMpt)} − ПВ в авто ${rub(downMptCar)} = тело ${rub(creditMpt)}`:""}</p>
-              ${fleetOn?fleetWarn.html:""}${qFleetPrio&&fleetPrioWarn.low&&!(fleetWarn.low&&fleetWarn.html===fleetPrioWarn.html)?fleetPrioWarn.html:""}${pShow?pangoWarn.html:""}
-              <label class="field" style="max-width:none"><span>Срок, мес.</span><input id="cMonths" inputmode="numeric" value="${months}" /></label>`:""}
+                :`<label class="field" style="max-width:none"><span>Первый взнос, %</span><input id="cDownPct" type="number" inputmode="numeric" min="1" max="99" step="1" value="${downPct}" /></label>`}
+              <p class="calc-note">${rub(down)} ₽${downMode==="pct"?" · "+downPct+"% от цены авто":" · ≈ "+downPct+"%"}${(showMpt||showSub||showFleet)?` · ${showFleet?"флит":"субс. бренда"}: ${rub(priceMpt)} − ПВ в авто ${rub(downMptCar)} = тело ${rub(creditMpt)}`:""}</p>
+              <label class="field" style="max-width:none"><span>Срок, мес.</span><select id="cMonths" class="km-term">${kmTermOptions(months)}</select></label>`:""}
             <button type="button" class="btn ivory" id="kmToOffer" style="margin-top:16px;width:100%">Сформировать КП</button>
           </div>
           ${(useLoan&&showSplit)||pShow?`<div class="km-credit"><div class="card km-pv">
@@ -6877,56 +6879,21 @@ async function pingTelegram(body){
             </div>
             ${downMode==="sum"
               ?`<label class="field"><span>Первый взнос, ₽</span><input id="cDown" inputmode="numeric" value="${down}" /></label>`
-              :`<label class="field"><span>Первый взнос, %</span><input id="cDownPct" inputmode="decimal" value="${downPct}" /></label>`}
-            <label class="field"><span>Срок, мес.</span><input id="cMonths" inputmode="numeric" value="${months}" /></label>
+              :`<label class="field"><span>Первый взнос, %</span><input id="cDownPct" type="number" inputmode="numeric" min="1" max="99" step="1" value="${downPct}" /></label>`}
+            <label class="field"><span>Срок, мес.</span><select id="cMonths" class="km-term">${kmTermOptions(months)}</select></label>
           </div>
-          <input type="hidden" id="cDownMode" value="${downMode==="sum"?"sum":"pct"}" />
-          <p class="calc-note">${rub(down)} ₽ · ${downPct}% от цены авто ${rub(price)}${(showMpt||showSub||showFleet)?` · ${showFleet?"флит":"субс. бренда"}: ${rub(priceMpt)} − ПВ в авто ${rub(downMptCar)} = тело ${rub(creditMpt)}`:""}</p>
-          ${(showSub||showFleet)?fleetWarn.html:""}${qFleetPrio&&fleetPrioWarn.low&&!(fleetWarn.low&&fleetWarn.html===fleetPrioWarn.html)?fleetPrioWarn.html:""}${pShow?pangoWarn.html:""}
-        </div><div class="km-pays">
-          ${pangoOnly?"":`<div class="pay-col std km-pay">
-            <div class="km-contrast solo">
-              <div class="pay-cell">
-                <p class="eyebrow">Директ</p>
-                <p class="calc-note">Обычный. Цена ${rub(ordDeal.price)} · ПВ ${rub(ordDeal.down)} · тело ${rub(ordDeal.credit)}</p>
-              </div>
-              ${directPairs}
-              ${l6u4?"":`<div class="pay-cell"><p class="calc-note">КМ ${kmFixK(ordDeal.km/1000)} тыс. · фикс ${typeof kmBandTxt==="function"?kmBandTxt(ob.lo,ob.hi):ob.lo+" тыс."}${useTi?" с трейд-ином":" без трейд-ина"}</p></div>`}
-            </div>
-            <p class="calc-note">${isPlus?"Ставки TENET PLUS, ИП 1938/И (пролонгирована).":"Ставки TENET ФИНАНС, ИП 2641/И."}</p>
-            
+          <input type="hidden" id="cDownMode" value="${downMode}" />
+          <p class="calc-note">${rub(down)} ₽${downMode==="pct"?" · "+downPct+"% от цены авто":" · ≈ "+downPct+"%"}${(showMpt||showSub||showFleet)?` · ${showFleet?"флит":"субс. бренда"}: ${rub(priceMpt)} − ПВ в авто ${rub(downMptCar)} = тело ${rub(creditMpt)}`:""}</p>
+        </div>${altPick}<div class="km-pays">
+          <div class="pay-col std km-pay">
+            <p class="eyebrow">Директ</p>
+            <p class="calc-note">ПВ ${rub(down)} · тело ${rub(credit)}</p>
+            ${kmPayRows(banks,"pay","over")}
+            <p class="calc-note">${isPlus?"Ставки TENET PLUS, ИП 1938/И.":"Ставки TENET ФИНАНС, ИП 2641/И."} Кредит = авто ${rub(price)} − ПВ + Д/О ${rub(addons)} + каско ${rub(pack)} + комиссия банка.</p>
+            ${plusAltDirect}
           </div>
-          <div class="pay-col ${showSub?"sub":"mpt"} km-pay${fleetWarn.low?" pv-low":""}${qFleetPrio?" fleet-pair":""}">
-            ${qFleetPrio?`<div class="km-contrast">
-              <div class="pay-cell${fleetWarn.low?" pv-low":""}">
-                <p class="eyebrow">${showFleet||isPlus?"Флит · Совкомбанк 22,5% · Сбер 24%":showSub?(mptVin?"Флит · МПТ 10%":"Флит · субсидия бренда"):"Флит · Совкомбанк 22,5% · Сбер 24%"}</p>
-                ${fleetWarn.html}
-                ${typeof fleetBodyTop==="function"?fleetBodyTop(qFleet):""}
-              </div>
-              <div class="pay-cell prio${fleetPrioWarn.low?" pv-low":""}">
-                <p class="eyebrow">Флит · от 2 389</p>
-                <p class="calc-note">EDXFB32B2TE041658 · EDXFB32B7TE062327${fleetPin?" · этот VIN":""}. Старт 2 389 000${useDcTi?" − трейд-ин "+rub(tiMpt):""}${subAmt?" − субсидия "+rub(subAmt):""}.</p>
-                ${fleetPrioWarn.html}
-                ${typeof fleetBodyTop==="function"?fleetBodyTop(qFleetPrio):""}
-              </div>
-              <div class="pay-cell">${kmPayRows(banksMpt,"payMpt","overMpt")}</div>
-              <div class="pay-cell prio">${kmPayRows(banksMptPrio,"payMpt","overMpt")}</div>
-              <div class="pay-cell">${typeof fleetBodyRows==="function"?fleetBodyRows(qFleet):`<div class="bank-row"><span>Тело кредита</span><span class="pay">${rub(creditMpt)}</span></div>`}</div>
-              <div class="pay-cell prio">${typeof fleetBodyRows==="function"?fleetBodyRows(qFleetPrio):""}</div>
-              <div class="pay-cell">${typeof fleetClientRow==="function"?fleetClientRow(qFleet):""}</div>
-              <div class="pay-cell prio">${typeof fleetClientRow==="function"?fleetClientRow(qFleetPrio):""}</div>
-              <div class="pay-cell">
-                <details class="calc-more">
-                  <summary>Подробности расчёта</summary>
-                  <p class="calc-note">${typeof fleetSubNote==="function"?fleetSubNote(qFleet):""}</p>
-                  ${mptBreak}
-                </details>
-              </div>
-              <div class="pay-cell prio"><p class="calc-note">${qFleet.price>qFleetPrio.price?"Дешевле обычного флита на "+rub(qFleet.price-qFleetPrio.price)+".":""}</p></div>
-            </div>`:`<p class="eyebrow">${showFleet||isPlus?"Флит · Совкомбанк 22,5% · Сбер 24%":showSub?(mptVin?"Флит · МПТ 10%":"Флит · субсидия бренда"):"Флит · Совкомбанк 22,5% · Сбер 24%"}</p>
-            ${fleetWarn.low
-              ? fleetWarn.html+`<p class="calc-note">Флит не считаем. В 20% идут только ПВ в авто и субсидия, каско и Д/О не считаются.</p>`
-              : `${fleetWarn.html}
+          <div class="pay-col ${showSub?"sub":"mpt"} km-pay">
+            <p class="eyebrow">${showFleet||isPlus?"Флит · Совкомбанк 19,2%":showSub?"Флит · субсидия бренда":"Флит · Совкомбанк 19,2%"}</p>
             ${typeof fleetBodyTop==="function"?fleetBodyTop(qFleet):""}
             ${kmPayRows(banksMpt,"payMpt","overMpt")}
             ${typeof fleetBodyRows==="function"?fleetBodyRows(qFleet):`<div class="bank-row"><span>Тело кредита</span><span class="pay">${rub(creditMpt)}</span></div>`}
@@ -6935,12 +6902,11 @@ async function pingTelegram(body){
               <summary>Подробности расчёта</summary>
               <p class="calc-note">${typeof fleetSubNote==="function"?fleetSubNote(qFleet):""}</p>
               ${mptBreak}
-            </details>`}`}
-            
-          </div>`}
-          ${pShow?`<div class="pay-col pango km-pay${pangoWarn.low?" pv-low":""}">
+            </details>
+            ${plusAltFleet}
+          </div>
+          ${pShow?`<div class="pay-col pango km-pay">
             <p class="eyebrow">Спеццена · PANGO</p>
-            ${pangoWarn.html}
             <p class="eyebrow" style="margin-top:8px">18,4% без комиссий</p>
             <div class="bank-row pay-top"><span><b>Платёж</b><br/><small>${pRateA}% · ${months} мес. · переплата ~${rub(Math.round(pOverA))}</small></span><span class="pay">${rub(Math.round(pPayA))} ₽</span></div>
             <div class="bank-row"><span>Тело кредита</span><span class="pay">${rub(pBase)}</span></div>
@@ -6949,7 +6915,7 @@ async function pingTelegram(body){
             <div class="bank-row"><span>Тело с НСС</span><span class="pay">${rub(pCreditB)}</span></div>
             <details class="calc-more">
               <summary>Подробности расчёта</summary>
-              <p class="calc-note">${selected&&isPangoDeal(selected,m.id)?"Этот VIN по спеццене.":"Если машина по спеццене."} ${_pg&&_pg.cash===_pg.ti?"Фикс "+rub(pFix)+" при любых условиях.":"Фикс "+(pWithTi?"с трейд-ин ":"без трейд-ин ")+rub(pFix)+"."} Каско + GAP + ДМС ${rub(pBundle)} всегда в кредите.</p>
+              <p class="calc-note">${selected&&selected.invoice?"Этот VIN по спеццене.":"Если машина по спеццене."} Фикс ${pWithTi?"с трейд-ин":"без трейд-ин"} ${rub(pFix)}. Каско + GAP + ДМС ${rub(pBundle)} всегда в кредите.</p>
               <div class="bank-row"><span>Цена авто</span><span class="pay">${rub(pFix)}</span></div>
               <div class="bank-row"><span>Первый взнос</span><span class="pay">${rub(pDownP)}</span></div>
               <div class="bank-row"><span>Каско + GAP + ДМС</span><span class="pay">${rub(pBundle)}</span></div>
@@ -6960,7 +6926,7 @@ async function pingTelegram(body){
             ${useLoan?`<div class="card">
               <p class="eyebrow">Кредит · ${escape(m.name)}</p>
               <p class="calc-note">ПВ от цены авто ${rub(price)} ₽, без Д/О и каско. В кредит входят авто − ПВ, Д/О, каско расширенное и комиссия банка.</p>
-              ${showMpt||showSub||showFleet?`<p class="eyebrow" style="margin-top:16px">${showFleet||isPlus?"Флит · Совкомбанк 22,5% · Сбер 24%":showSub?(mptVin?"Флит · МПТ 10%":"Флит · субсидия бренда"):"Флит · Совкомбанк 22,5% · Сбер 24%"}</p>
+              ${showMpt||showSub||showFleet?`<p class="eyebrow" style="margin-top:16px">${showFleet||isPlus?"Флит · Совкомбанк 19,2%":showSub?"Флит · субсидия бренда":"Флит · Совкомбанк 19,2%"}</p>
               ${typeof fleetBodyTop==="function"?fleetBodyTop(qFleet):""}
               ${kmPayRows(banksMpt,"payMpt","overMpt")}
               ${typeof fleetBodyRows==="function"?fleetBodyRows(qFleet):`<div class="bank-row"><span>Тело кредита</span><span class="pay">${rub(creditMpt)}</span></div>`}
@@ -6970,27 +6936,21 @@ async function pingTelegram(body){
               ${mptBreak}</details>`
               :`<p class="eyebrow" style="margin-top:16px">Платёж в месяц</p>
               ${kmPayRows(banks,"pay","over")}`}
-              <p class="calc-note">${showSub?"Субсидия бренда. ":showFleet?"Флит. ":""}${isPlus?"Ставки TENET PLUS, ИП 1938/И (пролонгирована).":"Ставки TENET ФИНАНС, ИП 2641/И."} Кредит = авто ${rub(price)} − ПВ + Д/О ${rub(addons)} + каско ${rub(pack)} + комиссия банка.</p>
+              <p class="calc-note">${showSub?"Субсидия бренда. ":showFleet?"Флит. ":""}${isPlus?"Ставки TENET PLUS, ИП 1938/И.":"Ставки TENET ФИНАНС, ИП 2641/И."} Кредит = авто ${rub(price)} − ПВ + Д/О ${rub(addons)} + каско ${rub(pack)} + комиссия банка.</p>
             </div>`:`<div class="card"><p class="eyebrow">Кредит</p><p class="lead" style="max-width:none">Включите галочку «Кредит», чтобы открыть расчёт платежа${canSub?" и сравнение с субсидией бренда":""}.</p></div>`}
             ${kmSideList(m, price, downPct, months, extras, {useTi, spec, useDcTi, dcTi, useDcCr, dcCr, downMode, down, finDelta, useLoan})}
           </div>`}
         </div>
         </div>
         <div class="${(useLoan&&showSplit)||pShow?"km-bottom":""}">
-          <div class="card dc-result ${(kmPango?pOk:ok)?"ok":"bad"}">
-            ${l6u4?"":`<p class="eyebrow">КМ без НДС${kmPango?" · спеццена":""}</p>
-            <div class="calc-out">${rub(kmFixK((kmPango?pKm:km)/1000)*1000)} ₽</div>
-            <p class="calc-note">КМ ${typeof kmFixPair==="function"?kmFixPair(kmVin, prio, m):kmBandTxt(lo,hi)} · сейчас ${kmFixK(kmPango?pKmK:kmK)} тыс. · ${kmGate(kmPango?pKmK:kmK).word}</p>`}
-            <div class="note-box">${kmPango?`Спеццена <b>${rub(pFix)} ₽</b> · скидка от РРЦ ${rub(pDiscount)}<br/>Маржа 1С ${rub(Math.round(pMargin))} · бонус ${rub(Math.round(pBonus))} · доход на железе ${rub(Math.round(pIron))}<br/>Каско 80 000 + GAP/ДМС ${rub(pCard)} внутри PANGO${useTi?" · возмещение трейд-ин "+rub(pTiBack):""}`:`Цена авто <b>${rub(Math.round(carPrice))} ₽</b> · клиенту с Д/О <b>${rub(Math.round(client))} ₽</b><br/>Скидка ${rub(Math.round(discount))} · маржа 1С ${rub(Math.round(margin))}<br/>Бонус ${rub(Math.round(bonus))} (${Math.round(m.bonus*100)}%) · доход на железе ${rub(Math.round(iron))}<br/>НДС ${m.vat===1.22?"22%":"20%"} · сбор ${Math.round(m.fee*100)}% от цены авто${prio?" · приоритет":""}`}</div>
+          <div class="card dc-result ${(selected&&selected.invoice&&_pg?pOk:ok)?"ok":"bad"}">
+            ${noKM?"":`<p class="eyebrow">КМ без НДС${selected&&selected.invoice&&_pg?" · спеццена":""}</p>
+            <div class="calc-out">${rub(Math.round((selected&&selected.invoice&&_pg?pKm:km)/1000)*1000)} ₽</div>
+            <p class="calc-note">${(m.id==="l6e"||m.id==="l6u")&&typeof kmFixPair==="function"?("КМ "+kmFixPair(kmVin, prio, m)+" · "):""}${lo===hi?"Фикс "+lo:"Коридор "+lo+" … "+hi} тыс. · сейчас ${Math.round(selected&&selected.invoice&&_pg?pKmK:kmK)} тыс. · ${(selected&&selected.invoice&&_pg?pOk:ok)?(lo===hi?"на фиксе":"в коридоре"):"вне коридора"}</p>`}
+            <div class="note-box">${selected&&selected.invoice&&_pg?`Спеццена <b>${rub(pFix)} ₽</b> · скидка от РРЦ ${rub(pDiscount)}<br/>Маржа 1С ${rub(Math.round(pMargin))} · бонус ${rub(Math.round(pBonus))} · доход на железе ${rub(Math.round(pIron))}<br/>Каско 80 000 + GAP/ДМС ${rub(pCard)} внутри PANGO${useTi?" · возмещение трейд-ин "+rub(pTiBack):""}`:`Цена авто <b>${rub(Math.round(carPrice))} ₽</b> · клиенту с Д/О <b>${rub(Math.round(client))} ₽</b><br/>Скидка ${rub(Math.round(discount))} · маржа 1С ${rub(Math.round(margin))}<br/>Бонус ${rub(Math.round(bonus))} (${Math.round(m.bonus*100)}%) · доход на железе ${rub(Math.round(iron))}<br/>НДС ${m.vat===1.22?"22%":"20%"} · сбор ${Math.round(m.fee*100)}% от цены авто${prio?" · приоритет":""}`}</div>
           </div>
           ${(useLoan&&showSplit)||pShow?kmSideList(m, price, downPct, months, extras, {useTi, spec, useDcTi, dcTi, useDcCr, dcCr, downMode, down, finDelta, useLoan}):""}
         </div>`;
-    }
-    function calcVinBar(){
-      const q=escape(typeof kmVinQuery==="string"?kmVinQuery:(typeof kmVin==="string"?kmVin:""));
-      const miss=(typeof kmVinMiss==="string" && kmVinMiss)?`<p class="calc-note">${escape(kmVinMiss)}</p>`:"";
-      const now=(typeof kmVin==="string" && kmVin)?`<p class="calc-note">Считаем VIN <b>${escape(kmVin)}</b></p>`:"";
-      return `<div class="card" style="margin-bottom:12px"><button type="button" class="btn ghost" id="backStock">← На склад</button><p class="eyebrow">Конкретный VIN</p><div class="km-vin-row"><input id="kmVinFind" class="st-vin-search" type="search" inputmode="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="VIN со склада" value="${q}"><button type="button" class="chip on" id="kmVinGo">Считать</button></div>${now}${miss}</div>`;
     }
     function calcVinBar(){
       const q=escape(typeof kmVinQuery==="string"?kmVinQuery:(typeof kmVin==="string"?kmVin:""));
@@ -7478,15 +7438,50 @@ async function pingTelegram(body){
       ta.remove();
     }
     function offerNav(){
-      const tabs=[["home","Разделы"],["new","КП Новый а/м"],["service","Оценка сервиса"],["fleet","КП Флит"]];
+      const tabs=[["home","Разделы"],["new","КП Новый а/м"],["service","Оценка сервиса"],["lease","КП Лизинг"]];
       return `<div class="down-mode" style="margin:0 0 14px">${tabs.map(([id,l])=>`<button type="button" class="chip ${offerTab===id?"on":""}" data-offer-tab="${id}">${l}</button>`).join("")}</div>`;
     }
     function offerHome(){
-      const cards=[["new","Н","КП Новый а/м","Прайс, скидки, каско, кредит и PDF"],["service","С","Оценка сервиса","Клиенту из сервиса: меняем его машину на новую"],["fleet","Ф","КП Флит","С1/С2, безнал, субсидия, трейд-ин и PDF"]];
+      const cards=[["new","Н","КП Новый а/м","Прайс, скидки, каско, кредит и PDF"],["service","С","Оценка сервиса","Клиенту из сервиса: меняем его машину на новую"],["lease","Л","КП Лизинг","Компания, флит, аванс и PDF"]];
       return banner("Коммерческое предложение","TENET · Отдел продаж","КП")+`
         <p class="lead">Слева условия, справа бланк. Клиенту уходит PDF: его скачивают и пересылают.</p>
         ${offerNav()}
         <div class="hub-grid offer-grid">${cards.map(([id,mark,title,lead])=>`<button class="card hub-card" data-offer-tab="${id}" type="button"><span class="hub-mark">${mark}</span><div class="txt"><h3>${title}</h3><p>${lead}</p></div></button>`).join("")}</div>`;
+    }
+    function offerCreditTerms(){
+      const fallback=[12,24,36,48,60,72,84,96,108,120];
+      const table=typeof KM_BANK_MONTHS!=="undefined"?KM_BANK_MONTHS:null;
+      if(!table) return fallback;
+      const set=new Set();
+      Object.keys(table).forEach(id=>{ (table[id]||[]).forEach(t=>{ const n=Number(t); if(n>0) set.add(n); }); });
+      const list=[...set].sort((a,b)=>a-b);
+      if(list.length) return list;
+      return Array.isArray(table.sber)&&table.sber.length?table.sber.slice():fallback;
+    }
+    function offerCreditTerm(v){
+      const terms=offerCreditTerms();
+      const n=Math.round(Number(v)||0);
+      if(terms.indexOf(n)>=0) return n;
+      let best=terms.indexOf(60)>=0?60:terms[0], dist=1e9;
+      terms.forEach(t=>{ const d=Math.abs(t-n); if(d<dist){ dist=d; best=t; } });
+      return best;
+    }
+    function offerBankHasTerm(bankId, months){
+      const table=typeof KM_BANK_MONTHS!=="undefined"?KM_BANK_MONTHS:null;
+      const list=table&&table[bankId];
+      if(!list||!list.length) return true;
+      return list.indexOf(months)>=0;
+    }
+    function kmRopUser(){
+      try{
+        const blob=String(((typeof state!=="undefined"&&state&&state.surname)||"")+" "+((typeof state!=="undefined"&&state&&state.display)||"")).toLowerCase().replace(/ё/g,"е");
+        return blob.indexOf("леонтьев")>=0;
+      }catch(e){ return false; }
+    }
+    function kmRopOn(){
+      if(!kmRopUser()) return false;
+      if(typeof kmRopFlag==="boolean") return kmRopFlag;
+      try{ return localStorage.getItem("tenet-km-rop")==="1"; }catch(e){ return false; }
     }
     function offerDeal(){
       const models=(typeof KM_MODELS!=="undefined"?KM_MODELS:[]).filter(x=>x.id!=="t4p"&&x.id!=="t7l");
@@ -7495,52 +7490,53 @@ async function pingTelegram(body){
       if(seeded) offerSeed=null;
       const mid=S?S.mid:offerVal("ofModel", models[0]?models[0].id:"t7a");
       const m=models.find(x=>x.id===mid)||models[0]||{id:"t7a",name:"TENET",rrc:0,ti:0,cr:0};
+      const noKM=!!(m&&m.noKM)&&!(typeof kmRopOn==="function"&&kmRopOn());/*noKM*//*km-rop*/
       const prevModel=S?mid:offerVal("ofPrevModel", mid);
       const client=offerVal("ofClient","");
       const color=offerVal("ofColor","");
       let price=S?(Number(S.price)||0):(offerNum("ofPrice", m.rrc)||m.rrc);
       if(!S && prevModel!==mid) price=m.rrc;
       const useTi=S?!!S.useTi:offerOn("ofTi");
-      const useLoyal=(m.stock==="pl4"||m.stock==="pl6") && (S?!!S.useLoyal:offerOn("ofLoyal"));/*plus-loyal*/
       const useLoan=S?!!S.useLoan:offerOn("ofLoan");
       const showDealCr=(m.cr||0)>0 && (m.id!=="t7p" || useLoan);
       const useCr=showDealCr && (S?!!S.useCr:offerOn("ofCr"));
       const spec=S?(Number(S.spec)||0):(offerNum("ofSpec", 0)||0);
-      const l6u4=m.id==="l6u4";/*l6u4-lock*/
-      const useDcTi=l6u4?false:(S?!!S.useDcTi:offerOn("ofDcTi"));
-      const useDcCr=l6u4?false:(S?!!S.useDcCr:offerOn("ofDcCr"));/*km-cash-fix*/
+      const useDcTi=useTi && (S?!!S.useDcTi:offerOn("ofDcTi"));
+      const useDcCr=useLoan && (S?!!S.useDcCr:offerOn("ofDcCr"));
       const dcDef=typeof KM_DC_DEF==="number"?KM_DC_DEF:100000;
-      const dcTi=useDcTi?(S?(Number(S.dcTi)||0):(offerNum("ofDcTiAmt", dcDef)||0)):0;
-      const dcCr=useDcCr?(S?(Number(S.dcCr)||0):(offerNum("ofDcCrAmt", dcDef)||0)):0;
+      const dcTi=noKM?0:(useDcTi?(S?(Number(S.dcTi)||0):(offerNum("ofDcTiAmt", dcDef)||0)):0);
+      const dcCr=noKM?0:(useDcCr?(S?(Number(S.dcCr)||0):(offerNum("ofDcCrAmt", dcDef)||0)):0);
       const addons=S?(Number(S.addons)||0):(offerNum("ofDo", 0)||0);
+      const cascoMin=noKM?Math.max(0, Number(m.cascoGapMin)||200000):0;
       let casco=0, pack=0;
       if(useLoan){
-        pack=S?(Number(S.pack)||0):(offerNum("ofPack", l6u4?200000:150000)||0);
-        if(l6u4 && pack<200000) pack=200000;/*l6u4-casco*/
+        pack=Math.max(cascoMin, S?(Number(S.pack)||0):(offerNum("ofPack", cascoMin||150000)||0));
         casco=Math.min(pack, 80000);
-      }else{
-        casco=S?(Number(S.casco)||0):(offerNum("ofCasco", l6u4?200000:0)||0);
-        if(l6u4 && casco<200000) casco=200000;/*l6u4-casco*/
-      }
-      const months=S?(Number(S.months)||60):(offerNum("ofMonths", 60)||60);
-      const downMode=S?(S.downMode==="sum"?"sum":"pct"):offerVal("ofDownMode","pct");
+      }else casco=Math.max(cascoMin, S?(Number(S.casco)||0):(offerNum("ofCasco", cascoMin||0)||0));
+      const months=offerCreditTerm(S?(Number(S.months)||60):(offerNum("ofMonths", 60)||60));
+      const downMode=S?(S.downMode==="sum"?"sum":"pct"):(offerVal("ofDownMode","pct")==="sum"?"sum":"pct");
       let downPct=S?(Number(S.downPct)||0):offerNum("ofDownPct", 20);
       let down=S?(Number(S.down)||0):offerNum("ofDown", Math.round(price*0.2));
       const tiAmt=useTi?(m.ti||0):0;
       const crAmt=useCr?(m.cr||0):0;
       const discs=[];
       if(tiAmt) discs.push(["Трейд-ин импортёра", tiAmt]);
-      if(useLoyal) discs.push(["Elegant Трейд-Ин (Mazda / KIA / Hyundai)", 100000]);
       if(useCr && crAmt) discs.push([m.id==="t7p"?"Выгодный кредит":"Программа кредита", crAmt]);
       if(spec) discs.push(["Спецпредложение", spec]);
       if(dcTi) discs.push(["Скидка ДЦ за трейд-ин", dcTi]);
-      if(dcCr) discs.push([useLoan?"Скидка ДЦ за кредит":"Скидка ДЦ", dcCr]);
+      if(dcCr) discs.push(["Скидка ДЦ за кредит", dcCr]);
       const discount=discs.reduce((s,x)=>s+x[1],0);
       const carPrice=Math.max(0, price-discount);
-      if(downMode==="pct") down=Math.round(carPrice*Math.max(0,downPct)/100);
-      else downPct=carPrice>0?Math.round(down*1000/carPrice)/10:0;
+      if(downMode==="pct"){
+        let n=Math.round(Number(downPct));
+        if(!Number.isFinite(n)||n<1) n=1;
+        if(n>99) n=99;
+        downPct=n;
+        down=Math.round(carPrice*downPct/100);
+      }else downPct=carPrice>0?Math.round(down*1000/carPrice)/10:0;
       down=Math.max(0, Math.min(carPrice, down));
-      const fee=useLoan?(typeof KM_BANK_FEE==="number"?KM_BANK_FEE:30000):0;
+      const feeDefault=typeof KM_BANK_FEE==="number"?KM_BANK_FEE:100000;
+      const fee=useLoan?feeDefault:0;
       const extras=useLoan?(addons+pack+fee):0;
       const credit=Math.max(0, carPrice-down+extras);
       const clientPay=carPrice+addons+(useLoan?0:casco);
@@ -7548,12 +7544,14 @@ async function pingTelegram(body){
       const packEq=typeof offerPack==="function"?offerPack(m.id):null;
       const rateGroup=typeof kmRateGroup==="function"?kmRateGroup(m):"t4l_t7";
       const banks=(useLoan && typeof KM_BANKS!=="undefined"?KM_BANKS:[]).map(b=>{
+        const bFee=b.fee??feeDefault;
+        if(!offerBankHasTerm(b.id, months)) return {name:b.name, id:b.id, rate:0, term:months, pay:0, fee:bFee, na:true};
+        const bExtras=useLoan?(addons+pack+bFee):0;
         const look=typeof kmBankRate==="function"?kmBankRate(b.id, rateGroup, months, downPct):{rate:19.2, term:months};
-        if(look&&look.na) return null;
         const term=look.term||months;
-        const pay=typeof calcPay==="function"?calcPay(carPrice+extras, down, term, look.rate):0;
-        return {name:b.name, rate:look.rate, term, pay:Math.round(pay)};
-      }).filter(Boolean);
+        const pay=typeof calcPay==="function"?calcPay(carPrice+bExtras, down, term, look.rate):0;
+        return {name:b.name, id:b.id, rate:look.rate, term, pay:Math.round(pay), fee:bFee, na:false};
+      });
       const rivals=offerRivalsPicked(m, months, downPct, banks);
       const ownEl=document.getElementById("ofOwnCar");
       if(ownEl) offerOwnCar=String(ownEl.value||"").trim();
@@ -7563,20 +7561,20 @@ async function pingTelegram(body){
         offerOwnVal=Number.isFinite(n)?Math.max(0, Math.round(n)):0;
       }
       const service=offerTab==="service";
-      return {m, mid, models, client, color, price, useTi, useLoyal, useLoan, showDealCr, useCr, spec, useDcTi, useDcCr, dcDef, dcTi, dcCr, addons, casco, pack, months, downMode, downPct, down, carPrice, clientPay, credit, fee, valid, packEq, banks, discs, discount, rivals, service, ownCar:offerOwnCar, ownVal:service?offerOwnVal:0};
+      return {m, mid, models, client, color, price, useTi, useLoan, showDealCr, useCr, spec, noKM, cascoMin, useDcTi, useDcCr, dcDef, dcTi, dcCr, addons, casco, pack, months, downMode, downPct, down, carPrice, clientPay, credit, fee, valid, packEq, banks, discs, discount, rivals, service, ownCar:offerOwnCar, ownVal:service?offerOwnVal:0};
     }
     function offerDash(v){ const s=String(v||"").trim(); return s||"—"; }
     function offerPhotoKey(id){
       return ({
         t4p:"t4",
-        t4la:"t4l",t4lp:"t4l",
+        t4la:"t4l",t4lp:"t4l",t4la4:"t4l",t4lp4:"t4l",
         t7a:"t7",t7p:"t7",t7a4:"t7",t7p4:"t7",
         t8a:"t8",t8p:"t8",t8p4:"t8",t8u4:"t8",
         tt9p:"t9",tt9u:"t9",tt9u7:"t9",tt9s7:"t9",tst9:"tiggo9",tsa8:"arrizo",tst4:"tiggo4",
         ta8p:"a8",ta8u:"a8",
         t9p:"tiggo9",t9u:"tiggo9",
         t7l:"t7l",
-        l4s:"l4",l4e:"l4",l6e:"l6",l6u:"l6",l6u4:"l6",
+        l4s:"l4",l4e:"l4",l6e:"l6",l6u:"l6",
         a8a:"arrizo",a8p:"arrizo",a8u:"arrizo"
       })[id]||"";
     }
@@ -7689,7 +7687,7 @@ async function pingTelegram(body){
     function offerCreditCard(d){
       const banks=d.banks||[];
       let best=null;
-      banks.forEach(b=>{ if(!best || (Number(b.pay)||0)<(Number(best.pay)||0)) best=b; });
+      banks.forEach(b=>{ if(b.na) return; if(!best || (Number(b.pay)||0)<(Number(best.pay)||0)) best=b; });
       return {
         title:"Кредит",
         pay:best?rub(best.pay)+" ₽ / мес.":"",
@@ -7698,21 +7696,21 @@ async function pingTelegram(body){
           "Срок "+d.months+" мес.",
           "Тело кредита "+rub(d.credit)+" ₽"
         ],
-        pays:banks.map(b=>b.name+": "+b.rate+"% · "+b.term+" мес. · "+rub(b.pay)+" ₽ / мес.")
+        pays:banks.map(b=>b.na?b.name+": нет срока":b.name+": "+b.rate+"% · "+b.term+" мес. · "+rub(b.pay)+" ₽ / мес.")
       };
     }
     function offerFleetCard(d, f, n){
       const base=Math.max(0, Math.round(f.tidy||f.rrc||0));
       const sub=Math.max(0, Math.round(f.sub||0));
-      const ti=d.useDcTi?(typeof FLEET_TI==="number"?FLEET_TI:100000):0;
+      const ti=typeof FLEET_TI==="number"?FLEET_TI:100000;
       const months=Math.max(1, Math.round(Number(d.months)||60));
       const down=Math.max(0, Math.round(Number(d.down)||0));
       const have=(d.service && d.ownVal)?Math.max(0, Math.round(d.ownVal)):down;
-      const q=typeof fleetSubQuote==="function"?fleetSubQuote(Math.max(0, base-ti), sub, have, f.do||70000, f.casco||80000, months, true, 22.5):null;
+      const q=typeof fleetSubQuote==="function"?fleetSubQuote(base, sub, have, f.do||70000, f.casco||80000, months, true, 22.5):null;
       const qSber=typeof fleetSubQuote==="function"?fleetSubQuote(base, sub, have, f.do||70000, f.casco||80000, months, true, 24):null;
       const gov=Math.max(0, base-sub-ti);
       const lines=[
-        "Цена по госпрограмме с учётом субсидии"+(ti?" и трейд-ин ":" ")+rub(gov)+" ₽",
+        "Цена по госпрограмме с учётом субсидии и трейд-ин "+rub(gov)+" ₽",
         "Совкомбанк 22,5%"+(q&&q.pay?" · "+rub(Math.round(q.pay))+" ₽ / мес.":""),
         "Сбер 24%"+(qSber&&qSber.pay?" · "+rub(Math.round(qSber.pay))+" ₽ / мес.":""),
         "ПВ и субсидия не больше 49%"+(q?" · взнос до "+rub(q.maxPv)+" ₽":"")
@@ -8082,7 +8080,7 @@ async function pingTelegram(body){
     function offerRich(m){ return /ultra|ультра|4wd|2\.0/i.test((m&&m.name)||""); }
     function offerRivalPrice(r, m){
       if(offerRich(m) && r.priceHi) return {price:r.priceHi, trim:r.trimHi||r.trim};
-      if(/4wd/i.test((m&&(m.nm0||m.name))||"") && r.price4) return {price:r.price4, trim:r.trim4||r.trim};
+      if(/4wd/i.test((m&&m.name)||"") && r.price4) return {price:r.price4, trim:r.trim4||r.trim};
       return {price:r.price, trim:r.trim};
     }
     function offerOurShort(m){
@@ -8100,9 +8098,9 @@ async function pingTelegram(body){
     }
     function offerOurRate(banks, m, months, downPct){
       if(banks && banks.length){
-        let best=banks[0];
-        banks.forEach(b=>{ if((Number(b.rate)||99)<(Number(best.rate)||99)) best=b; });
-        return {rate:Number(best.rate)||0, name:best.name||"наш банк", pay:best.pay||0};
+        let best=null;
+        banks.forEach(b=>{ if(b.na) return; if(!best || (Number(b.rate)||99)<(Number(best.rate)||99)) best=b; });
+        if(best) return {rate:Number(best.rate)||0, name:best.name||"наш банк", pay:best.pay||0};
       }
       const group=typeof kmRateGroup==="function"?kmRateGroup(m):"t4l_t7";
       const look=typeof kmBankRate==="function"?kmBankRate("sovcom", group, months, downPct):{rate:19.2};
@@ -8168,18 +8166,16 @@ async function pingTelegram(body){
         ${offerRivalChecks(d.m)}
         <p class="eyebrow">Скидки</p>
         <label class="check-row"><input id="ofTi" type="checkbox" ${d.useTi?"checked":""} /> <span>Трейд-ин ${d.m.ti?rub(d.m.ti):"нет в базе"}</span></label>
-        ${(d.m.stock==="pl4"||d.m.stock==="pl6")?`<label class="check-row"><input id="ofLoyal" type="checkbox" ${d.useLoyal?"checked":""} /> <span>Elegant Трейд-Ин (Mazda / KIA / Hyundai) ${rub(100000)}</span></label>`:""}
         <label class="check-row"><input id="ofLoan" type="checkbox" ${d.useLoan?"checked":""} /> <span>Кредит</span></label>
         ${d.showDealCr?`<label class="check-row"><input id="ofCr" type="checkbox" ${d.useCr?"checked":""} /> <span>${d.m.id==="t7p"?"Выгодный кредит":"Программа кредита"} · ${rub(d.m.cr||0)}</span></label>`:""}
         ${offerField("Спецпредложение, ₽", `<input id="ofSpec" inputmode="numeric" value="${d.spec}" />`)}
-        ${d.m.id==="l6u4"?`<p class="calc-note">Скидка ДЦ на L6 Ultra 4WD не применяется.</p>`:""}
-        ${d.m.id==="l6u4"?"":`<label class="check-row"><input id="ofDcTi" type="checkbox" ${d.useDcTi?"checked":""} /> <span>Скидка ДЦ за трейд-ин</span></label>`}
-        ${(d.m.id!=="l6u4" && d.useDcTi)?offerField("Скидка ДЦ за трейд-ин, ₽", `<input id="ofDcTiAmt" inputmode="numeric" value="${d.dcTi||d.dcDef}" />`):""}
-        ${d.m.id==="l6u4"?"":`<label class="check-row"><input id="ofDcCr" type="checkbox" ${d.useDcCr?"checked":""} /> <span>${d.useLoan?"Скидка ДЦ за кредит":"Скидка ДЦ"}</span></label>`}
-        ${(d.m.id!=="l6u4" && d.useDcCr)?offerField(d.useLoan?"Скидка ДЦ за кредит, ₽":"Скидка ДЦ, ₽", `<input id="ofDcCrAmt" inputmode="numeric" value="${d.dcCr||d.dcDef}" />`):""}
+        ${d.noKM?"":`${d.useTi?`<label class="check-row"><input id="ofDcTi" type="checkbox" ${d.useDcTi?"checked":""} /> <span>Скидка ДЦ за трейд-ин</span></label>`:""}`}
+        ${d.noKM?"":`${d.useTi&&d.useDcTi?offerField("Скидка ДЦ за трейд-ин, ₽", `<input id="ofDcTiAmt" inputmode="numeric" value="${d.dcTi||d.dcDef}" />`):""}`}
+        ${d.noKM?"":`${d.useLoan?`<label class="check-row"><input id="ofDcCr" type="checkbox" ${d.useDcCr?"checked":""} /> <span>Скидка ДЦ за кредит</span></label>`:""}`}
+        ${d.noKM?"":`${d.useLoan&&d.useDcCr?offerField("Скидка ДЦ за кредит, ₽", `<input id="ofDcCrAmt" inputmode="numeric" value="${d.dcCr||d.dcDef}" />`):""}`}
         ${offerField("Д/О, ₽", `<input id="ofDo" inputmode="numeric" value="${d.addons}" />`)}
-        ${d.useLoan?offerField("Каско расширенное, ₽"+(d.m.id==="l6u4"?" · минимум 200 000":""), `<input id="ofPack" inputmode="numeric" value="${d.pack}" />`):offerField("КАСКО, ₽"+(d.m.id==="l6u4"?" · минимум 200 000":""), `<input id="ofCasco" inputmode="numeric" value="${d.casco}" />`)}
-        ${d.useLoan?`<p class="eyebrow">Кредит</p><div class="down-mode"><button type="button" class="chip ${d.downMode==="sum"?"on":""}" data-offer-down="sum">Сумма, ₽</button><button type="button" class="chip ${d.downMode!=="sum"?"on":""}" data-offer-down="pct">Проценты</button></div><input type="hidden" id="ofDownMode" value="${d.downMode==="sum"?"sum":"pct"}" />${d.downMode==="sum"?offerField("Первый взнос, ₽", `<input id="ofDown" inputmode="numeric" value="${d.down}" />`):offerField("Первый взнос, %", `<input id="ofDownPct" inputmode="decimal" value="${d.downPct}" />`)}${offerField("Срок, мес.", `<input id="ofMonths" inputmode="numeric" value="${d.months}" />`)}`:""}
+        ${d.useLoan?offerField("Каско расширенное, ₽"+(d.noKM?" · минимум "+rub(d.cascoMin||200000):""), `<input id="ofPack" inputmode="numeric" value="${d.pack}" />`):offerField("КАСКО, ₽"+(d.noKM?" · минимум "+rub(d.cascoMin||200000):""), `<input id="ofCasco" inputmode="numeric" value="${d.casco}" />`)}
+        ${d.useLoan?`<p class="eyebrow">Кредит</p><style>select.km-term{appearance:none;-webkit-appearance:none;width:100%;box-sizing:border-box;background:#fff url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path d='M1.2 1.4 6 6.2 10.8 1.4' stroke='%236b645b' stroke-width='1.4' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>") no-repeat right 12px center;border:1px solid var(--border);color:var(--fg);border-radius:10px;padding:12px 36px 12px 12px;font:15px Inter,sans-serif;cursor:pointer}select.km-term:hover{border-color:#b7a894}select.km-term:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(200,30,43,.16)}</style><div class="down-mode"><button type="button" class="chip ${d.downMode==="sum"?"on":""}" data-offer-down="sum">Сумма, ₽</button><button type="button" class="chip ${d.downMode!=="sum"?"on":""}" data-offer-down="pct">Проценты</button></div><input type="hidden" id="ofDownMode" value="${d.downMode}" />${d.downMode==="sum"?offerField("Первый взнос, ₽", `<input id="ofDown" inputmode="numeric" value="${d.down}" />`):offerField("Первый взнос, %", `<input id="ofDownPct" type="number" inputmode="numeric" min="1" max="99" step="1" value="${d.downPct}" />`)}<p class="calc-note">${rub(d.down)} ₽${d.downMode==="pct"?" · "+d.downPct+"% от цены":" · ≈ "+d.downPct+"%"}</p>${offerField("Срок, мес.", `<select id="ofMonths" class="km-term">${offerCreditTerms().map(t=>`<option value="${t}"${t===d.months?" selected":""}>${t} мес.</option>`).join("")}</select>`)}`:""}
         ${offerField("Срок действия", `<input id="ofValid" value="${escape(d.valid)}" />`)}`;
     }
     function offerFromCalc(){
@@ -8203,13 +8199,12 @@ async function pingTelegram(body){
         mid:mid,
         price:price,
         useTi:useTi,
-        useLoyal:on("kmUseLoyal"),
         useLoan:useLoan,
         useCr:on("kmUseCr"),
         spec:num("kmSpec", 0),
-        useDcTi:on("kmUseDcTi"),
+        useDcTi:useTi && on("kmUseDcTi"),
         dcTi:num("kmDcTi", typeof KM_DC_DEF==="number"?KM_DC_DEF:100000),
-        useDcCr:useLoan?on("kmUseDcCr"):on("kmUseDcCash"),
+        useDcCr:useLoan && on("kmUseDcCr"),
         dcCr:num("kmDcCr", typeof KM_DC_DEF==="number"?KM_DC_DEF:100000),
         addons:num("kmDo", 0),
         pack:num("kmPack", 150000),
@@ -8753,7 +8748,7 @@ async function pingTelegram(body){
       return offerScreen("Оценка сервиса", offerFormNew(d), offerDocNew(d));
     }
     function offerLease(){
-      const models=typeof KM_MODELS!=="undefined"?KM_MODELS:[];
+      const models=(typeof KM_MODELS!=="undefined"?KM_MODELS:[]).filter(x=>x.id!=="t4p"&&x.id!=="t7l");
       const fset=typeof FLEET_BFS!=="undefined"?FLEET_BFS:{};
       const fleetIds=Object.keys(fset).filter(id=>id!=="t4p"&&id!=="t7l");
       const options=fleetIds.length?fleetIds.map(id=>{ const km=models.find(x=>x.id===id); return {id,brand:km&&km.brand,name:(fset[id]&&fset[id].name)||id,rrc:(fset[id]&&(fset[id].rrc||fset[id].tidy))||0}; }):models;
@@ -8816,7 +8811,7 @@ async function pingTelegram(body){
       if(needAuth()) return login();
       if(offerTab==="new") return offerNew();
       if(offerTab==="service") return offerService();
-      if(offerTab==="lease") offerTab="fleet";
+      if(offerTab==="lease") return offerLease();
       return offerHome();
     }
     function offerBind(){
@@ -8831,7 +8826,7 @@ async function pingTelegram(body){
       document.querySelectorAll("[data-offer-pdf]").forEach(b=>b.onclick=()=>offerPdf());
       document.querySelectorAll("[data-offer-down]").forEach(b=>b.onclick=()=>{ const hid=document.getElementById("ofDownMode"); if(hid) hid.value=b.dataset.offerDown||"pct"; view="offer"; render(); });
       document.querySelectorAll("[data-offer-rival]").forEach(el=>el.addEventListener("change", ()=>{ view="offer"; render(); }));
-      ["ofClient","ofOwnCar","ofOwnVal","ofModel","ofColor","ofPrice","ofSpec","ofDo","ofPack","ofCasco","ofDown","ofDownPct","ofMonths","ofValid","ofTi","ofLoyal","ofLoan","ofCr","ofDcTi","ofDcCr","ofDcTiAmt","ofDcCrAmt","osClient","osModel","osCar","osVin","osPack","osPrice","osNote","osValid","olCo","olInn","olModel","olPrice","olAdv","olMonths","olValid"].forEach(id=>{ const el=document.getElementById(id); if(el) el.addEventListener("change", ()=>{ view="offer"; render(); }); });
+      ["ofClient","ofOwnCar","ofOwnVal","ofModel","ofColor","ofPrice","ofSpec","ofDo","ofPack","ofCasco","ofDown","ofDownPct","ofMonths","ofValid","ofTi","ofLoan","ofCr","ofDcTi","ofDcCr","ofDcTiAmt","ofDcCrAmt","osClient","osModel","osCar","osVin","osPack","osPrice","osNote","osValid","olCo","olInn","olModel","olPrice","olAdv","olMonths","olValid"].forEach(id=>{ const el=document.getElementById(id); if(el) el.addEventListener("change", ()=>{ view="offer"; render(); }); });
     }
 
     let tuneTab = "do";
@@ -11356,7 +11351,7 @@ async function confirmCloud(rec){
       }
       if(kmVinGo) kmVinGo.onclick=()=>{ kmApplyVin(kmVinFind?kmVinFind.value:""); };
       if(kmVinFind) kmVinFind.onkeydown=(e)=>{ if(e.key==="Enter"){ e.preventDefault(); kmApplyVin(kmVinFind.value); } };
-      ["kmRrc","kmInv","kmUseTi","kmUseLoyal","kmFleetDisc","kmFleetMpt","kmUseLoyal","kmFleetDisc","kmFleetMpt","kmUseLoyal","kmFleetDisc","kmFleetMpt","kmUseLoyal","kmFleetDisc","kmFleetMpt","kmUseLoyal","kmFleetDisc","kmFleetMpt","kmUseLoyal","kmFleetDisc","kmFleetMpt","kmUseLoyal","kmFleetDisc","kmFleetMpt","kmUseLoyal","kmFleetDisc","kmFleetMpt","kmUseLoyal","kmFleetDisc","kmFleetMpt","kmUseLoyal","kmFleetDisc","kmFleetMpt","kmUseLoyal","kmFleetDisc","kmFleetMpt","kmUseLoyal","kmFleetDisc","kmFleetMpt","kmUseLoyal","kmFleetDisc","kmFleetMpt","kmUseLoyal","kmFleetDisc","kmFleetMpt","kmUseLoyal","kmFleetDisc","kmFleetMpt","cDownMode","cDown","cDownPct","cMonths","kmUseLoan","kmUseCr","kmSpec","kmUseDcTi","kmUseDcCr","kmDcTi","kmDcCr","kmDo","kmPack","kmCasco","kmAltId","kmAltLoyal","kmAltDcTi","kmFleetSub"].forEach(id=>{
+      ["kmRrc","kmInv","kmUseTi","kmUseLoyal","kmFleetDisc","kmFleetMpt","kmUseLoyal","kmFleetDisc","kmFleetMpt","kmUseLoyal","kmFleetDisc","kmFleetMpt","kmUseLoyal","kmFleetDisc","kmFleetMpt","kmUseLoyal","kmFleetDisc","kmFleetMpt","kmUseLoyal","kmFleetDisc","kmFleetMpt","kmUseLoyal","kmFleetDisc","kmFleetMpt","kmUseLoyal","kmFleetDisc","kmFleetMpt","kmUseLoyal","kmFleetDisc","kmFleetMpt","kmUseLoyal","kmFleetDisc","kmFleetMpt","kmUseLoyal","kmFleetDisc","kmFleetMpt","kmUseLoyal","kmFleetDisc","kmFleetMpt","kmUseLoyal","kmFleetDisc","kmFleetMpt","kmUseLoyal","kmFleetDisc","kmFleetMpt","kmUseLoyal","kmFleetDisc","kmFleetMpt","cDownMode","cDown","cDownPct","cMonths","kmUseLoan","kmRop","kmUseCr","kmSpec","kmUseDcTi","kmUseDcCr","kmDcTi","kmDcCr","kmDo","kmPack","kmCasco","kmAltId","kmAltLoyal","kmAltDcTi","kmFleetSub"].forEach(id=>{
         const el=document.getElementById(id);
         if(el) el.addEventListener("change", ()=>{
           if(id==="cDown" && typeof kmDownKeep==="object"){
