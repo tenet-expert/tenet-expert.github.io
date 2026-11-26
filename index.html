@@ -5981,8 +5981,6 @@ async function pingTelegram(body){
       TERMS_PRIO.forEach(r=>{
         if(r.sold && r.seller) soldBy[r.seller]=(soldBy[r.seller]||0)+1;
       });
-      const people=roster.map(name=>({name, n:soldBy[name]||0}));
-      people.sort((a,b)=>b.n-a.n || a.name.localeCompare(b.name,"ru"));
       const team=Object.keys(soldBy).reduce((s,name)=>s+(soldBy[name]||0),0);
       const pct=max=>Math.max(0, Math.min(100, Math.round(max)));
       const teamLeft=Math.max(0, teamGoal-team);
@@ -5990,16 +5988,42 @@ async function pingTelegram(body){
         <div class="row"><b>Команда</b><span>${team} из ${teamGoal}${team>=teamGoal?" · победа":" · ещё "+teamLeft}</span></div>
         <div class="prio-track"><div class="prio-fill" style="width:${pct(team*100/teamGoal)}%"></div></div>
       </div>`;
-      const scales=`<div class="prio-scales">${teamBar}</div>`;
-      return scales+`<ol class="prio-list">`+TERMS_PRIO.map((r,i)=>{
-        const out=!!r.out;
-        const sold=!!r.sold || out;
-        const hold=!sold && !!r.reserved;
-        const n=r.seller?soldBy[r.seller]||0:0;
-        const mark=out?`<span class="sold-mark out-mark">Продан</span>`:(sold?(r.seller?`<span class="sold-mark">Продано · ${escape(r.seller)} <i>${n}</i></span>`:`<span class="sold-mark">Продано</span>`):(hold&&r.seller?`<span class="hold-mark">Бронь · ${escape(r.seller)}</span>`:""));
+      function prioKey(r){
+        const model=String(r.model||"");
+        const rank=model==="T4"?0:model==="T7"?1:model==="T8"?2:9;
+        const t=String(r.trim||"").toLowerCase().replace(/ё/g,"е");
+        const prime=/прайм|prime/.test(t)?1:0;
+        const wd=/4wd|4х4|полный/.test(t)?1:0;
+        return [rank, prime, wd, String(r.vin||"")];
+      }
+      function prioGone(r){
+        if(r.sold || r.out) return true;
+        const vin=String(r.vin||"").toUpperCase();
+        if(vin.length<11) return true;
+        const list=typeof STOCK!=="undefined"?STOCK:[];
+        const car=list.find(c=>c && String(c.vin||"").toUpperCase()===vin);
+        if(!car) return true;
+        const st=String(car.status||"").toLowerCase();
+        return !!(car.sold || st==="sold" || st==="out" || st==="issued");
+      }
+      const rows=TERMS_PRIO.slice().sort((a,b)=>{
+        const ka=prioKey(a), kb=prioKey(b);
+        for(let i=0;i<ka.length;i++){
+          if(ka[i]<kb[i]) return -1;
+          if(ka[i]>kb[i]) return 1;
+        }
+        return 0;
+      });
+      const gone=rows.filter(prioGone).length;
+      const stockDate=(typeof STOCK_META==="object" && STOCK_META && STOCK_META.updated)?STOCK_META.updated:"";
+      const scales=`<div class="prio-scales">${teamBar}</div><p class="calc-note">Продано ${gone} из ${rows.length}${stockDate?" · склад Logicstars "+escape(stockDate):""}.</p>`;
+      return scales+`<ol class="prio-list">`+rows.map((r,i)=>{
+        const goneRow=prioGone(r);
+        const hold=!goneRow && !!r.reserved;
+        const mark=goneRow?`<span class="sold-mark out-mark">Продан</span>`:(hold&&r.seller?`<span class="hold-mark">Бронь · ${escape(r.seller)}</span>`:"");
         const extra=r.extra?` · ${escape(r.extra)}`:"";
         const meta=(r.vin&&String(r.vin).length>=11)?`${escape(r.vin)} · ${escape(r.color)} · ${escape(r.year)}${extra}`:`Модель снята с продажи${r.trim?` · ${escape(r.trim)}`:""}`;
-        return `<li class="prio-item${out?" out":sold?" sold":hold?" hold":""}">
+        return `<li class="prio-item${goneRow?" out":hold?" hold":""}">
           <div class="prio-top"><b>${i+1}. ${escape(r.model)} · ${escape(r.trim)}</b>${mark}</div>
           <div class="prio-meta">${meta}</div>
           ${r.pay?`<div class="prio-pay">Взнос ${rub(r.pay)}</div>`:""}
