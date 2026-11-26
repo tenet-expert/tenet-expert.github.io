@@ -36,6 +36,20 @@ SCHED_CARD_NEW = """        ...(typeof isRop==="function"&&isRop()?[["issue","В
         ["sched","Гр","График сотрудников","Октябрь: смены, дежурства, собрание"],"""
 
 
+def refresh_blocks(html: str, css: str, js: str) -> str:
+    """Подменяет уже вшитые CSS и JS графика выдач свежими issue.css / issue.js."""
+    css_at = html.find("/* График выдач */")
+    hub = html.find(".hub-grid{", css_at if css_at >= 0 else 0)
+    if css_at >= 0 and hub > css_at:
+        html = html[:css_at] + css.strip() + "\n\n" + html[hub:]
+    js_at = html.find("/* График выдач · читает")
+    if js_at >= 0:
+        js_end = html.find("</script>", js_at)
+        if js_end > js_at:
+            html = html[:js_at] + js.strip() + "\n" + html[js_end:]
+    return html
+
+
 def patch(html: str, css: str, js: str) -> str:
     if "state.rop=true" not in html and LOGIN_OLD in html:
         html = html.replace(LOGIN_OLD, LOGIN_NEW, 1)
@@ -74,6 +88,7 @@ def patch(html: str, css: str, js: str) -> str:
             html = html.replace(anchor, block, 1)
         elif "</body>" in html:
             html = html.replace("</body>", "<script>\n" + js.strip() + "\n</script>\n</body>", 1)
+    html = refresh_blocks(html, css, js)
     return html
 
 

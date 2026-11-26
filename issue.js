@@ -1,7 +1,7 @@
 /* График выдач · читает общий Google-график, чужие ячейки не переписывает */
 var ISSUE_ID = "1lXlvHTVbrvvgX3XwdFw8Ktiaoat8OUl5IBdi0bTs1SE";
 var ISSUE_SHEETS = ["Январь","Февраль","Март","Апрель","Май","Июнь","Июль","Август","Сентябрь","Октябрь","НОЯБРЬ","Декабрь"];
-var ISSUE_TYPES = ["Нал 1 час","Кредит 2 часа","НАЛ + ТИ 2 часа","Кредит + ТИ 3 часа"];
+var ISSUE_TYPES = ["Нал 1 час","Кредит 3 часа","НАЛ + ТИ 2 часа","Кредит + ТИ 4 часа"];
 var ISSUE_BRANDS = ["Tenet","Chery","EXEED","Solaris"];
 var ISSUE_MGRS = ["Бикулов","Назарян","Спицын","Сидоров","Лавров","Ахмадуллин","Демьянов","Тальков","Велиджанов","Леонтьев","Кокуркин","Хорошунов","Елчин"];
 var ISSUE_STATE = { month: "", day: 0, form: null, busy: false, err: "", ok: "" };
@@ -21,11 +21,38 @@ function issueEsc(s){
 }
 
 function issueHours(type){
-  var m = String(type || "").match(/(\d+)\s*час/i);
+  var s = String(type || "").toLowerCase().replace(/ё/g, "е");
+  if (s.indexOf("кредит") >= 0 && s.indexOf("ти") >= 0) return 4;
+  if (s.indexOf("кредит") >= 0) return 3;
+  var m = s.match(/(\d+)\s*час/i);
   var n = m ? Number(m[1]) : 1;
   if (!n || n < 1) n = 1;
   if (n > 6) n = 6;
   return n;
+}
+
+function issueNorm(v){
+  return String(v == null ? "" : v).toLowerCase().replace(/ё/g, "е").trim();
+}
+
+function issueWhoParts(){
+  var sur = "", disp = "";
+  try {
+    sur = (typeof state !== "undefined" && state && state.surname) || "";
+    disp = (typeof state !== "undefined" && state && state.display) || "";
+  } catch (e) {}
+  return issueNorm(sur + " " + disp).split(/\s+/).filter(Boolean);
+}
+
+function issueMine(slot){
+  if (!slot) return false;
+  var parts = issueWhoParts();
+  if (!parts.length) return false;
+  var mgr = issueNorm(slot.manager);
+  if (mgr && parts.indexOf(mgr) >= 0) return true;
+  var author = issueNorm(slot.author);
+  var sur = parts[0];
+  return !!(author && sur && author === sur && (!mgr || parts.indexOf(mgr) >= 0));
 }
 
 function issueBlank(v){
@@ -68,10 +95,19 @@ function issueApplyLocal(sheet, slots){
       if (!t) break;
       var hit = slots.filter(function(s){ return s.day === rec.day && s.time === t && s.side === rec.side; })[0];
       if (!hit) continue;
+      if (rec.cleared){
+        hit.type = "";
+        hit.manager = "";
+        hit.brand = "";
+        hit.client = "";
+        hit.local = false;
+        continue;
+      }
       if (i === 0 || issueBlank(hit.type)){
         hit.type = rec.type;
         hit.manager = rec.manager;
         hit.brand = rec.brand;
+        hit.author = rec.author || "";
         if (i === 0) hit.client = rec.client;
         hit.local = true;
       }
@@ -180,13 +216,17 @@ var ISSUE_QUEUE_KEY = "Jh6X6f8S";
 
 function issueCells(rec){
   var cols = String(rec.side) === "2" ? ["J", "K", "L", "M"] : ["C", "D", "E", "F"];
+  var type = rec.cleared ? "" : (rec.type || "");
+  var manager = rec.cleared ? "" : (rec.manager || "");
+  var brand = rec.cleared ? "" : (rec.brand || "");
+  var client = rec.cleared ? "" : (rec.client || "");
   var cells = [];
   for (var i = 0; i < rec.hours; i++){
     var row = Number(rec.row) + i;
-    cells.push({ a1: cols[0] + row, v: rec.type || "" });
-    cells.push({ a1: cols[1] + row, v: rec.manager || "" });
-    cells.push({ a1: cols[2] + row, v: rec.brand || "" });
-    if (i === 0) cells.push({ a1: cols[3] + row, v: rec.client || "" });
+    cells.push({ a1: cols[0] + row, v: type });
+    cells.push({ a1: cols[1] + row, v: manager });
+    cells.push({ a1: cols[2] + row, v: brand });
+    if (i === 0) cells.push({ a1: cols[3] + row, v: client });
   }
   return cells;
 }
@@ -199,6 +239,14 @@ function issueFormBody(obj){
 }
 
 function issueEnqueue(rec, cb){
+  if (rec && rec.cleared){
+    var live = issueAt(ISSUE_CACHE[rec.sheet] || [], rec.day, rec.time, rec.side);
+    var owner = {
+      manager: (live && live.manager) ? live.manager : (rec.manager || ""),
+      author: (live && live.author) || rec.author || ""
+    };
+    if (!issueMine(owner)) { cb(new Error("Можно удалить только свою запись")); return; }
+  }
   var headers = { "Content-Type": "application/x-www-form-urlencoded" };
   fetch("https://rentry.co/api/fetch/" + ISSUE_QUEUE, {
     method: "POST", headers: headers, body: issueFormBody({ edit_code: ISSUE_QUEUE_KEY })
@@ -234,6 +282,33 @@ function issueBook(rec, cb){
   });
 }
 
+function issueDelete(slot, cb){
+  if (!issueMine(slot)) { cb(new Error("Можно удалить только свою запись")); return; }
+  var hours = issueHours(slot.type);
+  var sheet = ISSUE_STATE.month;
+  var all = issueLocalAll();
+  Object.keys(all).forEach(function(k){
+    var rec = all[k];
+    if (!rec || rec.sheet !== sheet || rec.day !== slot.day || String(rec.side) !== String(slot.side)) return;
+    var start = ISSUE_TIMES.indexOf(rec.time);
+    var at = ISSUE_TIMES.indexOf(slot.time);
+    if (start < 0 || at < 0) return;
+    if (at >= start && at < start + (rec.hours || 1)) delete all[k];
+  });
+  var tomb = {
+    sheet: sheet, day: slot.day, time: slot.time, side: slot.side,
+    row: slot.row, hours: hours, cleared: true,
+    type: slot.type || "", manager: slot.manager || "", brand: slot.brand || "",
+    client: slot.client || "", author: slot.author || ""
+  };
+  all[issueSlotKey(sheet, slot.day, slot.time, slot.side)] = tomb;
+  issueLocalSave(all);
+  issueEnqueue(tomb, function(err){
+    if (err) cb(err);
+    else cb(null, { ok: true });
+  });
+}
+
 function issueMonthNow(){
   var n = new Date();
   return ISSUE_SHEETS[n.getMonth()] || "Октябрь";
@@ -256,11 +331,17 @@ function issueFormHtml(slots){
       var on = (f.type || ISSUE_TYPES[0]) === t ? " on" : "";
       return "<button type=\"button\" class=\"chip" + on + "\" data-issue-type=\"" + issueEsc(t) + "\">" + issueEsc(t) + "</button>";
     }).join("") + "</div>" +
-    "<label class=\"field\"><span>Менеджер TENET</span><select id=\"issueMgr\">" +
-      ISSUE_MGRS.map(function(m){ return "<option>" + issueEsc(m) + "</option>"; }).join("") +
+    "<label class=\"field\"><span>Менеджер</span><select id=\"issueMgr\" class=\"is-select\">" +
+      ISSUE_MGRS.map(function(m){
+        var sel = (f.manager || "") === m ? " selected" : "";
+        return "<option" + sel + ">" + issueEsc(m) + "</option>";
+      }).join("") +
     "</select></label>" +
-    "<label class=\"field\"><span>Бренд</span><select id=\"issueBrand\">" +
-      ISSUE_BRANDS.map(function(b){ return "<option" + (b === "Tenet" ? " selected" : "") + ">" + issueEsc(b) + "</option>"; }).join("") +
+    "<label class=\"field\"><span>Бренд</span><select id=\"issueBrand\" class=\"is-select\">" +
+      ISSUE_BRANDS.map(function(b){
+        var cur = f.brand || "Tenet";
+        return "<option" + (b === cur ? " selected" : "") + ">" + issueEsc(b) + "</option>";
+      }).join("") +
     "</select></label>" +
     "<label class=\"field\"><span>VIN или фамилия клиента</span><input id=\"issueClient\" placeholder=\"Необязательно\" /></label>" +
     "<p class=\"is-span\">Займёт " + hours + " " + (hours === 1 ? "час" : hours < 5 ? "часа" : "часов") + " подряд" + (why ? " · " + issueEsc(why) : "") + "</p>" +
@@ -277,7 +358,9 @@ function issueCol(slots, day, side){
     var s = issueAt(slots, day, time, side);
     var taken = issueTaken(s);
     if (!taken){
-      html += "<button type=\"button\" class=\"is-slot free\" data-issue-side=\"" + side + "\" data-issue-time=\"" + time + "\"><b>" + time + "</b><span>свободно</span></button>";
+      var open = ISSUE_STATE.form && ISSUE_STATE.form.day === day && ISSUE_STATE.form.time === time && String(ISSUE_STATE.form.side) === String(side);
+      html += "<button type=\"button\" class=\"is-slot free" + (open ? " on" : "") + "\" data-issue-side=\"" + side + "\" data-issue-time=\"" + time + "\"><b>" + time + "</b><span>свободно</span></button>";
+      if (open) html += issueFormHtml(slots);
       return;
     }
     var h = issueHours(s.type || "1 час");
@@ -289,7 +372,8 @@ function issueCol(slots, day, side){
     }
     skip = chain - 1;
     var cls = "is-slot busy" + (issueTenet(s.brand) ? " tenet" : "") + (s.local ? " local" : "");
-    html += "<div class=\"" + cls + "\" style=\"--h:" + chain + "\"><b>" + time + (chain > 1 ? "–" + ISSUE_TIMES[i + chain - 1] : "") + "</b><em>" + issueEsc(s.type || "занято") + "</em><span>" + issueEsc([s.manager, s.brand, s.client].filter(Boolean).join(" · ")) + "</span></div>";
+    var del = issueMine(s) ? "<button type=\"button\" class=\"is-del\" data-issue-del data-issue-side=\"" + side + "\" data-issue-time=\"" + time + "\">Удалить</button>" : "";
+    html += "<div class=\"" + cls + "\" style=\"--h:" + chain + "\"><b>" + time + (chain > 1 ? "–" + ISSUE_TIMES[i + chain - 1] : "") + "</b><em>" + issueEsc(s.type || "занято") + "</em><span>" + issueEsc([s.manager, s.brand, s.client].filter(Boolean).join(" · ")) + "</span>" + del + "</div>";
   });
   return html;
 }
@@ -328,14 +412,13 @@ function issue(){
       "<section><header><p class=\"eyebrow\">колонка слева</p><h2>Оформитель 1</h2></header>" + issueCol(slots, ISSUE_STATE.day, "1") + "</section>" +
       "<section><header><p class=\"eyebrow\">колонка справа</p><h2>Оформитель 2</h2></header>" + issueCol(slots, ISSUE_STATE.day, "2") + "</section>" +
     "</div>" +
-    issueFormHtml(slots) +
     "</div>";
 }
 
 if (!window.__issueListen){
   window.__issueListen = true;
   document.addEventListener("click", function(ev){
-    var t = ev.target.closest("[data-issue-month],[data-issue-day],[data-issue-side],[data-issue-type],[data-issue-close],#issueHookSave");
+    var t = ev.target.closest("[data-issue-month],[data-issue-day],[data-issue-side],[data-issue-type],[data-issue-close],[data-issue-del],#issueHookSave");
     if (!t || !isRop()) return;
     if (t.id === "issueHookSave"){
       var input = document.getElementById("issueHook");
@@ -372,6 +455,32 @@ if (!window.__issueListen){
       if (typeof render === "function") render();
       return;
     }
+    if (t.hasAttribute("data-issue-del")){
+      var delSlots = ISSUE_CACHE[ISSUE_STATE.month] || [];
+      var delTime = t.getAttribute("data-issue-time");
+      var delSide = t.getAttribute("data-issue-side");
+      var delHit = issueAt(delSlots, ISSUE_STATE.day, delTime, delSide);
+      if (!delHit || !issueMine(delHit)){
+        ISSUE_STATE.err = "Можно удалить только свою запись";
+        if (typeof render === "function") render();
+        return;
+      }
+      if (!window.confirm("Удалить свою запись " + delTime + (delHit.manager ? " · " + delHit.manager : "") + "?")) return;
+      ISSUE_STATE.ok = "Удаляю…";
+      ISSUE_STATE.err = "";
+      if (typeof render === "function") render();
+      issueDelete(delHit, function(err){
+        if (err){ ISSUE_STATE.ok = ""; ISSUE_STATE.err = err.message || String(err); }
+        else {
+          ISSUE_STATE.err = "";
+          ISSUE_STATE.ok = "Запись удалена.";
+          delete ISSUE_CACHE[ISSUE_STATE.month];
+          issueLoad(ISSUE_STATE.month, function(){ if (typeof render === "function") render(); });
+        }
+        if (typeof render === "function") render();
+      });
+      return;
+    }
     if (t.hasAttribute("data-issue-side")){
       var slots = ISSUE_CACHE[ISSUE_STATE.month] || [];
       var time = t.getAttribute("data-issue-time");
@@ -401,7 +510,8 @@ if (!window.__issueListen){
     var rec = {
       sheet: ISSUE_STATE.month, day: f.day, time: f.time, side: f.side,
       row: hit ? hit.row : f.row, hours: hours, type: type,
-      manager: mgr, brand: brand, client: client.trim()
+      manager: mgr, brand: brand, client: client.trim(),
+      author: (typeof state !== "undefined" && state && state.surname) || ""
     };
     ISSUE_STATE.err = "";
     ISSUE_STATE.ok = "Записываю…";
@@ -417,5 +527,11 @@ if (!window.__issueListen){
       }
       if (typeof render === "function") render();
     });
+  });
+  document.addEventListener("change", function(ev){
+    var t = ev.target;
+    if (!t || !ISSUE_STATE.form) return;
+    if (t.id === "issueMgr") ISSUE_STATE.form.manager = t.value;
+    if (t.id === "issueBrand") ISSUE_STATE.form.brand = t.value;
   });
 }
