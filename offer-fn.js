@@ -53,6 +53,30 @@
         ${offerNav()}
         <div class="hub-grid offer-grid">${cards.map(([id,mark,title,lead])=>`<button class="card hub-card" data-offer-tab="${id}" type="button"><span class="hub-mark">${mark}</span><div class="txt"><h3>${title}</h3><p>${lead}</p></div></button>`).join("")}</div>`;
     }
+    function offerCreditTerms(){
+      const fallback=[12,24,36,48,60,72,84,96,108,120];
+      const table=typeof KM_BANK_MONTHS!=="undefined"?KM_BANK_MONTHS:null;
+      if(!table) return fallback;
+      const set=new Set();
+      Object.keys(table).forEach(id=>{ (table[id]||[]).forEach(t=>{ const n=Number(t); if(n>0) set.add(n); }); });
+      const list=[...set].sort((a,b)=>a-b);
+      if(list.length) return list;
+      return Array.isArray(table.sber)&&table.sber.length?table.sber.slice():fallback;
+    }
+    function offerCreditTerm(v){
+      const terms=offerCreditTerms();
+      const n=Math.round(Number(v)||0);
+      if(terms.indexOf(n)>=0) return n;
+      let best=terms.indexOf(60)>=0?60:terms[0], dist=1e9;
+      terms.forEach(t=>{ const d=Math.abs(t-n); if(d<dist){ dist=d; best=t; } });
+      return best;
+    }
+    function offerBankHasTerm(bankId, months){
+      const table=typeof KM_BANK_MONTHS!=="undefined"?KM_BANK_MONTHS:null;
+      const list=table&&table[bankId];
+      if(!list||!list.length) return true;
+      return list.indexOf(months)>=0;
+    }
     function offerDeal(){
       const models=(typeof KM_MODELS!=="undefined"?KM_MODELS:[]).filter(x=>x.id!=="t4p"&&x.id!=="t7l");
       const seeded=!!(offerSeed && !document.getElementById("ofModel"));
@@ -83,7 +107,7 @@
         pack=Math.max(cascoMin, S?(Number(S.pack)||0):(offerNum("ofPack", cascoMin||150000)||0));
         casco=Math.min(pack, 80000);
       }else casco=Math.max(cascoMin, S?(Number(S.casco)||0):(offerNum("ofCasco", cascoMin||0)||0));
-      const months=(typeof kmCreditTerm==="function"?kmCreditTerm:function(v){ const terms=[12,24,36,48,60,72,84,96]; const n=Math.round(Number(v)||0); if(terms.indexOf(n)>=0) return n; let best=60, dist=1e9; terms.forEach(t=>{ const d=Math.abs(t-n); if(d<dist){ dist=d; best=t; } }); return best; })(S?(Number(S.months)||60):(offerNum("ofMonths", 60)||60));
+      const months=offerCreditTerm(S?(Number(S.months)||60):(offerNum("ofMonths", 60)||60));
       const downMode=S?(S.downMode==="sum"?"sum":"pct"):(offerVal("ofDownMode","pct")==="sum"?"sum":"pct");
       let downPct=S?(Number(S.downPct)||0):offerNum("ofDownPct", 20);
       let down=S?(Number(S.down)||0):offerNum("ofDown", Math.round(price*0.2));
@@ -115,11 +139,12 @@
       const rateGroup=typeof kmRateGroup==="function"?kmRateGroup(m):"t4l_t7";
       const banks=(useLoan && typeof KM_BANKS!=="undefined"?KM_BANKS:[]).map(b=>{
         const bFee=b.fee??feeDefault;
+        if(!offerBankHasTerm(b.id, months)) return {name:b.name, id:b.id, rate:0, term:months, pay:0, fee:bFee, na:true};
         const bExtras=useLoan?(addons+pack+bFee):0;
         const look=typeof kmBankRate==="function"?kmBankRate(b.id, rateGroup, months, downPct):{rate:19.2, term:months};
         const term=look.term||months;
         const pay=typeof calcPay==="function"?calcPay(carPrice+bExtras, down, term, look.rate):0;
-        return {name:b.name, rate:look.rate, term, pay:Math.round(pay), fee:bFee};
+        return {name:b.name, id:b.id, rate:look.rate, term, pay:Math.round(pay), fee:bFee, na:false};
       });
       const rivals=offerRivalsPicked(m, months, downPct, banks);
       const ownEl=document.getElementById("ofOwnCar");
@@ -256,7 +281,7 @@
     function offerCreditCard(d){
       const banks=d.banks||[];
       let best=null;
-      banks.forEach(b=>{ if(!best || (Number(b.pay)||0)<(Number(best.pay)||0)) best=b; });
+      banks.forEach(b=>{ if(b.na) return; if(!best || (Number(b.pay)||0)<(Number(best.pay)||0)) best=b; });
       return {
         title:"Кредит",
         pay:best?rub(best.pay)+" ₽ / мес.":"",
@@ -265,7 +290,7 @@
           "Срок "+d.months+" мес.",
           "Тело кредита "+rub(d.credit)+" ₽"
         ],
-        pays:banks.map(b=>b.name+": "+b.rate+"% · "+b.term+" мес. · "+rub(b.pay)+" ₽ / мес.")
+        pays:banks.map(b=>b.na?b.name+": нет срока":b.name+": "+b.rate+"% · "+b.term+" мес. · "+rub(b.pay)+" ₽ / мес.")
       };
     }
     function offerFleetCard(d, f, n){
@@ -667,9 +692,9 @@
     }
     function offerOurRate(banks, m, months, downPct){
       if(banks && banks.length){
-        let best=banks[0];
-        banks.forEach(b=>{ if((Number(b.rate)||99)<(Number(best.rate)||99)) best=b; });
-        return {rate:Number(best.rate)||0, name:best.name||"наш банк", pay:best.pay||0};
+        let best=null;
+        banks.forEach(b=>{ if(b.na) return; if(!best || (Number(b.rate)||99)<(Number(best.rate)||99)) best=b; });
+        if(best) return {rate:Number(best.rate)||0, name:best.name||"наш банк", pay:best.pay||0};
       }
       const group=typeof kmRateGroup==="function"?kmRateGroup(m):"t4l_t7";
       const look=typeof kmBankRate==="function"?kmBankRate("sovcom", group, months, downPct):{rate:19.2};
@@ -744,7 +769,7 @@
         ${d.noKM?"":`${d.useLoan&&d.useDcCr?offerField("Скидка ДЦ за кредит, ₽", `<input id="ofDcCrAmt" inputmode="numeric" value="${d.dcCr||d.dcDef}" />`):""}`}
         ${offerField("Д/О, ₽", `<input id="ofDo" inputmode="numeric" value="${d.addons}" />`)}
         ${d.useLoan?offerField("Каско расширенное, ₽"+(d.noKM?" · минимум "+rub(d.cascoMin||200000):""), `<input id="ofPack" inputmode="numeric" value="${d.pack}" />`):offerField("КАСКО, ₽"+(d.noKM?" · минимум "+rub(d.cascoMin||200000):""), `<input id="ofCasco" inputmode="numeric" value="${d.casco}" />`)}
-        ${d.useLoan?`<p class="eyebrow">Кредит</p><style>select.km-term{appearance:none;-webkit-appearance:none;width:100%;box-sizing:border-box;background:#fff url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path d='M1.2 1.4 6 6.2 10.8 1.4' stroke='%236b645b' stroke-width='1.4' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>") no-repeat right 12px center;border:1px solid var(--border);color:var(--fg);border-radius:10px;padding:12px 36px 12px 12px;font:15px Inter,sans-serif;cursor:pointer}select.km-term:hover{border-color:#b7a894}select.km-term:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(200,30,43,.16)}</style><div class="down-mode"><button type="button" class="chip ${d.downMode==="sum"?"on":""}" data-offer-down="sum">Сумма, ₽</button><button type="button" class="chip ${d.downMode!=="sum"?"on":""}" data-offer-down="pct">Проценты</button></div><input type="hidden" id="ofDownMode" value="${d.downMode}" />${d.downMode==="sum"?offerField("Первый взнос, ₽", `<input id="ofDown" inputmode="numeric" value="${d.down}" />`):offerField("Первый взнос, %", `<input id="ofDownPct" type="number" inputmode="numeric" min="1" max="99" step="1" value="${d.downPct}" />`)}<p class="calc-note">${rub(d.down)} ₽${d.downMode==="pct"?" · "+d.downPct+"% от цены":" · ≈ "+d.downPct+"%"}</p>${offerField("Срок, мес.", `<select id="ofMonths" class="km-term">${[12,24,36,48,60,72,84,96].map(t=>`<option value="${t}"${t===d.months?" selected":""}>${t} мес.</option>`).join("")}</select>`)}`:""}
+        ${d.useLoan?`<p class="eyebrow">Кредит</p><style>select.km-term{appearance:none;-webkit-appearance:none;width:100%;box-sizing:border-box;background:#fff url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path d='M1.2 1.4 6 6.2 10.8 1.4' stroke='%236b645b' stroke-width='1.4' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>") no-repeat right 12px center;border:1px solid var(--border);color:var(--fg);border-radius:10px;padding:12px 36px 12px 12px;font:15px Inter,sans-serif;cursor:pointer}select.km-term:hover{border-color:#b7a894}select.km-term:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(200,30,43,.16)}</style><div class="down-mode"><button type="button" class="chip ${d.downMode==="sum"?"on":""}" data-offer-down="sum">Сумма, ₽</button><button type="button" class="chip ${d.downMode!=="sum"?"on":""}" data-offer-down="pct">Проценты</button></div><input type="hidden" id="ofDownMode" value="${d.downMode}" />${d.downMode==="sum"?offerField("Первый взнос, ₽", `<input id="ofDown" inputmode="numeric" value="${d.down}" />`):offerField("Первый взнос, %", `<input id="ofDownPct" type="number" inputmode="numeric" min="1" max="99" step="1" value="${d.downPct}" />`)}<p class="calc-note">${rub(d.down)} ₽${d.downMode==="pct"?" · "+d.downPct+"% от цены":" · ≈ "+d.downPct+"%"}</p>${offerField("Срок, мес.", `<select id="ofMonths" class="km-term">${offerCreditTerms().map(t=>`<option value="${t}"${t===d.months?" selected":""}>${t} мес.</option>`).join("")}</select>`)}`:""}
         ${offerField("Срок действия", `<input id="ofValid" value="${escape(d.valid)}" />`)}`;
     }
     function offerFromCalc(){
