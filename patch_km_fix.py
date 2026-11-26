@@ -1073,8 +1073,75 @@ def pin_tplus_extra(text):
     return text
 
 
+def pin_t4l_4wd(text):
+    """26.11.2026: T4L Active/Prime 4WD из прайса. РРЦ и дилерская, официальные скидки 0.
+    Держит строки, если синк канона их ещё не привёз или привёз со старыми цифрами."""
+    rows = {
+        "t4la4": '{id:"t4la4",brand:"TENET",name:"T4L Active 4WD",stock:"t4l",rrc:2504000,dealer:2409000,ti:0,tiBack:0,cr:0,crBack:0,bonus:0.02,vat:1.22,fee:0.01,kmMin:0,kmMax:50,prioMin:0,prioMax:50}',
+        "t4lp4": '{id:"t4lp4",brand:"TENET",name:"T4L Prime 4WD",stock:"t4l",rrc:2670000,dealer:2580000,ti:0,tiBack:0,cr:0,crBack:0,bonus:0.02,vat:1.22,fee:0.01,kmMin:0,kmMax:50,prioMin:0,prioMax:50}',
+    }
+    nums = {
+        "t4la4": {"rrc": 2504000, "dealer": 2409000, "ti": 0, "tiBack": 0, "cr": 0, "crBack": 0, "bonus": 0.02, "vat": 1.22, "fee": 0.01, "kmMin": 0, "kmMax": 50, "prioMin": 0, "prioMax": 50},
+        "t4lp4": {"rrc": 2670000, "dealer": 2580000, "ti": 0, "tiBack": 0, "cr": 0, "crBack": 0, "bonus": 0.02, "vat": 1.22, "fee": 0.01, "kmMin": 0, "kmMax": 50, "prioMin": 0, "prioMax": 50},
+    }
+    a = text.find("const KM_MODELS")
+    b = text.find("];", a if a >= 0 else 0)
+    if a < 0 or b < 0:
+        return text
+    block = text[a:b]
+    orig = block
+    if 'id:"t4la4"' not in block:
+        loc = re.search(r'\{id:"t4lp"[^}]*\}', block)
+        if loc:
+            block = block[:loc.end()] + ",\n      " + rows["t4la4"] + block[loc.end():]
+    if 'id:"t4lp4"' not in block:
+        loc = re.search(r'\{id:"t4la4"[^}]*\}', block)
+        if loc:
+            block = block[:loc.end()] + ",\n      " + rows["t4lp4"] + block[loc.end():]
+    for bid, fields in nums.items():
+        m = re.search(r'\{id:"%s"[^}]*\}' % bid, block)
+        if not m:
+            continue
+        row = m.group(0)
+        for k, v in fields.items():
+            if re.search(r"\b" + k + r":-?\d+(?:\.\d+)?", row):
+                row = re.sub(r"\b" + k + r":-?\d+(?:\.\d+)?", "%s:%s" % (k, v), row, count=1)
+            else:
+                row = row[:-1] + ",%s:%s}" % (k, v)
+        if row != m.group(0):
+            block = block[:m.start()] + row + block[m.end():]
+    old_id = 'if(car.model==="t4l") return t.includes("прайм")?"t4lp":"t4la";'
+    new_id = (
+        'if(car.model==="t4l"){\n'
+        '        if(t.includes("4wd") && t.includes("прайм")) return "t4lp4";\n'
+        '        if(t.includes("4wd")) return "t4la4";\n'
+        '        if(t.includes("прайм")) return "t4lp";\n'
+        '        return "t4la";\n'
+        '      }'
+    )
+    text2 = text[:a] + block + text[b:]
+    text2 = text2.replace(old_id, new_id)
+    text2 = text2.replace(
+        'if(id==="t4la") return t.includes("актив");',
+        'if(id==="t4la") return t.includes("актив") && !t.includes("4wd");',
+    )
+    text2 = text2.replace(
+        'if(id==="t4lp") return t.includes("прайм");\n',
+        'if(id==="t4lp") return t.includes("прайм") && !t.includes("4wd");\n'
+        '      if(id==="t4la4") return t.includes("актив") && t.includes("4wd");\n'
+        '      if(id==="t4lp4") return t.includes("прайм") && t.includes("4wd");\n',
+    )
+    text2 = text2.replace(
+        'if(id==="t4la"||id==="t4lp") return "T4L";',
+        'if(id==="t4la"||id==="t4lp"||id==="t4la4"||id==="t4lp4") return "T4L";',
+    )
+    if text2 != text:
+        print("km-fix: pin T4L 4WD t4la4/t4lp4")
+    return text2
+
+
 def apply(text):
-    return pin_tplus_extra(pin_l6u4_ui(ensure_borderless(rename_trims(fix_code(fix_data(text))))))
+    return pin_t4l_4wd(pin_tplus_extra(pin_l6u4_ui(ensure_borderless(rename_trims(fix_code(fix_data(text)))))))
 
 
 def main():
