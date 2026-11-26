@@ -605,6 +605,12 @@ def ensure_local(text):
         print("terms sync: l6 pin skipped:", e)
     text = ensure_pango_rates(text)
     text = pin_bank_dms(text)
+    try:
+        import patch_km_fix
+        if hasattr(patch_km_fix, "pin_t4l_4wd"):
+            text = patch_km_fix.pin_t4l_4wd(text)
+    except Exception as e:
+        print("terms sync: t4l 4wd pin skipped:", e)
     text = pin_t7_prime_spec(text)
     # 24.11.2026: «TENET Plus Выбор» = спец T+. Пин, чтобы синк не вернул +70 000.
     text = ensure_tplus_choice(text)

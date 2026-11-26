@@ -56,8 +56,10 @@
     function kmTrimFit(m, car){
       const t=(car.trim||"").toLowerCase();
       const id=m.id;
-      if(id==="t4la") return t.includes("актив");
-      if(id==="t4lp") return t.includes("прайм");
+      if(id==="t4la") return t.includes("актив") && !t.includes("4wd");
+      if(id==="t4lp") return t.includes("прайм") && !t.includes("4wd");
+      if(id==="t4la4") return t.includes("актив") && t.includes("4wd");
+      if(id==="t4lp4") return t.includes("прайм") && t.includes("4wd");
       if(id==="t7a") return t.includes("актив") && !t.includes("4wd");
       if(id==="t7p") return t.includes("прайм") && !t.includes("4wd");
       if(id==="t7a4") return t.includes("актив") && t.includes("4wd");
@@ -81,7 +83,12 @@
     function kmIdFromCar(car){
       const t=(car.trim||"").toLowerCase();
       if(car.model==="t4") return "t4p";
-      if(car.model==="t4l") return t.includes("прайм")?"t4lp":"t4la";
+      if(car.model==="t4l"){
+        if(t.includes("4wd") && t.includes("прайм")) return "t4lp4";
+        if(t.includes("4wd")) return "t4la4";
+        if(t.includes("прайм")) return "t4lp";
+        return "t4la";
+      }
       if(car.model==="t7"){
         if(t.includes("4wd") && t.includes("прайм")) return "t7p4";
         if(t.includes("4wd")) return "t7a4";
@@ -107,7 +114,7 @@
     }
     function kmLineOf(id){
       if(id==="t4p") return "T4";
-      if(id==="t4la"||id==="t4lp") return "T4L";
+      if(id==="t4la"||id==="t4lp"||id==="t4la4"||id==="t4lp4") return "T4L";
       if(id==="t7a"||id==="t7p"||id==="t7a4"||id==="t7p4") return "T7";
       if(id==="t8a"||id==="t8p"||id==="t8p4"||id==="t8u4") return "T8";
       if(id==="tt9p"||id==="tt9u") return "TENET T9";
