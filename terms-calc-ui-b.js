@@ -30,16 +30,32 @@
         if(n>99) n=99;
         return n;
       }
+      function kmTermList(){
+        const fallback=[12,24,36,48,60,72,84,96,108,120];
+        const table=typeof KM_BANK_MONTHS!=="undefined"?KM_BANK_MONTHS:null;
+        if(!table) return fallback;
+        const set=new Set();
+        Object.keys(table).forEach(id=>{ (table[id]||[]).forEach(t=>{ const n=Number(t); if(n>0) set.add(n); }); });
+        const list=[...set].sort((a,b)=>a-b);
+        if(list.length) return list;
+        return Array.isArray(table.sber)&&table.sber.length?table.sber.slice():fallback;
+      }
       function kmCreditTerm(v){
-        const terms=[12,24,36,48,60,72,84,96];
+        const terms=kmTermList();
         const n=Math.round(Number(v)||0);
         if(terms.indexOf(n)>=0) return n;
-        let best=60, dist=1e9;
+        let best=terms.indexOf(60)>=0?60:terms[0], dist=1e9;
         terms.forEach(t=>{ const d=Math.abs(t-n); if(d<dist){ dist=d; best=t; } });
         return best;
       }
       function kmTermOptions(months){
-        return [12,24,36,48,60,72,84,96].map(t=>`<option value="${t}"${t===months?" selected":""}>${t} мес.</option>`).join("");
+        return kmTermList().map(t=>`<option value="${t}"${t===months?" selected":""}>${t} мес.</option>`).join("");
+      }
+      function kmBankHasTerm(bankId, months){
+        const table=typeof KM_BANK_MONTHS!=="undefined"?KM_BANK_MONTHS:null;
+        const list=table&&table[bankId];
+        if(!list||!list.length) return true;
+        return list.indexOf(months)>=0;
       }
       const kmOff={t4p:1,t7l:1,t9p:1,a8a:1,a8u:1};
       if(typeof kmId!=="string" || !KM_MODELS.some(x=>x.id===kmId && !kmOff[x.id])){ kmId=(KM_MODELS.find(x=>!kmOff[x.id])||KM_MODELS[0]).id; kmVin=""; }
@@ -157,22 +173,24 @@
         const bFee=b.fee??feeDefault;
         const bExtras=(useLoan||_pgTrim)?(addons+(pack||0)+bFee):0;
         const bCredit=Math.max(0, price-down+bExtras);
+        if(!kmBankHasTerm(b.id, months)) return Object.assign({}, b, {fee:bFee, rate:0, term:months, capped:false, na:true, pay:0, over:0});
         const look=typeof kmBankRate==="function"?kmBankRate(b.id, rateGroup, months, downPct):{rate:b.rate||0, term:months, capped:false};
         const term=look.term||months;
         const pay=calcPay(price+bExtras, down, term, look.rate);
-        return Object.assign({}, b, {fee:bFee, rate:look.rate, term, capped:!!look.capped, pay, over:pay*term-bCredit});
+        return Object.assign({}, b, {fee:bFee, rate:look.rate, term, capped:!!look.capped, na:false, pay, over:pay*term-bCredit});
       });
       function kmPayRows(list, payKey, overKey){
         return list.map(b=>{
           const yearsWant=Math.round(months/12);
           const yearsHave=Math.round(b.term/12);
-          const note=b.termNote?b.termNote:(b.capped?`нет ${yearsWant} ${yearsWant===1?"года":"лет"} · считаем ${b.term} мес. (${yearsHave} ${yearsHave===1?"год":yearsHave<5?"года":"лет"})`: `${b.term} мес.`);
-          const pay=Math.round(b[payKey]||0);
-          const over=Math.round(b[overKey]||0);
+          const note=b.na?"нет срока":(b.termNote?b.termNote:(b.capped?`нет ${yearsWant} ${yearsWant===1?"года":"лет"} · считаем ${b.term} мес. (${yearsHave} ${yearsHave===1?"год":yearsHave<5?"года":"лет"})`: `${b.term} мес.`));
+          const pay=b.na?0:Math.round(b[payKey]||0);
+          const over=b.na?0:Math.round(b[overKey]||0);
           const isSov=b.id==="sovcom" || /совком/i.test(b.name||"");
           const cls=isSov?"bank-row sovcom-priority":"bank-row";
           const style=isSov?' style="background:#fff8e6;border-radius:10px;padding:12px 14px;margin:4px -6px;box-shadow:0 0 0 2px #f5a623"':'';
           const badge=isSov?' <span style="background:#f5a623;color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;margin-left:6px;letter-spacing:.04em">ПРИОРИТЕТ</span>':'';
+          if(b.na) return `<div class="${cls}"${style}><span><b>${escape(b.name)}</b>${badge}<br/><small>нет срока</small></span><span class="pay">—</span></div>`;
           return `<div class="${cls}"${style}><span><b>${escape(b.name)}</b>${badge}<br/><small>${b.rate}% · ${note} · переплата ~${rub(over)}</small></span><span class="pay"${isSov?' style="font-size:20px;color:#c47d00"':''}>${rub(pay)} ₽</span></div>`;
         }).join("");
       }
@@ -239,10 +257,11 @@
             const bFee=b.fee??feeDefault;
             const bExtras=(addons+(pack||0)+bFee);
             const bCredit=Math.max(0, altPrice-altDown+bExtras);
+            if(!kmBankHasTerm(b.id, months)) return Object.assign({}, b, {fee:bFee, rate:0, term:months, capped:false, na:true, pay:0, over:0});
             const look=typeof kmBankRate==="function"?kmBankRate(b.id, altGroup, months, altPct):{rate:0, term:months, capped:false};
             const term=look.term||months;
             const pay=calcPay(altPrice+bExtras, altDown, term, look.rate);
-            return Object.assign({}, b, {fee:bFee, rate:look.rate, term, capped:!!look.capped, pay, over:pay*term-bCredit});
+            return Object.assign({}, b, {fee:bFee, rate:look.rate, term, capped:!!look.capped, na:false, pay, over:pay*term-bCredit});
           });
           const fAlt=typeof fleetOf==="function"?fleetOf(alt.id):null;
           const altSub=(fAlt&&fAlt.sub)||0;
