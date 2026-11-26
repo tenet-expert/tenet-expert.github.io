@@ -4848,8 +4848,7 @@ async function pingTelegram(body){
     };
     /* TPLUS_CHOICE_END */
     const TERMS_PRIO = [
-      {model:"T4",vin:"EDEEB31B8TE003261",trim:"Прайм",year:"2026",color:"Светло-серый",extra:"",pay:1000,kmTi:-50,kmCash:0,sold:true,out:true},
-      {model:"Tiggo 7 L",vin:"",trim:"Active",year:"2025",color:"",extra:"",pay:0,sold:true,out:true},
+      {model:"T4",vin:"EDEEB31B8TE003261",trim:"Прайм",year:"2026",color:"Светло-серый",extra:"",pay:1000,kmTi:-50,kmCash:0},
       {model:"T8",vin:"EDXGD34B5TE095631",trim:"Прайм 7 мест 4WD",year:"2026",color:"Чёрный",extra:"",pay:1000,kmTi:-50,kmCash:0},
       {model:"T8",vin:"EDXGD34B8TE095347",trim:"Прайм 7 мест 4WD",year:"2026",color:"Белый",extra:"",pay:1000,kmTi:-50,kmCash:0},
       {model:"T7",vin:"EDEFB32BXTE100707",trim:"Актив",year:"2026",color:"Белый",extra:"",pay:1000,kmTi:-50,kmCash:0},
@@ -4858,7 +4857,7 @@ async function pingTelegram(body){
       {model:"T7",vin:"EDXFD32B2TE042710",trim:"Актив 4WD",year:"2026",color:"Белый",extra:"",pay:1000,kmTi:-50,kmCash:0},
       {model:"T8",vin:"EDXGB32B8TE110275",trim:"Прайм 5 мест 2WD",year:"2026",color:"Чёрный",extra:"",pay:1000,kmTi:0,kmCash:30},
       {model:"T8",vin:"EDXGB32B1TE110196",trim:"Прайм 5 мест 2WD",year:"2026",color:"Белый",extra:"",pay:1000,kmTi:0,kmCash:30},
-      {model:"T8",vin:"EDXGB32B0TE089261",trim:"Актив 5 мест 2WD",year:"2026",color:"Светло-серый",extra:"",pay:1000,kmTi:0,kmCash:30},
+      {model:"T8",vin:"EDXGB32B0TE089261",trim:"Прайм 5 мест 2WD",year:"2026",color:"Светло-серый",extra:"",pay:1000,kmTi:0,kmCash:30},
       {model:"T7",vin:"EDEFD32B1TE101190",trim:"Прайм 4WD",year:"2026",color:"Белый",extra:"",pay:1000,kmTi:0,kmCash:50},
       {model:"T7",vin:"EDEFD32B5TE102522",trim:"Прайм 4WD",year:"2026",color:"Белый",extra:"",pay:1000,kmTi:-50,kmCash:0},
       {model:"T7",vin:"EDEFB32B2TE105500",trim:"Актив",year:"2026",color:"Чёрный",extra:"",pay:1000,kmTi:0,kmCash:50}
@@ -6277,8 +6276,8 @@ async function pingTelegram(body){
         `<div class="terms-cards">`+termGroup(TERMS_BONUS,"bonus")+`</div></details>`+
         `</div>`+
         (typeof stockTestHtml==="function"?stockTestHtml(true):"")+
-        `<h2>Приоритет · октябрь · ${TERMS_PRIO.length} авто${TERMS_PRIO.some(r=>r.out)?" · "+TERMS_PRIO.filter(r=>r.out).length+" продано":""}</h2>`+
-        `<p class="lead">Личного плана нет. Командная победа — 13 машин из списка.</p>`+
+        `<h2>Приоритет · 26.11 · ${TERMS_PRIO.length} авто</h2>`+
+        `<p class="lead">Личный план — нет. Командный план — 13.</p>`+
         prioList()+
         `<p class="lead">Доплата за 4WD на T7 — 205 000 ₽. Мотор T7 везде 1.6T 150.</p>`+
         `<div class="who-line"><button class="btn ivory" data-go="calc">В калькулятор</button>${isAo()?"":`<button class="btn ghost" data-go="docs">Документы</button>`}</div>`+
