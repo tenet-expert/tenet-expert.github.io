@@ -4893,7 +4893,7 @@ async function pingTelegram(body){
       {id:"l4e",brand:"TENET PLUS",name:"L4 Elegant",stock:"pl4",rrc:2690000,dealer:2582400,ti:150000,tiBack:150000,cr:0,crBack:0,bonus:0.022,vat:1.22,fee:0.01,kmMin:-30,kmMax:50,prioMin:-30,prioMax:50},
       {id:"l6e",brand:"TENET PLUS",name:"L6 Elegant",stock:"pl6",rrc:2890000,dealer:2745500,ti:100000,tiBack:70000,cr:0,crBack:0,bonus:0.022,vat:1.22,fee:0.01,kmMin:100,kmMax:200,prioMin:100,prioMax:200},
       {id:"l6u",brand:"TENET PLUS",name:"L6 Ultra",stock:"pl6",rrc:3040000,dealer:2888000,ti:100000,tiBack:70000,cr:0,crBack:0,bonus:0.022,vat:1.22,fee:0.01,kmMin:100,kmMax:200,prioMin:100,prioMax:200},
-      {id:"l6u4",brand:"TENET PLUS",name:"L6 Ultra 4WD",stock:"pl6",rrc:3290000,dealer:3138000,ti:100000,tiBack:70000,cr:0,crBack:0,bonus:0.022,vat:1.22,fee:0.01,kmMin:0,kmMax:50,prioMin:0,prioMax:50}
+      {id:"l6u4",brand:"TENET PLUS",name:"L6 Ultra 4WD",stock:"pl6",rrc:3290000,dealer:3138000,ti:100000,tiBack:70000,cr:0,crBack:0,bonus:0.022,vat:1.22,fee:0.01,kmMin:0,kmMax:50,prioMin:0,prioMax:50,noKM:true,dcMax:0,cascoGapMin:200000}
     ];
     const PRIO_VINS = new Set(["EDEEB31B8TE003261", "EDXGD34B5TE095631", "EDXGD34B8TE095347", "EDEFB32BXTE100707", "EDEFB32B8TE099203", "EDEFB32B8TE105355", "EDXFD32B2TE042710", "EDXGB32B8TE110275", "EDXGB32B1TE110196", "EDXGB32B0TE089261", "EDEFD32B1TE101190", "EDEFD32B5TE102522", "EDEFB32B2TE105500"]);
 
@@ -6946,7 +6946,7 @@ select.km-term:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3
           <div class="card dc-result ${(selected&&selected.invoice&&_pg?pOk:ok)?"ok":"bad"}">
             ${noKM?"":`<p class="eyebrow">КМ без НДС${selected&&selected.invoice&&_pg?" · спеццена":""}</p>
             <div class="calc-out">${rub(Math.round((selected&&selected.invoice&&_pg?pKm:km)/1000)*1000)} ₽</div>
-            <p class="calc-note">${(m.id==="l6e"||m.id==="l6u")&&typeof kmFixPair==="function"?("КМ "+kmFixPair(kmVin, prio, m)+" · "):""}${lo===hi?"Фикс "+lo:"Коридор "+lo+" … "+hi} тыс. · сейчас ${Math.round(selected&&selected.invoice&&_pg?pKmK:kmK)} тыс. · ${(selected&&selected.invoice&&_pg?pOk:ok)?(lo===hi?"на фиксе":"в коридоре"):"вне коридора"}</p>`}
+            <p class="calc-note">${(m.id==="l6e"||m.id==="l6u"||m.id==="l6u4")&&typeof kmFixPair==="function"?("КМ "+kmFixPair(kmVin, prio, m)+" · "):""}${lo===hi?"Фикс "+lo:"Коридор "+lo+" … "+hi} тыс. · сейчас ${Math.round(selected&&selected.invoice&&_pg?pKmK:kmK)} тыс. · ${(selected&&selected.invoice&&_pg?pOk:ok)?(lo===hi?"на фиксе":"в коридоре"):"вне коридора"}</p>`}
             <div class="note-box">${selected&&selected.invoice&&_pg?`Спеццена <b>${rub(pFix)} ₽</b> · скидка от РРЦ ${rub(pDiscount)}<br/>Маржа 1С ${rub(Math.round(pMargin))} · бонус ${rub(Math.round(pBonus))} · доход на железе ${rub(Math.round(pIron))}<br/>Каско 80 000 + GAP/ДМС ${rub(pCard)} внутри PANGO${useTi?" · возмещение трейд-ин "+rub(pTiBack):""}`:`Цена авто <b>${rub(Math.round(carPrice))} ₽</b> · клиенту с Д/О <b>${rub(Math.round(client))} ₽</b><br/>Скидка ${rub(Math.round(discount))} · маржа 1С ${rub(Math.round(margin))}<br/>Бонус ${rub(Math.round(bonus))} (${Math.round(m.bonus*100)}%) · доход на железе ${rub(Math.round(iron))}<br/>НДС ${m.vat===1.22?"22%":"20%"} · сбор ${Math.round(m.fee*100)}% от цены авто${prio?" · приоритет":""}`}</div>
           </div>
           ${(useLoan&&showSplit)||pShow?kmSideList(m, price, downPct, months, extras, {useTi, spec, useDcTi, dcTi, useDcCr, dcCr, downMode, down, finDelta, useLoan}):""}

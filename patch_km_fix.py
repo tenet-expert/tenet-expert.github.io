@@ -242,7 +242,7 @@ L6_CORRIDOR_RE = re.compile(r'\{model:"L6",trim:"[^"]*",km:"[^"]*",note:"[^"]*"\
 
 def pin_l6(text):
     """22.11.2026: L6 Elegant/Ultra КМ 100 с ТИ / 200 без ТИ.
-    L6 Ultra 4WD (l6u4) без КМ: km 0/0, noKM:true, dcMax 0, cascoGapMin 200000.
+    L6 Ultra 4WD (l6u4) без КМ: km 0/50, noKM:true, dcMax 0, cascoGapMin 200000.
     Один источник чисел — константы выше. Вызывается после синка Sheet."""
     sp = _span(text, "KM_CORRIDOR")
     if sp:
@@ -270,7 +270,7 @@ def pin_l6(text):
 
     def _row_u4(m):
         row = m.group(0)
-        for key, val in (("kmMin", 0), ("kmMax", 0), ("prioMin", 0), ("prioMax", 0),
+        for key, val in (("kmMin", 0), ("kmMax", 50), ("prioMin", 0), ("prioMax", 50),
                          ("dcMax", 0), ("cascoGapMin", 200000)):
             if re.search(r"\b" + key + r":-?\d+(?:\.\d+)?", row):
                 row = re.sub(r"\b" + key + r":-?\d+(?:\.\d+)?", "%s:%s" % (key, val), row, count=1)
