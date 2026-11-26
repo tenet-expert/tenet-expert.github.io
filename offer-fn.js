@@ -105,7 +105,8 @@
         down=Math.round(carPrice*downPct/100);
       }else downPct=carPrice>0?Math.round(down*1000/carPrice)/10:0;
       down=Math.max(0, Math.min(carPrice, down));
-      const fee=useLoan?(typeof KM_BANK_FEE==="number"?KM_BANK_FEE:30000):0;
+      const feeDefault=typeof KM_BANK_FEE==="number"?KM_BANK_FEE:100000;
+      const fee=useLoan?feeDefault:0;
       const extras=useLoan?(addons+pack+fee):0;
       const credit=Math.max(0, carPrice-down+extras);
       const clientPay=carPrice+addons+(useLoan?0:casco);
@@ -113,10 +114,12 @@
       const packEq=typeof offerPack==="function"?offerPack(m.id):null;
       const rateGroup=typeof kmRateGroup==="function"?kmRateGroup(m):"t4l_t7";
       const banks=(useLoan && typeof KM_BANKS!=="undefined"?KM_BANKS:[]).map(b=>{
+        const bFee=b.fee??feeDefault;
+        const bExtras=useLoan?(addons+pack+bFee):0;
         const look=typeof kmBankRate==="function"?kmBankRate(b.id, rateGroup, months, downPct):{rate:19.2, term:months};
         const term=look.term||months;
-        const pay=typeof calcPay==="function"?calcPay(carPrice+extras, down, term, look.rate):0;
-        return {name:b.name, rate:look.rate, term, pay:Math.round(pay)};
+        const pay=typeof calcPay==="function"?calcPay(carPrice+bExtras, down, term, look.rate):0;
+        return {name:b.name, rate:look.rate, term, pay:Math.round(pay), fee:bFee};
       });
       const rivals=offerRivalsPicked(m, months, downPct, banks);
       const ownEl=document.getElementById("ofOwnCar");

@@ -541,6 +541,30 @@ def pin_a8_ultra_spec(text):
     return text
 
 
+def pin_bank_dms(text):
+    """26.11.2026: ДМС банка в ₽. Совкомбанк 0, остальные 100 000. Поле KM_BANKS.fee,
+    чтобы синк канона не стёр его. KM_BANK_FEE — запас для ВТБ и банков без fee."""
+    fees = (("sber", 100000), ("sovcom", 0), ("alfa", 100000), ("tbank", 100000))
+    sp = span(text, "KM_BANKS")
+    if sp:
+        block = text[sp[0]:sp[1]]
+        block2 = block
+        for bid, fee in fees:
+            block2 = re.sub(
+                r'(\{id:"%s", name:"[^"]*")(?:, fee:\d+)?(\})' % bid,
+                r'\1, fee:%d\2' % fee,
+                block2,
+                count=1,
+            )
+        if block2 != block:
+            text = text[:sp[0]] + block2 + text[sp[1]:]
+            print("terms sync: pin KM_BANKS.fee")
+    text2, n = re.subn(r"(const KM_BANK_FEE = )\d+;", r"\g<1>100000;", text, count=1)
+    if n and text2 != text:
+        print("terms sync: pin KM_BANK_FEE 100000")
+    return text2
+
+
 def ensure_local(text):
     text = drop_sold_tests(text)
     text = ensure_t9(text)
@@ -580,6 +604,7 @@ def ensure_local(text):
     except Exception as e:
         print("terms sync: l6 pin skipped:", e)
     text = ensure_pango_rates(text)
+    text = pin_bank_dms(text)
     text = pin_t7_prime_spec(text)
     # 24.11.2026: «TENET Plus Выбор» = спец T+. Пин, чтобы синк не вернул +70 000.
     text = ensure_tplus_choice(text)

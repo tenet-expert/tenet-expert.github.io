@@ -4,7 +4,7 @@ from pathlib import Path
 import urllib.request
 
 SRC = "https://raw.githubusercontent.com/sanchesefn/tenet-expert/3c546270ea6f075d4c1c84d7e4f4032a8faced33/terms-calc-data.js"
-NEEDLE = "    const KM_BANK_FEE = 30000;"
+NEEDLE = "    const KM_BANK_FEE = "
 BROKEN = "      tbank:[12,24,36,48,60,72,84,96]\n    ];"
 FIXED = "      tbank:[12,24,36,48,60,72,84,96]\n    };"
 ERR_OLD = (

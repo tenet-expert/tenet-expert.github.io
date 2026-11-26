@@ -4783,10 +4783,10 @@ async function pingTelegram(body){
     function kmBandTxt(lo, hi){ return (lo===0&&hi===0)?"0/0":(lo===hi ? (lo+" тыс.") : (lo+" … "+hi+" тыс.")); }
     const KM_DC_DEF = 100000;
     const KM_BANKS = [
-      {id:"sber", name:"Сбер"},
-      {id:"sovcom", name:"Совкомбанк"},
-      {id:"alfa", name:"Альфа"},
-      {id:"tbank", name:"Т-Банк"}
+      {id:"sber", name:"Сбер", fee:100000},
+      {id:"sovcom", name:"Совкомбанк", fee:0},
+      {id:"alfa", name:"Альфа", fee:100000},
+      {id:"tbank", name:"Т-Банк", fee:100000}
     ];
     const KM_BANK_MONTHS = {
       sber:[12,24,36,48,60,72,84,96,108,120],
@@ -5232,7 +5232,7 @@ async function pingTelegram(body){
       if(p>=10) return 10;
       return 0;
     }
-    const KM_BANK_FEE = 30000;
+    const KM_BANK_FEE = 100000;/*ДМС банка по умолчанию; по банкам — KM_BANKS.fee (Совкомбанк 0), с 26.11.2026*/
     function kmBankRate(bankId, group, months, downPct){
       const terms=KM_BANK_MONTHS[bankId]||KM_BANK_MONTHS.sber;
       const n=Math.max(1, Number(months)||60);

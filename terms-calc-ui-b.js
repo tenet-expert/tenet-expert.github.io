@@ -107,7 +107,8 @@
       const kmK=km/1000;
       const ok=kmK+0.05>=lo && kmK-0.05<=hi;
       const price=Math.round(carPrice);
-      const fee=typeof KM_BANK_FEE==="number"?KM_BANK_FEE:30000;
+      const feeDefault=typeof KM_BANK_FEE==="number"?KM_BANK_FEE:100000;
+      const fee=feeDefault;
       const _pgTrim=(typeof pangoOf==="function")?pangoOf(m.id):null;
       if(_pgTrim && !useLoan && !noKM) pack=150000;
       if(noKM && pack<cascoMin) pack=cascoMin;
@@ -153,10 +154,13 @@
       const banksMpt=[{id:"sovcom", name:"Совкомбанк", rate:qFleet.rate, term:qFleet.termAfter, capped:!qFleet.early && qFleet.term!==months, termNote:qFleet.early?(qFleet.termAfter+" мес. вместо "+qFleet.term+" · досрочное не меняет платёж"):"", payMpt:qFleet.pay, overMpt:qFleet.over}];
       const mptBreak=typeof fleetSubBreak==="function"?fleetSubBreak(qFleet, {name:(fMpt&&fMpt.name)||m.name, stock:mptSample?escape(mptSample.color||"—")+" · "+escape(mptSample.vin||""):"", rrc:mptRrc, trade:!!useTi}):"";
       const banks=(typeof KM_BANKS!=="undefined"?KM_BANKS:[]).map(b=>{
+        const bFee=b.fee??feeDefault;
+        const bExtras=(useLoan||_pgTrim)?(addons+(pack||0)+bFee):0;
+        const bCredit=Math.max(0, price-down+bExtras);
         const look=typeof kmBankRate==="function"?kmBankRate(b.id, rateGroup, months, downPct):{rate:b.rate||0, term:months, capped:false};
         const term=look.term||months;
-        const pay=calcPay(price+extras, down, term, look.rate);
-        return Object.assign({}, b, {rate:look.rate, term, capped:!!look.capped, pay, over:pay*term-credit});
+        const pay=calcPay(price+bExtras, down, term, look.rate);
+        return Object.assign({}, b, {fee:bFee, rate:look.rate, term, capped:!!look.capped, pay, over:pay*term-bCredit});
       });
       function kmPayRows(list, payKey, overKey){
         return list.map(b=>{
@@ -232,10 +236,13 @@
           const altGroup=wantPlus?(alt.stock==="pl6"?"plusL6":"plusL4"):(typeof kmRateGroup==="function"?kmRateGroup(alt):"t4l_t7");
           const altCredit=Math.max(0, altPrice-altDown+extras);
           const altBanks=(typeof KM_BANKS!=="undefined"?KM_BANKS:[]).map(b=>{
+            const bFee=b.fee??feeDefault;
+            const bExtras=(addons+(pack||0)+bFee);
+            const bCredit=Math.max(0, altPrice-altDown+bExtras);
             const look=typeof kmBankRate==="function"?kmBankRate(b.id, altGroup, months, altPct):{rate:0, term:months, capped:false};
             const term=look.term||months;
-            const pay=calcPay(altPrice+extras, altDown, term, look.rate);
-            return Object.assign({}, b, {rate:look.rate, term, capped:!!look.capped, pay, over:pay*term-altCredit});
+            const pay=calcPay(altPrice+bExtras, altDown, term, look.rate);
+            return Object.assign({}, b, {fee:bFee, rate:look.rate, term, capped:!!look.capped, pay, over:pay*term-bCredit});
           });
           const fAlt=typeof fleetOf==="function"?fleetOf(alt.id):null;
           const altSub=(fAlt&&fAlt.sub)||0;

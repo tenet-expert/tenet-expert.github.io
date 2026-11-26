@@ -188,8 +188,8 @@ LOYAL_LBL_OF = ('${(d.m.stock==="pl4"||d.m.stock==="pl6")?`<label class="check-r
                 '<span>Elegant Трейд-Ин (Mazda / KIA / Hyundai) ${rub(100000)}</span></label>`:""}')
 PLUS_SUBS = [
     # bank lists
-    ('      {id:"tbank", name:"Т-Банк"}\n    ];',
-     '      {id:"tbank", name:"Т-Банк"},\n      {id:"vtb", name:"ВТБ"}\n    ];'),
+    ('      {id:"tbank", name:"Т-Банк", fee:100000}\n    ];',
+     '      {id:"tbank", name:"Т-Банк", fee:100000},\n      {id:"vtb", name:"ВТБ"}\n    ];'),
     ('      tbank:[12,24,36,48,60,72,84,96]\n    };\n    const KM_BANK_RATES',
      '      tbank:[12,24,36,48,60,72,84,96],\n      vtb:[12,24,36,48,60,72,84]\n    };\n    const KM_BANK_RATES'),
     # kmBankRate: n/a handling
