@@ -77,6 +77,17 @@
       if(!list||!list.length) return true;
       return list.indexOf(months)>=0;
     }
+    function kmRopUser(){
+      try{
+        const blob=String(((typeof state!=="undefined"&&state&&state.surname)||"")+" "+((typeof state!=="undefined"&&state&&state.display)||"")).toLowerCase().replace(/ё/g,"е");
+        return blob.indexOf("леонтьев")>=0;
+      }catch(e){ return false; }
+    }
+    function kmRopOn(){
+      if(!kmRopUser()) return false;
+      if(typeof kmRopFlag==="boolean") return kmRopFlag;
+      try{ return localStorage.getItem("tenet-km-rop")==="1"; }catch(e){ return false; }
+    }
     function offerDeal(){
       const models=(typeof KM_MODELS!=="undefined"?KM_MODELS:[]).filter(x=>x.id!=="t4p"&&x.id!=="t7l");
       const seeded=!!(offerSeed && !document.getElementById("ofModel"));
@@ -84,7 +95,7 @@
       if(seeded) offerSeed=null;
       const mid=S?S.mid:offerVal("ofModel", models[0]?models[0].id:"t7a");
       const m=models.find(x=>x.id===mid)||models[0]||{id:"t7a",name:"TENET",rrc:0,ti:0,cr:0};
-      const noKM=!!(m&&m.noKM);/*noKM*/
+      const noKM=!!(m&&m.noKM)&&!(typeof kmRopOn==="function"&&kmRopOn());/*noKM*//*km-rop*/
       const prevModel=S?mid:offerVal("ofPrevModel", mid);
       const client=offerVal("ofClient","");
       const color=offerVal("ofColor","");

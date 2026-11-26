@@ -60,8 +60,21 @@
       const kmOff={t4p:1,t7l:1,t9p:1,a8a:1,a8u:1};
       if(typeof kmId!=="string" || !KM_MODELS.some(x=>x.id===kmId && !kmOff[x.id])){ kmId=(KM_MODELS.find(x=>!kmOff[x.id])||KM_MODELS[0]).id; kmVin=""; }
       if(typeof kmVin!=="string") kmVin="";
+      function kmRopUser(){
+        try{
+          const blob=String(((typeof state!=="undefined"&&state&&state.surname)||"")+" "+((typeof state!=="undefined"&&state&&state.display)||"")).toLowerCase().replace(/ё/g,"е");
+          return blob.indexOf("леонтьев")>=0;
+        }catch(e){ return false; }
+      }
+      function kmRopOn(){
+        if(!kmRopUser()) return false;
+        if(typeof kmRopFlag==="boolean") return kmRopFlag;
+        try{ return localStorage.getItem("tenet-km-rop")==="1"; }catch(e){ return false; }
+      }
+      const ropUser=kmRopUser();
+      const ropOn=kmRopOn();
       const m=KM_MODELS.find(x=>x.id===kmId)||KM_MODELS[0];
-      const noKM=!!(m&&m.noKM);/*noKM*/
+      const noKM=!!(m&&m.noKM)&&!ropOn;/*noKM*//*km-rop*/
       if(typeof kmIsCorp==="function" && kmIsCorp(kmVin) && typeof calcFleet==="function") return calcFleet(m);
       const fresh=(typeof kmShown==="undefined")||kmShown!==kmId;
       kmShown=kmId;
@@ -301,6 +314,7 @@ select.km-term:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3
         <div class="km-layout${pShow?" km-4":useLoan&&showSplit?" km-3":""}">
           <div class="card km-disc">
             <p class="eyebrow">Калькулятор КМ · ${escape(m.name)}</p>
+            ${ropUser?`<label class="check-row"><input id="kmRop" type="checkbox" ${ropOn?"checked":""} onchange="kmRopFlag=this.checked;try{localStorage.setItem('tenet-km-rop',this.checked?'1':'0')}catch(e){};view='calc';if(typeof render==='function')render();" /> <span>РОП</span></label>`:""}
             <label class="field" style="max-width:none;margin-top:8px"><span>РРЦ, ₽ · из условий ${TERMS_DATE}</span><input id="kmRrc" inputmode="numeric" value="${rrc}" /></label>
             <label class="field" style="max-width:none"><span>Сумма счёта, ₽ · из условий ${TERMS_DATE}</span><input id="kmInv" inputmode="numeric" value="${invoice}" /></label>
             <label class="check-row"><input id="kmUseTi" type="checkbox" ${useTi?"checked":""} /> <span>Трейд-ин ${m.ti?rub(m.ti)+" / возмещение "+rub(m.tiBack):"нет в базе"}</span></label>

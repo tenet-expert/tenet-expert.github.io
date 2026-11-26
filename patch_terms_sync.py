@@ -609,6 +609,8 @@ def ensure_local(text):
         import patch_km_fix
         if hasattr(patch_km_fix, "pin_t4l_4wd"):
             text = patch_km_fix.pin_t4l_4wd(text)
+        if hasattr(patch_km_fix, "pin_km_rop"):
+            text = patch_km_fix.pin_km_rop(text)
     except Exception as e:
         print("terms sync: t4l 4wd pin skipped:", e)
     text = pin_t7_prime_spec(text)

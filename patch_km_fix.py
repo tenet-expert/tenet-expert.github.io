@@ -1140,8 +1140,23 @@ def pin_t4l_4wd(text):
     return text2
 
 
+def pin_km_rop(text):
+    """Галочка «РОП» (id kmRop, localStorage tenet-km-rop) только для Леонтьева.
+    Снимает урезание noKM в калькуляторе и в КП. По умолчанию выключена."""
+    old = "const noKM=!!(m&&m.noKM);/*noKM*/"
+    new = 'const noKM=!!(m&&m.noKM)&&!(typeof kmRopOn==="function"&&kmRopOn());/*noKM*//*km-rop*/'
+    if old in text:
+        text = text.replace(old, new)
+        print("km-fix: pin km rop noKM")
+    needle = '"kmUseLoan","kmUseCr"'
+    if '"kmRop"' not in text and needle in text:
+        text = text.replace(needle, '"kmUseLoan","kmRop","kmUseCr"', 1)
+        print("km-fix: pin km rop bind")
+    return text
+
+
 def apply(text):
-    return pin_t4l_4wd(pin_tplus_extra(pin_l6u4_ui(ensure_borderless(rename_trims(fix_code(fix_data(text)))))))
+    return pin_km_rop(pin_t4l_4wd(pin_tplus_extra(pin_l6u4_ui(ensure_borderless(rename_trims(fix_code(fix_data(text))))))))
 
 
 def main():
