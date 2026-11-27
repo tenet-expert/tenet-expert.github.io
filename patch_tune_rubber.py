@@ -275,6 +275,18 @@ PAIRS += [
 ]
 
 
+
+
+# Drive 26.11.2026 (сверка 27.11): T7 R18 убран Pirelli Formula 14 500/58 000 ×1;
+# T7 R19 / L6 убран Tracmax, Pirelli Formula остаток 8 (было 9)
+PAIRS += [
+    ('["T7 R18",[["Ikon Tyres 225/55 R18 Ikon Character Ice 7 SUV 102T XL (шип.)",16000,64000,"8"],["Автошина 225/55 R18 Pirelli Formula 102T XL Ice TL (шип.)",14500,58000,"1"]]]',
+     '["T7 R18",[["Ikon Tyres 225/55 R18 Ikon Character Ice 7 SUV 102T XL (шип.)",16000,64000,"8"]]]'),
+    ('["T7 R19 / L6",[["LingLong Leao 225/55R19 99T Winter Defender SUV TL, липучка",12500,50000,"4"],["Tracmax 225/55 R19 103T XL X-Privilo S500 TL, шип.",15500,62000,"2"],["Pirelli Formula 225/55 R19 103T XL Ice TL, шип.",18500,74000,"9"]]]',
+     '["T7 R19 / L6",[["LingLong Leao 225/55R19 99T Winter Defender SUV TL, липучка",12500,50000,"4"],["Pirelli Formula 225/55 R19 103T XL Ice TL, шип.",18500,74000,"8"]]]'),
+]
+
+
 def patch(path: Path) -> bool:
     if not path.exists():
         return False
