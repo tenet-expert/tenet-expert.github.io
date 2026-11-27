@@ -103,6 +103,8 @@
       if(!S && prevModel!==mid) price=m.rrc;
       const useTi=S?!!S.useTi:offerOn("ofTi");
       const useLoan=S?!!S.useLoan:offerOn("ofLoan");
+      const cashReset=!S && !useLoan && window.__ofLoanPrev===true;
+      if(!S) window.__ofLoanPrev=useLoan;
       const showDealCr=(m.cr||0)>0 && (m.id!=="t7p" || useLoan);
       const useCr=showDealCr && (S?!!S.useCr:offerOn("ofCr"));
       const spec=S?(Number(S.spec)||0):(offerNum("ofSpec", 0)||0);
@@ -117,7 +119,10 @@
       if(useLoan){
         pack=Math.max(cascoMin, S?(Number(S.pack)||0):(offerNum("ofPack", cascoMin||150000)||0));
         casco=Math.min(pack, 80000);
-      }else casco=Math.max(cascoMin, S?(Number(S.casco)||0):(offerNum("ofCasco", cascoMin||0)||0));
+      }else{
+        const typed=S?(Number(S.casco)||0):(cashReset?0:Math.max(0, offerNum("ofCasco", 0)||0));
+        casco=Math.max(cascoMin, typed);
+      }
       const months=offerCreditTerm(S?(Number(S.months)||60):(offerNum("ofMonths", 60)||60));
       const downMode=S?(S.downMode==="sum"?"sum":"pct"):(offerVal("ofDownMode","pct")==="sum"?"sum":"pct");
       let downPct=S?(Number(S.downPct)||0):offerNum("ofDownPct", 20);
