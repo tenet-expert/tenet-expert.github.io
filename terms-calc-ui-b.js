@@ -82,6 +82,8 @@
       const invoice=fresh?m.dealer:kmVal("kmInv", m.dealer);
       const useTi=kmVal("kmUseTi", false);
       const useLoan=kmVal("kmUseLoan", false);
+      const cashReset=!useLoan && window.__kmLoanPrev===true;
+      window.__kmLoanPrev=useLoan;
       const hasDealCr=m.cr>0;
       const dealCrLabel=["t7p","t7a4","t7p4"].includes(m.id)?"Выгодный кредит":"Прямая скидка";
       const dealCrNeedsLoan=["t7p","t7a4","t7p4"].includes(m.id);
@@ -99,7 +101,9 @@
         casco=Math.min(pack, 80000);
         card=Math.max(0, pack-80000);
       }else{
-        casco=Math.max(cascoMin, kmVal("kmCasco", cascoMin||80000));
+        const cascoEl=document.getElementById("kmCasco");
+        casco=(cashReset || !cascoEl)?0:Math.max(0, kmVal("kmCasco", 0));
+        if(noKM && casco<cascoMin) casco=cascoMin;
         card=0;
       }
       const prio=PRIO_VINS.has(kmVin);
@@ -107,10 +111,22 @@
       const tiBack=useTi?m.tiBack:0;
       const crAmt=useCr?m.cr:0;
       const crBack=useCr?m.crBack:0;
-      let lo=prio?m.prioMin:m.kmMin;
-      let hi=prio?m.prioMax:m.kmMax;
-      const fix=useTi?lo:hi;
-      lo=fix; hi=fix;
+      function kmCashFix(model, vin, withTi){
+        const v=String(vin||"").toUpperCase();
+        const row=(typeof TERMS_PRIO!=="undefined"?TERMS_PRIO:[]).find(r=>String(r&&r.vin||"").toUpperCase()===v && String(r.vin||"").length>=11);
+        if(row && Number.isFinite(Number(row.kmTi)) && Number.isFinite(Number(row.kmCash))) return withTi?Number(row.kmTi):Number(row.kmCash);
+        return withTi?model.kmMin:model.kmMax;
+      }
+      let lo, hi;
+      if(!useLoan){
+        const fixCash=kmCashFix(m, kmVin, useTi);
+        lo=fixCash; hi=fixCash;
+      }else{
+        lo=prio?m.prioMin:m.kmMin;
+        hi=prio?m.prioMax:m.kmMax;
+        const fix=useTi?lo:hi;
+        lo=fix; hi=fix;
+      }
       const dcPack={rrc,invoice,vat:m.vat,fee:m.fee,bonus:m.bonus,tiAmt,tiBack,spec:0,dcTi,crAmt,crBack,addons,casco,card};
       const dcFit=typeof kmDcCrFit==="function"?kmDcCrFit(dcPack, lo):(typeof KM_DC_DEF==="number"?KM_DC_DEF:100000);
       const dcMin=typeof kmDcCrMin==="function"?kmDcCrMin(dcPack, hi):0;
@@ -336,7 +352,7 @@ select.km-term:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3
             ${useLoan
               ?`<label class="field" style="max-width:none"><span>Каско расширенное, ₽${noKM?" · минимум "+rub(cascoMin):""}</span><input id="kmPack" inputmode="numeric" value="${pack}" /></label>`
               :`<label class="field" style="max-width:none"><span>КАСКО, ₽${noKM?" · минимум "+rub(cascoMin):""}</span><input id="kmCasco" inputmode="numeric" value="${casco}" /></label>`}
-            ${!noKM&&prio?`<div class="note-box">Приоритетный VIN ${escape(kmVin)}. Коридор ${lo} … ${hi} тыс.</div>`:""}
+            ${!noKM&&prio?`<div class="note-box">Приоритетный VIN ${escape(kmVin)}. ${lo===hi?"Фикс "+lo:("Коридор "+lo+" … "+hi)} тыс.</div>`:""}
             ${useLoan&&!showSplit&&!pShow?`<p class="eyebrow" style="margin-top:12px">Первый взнос</p>
               <div class="down-mode">
                 <button type="button" class="chip ${downMode==="sum"?"on":""}" data-down-mode="sum">Сумма, ₽</button>
