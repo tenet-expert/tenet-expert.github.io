@@ -4915,6 +4915,14 @@ async function pingTelegram(body){
     function kmFixPair(vin, prio, m){ const a=kmBand(vin, true, prio, m), b=kmBand(vin, false, prio, m); return a.lo===b.lo?(a.lo+" тыс. с трейд-ином и без"):(a.lo+" тыс. с трейд-ином / "+b.lo+" тыс. без трейд-ина"); }
     function kmBandTxt(lo, hi){ return (lo===0&&hi===0)?"0/0":(lo===hi ? (lo+" тыс.") : (lo+" … "+hi+" тыс.")); }
     const KM_DC_DEF = 100000;
+    const KM_MGR_OVR = {/*km-mgr 28.11.2026*/
+      managers:["Бикулов","Назарян","Ковалева"],
+      models:{
+        l6e:{kmMin:0,kmMax:50,prioMin:0,prioMax:50},
+        l6u:{kmMin:0,kmMax:50,prioMin:0,prioMax:50},
+        l6u4:{kmMin:100,kmMax:200,prioMin:100,prioMax:200,noKM:false,dcMax:null,cascoGapMin:0}
+      }
+    };
     const KM_BANKS = [
       {id:"sber", name:"Сбер", fee:100000},
       {id:"sovcom", name:"Совкомбанк", fee:0},
@@ -6616,7 +6624,26 @@ async function pingTelegram(body){
       }
       const ropUser=kmRopUser();
       const ropOn=kmRopOn();
-      const m=KM_MODELS.find(x=>x.id===kmId)||KM_MODELS[0];
+      function kmMgrModel(model){
+        const table=typeof KM_MGR_OVR!=="undefined"?KM_MGR_OVR:null;
+        if(!table||!model||!table.models) return model;
+        let blob="";
+        try{
+          blob=String(((typeof state!=="undefined"&&state&&state.surname)||"")+" "+((typeof state!=="undefined"&&state&&state.display)||"")).toLowerCase().replace(/ё/g,"е");
+        }catch(e){ return model; }
+        const hit=(table.managers||[]).some(name=>{
+          const n=String(name||"").toLowerCase().replace(/ё/g,"е").trim();
+          if(!n) return false;
+          if(blob.indexOf(n)>=0) return true;
+          const sur=(blob.split(/\s+/)[0]||"");
+          return sur.length>=5 && n.indexOf(sur)===0;
+        });
+        if(!hit) return model;
+        const over=table.models[model.id];
+        return over?Object.assign({}, model, over):model;
+      }
+      const m0=KM_MODELS.find(x=>x.id===kmId)||KM_MODELS[0];
+      const m=kmMgrModel(m0);/*km-mgr*/
       const noKM=!!(m&&m.noKM)&&!ropOn;/*noKM*//*km-rop*/
       if(typeof kmIsCorp==="function" && kmIsCorp(kmVin) && typeof calcFleet==="function") return calcFleet(m);
       const fresh=(typeof kmShown==="undefined")||kmShown!==kmId;
@@ -7522,13 +7549,32 @@ select.km-term:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3
       if(typeof kmRopFlag==="boolean") return kmRopFlag;
       try{ return localStorage.getItem("tenet-km-rop")==="1"; }catch(e){ return false; }
     }
+    function kmMgrModel(model){
+      const table=typeof KM_MGR_OVR!=="undefined"?KM_MGR_OVR:null;
+      if(!table||!model||!table.models) return model;
+      let blob="";
+      try{
+        blob=String(((typeof state!=="undefined"&&state&&state.surname)||"")+" "+((typeof state!=="undefined"&&state&&state.display)||"")).toLowerCase().replace(/ё/g,"е");
+      }catch(e){ return model; }
+      const hit=(table.managers||[]).some(name=>{
+        const n=String(name||"").toLowerCase().replace(/ё/g,"е").trim();
+        if(!n) return false;
+        if(blob.indexOf(n)>=0) return true;
+        const sur=(blob.split(/\s+/)[0]||"");
+        return sur.length>=5 && n.indexOf(sur)===0;
+      });
+      if(!hit) return model;
+      const over=table.models[model.id];
+      return over?Object.assign({}, model, over):model;
+    }
     function offerDeal(){
       const models=(typeof KM_MODELS!=="undefined"?KM_MODELS:[]).filter(x=>x.id!=="t4p"&&x.id!=="t7l");
       const seeded=!!(offerSeed && !document.getElementById("ofModel"));
       const S=seeded?offerSeed:null;
       if(seeded) offerSeed=null;
       const mid=S?S.mid:offerVal("ofModel", models[0]?models[0].id:"t7a");
-      const m=models.find(x=>x.id===mid)||models[0]||{id:"t7a",name:"TENET",rrc:0,ti:0,cr:0};
+      const m0=models.find(x=>x.id===mid)||models[0]||{id:"t7a",name:"TENET",rrc:0,ti:0,cr:0};
+      const m=kmMgrModel(m0);/*km-mgr*/
       const noKM=!!(m&&m.noKM)&&!(typeof kmRopOn==="function"&&kmRopOn());/*noKM*//*km-rop*/
       const prevModel=S?mid:offerVal("ofPrevModel", mid);
       const client=offerVal("ofClient","");

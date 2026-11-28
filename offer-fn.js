@@ -88,13 +88,32 @@
       if(typeof kmRopFlag==="boolean") return kmRopFlag;
       try{ return localStorage.getItem("tenet-km-rop")==="1"; }catch(e){ return false; }
     }
+    function kmMgrModel(model){
+      const table=typeof KM_MGR_OVR!=="undefined"?KM_MGR_OVR:null;
+      if(!table||!model||!table.models) return model;
+      let blob="";
+      try{
+        blob=String(((typeof state!=="undefined"&&state&&state.surname)||"")+" "+((typeof state!=="undefined"&&state&&state.display)||"")).toLowerCase().replace(/ё/g,"е");
+      }catch(e){ return model; }
+      const hit=(table.managers||[]).some(name=>{
+        const n=String(name||"").toLowerCase().replace(/ё/g,"е").trim();
+        if(!n) return false;
+        if(blob.indexOf(n)>=0) return true;
+        const sur=(blob.split(/\s+/)[0]||"");
+        return sur.length>=5 && n.indexOf(sur)===0;
+      });
+      if(!hit) return model;
+      const over=table.models[model.id];
+      return over?Object.assign({}, model, over):model;
+    }
     function offerDeal(){
       const models=(typeof KM_MODELS!=="undefined"?KM_MODELS:[]).filter(x=>x.id!=="t4p"&&x.id!=="t7l");
       const seeded=!!(offerSeed && !document.getElementById("ofModel"));
       const S=seeded?offerSeed:null;
       if(seeded) offerSeed=null;
       const mid=S?S.mid:offerVal("ofModel", models[0]?models[0].id:"t7a");
-      const m=models.find(x=>x.id===mid)||models[0]||{id:"t7a",name:"TENET",rrc:0,ti:0,cr:0};
+      const m0=models.find(x=>x.id===mid)||models[0]||{id:"t7a",name:"TENET",rrc:0,ti:0,cr:0};
+      const m=kmMgrModel(m0);/*km-mgr*/
       const noKM=!!(m&&m.noKM)&&!(typeof kmRopOn==="function"&&kmRopOn());/*noKM*//*km-rop*/
       const prevModel=S?mid:offerVal("ofPrevModel", mid);
       const client=offerVal("ofClient","");

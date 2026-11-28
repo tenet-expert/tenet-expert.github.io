@@ -73,7 +73,26 @@
       }
       const ropUser=kmRopUser();
       const ropOn=kmRopOn();
-      const m=KM_MODELS.find(x=>x.id===kmId)||KM_MODELS[0];
+      function kmMgrModel(model){
+        const table=typeof KM_MGR_OVR!=="undefined"?KM_MGR_OVR:null;
+        if(!table||!model||!table.models) return model;
+        let blob="";
+        try{
+          blob=String(((typeof state!=="undefined"&&state&&state.surname)||"")+" "+((typeof state!=="undefined"&&state&&state.display)||"")).toLowerCase().replace(/ё/g,"е");
+        }catch(e){ return model; }
+        const hit=(table.managers||[]).some(name=>{
+          const n=String(name||"").toLowerCase().replace(/ё/g,"е").trim();
+          if(!n) return false;
+          if(blob.indexOf(n)>=0) return true;
+          const sur=(blob.split(/\s+/)[0]||"");
+          return sur.length>=5 && n.indexOf(sur)===0;
+        });
+        if(!hit) return model;
+        const over=table.models[model.id];
+        return over?Object.assign({}, model, over):model;
+      }
+      const m0=KM_MODELS.find(x=>x.id===kmId)||KM_MODELS[0];
+      const m=kmMgrModel(m0);/*km-mgr*/
       const noKM=!!(m&&m.noKM)&&!ropOn;/*noKM*//*km-rop*/
       if(typeof kmIsCorp==="function" && kmIsCorp(kmVin) && typeof calcFleet==="function") return calcFleet(m);
       const fresh=(typeof kmShown==="undefined")||kmShown!==kmId;

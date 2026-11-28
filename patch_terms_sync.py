@@ -16,7 +16,7 @@ SRC = os.environ.get("TERMS_SRC",
 DATA = ["TERMS_DATE", "KM_CORRIDOR", "TERMS_BONUS", "TERMS_MPT", "TERMS_INV",
         "PANGO_FIX", "PANGO_BUNDLE", "PANGO_RATE_A", "PANGO_RATE_B", "PANGO_NSS",
         "PANGO_VIN",
-        "TERMS_PRIO", "KM_MODELS", "PRIO_VINS", "KM_DC_DEF", "KM_BANKS",
+        "TERMS_PRIO", "KM_MODELS", "PRIO_VINS", "KM_DC_DEF", "KM_MGR_OVR", "KM_BANKS",
         "KM_BANK_MONTHS", "KM_BANK_RATES"]
 TARGETS = [Path("index.html"), Path("_site/index.html")]
 
@@ -570,7 +570,30 @@ def pin_bank_dms(text):
     return text2
 
 
+KM_MGR_OVR_BLOCK = """    const KM_MGR_OVR = {/*km-mgr 28.11.2026*/
+      managers:["Бикулов","Назарян","Ковалева"],
+      models:{
+        l6e:{kmMin:0,kmMax:50,prioMin:0,prioMax:50},
+        l6u:{kmMin:0,kmMax:50,prioMin:0,prioMax:50},
+        l6u4:{kmMin:100,kmMax:200,prioMin:100,prioMax:200,noKM:false,dcMax:null,cascoGapMin:0}
+      }
+    };"""
+
+
+def ensure_km_mgr(text):
+    """28.11.2026: индивидуальные КМ L6. Канон держит KM_MGR_OVR после KM_DC_DEF.
+    Если синк пришёл без константы — вернуть тот же блок, не затирая остальные данные."""
+    if "const KM_MGR_OVR" in text:
+        return text
+    needle = "    const KM_DC_DEF = 100000;\n"
+    if needle not in text:
+        return text
+    print("terms sync: pin KM_MGR_OVR")
+    return text.replace(needle, needle + KM_MGR_OVR_BLOCK + "\n", 1)
+
+
 def ensure_local(text):
+    text = ensure_km_mgr(text)
     text = drop_sold_tests(text)
     text = ensure_t9(text)
     text = ensure_sold_out(text)
