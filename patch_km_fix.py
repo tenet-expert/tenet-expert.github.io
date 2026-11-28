@@ -129,11 +129,16 @@ T7_PRIO_VINS = (
 T7_PRIO_ROWS = {
     "EDEFB32B8TE105355": '{model:"T7",vin:"EDEFB32B8TE105355",trim:"Актив",year:"2026",color:"Белый",extra:"",pay:1000,kmTi:-50,kmCash:0}',
     "EDXFD32B2TE042710": '{model:"T7",vin:"EDXFD32B2TE042710",trim:"Актив 4WD",year:"2026",color:"Белый",extra:"",pay:1000,kmTi:-50,kmCash:0}',
-    "EDEFB32BXTE100707": '{model:"T7",vin:"EDEFB32BXTE100707",trim:"Актив",year:"2026",color:"Белый",extra:"",pay:1000,kmTi:-50,kmCash:0}',
-    "EDEFB32B8TE099203": '{model:"T7",vin:"EDEFB32B8TE099203",trim:"Прайм",year:"2026",color:"Белый",extra:"",pay:1000,kmTi:-50,kmCash:0}',
+    "EDEFB32BXTE100707": '{model:"T7",vin:"EDEFB32BXTE100707",trim:"Актив",year:"2026",color:"Белый",extra:"продана 26.11",pay:1000,kmTi:-50,kmCash:0}',
+    "EDEFB32B8TE099203": '{model:"T7",vin:"EDEFB32B8TE099203",trim:"Прайм",year:"2026",color:"Белый",extra:"продана 28.11",pay:1000,kmTi:-50,kmCash:0}',
     "EDEFD32B5TE102522": '{model:"T7",vin:"EDEFD32B5TE102522",trim:"Прайм 4WD",year:"2026",color:"Белый",extra:"",pay:1000,kmTi:-50,kmCash:0}',
 }
 T7_PRIO_NOTE = "5 VIN: EDEFB32B8TE105355, EDXFD32B2TE042710, EDEFB32BXTE100707, EDEFB32B8TE099203, EDEFD32B5TE102522; остальные приоритеты T7 — стандарт 0/50"
+PRIO_EXTRA = {
+    "EDXGD34B8TE095347": "продана 27.11",
+    "EDEFB32BXTE100707": "продана 26.11",
+    "EDEFB32B8TE099203": "продана 28.11",
+}
 T7_PRIO_CORRIDOR = '{model:"T7",trim:"Приоритет",km:"−50 / 0",note:"' + T7_PRIO_NOTE + '"}'
 T7_ROW_RE = re.compile(r'\{model:"T7",trim:"([^"]*)",km:"([^"]*)",note:"([^"]*)"\}')
 T7_PRIO_ITEM_RE = re.compile(r'\{model:"T7",vin:"([A-Z0-9]{17})"[^}]*\}')
@@ -202,6 +207,15 @@ def pin_t7(text):
                 return row
             return row
         blk = T7_PRIO_ITEM_RE.sub(_prio, blk)
+        def _extra(m):
+            extra = PRIO_EXTRA.get(m.group(1))
+            if not extra:
+                return m.group(0)
+            row = m.group(0)
+            if re.search(r'extra:"[^"]*"', row):
+                return re.sub(r'extra:"[^"]*"', 'extra:"%s"' % extra, row, count=1)
+            return row[:-1] + ',extra:"%s"}' % extra
+        blk = re.sub(r'\{model:"[^"]*",vin:"([A-Z0-9]{17})"[^}]*\}', _extra, blk)
         missing = [v for v in T7_PRIO_VINS if v not in seen]
         if missing:
             # вставить недостающие приоритеты перед закрытием массива
