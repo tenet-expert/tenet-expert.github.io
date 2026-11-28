@@ -41,7 +41,8 @@
       }).join("")+`</div>`;
       const scales=`<div class="prio-scales">${teamBar}${peopleBars}</div>`;
       return scales+`<ol class="prio-list">`+TERMS_PRIO.map((r,i)=>{
-        const sold=!!r.sold;
+        const extraSold=/^продан/i.test(String(r.extra||"").replace(/ё/g,"е"));
+        const sold=!!r.sold || extraSold;
         const hold=!sold && !!r.reserved;
         const n=r.seller?soldBy[r.seller]||0:0;
         const mark=sold?(r.seller?`<span class="sold-mark">Продано · ${escape(r.seller)} <i>${n}</i></span>`:`<span class="sold-mark">Продано</span>`):(hold&&r.seller?`<span class="hold-mark">Бронь · ${escape(r.seller)}</span>`:"");
